@@ -5,6 +5,8 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
 import Html exposing (Html)
+import Svg as S exposing (Svg)
+import Svg.Attributes as SAtt
 
 
 
@@ -71,15 +73,46 @@ title =
 
 timeline : Model -> Element Msg
 timeline model =
-    el
+    column
         [ width fill
         , padding 20
         , Background.color <| rgb255 105 109 125
         , bodyFont
         , Font.size 20
         ]
-    <|
-        text "Timeline"
+        [ paragraph [] [ text "Timeline" ]
+        , el [ width fill ] <| html timelineGraphic
+        ]
+
+
+timelineGraphic : Html Msg
+timelineGraphic =
+    S.svg
+        [ SAtt.width "100%"
+        , SAtt.viewBox "0 0 360 60"
+        ]
+        [ S.line
+            [ SAtt.x1 "3"
+            , SAtt.y1 "30"
+            , SAtt.x2 "357"
+            , SAtt.y2 "30"
+            , SAtt.stroke "black"
+            , SAtt.strokeWidth "2"
+            ]
+            []
+        , S.circle
+            [ SAtt.cx "3"
+            , SAtt.cy "30"
+            , SAtt.r "3"
+            ]
+            []
+        , S.circle
+            [ SAtt.cx "357"
+            , SAtt.cy "30"
+            , SAtt.r "3"
+            ]
+            []
+        ]
 
 
 details : Element msg

@@ -9,10 +9,8 @@
             "elm/browser": "1.0.2",
             "elm/core": "1.0.4",
             "elm/html": "1.0.0",
+            "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
-            "ianmackenzie/elm-geometry": "3.9.1",
-            "ianmackenzie/elm-geometry-svg": "3.0.0",
-            "ianmackenzie/elm-units": "2.9.0",
             "justinmimbs/date": "4.0.0",
             "mdgriffith/elm-ui": "1.1.8"
         },
@@ -20,14 +18,8 @@
             "elm/json": "1.1.2",
             "elm/parser": "1.1.0",
             "elm/random": "1.0.0",
-            "elm/svg": "1.0.1",
             "elm/url": "1.0.0",
-            "elm/virtual-dom": "1.0.2",
-            "ianmackenzie/elm-1d-parameter": "1.0.1",
-            "ianmackenzie/elm-float-extra": "1.1.0",
-            "ianmackenzie/elm-interval": "2.0.0",
-            "ianmackenzie/elm-triangular-mesh": "1.1.0",
-            "ianmackenzie/elm-units-interval": "2.3.0"
+            "elm/virtual-dom": "1.0.2"
         }
     },
     "test-dependencies": {
