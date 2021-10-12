@@ -1,4 +1,49 @@
-module Data exposing (rawData)
+module Data exposing (Design, rawData)
+
+import Date
+import Time exposing (Month(..))
+
+
+type alias Design =
+    { pdbCode : String
+    , depositionDate : Date.Date
+    , method : ExpMethod
+    , picturePath : String
+    , structuralKeywords : String
+    , publicationLink : String
+    }
+
+
+type ExpMethod
+    = Xray Float
+    | NMR
+    | CryoEM
+
+
+designs : List Design
+designs =
+    [ { pdbCode = "1cos"
+      , depositionDate = Date.fromCalendarDate 1993 Jan 22
+      , method = Xray 2.1
+      , picturePath = "static/designs/1cos.jpg"
+      , structuralKeywords = "ALPHA-HELICAL BUNDLE"
+      , publicationLink = "10.1126/science.8446897"
+      }
+    , { pdbCode = "1fsd"
+      , depositionDate = Date.fromCalendarDate 1997 Jun 9
+      , method = NMR
+      , picturePath = "static/designs/1fsd.jpg"
+      , structuralKeywords = "NOVEL SEQUENCE"
+      , publicationLink = "10.1126/science.278.5335.82"
+      }
+    , { pdbCode = "1jy4"
+      , depositionDate = Date.fromCalendarDate 2001 Sep 11
+      , method = NMR
+      , picturePath = "static/designs/1jy4.jpg"
+      , structuralKeywords = "DE NOVO PROTEIN"
+      , publicationLink = "10.1021/ja0174276"
+      }
+    ]
 
 
 rawData : String
@@ -1511,7 +1556,7 @@ rawData =
             "rcsb_pubmed_doi": "10.1021/ja0174276"
           },
           "rcsb_binding_affinity": null,
-          "rcsb_entry_container_identifiers": {
+          "rcsb_entry_container_identifiers": 
             "entry_id": "1JY4"
           },
           "rcsb_entry_info": {
