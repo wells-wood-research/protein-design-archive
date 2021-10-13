@@ -1,4 +1,4 @@
-module Data exposing (Design, rawData)
+module Data exposing (Design, designs)
 
 import Date
 import Time exposing (Month(..))
@@ -42,6 +42,20 @@ designs =
       , picturePath = "static/designs/1jy4.jpg"
       , structuralKeywords = "DE NOVO PROTEIN"
       , publicationLink = "10.1021/ja0174276"
+      }
+    , { pdbCode = "1byz"
+      , depositionDate = Date.fromCalendarDate 1998 Oct 28
+      , method = Xray 0.9
+      , picturePath = "static/designs/1byz.jpg"
+      , structuralKeywords = "DE NOVO PROTEIN"
+      , publicationLink = "10.1110/ps.8.7.1400"
+      }
+    , { pdbCode = "1bb1"
+      , depositionDate = Date.fromCalendarDate 1999 Feb 2
+      , method = Xray 1.8
+      , picturePath = "static/designs/1bb1.jpg"
+      , structuralKeywords = "DE NOVO PROTEIN DESIGN"
+      , publicationLink = "10.1110/ps.8.1.84"
       }
     ]
 
@@ -1787,4 +1801,3 @@ rawData =
       }
     ]
     """
-

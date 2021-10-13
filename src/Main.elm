@@ -1,12 +1,15 @@
 module Main exposing (..)
 
 import Browser
+import Data
+import Date exposing (Date, Unit(..))
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
 import Html exposing (Html)
-import Svg as S exposing (Svg)
+import Svg as S
 import Svg.Attributes as SAtt
+import Time exposing (Month(..))
 
 
 
@@ -14,12 +17,12 @@ import Svg.Attributes as SAtt
 
 
 type alias Model =
-    {}
+    { designs : List Data.Design }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    ( { designs = Data.designs }, Cmd.none )
 
 
 
@@ -31,7 +34,7 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update _ model =
     ( model, Cmd.none )
 
 
@@ -73,6 +76,10 @@ title =
 
 timeline : Model -> Element Msg
 timeline model =
+    let
+        timelineDates =
+            getFirstAndLastDate model.designs
+    in
     column
         [ width fill
         , padding 20
@@ -81,38 +88,169 @@ timeline model =
         , Font.size 20
         ]
         [ paragraph [] [ text "Timeline" ]
-        , el [ width fill ] <| html timelineGraphic
+        , column [ width fill ]
+            [ html (timelineGraphic timelineDates model.designs)
+            , row
+                [ width fill
+                , Font.alignLeft
+                ]
+                [ paragraph
+                    []
+                    [ timelineDates.firstDate
+                        |> Date.year
+                        |> String.fromInt
+                        |> text
+                    ]
+                , paragraph
+                    [ alignRight
+                    , Font.alignRight
+                    ]
+                    [ timelineDates.lastDate
+                        |> Date.year
+                        |> String.fromInt
+                        |> text
+                    ]
+                ]
+            ]
         ]
 
 
-timelineGraphic : Html Msg
-timelineGraphic =
+timelineGraphic : { firstDate : Date, lastDate : Date } -> List Data.Design -> Html Msg
+timelineGraphic { firstDate, lastDate } designs =
+    let
+        -- plot dimensions
+        width =
+            360
+
+        height =
+            20
+
+        radius =
+            3
+    in
     S.svg
         [ SAtt.width "100%"
-        , SAtt.viewBox "0 0 360 60"
+        , "0 0 "
+            ++ String.fromInt width
+            ++ " "
+            ++ String.fromInt height
+            |> SAtt.viewBox
         ]
-        [ S.line
-            [ SAtt.x1 "3"
-            , SAtt.y1 "30"
-            , SAtt.x2 "357"
-            , SAtt.y2 "30"
+        ([ S.line
+            [ SAtt.x1 "0"
+            , SAtt.y1 <| String.fromInt <| height // 2
+            , SAtt.x2 <| String.fromInt <| width
+            , SAtt.y2 <| String.fromInt <| height // 2
             , SAtt.stroke "black"
             , SAtt.strokeWidth "2"
             ]
             []
-        , S.circle
-            [ SAtt.cx "3"
-            , SAtt.cy "30"
-            , SAtt.r "3"
+         , S.line
+            [ SAtt.x1 "1"
+            , SAtt.y1 <| String.fromInt <| (height // 2) - 4
+            , SAtt.x2 "1"
+            , SAtt.y2 <| String.fromInt <| (height // 2) + 4
+            , SAtt.stroke "black"
+            , SAtt.strokeWidth "2"
             ]
             []
-        , S.circle
-            [ SAtt.cx "357"
-            , SAtt.cy "30"
-            , SAtt.r "3"
+         , S.line
+            [ SAtt.x1 <| String.fromInt <| (width - 1)
+            , SAtt.y1 <| String.fromInt <| (height // 2) - 4
+            , SAtt.x2 <| String.fromInt <| (width - 1)
+            , SAtt.y2 <| String.fromInt <| (height // 2) + 4
+            , SAtt.stroke "black"
+            , SAtt.strokeWidth "2"
             ]
             []
+         ]
+            ++ List.map
+                (designToMarker
+                    { width = width
+                    , height = height
+                    , radius = radius
+                    , firstDate = firstDate
+                    , lastDate = lastDate
+                    }
+                )
+                designs
+        )
+
+
+getFirstAndLastDate : List Data.Design -> { firstDate : Date, lastDate : Date }
+getFirstAndLastDate designs =
+    let
+        sortedDesigns =
+            List.sortWith
+                (\a b -> Date.compare a.depositionDate b.depositionDate)
+                designs
+
+        firstDesignDate =
+            List.head sortedDesigns
+                |> Maybe.map .depositionDate
+                |> Maybe.withDefault (Date.fromCalendarDate 1900 Jan 1)
+
+        lastDesignDate =
+            List.reverse sortedDesigns
+                |> List.head
+                |> Maybe.map .depositionDate
+                |> Maybe.withDefault (Date.fromCalendarDate 2100 Dec 31)
+    in
+    { firstDate = firstDesignDate, lastDate = lastDesignDate }
+
+
+designToMarker :
+    { width : Int
+    , height : Int
+    , radius : Int
+    , firstDate : Date
+    , lastDate : Date
+    }
+    -> Data.Design
+    -> S.Svg msg
+designToMarker { width, height, radius, firstDate, lastDate } design =
+    S.circle
+        [ SAtt.cx <|
+            String.fromInt <|
+                dateToPosition
+                    { firstDate = firstDate
+                    , lastDate = lastDate
+                    , date = design.depositionDate
+                    , width = width
+                    , radius = radius
+                    }
+        , SAtt.cy <| String.fromInt <| height // 2
+        , SAtt.r <| String.fromInt radius
         ]
+        []
+
+
+dateToPosition :
+    { firstDate : Date
+    , lastDate : Date
+    , date : Date
+    , width : Int
+    , radius : Int
+    }
+    -> Int
+dateToPosition { firstDate, lastDate, date, width, radius } =
+    let
+        dateRange =
+            Date.diff Days lastDate firstDate
+                |> toFloat
+
+        dateDelta =
+            Date.diff Days date firstDate
+                |> toFloat
+
+        fraction =
+            dateDelta / dateRange
+    in
+    fraction
+        * toFloat (width - (2 * radius))
+        |> round
+        |> (+) 3
+        |> Debug.log "Position"
 
 
 details : Element msg
