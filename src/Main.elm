@@ -7,8 +7,10 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
 import Html exposing (Html)
+import List.Extra as ListEx
 import Svg as S
 import Svg.Attributes as SAtt
+import Svg.Events as SEvents
 import Time exposing (Month(..))
 
 
@@ -17,12 +19,18 @@ import Time exposing (Month(..))
 
 
 type alias Model =
-    { designs : List Data.Design }
+    { designs : List Data.Design
+    , focusedDesign : Maybe Data.Design
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { designs = Data.designs }, Cmd.none )
+    ( { designs = Data.designs
+      , focusedDesign = Nothing
+      }
+    , Cmd.none
+    )
 
 
 
@@ -30,12 +38,14 @@ init =
 
 
 type Msg
-    = NoOp
+    = ClickedDesign Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update _ model =
-    ( model, Cmd.none )
+update msg model =
+    case msg of
+        ClickedDesign index ->
+            ( { model | focusedDesign = ListEx.getAt index model.designs }, Cmd.none )
 
 
 
@@ -164,16 +174,19 @@ timelineGraphic { firstDate, lastDate } designs =
             ]
             []
          ]
-            ++ List.map
-                (designToMarker
-                    { width = width
-                    , height = height
-                    , radius = radius
-                    , firstDate = firstDate
-                    , lastDate = lastDate
-                    }
-                )
-                designs
+            ++ (List.indexedMap
+                    Tuple.pair
+                    designs
+                    |> List.map
+                        (designToMarker
+                            { width = width
+                            , height = height
+                            , radius = radius
+                            , firstDate = firstDate
+                            , lastDate = lastDate
+                            }
+                        )
+               )
         )
 
 
@@ -206,9 +219,9 @@ designToMarker :
     , firstDate : Date
     , lastDate : Date
     }
-    -> Data.Design
-    -> S.Svg msg
-designToMarker { width, height, radius, firstDate, lastDate } design =
+    -> ( Int, Data.Design )
+    -> S.Svg Msg
+designToMarker { width, height, radius, firstDate, lastDate } ( index, design ) =
     S.circle
         [ SAtt.cx <|
             String.fromInt <|
@@ -221,6 +234,7 @@ designToMarker { width, height, radius, firstDate, lastDate } design =
                     }
         , SAtt.cy <| String.fromInt <| height // 2
         , SAtt.r <| String.fromInt radius
+        , SEvents.onClick <| ClickedDesign index
         ]
         []
 
@@ -250,7 +264,6 @@ dateToPosition { firstDate, lastDate, date, width, radius } =
         * toFloat (width - (2 * radius))
         |> round
         |> (+) 3
-        |> Debug.log "Position"
 
 
 details : Element msg
