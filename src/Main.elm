@@ -5,7 +5,9 @@ import Data
 import Date exposing (Date, Unit(..))
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
+import FeatherIcons
 import Html exposing (Html)
 import List.Extra as ListEx
 import Svg as S
@@ -65,64 +67,88 @@ portraitView model =
         , height fill
         ]
         [ title
-        , timeline model
-        , details
+        , timeline model.designs
+        , details model.focusedDesign
         ]
 
 
 title : Element msg
 title =
     el
-        [ width fill
-        , padding 60
-        , Background.color <| rgb255 143 192 169
-        , headerFont
-        , Font.size 40
-        , Font.center
-        ]
+        (titleFont
+            ++ [ width fill
+               , padding 30
+               , Background.color <| rgb255 143 192 169
+               , Font.center
+               ]
+        )
     <|
         text "The Designed Protein Archive"
 
 
-timeline : Model -> Element Msg
-timeline model =
+timeline : List Data.Design -> Element Msg
+timeline designs =
     let
         timelineDates =
-            getFirstAndLastDate model.designs
+            getFirstAndLastDate designs
     in
     column
-        [ width fill
-        , padding 20
-        , Background.color <| rgb255 105 109 125
-        , bodyFont
-        , Font.size 20
-        ]
+        (h1Font
+            ++ [ width fill
+               , padding 20
+               , Background.color <| rgb255 105 109 125
+               ]
+        )
         [ paragraph [] [ text "Timeline" ]
         , column [ width fill ]
-            [ html (timelineGraphic timelineDates model.designs)
+            [ html (timelineGraphic timelineDates designs)
             , row
                 [ width fill
                 , Font.alignLeft
                 ]
                 [ paragraph
-                    []
+                    bodyFont
                     [ timelineDates.firstDate
                         |> Date.year
                         |> String.fromInt
                         |> text
                     ]
                 , paragraph
-                    [ alignRight
-                    , Font.alignRight
-                    ]
+                    (bodyFont
+                        ++ [ alignRight
+                           , Font.alignRight
+                           ]
+                    )
                     [ timelineDates.lastDate
                         |> Date.year
                         |> String.fromInt
                         |> text
                     ]
                 ]
+            , row
+                [ padding 10
+                , spacing 3
+                , centerX
+                ]
+                [ timelineButton FeatherIcons.search
+                , timelineButton FeatherIcons.filter
+                , timelineButton FeatherIcons.zoomIn
+                , timelineButton FeatherIcons.zoomOut
+                ]
             ]
         ]
+
+
+timelineButton : FeatherIcons.Icon -> Element msg
+timelineButton icon =
+    el
+        [ Border.solid
+        , Border.width 2
+        ]
+        (icon
+            |> FeatherIcons.toHtml []
+            |> html
+        )
 
 
 timelineGraphic : { firstDate : Date, lastDate : Date } -> List Data.Design -> Html Msg
@@ -234,6 +260,8 @@ designToMarker { width, height, radius, firstDate, lastDate } ( index, design ) 
                     }
         , SAtt.cy <| String.fromInt <| height // 2
         , SAtt.r <| String.fromInt radius
+        , SAtt.fill "#68b0ab"
+        , SAtt.cursor "pointer"
         , SEvents.onClick <| ClickedDesign index
         ]
         []
@@ -266,18 +294,162 @@ dateToPosition { firstDate, lastDate, date, width, radius } =
         |> (+) 3
 
 
-details : Element msg
-details =
-    el
-        [ width fill
-        , height <| fillPortion 5
-        , padding 20
-        , Background.color <| rgb255 255 255 255
-        , bodyFont
-        , Font.size 20
+details : Maybe Data.Design -> Element msg
+details mDesign =
+    column
+        [ centerX
+        , width
+            (fill |> maximum 640)
         ]
-    <|
-        text "Design Details"
+        [ el
+            (h1Font
+                ++ [ width fill
+                   , height <| fillPortion 5
+                   , padding 20
+                   , Background.color <| rgb255 255 255 255
+                   ]
+            )
+          <|
+            text "Design Details"
+        , case mDesign of
+            Nothing ->
+                paragraph
+                    (bodyFont
+                        ++ [ Font.center ]
+                    )
+                    [ text "Click on the timeline for detailed information about a design."
+                    ]
+
+            Just design ->
+                designDetailsView design
+        ]
+
+
+designDetailsView : Data.Design -> Element msg
+designDetailsView design =
+    column
+        [ centerX
+        , width
+            (fill |> maximum 640)
+        , padding 20
+        , spacing 30
+        ]
+        [ wrappedRow
+            [ height fill
+            , width fill
+            , spacing 10
+            ]
+            [ image
+                []
+                { src = design.picturePath
+                , description = "Structure of " ++ design.pdbCode
+                }
+            , column
+                [ height fill
+                , width fill
+                , spacing 10
+                , Font.alignLeft
+                ]
+                [ paragraph
+                    bodyFont
+                    [ text "PDB Code: "
+                    , link
+                        [ Font.color <| rgb255 104 176 171
+                        , Font.underline
+                        ]
+                        { url =
+                            "https://www.ebi.ac.uk/pdbe/entry/pdb/"
+                                ++ design.pdbCode
+                        , label =
+                            design.pdbCode
+                                |> text
+                        }
+                    ]
+                , paragraph
+                    bodyFont
+                    [ "Deposition Date: "
+                        ++ Date.toIsoString design.depositionDate
+                        |> text
+                    ]
+                , paragraph
+                    bodyFont
+                    [ "Design Method: Rational"
+                        |> text
+                    ]
+                , paragraph
+                    bodyFont
+                    [ "Structure Method: "
+                        ++ Data.expMethodToString design.method
+                        |> text
+                    ]
+                , paragraph
+                    bodyFont
+                    [ text "Publication: "
+                    , link
+                        [ Font.color <| rgb255 104 176 171
+                        , Font.underline
+                        ]
+                        { url =
+                            "https://www.doi.org/"
+                                ++ design.publicationLink
+                        , label =
+                            design.publicationLink
+                                |> text
+                        }
+                    ]
+                ]
+            ]
+        , column
+            [ width fill
+            , spacing 20
+            ]
+            [ paragraph
+                h2Font
+                [ text "Sequence"
+                ]
+            , paragraph
+                monospacedFont
+                [ text design.sequence
+                ]
+            ]
+        , column
+            [ width fill
+            , spacing 20
+            ]
+            [ paragraph
+                h2Font
+                [ text "Description"
+                ]
+            , paragraph
+                bodyFont
+                [ """ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+                    id dignissim massa. Sed ut augue mi. Sed sit amet molestie sapien,
+                    et euismod augue. Quisque at nulla eu lectus pretium commodo. Morbi
+                    vel diam at dolor ornare vestibulum quis a nisl. Vivamus porta
+                    semper sem eget maximus. Morbi a dolor vel purus ullamcorper
+                    condimentum sed sed libero. Nunc tristique nulla id felis convallis
+                    feugiat. Ut bibendum pulvinar ante a posuere. Cras laoreet tellus eu
+                    felis porta accumsan."""
+                    |> text
+                ]
+            ]
+        , paragraph
+            h2Font
+            [ text "Structural Similarity"
+            ]
+        , paragraph
+            h2Font
+            [ text "Homologues"
+            ]
+        , paragraph
+            h2Font
+            [ text "Sequence Metrics"
+            ]
+        , paragraph
+            h2Font
+            [ text "DE-STRESS Metrics"
+            ]
+        ]
 
 
 
@@ -299,17 +471,52 @@ main =
 -- https://coolors.co/faf3dd-c8d5b9-8fc0a9-68b0ab-696d7d
 
 
-headerFont : Attribute msg
-headerFont =
-    Font.family
+titleFont : List (Attribute msg)
+titleFont =
+    [ Font.family
         [ Font.typeface "Barlow"
         , Font.sansSerif
         ]
+    , Font.size 40
+    ]
 
 
-bodyFont : Attribute msg
-bodyFont =
-    Font.family
+h1Font : List (Attribute msg)
+h1Font =
+    [ Font.family
         [ Font.typeface "Lato"
         , Font.sansSerif
         ]
+    , Font.size 32
+    ]
+
+
+h2Font : List (Attribute msg)
+h2Font =
+    [ Font.family
+        [ Font.typeface "Lato"
+        , Font.sansSerif
+        ]
+    , Font.size 24
+    ]
+
+
+bodyFont : List (Attribute msg)
+bodyFont =
+    [ Font.family
+        [ Font.typeface "Lato"
+        , Font.sansSerif
+        ]
+    , Font.size 16
+    , Font.alignLeft
+    ]
+
+
+monospacedFont : List (Attribute msg)
+monospacedFont =
+    [ Font.family
+        [ Font.typeface "Fira Code"
+        , Font.sansSerif
+        ]
+    , Font.size 16
+    ]

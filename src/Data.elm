@@ -1,4 +1,4 @@
-module Data exposing (Design, designs)
+module Data exposing (Design, designs, expMethodToString)
 
 import Date
 import Time exposing (Month(..))
@@ -11,6 +11,7 @@ type alias Design =
     , picturePath : String
     , structuralKeywords : String
     , publicationLink : String
+    , sequence : String
     }
 
 
@@ -20,42 +21,62 @@ type ExpMethod
     | CryoEM
 
 
+expMethodToString : ExpMethod -> String
+expMethodToString method =
+    case method of
+        Xray resolution ->
+            "Xray Crystallography ("
+                ++ String.fromFloat resolution
+                ++ " Å)"
+
+        NMR ->
+            "NMR"
+
+        CryoEM ->
+            "Cryo EM"
+
+
 designs : List Design
 designs =
     [ { pdbCode = "1cos"
       , depositionDate = Date.fromCalendarDate 1993 Jan 22
       , method = Xray 2.1
-      , picturePath = "static/designs/1cos.jpg"
+      , picturePath = "%PUBLIC_URL%/designs/1cos.jpg"
       , structuralKeywords = "ALPHA-HELICAL BUNDLE"
       , publicationLink = "10.1126/science.8446897"
+      , sequence = "XEWEALEKKLAALESKLQALEKKLEALEHGX"
       }
     , { pdbCode = "1fsd"
       , depositionDate = Date.fromCalendarDate 1997 Jun 9
       , method = NMR
-      , picturePath = "static/designs/1fsd.jpg"
+      , picturePath = "%PUBLIC_URL%/designs/1fsd.jpg"
       , structuralKeywords = "NOVEL SEQUENCE"
       , publicationLink = "10.1126/science.278.5335.82"
+      , sequence = "QQYTAKIKGRTFRNEKELRDFIEKFKGR"
       }
     , { pdbCode = "1jy4"
       , depositionDate = Date.fromCalendarDate 2001 Sep 11
       , method = NMR
-      , picturePath = "static/designs/1jy4.jpg"
+      , picturePath = "%PUBLIC_URL%/designs/1jy4.jpg"
       , structuralKeywords = "DE NOVO PROTEIN"
       , publicationLink = "10.1021/ja0174276"
+      , sequence = "RGECKFTVPGRTALNTPAVQKWHFVLPGYKCEILA"
       }
     , { pdbCode = "1byz"
       , depositionDate = Date.fromCalendarDate 1998 Oct 28
       , method = Xray 0.9
-      , picturePath = "static/designs/1byz.jpg"
+      , picturePath = "%PUBLIC_URL%/designs/1byz.jpg"
       , structuralKeywords = "DE NOVO PROTEIN"
       , publicationLink = "10.1110/ps.8.7.1400"
+      , sequence = "XELLKKLLEELKG"
       }
     , { pdbCode = "1bb1"
       , depositionDate = Date.fromCalendarDate 1999 Feb 2
       , method = Xray 1.8
-      , picturePath = "static/designs/1bb1.jpg"
+      , picturePath = "%PUBLIC_URL%/designs/1bb1.jpg"
       , structuralKeywords = "DE NOVO PROTEIN DESIGN"
       , publicationLink = "10.1110/ps.8.1.84"
+      , sequence = "XAEIAAIEYEQAAIKEEIAAIKDKIAAIKEYIAAIX"
       }
     ]
 
