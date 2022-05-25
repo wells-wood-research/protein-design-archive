@@ -83,7 +83,7 @@ title =
                ]
         )
     <|
-        text "The Designed Protein Archive"
+        paragraph [] [ text "The Designed Protein Archive" ]
 
 
 timeline : List Data.Design -> Element Msg
