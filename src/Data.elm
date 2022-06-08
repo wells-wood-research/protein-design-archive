@@ -8,8 +8,12 @@ import Time exposing (Month(..))
 
 -- Things to add:
 -- * Crystallisation conditions
--- * Publicatoin doi and link
+-- * Temperature
+-- * Publicatoin doi, link, authors and abstract
 -- * All the pictures
+--   * Have a toggle for asym unit and biol unit
+--   * URLs are preferred for the pictures so we don't need to host
+-- * NGL view?
 -- * The design method
 type alias Design =
     { pdbCode : String

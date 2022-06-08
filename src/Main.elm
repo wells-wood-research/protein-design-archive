@@ -86,6 +86,13 @@ title =
         paragraph [] [ text "The Designed Protein Archive" ]
 
 
+
+-- TODO:
+-- * Signpost dots to aid navigation
+-- * Zoom mechanism to show time range
+-- * Plot of generation of designs over time
+
+
 timeline : List Data.Design -> Element Msg
 timeline designs =
     let
