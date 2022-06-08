@@ -1,74 +1,3 @@
-module Data exposing (Design, getAllDesigns)
-
-import Date
-import Json.Decode as JDe
-import Json.Decode.Pipeline exposing (hardcoded, required, requiredAt)
-import Time exposing (Month(..))
-
-
--- Things to add:
--- * Crystallisation conditions
--- * Publicatoin doi and link
--- * All the pictures
--- * The design method
-type alias Design =
-    { pdbCode : String
-    , depositionDate : Date.Date
-    , method : String
-    , picturePath : String
-    , structuralKeywords : String
-    , publicationLink : String
-    , sequences : List String
-    }
-
-
-getAllDesigns : List Design
-getAllDesigns =
-    JDe.decodeString
-        (designDecoder
-            |> JDe.field "data"
-            |> JDe.list
-        )
-        rawData
-        |> Result.withDefault []
-
-
-designDecoder : JDe.Decoder Design
-designDecoder =
-    JDe.succeed makeDesign
-        |> required "rcsb_id" JDe.string
-        |> requiredAt [ "rcsb_accession_info", "deposit_date" ] JDe.string
-        |> required "exptl" (JDe.index 0 (JDe.field "method" JDe.string))
-        |> hardcoded "blah"
-        |> hardcoded "eep"
-        |> hardcoded "doi"
-        |> required "polymer_entities"
-            (JDe.list
-                (JDe.at [ "entity_poly", "pdbx_seq_one_letter_code_can" ] JDe.string)
-            )
-
-
-makeDesign : String -> String -> String -> String -> String -> String -> List String -> Design
-makeDesign pdbCode depositionDate method picturePath structuralKeywords publicationLink sequences =
-    { pdbCode = pdbCode
-    , depositionDate =
-        depositionDate
-            |> String.split "T"
-            |> List.head
-            |> Maybe.withDefault "ERROR"
-            |> Date.fromIsoString
-            |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)
-    , method = method
-    , picturePath = "%PUBLIC_URL%/designs/1cos.jpg"
-    , structuralKeywords = "ALPHA-HELICAL BUNDLE"
-    , publicationLink = "10.1126/science.8446897"
-    , sequences = sequences
-    }
-
-
-rawData : String
-rawData =
-    """
 [
   {
     "identifier": "1AL1",
@@ -3868,4 +3797,3 @@ rawData =
     "type": "entry"
   }
 ]
-"""

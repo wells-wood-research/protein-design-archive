@@ -28,7 +28,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { designs = Data.designs
+    ( { designs = Data.getAllDesigns
       , focusedDesign = Nothing
       }
     , Cmd.none
@@ -378,8 +378,8 @@ designDetailsView design =
                     ]
                 , paragraph
                     bodyFont
-                    [ "Structure Method: "
-                        ++ Data.expMethodToString design.method
+                    [ "Experimental Method: "
+                        ++ design.method
                         |> text
                     ]
                 , paragraph
@@ -409,7 +409,8 @@ designDetailsView design =
                 ]
             , paragraph
                 monospacedFont
-                [ text design.sequence
+                [ String.join "\n" design.sequences
+                    |> text
                 ]
             ]
         , column
