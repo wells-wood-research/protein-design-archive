@@ -2,18 +2,22 @@ module Main exposing (..)
 
 import Browser
 import Data
+import Debug
 import Date exposing (Date, Unit(..))
+import DatePicker exposing (ChangeEvent(..), initWithToday)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Element.Input as Input
 import FeatherIcons
 import Html exposing (Html)
 import List.Extra as ListEx
 import Svg as S
 import Svg.Attributes as SAtt
 import Svg.Events as SEvents
-import Time exposing (Month(..))
+import Time exposing (Month(..)) 
+import Maybe.Extra
 
 
 
@@ -23,24 +27,45 @@ import Time exposing (Month(..))
 type alias Model =
     { designs : List Data.Design
     , focusedDesign : Maybe Data.Design
+    , startDate : Maybe Date
+    , startDateText : String
+    , startDatePickerModel : DatePicker.Model
+    , endDate : Maybe Date
+    , endDateText : String
+    , endDatePickerModel : DatePicker.Model
     }
 
 
-init : ( Model, Cmd Msg )
+
+init : (Model, Cmd Msg )
 init =
     ( { designs = Data.getAllDesigns
       , focusedDesign = Nothing
+      , startDate = Just (getFirstAndLastDate Data.getAllDesigns).firstDate
+      , startDateText = Date.toIsoString (getFirstAndLastDate Data.getAllDesigns).firstDate
+      , startDatePickerModel = DatePicker.initWithToday (getFirstAndLastDate Data.getAllDesigns).firstDate
+      , endDate = Just (getFirstAndLastDate Data.getAllDesigns).lastDate
+      , endDateText = Date.toIsoString (getFirstAndLastDate Data.getAllDesigns).lastDate
+      , endDatePickerModel = DatePicker.initWithToday (getFirstAndLastDate Data.getAllDesigns).lastDate
       }
     , Cmd.none
     )
 
 
 
+
+
 ---- UPDATE ----
 
 
-type Msg
+type Msg 
     = ClickedDesign Int
+    | StartDateChangePicker ChangeEvent
+    | EndDateChangePicker ChangeEvent
+
+
+
+
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -48,9 +73,78 @@ update msg model =
     case msg of
         ClickedDesign index ->
             ( { model | focusedDesign = ListEx.getAt index model.designs }, Cmd.none )
+        StartDateChangePicker changeEvent->
+            case changeEvent of
+                DateChanged date ->
+                    -- update both date and text
+                    ( { model
+                        | startDate = Just date
+                        , startDateText = Date.toIsoString date
+                        , designs = filterDesignDates Data.getAllDesigns model
+                      }
+                    , Cmd.none
+                    )
+
+                TextChanged text ->
+                    ( { model
+                        | startDate =
+                            -- parse the text in any way you like
+                            Date.fromIsoString text
+                                |> Result.toMaybe
+                                |> Maybe.Extra.orElse model.startDate
+                        , startDateText = text
+                      }
+                    , Cmd.none
+                    )
+
+                PickerChanged subMsg  ->
+                    -- internal stuff changed
+                    -- call DatePicker.update
+                    ( { model
+                        | startDatePickerModel =
+                            model.startDatePickerModel
+                                |> DatePicker.update subMsg
+                      }
+                    , Cmd.none
+                    )
+
+        EndDateChangePicker changeEvent->
+            case changeEvent of
+                DateChanged date ->
+                    -- update both date and text
+                    ( { model
+                        | endDate = Just date
+                        , endDateText = Date.toIsoString date
+                        , designs = filterDesignDates Data.getAllDesigns model
+                      }
+                    , Cmd.none
+                    )
+
+                TextChanged text ->
+                    ( { model
+                        | endDate =
+                            -- parse the text in any way you like
+                            Date.fromIsoString text
+                                |> Result.toMaybe
+                                |> Maybe.Extra.orElse model.endDate
+                        , endDateText = text
+                      }
+                    , Cmd.none
+                    )
+
+                PickerChanged subMsg  ->
+                    -- internal stuff changed
+                    -- call DatePicker.update
+                    ( { model
+                        | endDatePickerModel =
+                            model.endDatePickerModel
+                                |> DatePicker.update subMsg
+                      }
+                    , Cmd.none
+                    )
 
 
-
+                
 ---- VIEW ----
 
 
@@ -67,7 +161,7 @@ portraitView model =
         , height fill
         ]
         [ title
-        , timeline model.designs
+        , timeline model
         , details model.focusedDesign
         ]
 
@@ -93,11 +187,11 @@ title =
 -- * Plot of generation of designs over time
 
 
-timeline : List Data.Design -> Element Msg
-timeline designs =
+timeline : Model -> Element Msg
+timeline model =
     let
         timelineDates =
-            getFirstAndLastDate designs
+            getFirstAndLastDate model.designs
     in
     column
         (h1Font
@@ -108,7 +202,7 @@ timeline designs =
         )
         [ paragraph [] [ text "Timeline" ]
         , column [ width fill ]
-            [ html (timelineGraphic timelineDates designs)
+            [ html (timelineGraphic timelineDates model.designs)
             , row
                 [ width fill
                 , Font.alignLeft
@@ -132,6 +226,12 @@ timeline designs =
                         |> text
                     ]
                 ]
+            , row [ padding 10
+                  , spacing 3
+                  , alignLeft
+                  ] 
+                [datePickerView model.startDate model.startDateText "Choose Start Date" model.startDatePickerModel StartDateChangePicker 
+                , datePickerView model.endDate model.endDateText "Choose End Date" model.endDatePickerModel EndDateChangePicker ]
             , row
                 [ padding 10
                 , spacing 3
@@ -145,6 +245,22 @@ timeline designs =
             ]
         ]
 
+
+
+datePickerView : Maybe Date -> String -> String -> DatePicker.Model -> (ChangeEvent -> msg) -> Element msg
+datePickerView date dateText boxText datePicker changePicker = 
+    el [width fill]
+        (DatePicker.input [ Element.width Element.shrink, Element.centerX, Element.centerY ]
+            { onChange = changePicker
+            , selected = date
+            , text = dateText
+            , label =
+                Input.labelAbove [] <|
+                    Element.text boxText
+            , placeholder = Just <| Input.placeholder [] <| Element.text "yyyy-mm-dd"
+            , settings = DatePicker.defaultSettings
+            , model = datePicker
+            })
 
 timelineButton : FeatherIcons.Icon -> Element msg
 timelineButton icon =
@@ -169,7 +285,7 @@ timelineGraphic { firstDate, lastDate } designs =
             20
 
         radius =
-            3
+            2
     in
     S.svg
         [ SAtt.width "100%"
@@ -222,6 +338,30 @@ timelineGraphic { firstDate, lastDate } designs =
                )
         )
 
+
+filterDesignDates : List Data.Design -> Model -> List Data.Design
+filterDesignDates designs model = 
+
+    case model.startDate of 
+
+        Just b -> 
+
+            case model.endDate of 
+
+                Just c ->
+
+                    List.filter 
+                        (\a -> Date.isBetween b c a.depositionDate)
+                        designs
+
+                Nothing ->
+                    model.designs 
+
+        Nothing -> 
+            model.designs
+
+
+    
 
 getFirstAndLastDate : List Data.Design -> { firstDate : Date, lastDate : Date }
 getFirstAndLastDate designs =
