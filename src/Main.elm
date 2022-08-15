@@ -169,7 +169,7 @@ timelineGraphic { firstDate, lastDate } designs =
             20
 
         radius =
-            3
+            2
     in
     S.svg
         [ SAtt.width "100%"
@@ -268,6 +268,8 @@ designToMarker { width, height, radius, firstDate, lastDate } ( index, design ) 
         , SAtt.cy <| String.fromInt <| height // 2
         , SAtt.r <| String.fromInt radius
         , SAtt.fill "#68b0ab"
+        , SAtt.strokeWidth "0.5"
+        , SAtt.stroke "black"
         , SAtt.cursor "pointer"
         , SEvents.onClick <| ClickedDesign index
         ]
