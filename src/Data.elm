@@ -43,7 +43,6 @@ designDecoder =
         |> required "rcsb_id" JDe.string
         |> requiredAt [ "rcsb_accession_info", "deposit_date" ] JDe.string
         |> required "exptl" (JDe.index 0 (JDe.field "method" JDe.string))
-        |> hardcoded "blah"
         |> hardcoded "eep"
         |> hardcoded "doi"
         |> required "polymer_entities"
@@ -52,8 +51,11 @@ designDecoder =
             )
 
 
-makeDesign : String -> String -> String -> String -> String -> String -> List String -> Design
-makeDesign pdbCode depositionDate method picturePath structuralKeywords publicationLink sequences =
+makeDesign : String -> String -> String -> String -> String -> List String -> Design
+makeDesign inPdbCode depositionDate method structuralKeywords publicationLink sequences =
+    let
+        pdbCode = String.toLower inPdbCode
+    in
     { pdbCode = pdbCode
     , depositionDate =
         depositionDate
@@ -63,7 +65,14 @@ makeDesign pdbCode depositionDate method picturePath structuralKeywords publicat
             |> Date.fromIsoString
             |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)
     , method = method
-    , picturePath = "%PUBLIC_URL%/designs/1cos.jpg"
+    -- Example: https://cdn.rcsb.org/images/structures/pn/4pnb/4pnb_assembly-1.jpeg
+    , picturePath = "https://cdn.rcsb.org/images/structures/"
+        ++ String.slice 1 3 pdbCode
+        ++ "/"
+        ++ pdbCode
+        ++ "/"
+        ++ pdbCode
+        ++ "_assembly-1.jpeg"
     , structuralKeywords = "ALPHA-HELICAL BUNDLE"
     , publicationLink = "10.1126/science.8446897"
     , sequences = sequences
