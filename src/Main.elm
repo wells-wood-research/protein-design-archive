@@ -393,6 +393,12 @@ designDetailsView design =
                     ]
                 , paragraph
                     bodyFont
+                    [ "Structural Keywords: "
+                        ++ design.structuralKeywords
+                        |> text
+                    ]
+                , paragraph
+                    bodyFont
                     [ text "Publication: "
                     , link
                         [ Font.color <| rgb255 104 176 171
@@ -400,11 +406,17 @@ designDetailsView design =
                         ]
                         { url =
                             "https://www.doi.org/"
-                                ++ design.publicationLink
+                                ++ design.doi
                         , label =
-                            design.publicationLink
+                            design.publicationTitle
                                 |> text
                         }
+                    ]
+                , paragraph
+                    bodyFont
+                    [ "Authors: "
+                        ++ (String.join ", " design.authors)
+                        |> text
                     ]
                 ]
             ]
