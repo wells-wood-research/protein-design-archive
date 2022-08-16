@@ -75,11 +75,12 @@ view model =
 portraitView : Model -> Element Msg
 portraitView model =
     column
-        [ width fill
+        [ width (fill |> maximum 1080)
+        , centerX
         , height fill
         ]
         [ title
-        , row [ width (fill |> maximum 1080), centerX ]
+        , row [ width fill ]
             [ timeline model
             , details model.focusedDesign
             ]
@@ -114,15 +115,16 @@ timeline { designs, randomNumbers } =
             getFirstAndLastDate designs
     in
     column
-        (h1Font
+        (bodyFont
             ++ [ width <| fillPortion 1
                , height fill
                , padding 20
+               , Font.center
                , Background.color <| rgb255 105 109 125
                ]
         )
         [ paragraph [] [ text "Timeline" ]
-        , row
+        , column
             [ padding 10
             , spacing 3
             , centerX
