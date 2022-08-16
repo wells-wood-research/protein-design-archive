@@ -2,8 +2,9 @@ module Data exposing (Design, getAllDesigns)
 
 import Date
 import Json.Decode as JDe
-import Json.Decode.Pipeline exposing (hardcoded, required, requiredAt, optionalAt)
+import Json.Decode.Pipeline exposing (required, requiredAt)
 import Time exposing (Month(..))
+
 
 
 -- Things to add:
@@ -15,6 +16,8 @@ import Time exposing (Month(..))
 --   * URLs are preferred for the pictures so we don't need to host
 -- * NGL view?
 -- * The design method
+
+
 type alias Design =
     { pdbCode : String
     , depositionDate : Date.Date
@@ -59,7 +62,8 @@ designDecoder =
 makeDesign : String -> Int -> String -> String -> String -> String -> List String -> List String -> Design
 makeDesign inPdbCode depositionDate method structuralKeywords doi publicationTitle authors sequences =
     let
-        pdbCode = String.toLower inPdbCode
+        pdbCode =
+            String.toLower inPdbCode
     in
     { pdbCode = pdbCode
     , depositionDate =
@@ -68,14 +72,16 @@ makeDesign inPdbCode depositionDate method structuralKeywords doi publicationTit
             |> Date.fromIsoString
             |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)
     , method = method
+
     -- Example: https://cdn.rcsb.org/images/structures/pn/4pnb/4pnb_assembly-1.jpeg
-    , picturePath = "https://cdn.rcsb.org/images/structures/"
-        ++ String.slice 1 3 pdbCode
-        ++ "/"
-        ++ pdbCode
-        ++ "/"
-        ++ pdbCode
-        ++ "_assembly-1.jpeg"
+    , picturePath =
+        "https://cdn.rcsb.org/images/structures/"
+            ++ String.slice 1 3 pdbCode
+            ++ "/"
+            ++ pdbCode
+            ++ "/"
+            ++ pdbCode
+            ++ "_assembly-1.jpeg"
     , structuralKeywords = structuralKeywords
     , doi = doi
     , publicationTitle = publicationTitle

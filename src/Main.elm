@@ -10,6 +10,7 @@ import Element.Font as Font
 import FeatherIcons
 import Html exposing (Html)
 import List.Extra as ListEx
+import Random
 import Svg as S
 import Svg.Attributes as SAtt
 import Svg.Events as SEvents
@@ -23,6 +24,7 @@ import Time exposing (Month(..))
 type alias Model =
     { designs : List Data.Design
     , focusedDesign : Maybe Data.Design
+    , randomNumbers : List Int
     }
 
 
@@ -30,9 +32,15 @@ init : ( Model, Cmd Msg )
 init =
     ( { designs = Data.getAllDesigns
       , focusedDesign = Nothing
+      , randomNumbers = []
       }
-    , Cmd.none
+    , Random.generate RandomNumbers gen1000Numbers
     )
+
+
+gen1000Numbers : Random.Generator (List Int)
+gen1000Numbers =
+    Random.list 100 (Random.int -50 50)
 
 
 
@@ -41,6 +49,7 @@ init =
 
 type Msg
     = ClickedDesign Int
+    | RandomNumbers (List Int)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -48,6 +57,9 @@ update msg model =
     case msg of
         ClickedDesign index ->
             ( { model | focusedDesign = ListEx.getAt index model.designs }, Cmd.none )
+
+        RandomNumbers numbers ->
+            ( { model | randomNumbers = numbers }, Cmd.none )
 
 
 
@@ -67,7 +79,7 @@ portraitView model =
         , height fill
         ]
         [ title
-        , timeline model.designs
+        , timeline model
         , details model.focusedDesign
         ]
 
@@ -93,8 +105,8 @@ title =
 -- * Plot of generation of designs over time
 
 
-timeline : List Data.Design -> Element Msg
-timeline designs =
+timeline : Model -> Element Msg
+timeline { designs, randomNumbers } =
     let
         timelineDates =
             getFirstAndLastDate designs
@@ -108,7 +120,7 @@ timeline designs =
         )
         [ paragraph [] [ text "Timeline" ]
         , column [ width fill ]
-            [ html (timelineGraphic timelineDates designs)
+            [ html (timelineGraphic timelineDates randomNumbers designs)
             , row
                 [ width fill
                 , Font.alignLeft
@@ -158,8 +170,8 @@ timelineButton icon =
         )
 
 
-timelineGraphic : { firstDate : Date, lastDate : Date } -> List Data.Design -> Html Msg
-timelineGraphic { firstDate, lastDate } designs =
+timelineGraphic : { firstDate : Date, lastDate : Date } -> List Int -> List Data.Design -> Html Msg
+timelineGraphic { firstDate, lastDate } randomNumbers designs =
     let
         -- plot dimensions
         width =
@@ -210,6 +222,7 @@ timelineGraphic { firstDate, lastDate } designs =
             ++ (List.indexedMap
                     Tuple.pair
                     designs
+                    |> List.map2 Tuple.pair randomNumbers
                     |> List.map
                         (designToMarker
                             { width = width
@@ -252,19 +265,21 @@ designToMarker :
     , firstDate : Date
     , lastDate : Date
     }
-    -> ( Int, Data.Design )
+    -> ( Int, ( Int, Data.Design ) )
     -> S.Svg Msg
-designToMarker { width, height, radius, firstDate, lastDate } ( index, design ) =
+designToMarker { width, height, radius, firstDate, lastDate } ( randomShift, ( index, design ) ) =
     S.circle
         [ SAtt.cx <|
             String.fromInt <|
-                dateToPosition
+                (dateToPosition
                     { firstDate = firstDate
                     , lastDate = lastDate
                     , date = design.depositionDate
                     , width = width
                     , radius = radius
                     }
+                    + randomShift
+                )
         , SAtt.cy <| String.fromInt <| height // 2
         , SAtt.r <| String.fromInt radius
         , SAtt.fill "#68b0ab"
@@ -415,7 +430,7 @@ designDetailsView design =
                 , paragraph
                     bodyFont
                     [ "Authors: "
-                        ++ (String.join ", " design.authors)
+                        ++ String.join ", " design.authors
                         |> text
                     ]
                 ]
