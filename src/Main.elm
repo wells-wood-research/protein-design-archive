@@ -79,8 +79,10 @@ portraitView model =
         , height fill
         ]
         [ title
-        , timeline model
-        , details model.focusedDesign
+        , row [ width (fill |> maximum 1080), centerX ]
+            [ timeline model
+            , details model.focusedDesign
+            ]
         ]
 
 
@@ -113,46 +115,42 @@ timeline { designs, randomNumbers } =
     in
     column
         (h1Font
-            ++ [ width fill
+            ++ [ width <| fillPortion 1
+               , height fill
                , padding 20
                , Background.color <| rgb255 105 109 125
                ]
         )
         [ paragraph [] [ text "Timeline" ]
-        , column [ width fill ]
-            [ html (timelineGraphic timelineDates randomNumbers designs)
-            , row
-                [ width fill
-                , Font.alignLeft
+        , row
+            [ padding 10
+            , spacing 3
+            , centerX
+            ]
+            [ timelineButton FeatherIcons.search
+            , timelineButton FeatherIcons.filter
+            ]
+        , column [ width <| px 80, centerX ]
+            [ paragraph
+                (bodyFont
+                    ++ [ Font.center
+                       ]
+                )
+                [ timelineDates.firstDate
+                    |> Date.year
+                    |> String.fromInt
+                    |> text
                 ]
-                [ paragraph
-                    bodyFont
-                    [ timelineDates.firstDate
-                        |> Date.year
-                        |> String.fromInt
-                        |> text
-                    ]
-                , paragraph
-                    (bodyFont
-                        ++ [ alignRight
-                           , Font.alignRight
-                           ]
-                    )
-                    [ timelineDates.lastDate
-                        |> Date.year
-                        |> String.fromInt
-                        |> text
-                    ]
-                ]
-            , row
-                [ padding 10
-                , spacing 3
-                , centerX
-                ]
-                [ timelineButton FeatherIcons.search
-                , timelineButton FeatherIcons.filter
-                , timelineButton FeatherIcons.zoomIn
-                , timelineButton FeatherIcons.zoomOut
+            , html (timelineGraphic timelineDates randomNumbers designs)
+            , paragraph
+                (bodyFont
+                    ++ [ Font.center
+                       ]
+                )
+                [ timelineDates.lastDate
+                    |> Date.year
+                    |> String.fromInt
+                    |> text
                 ]
             ]
         ]
@@ -175,16 +173,17 @@ timelineGraphic { firstDate, lastDate } randomNumbers designs =
     let
         -- plot dimensions
         width =
-            360
+            20
 
         height =
-            20
+            240
 
         radius =
             2
     in
     S.svg
         [ SAtt.width "100%"
+        , SAtt.height "100%"
         , "0 0 "
             ++ String.fromInt width
             ++ " "
@@ -192,28 +191,28 @@ timelineGraphic { firstDate, lastDate } randomNumbers designs =
             |> SAtt.viewBox
         ]
         ([ S.line
-            [ SAtt.x1 "0"
-            , SAtt.y1 <| String.fromInt <| height // 2
-            , SAtt.x2 <| String.fromInt <| width
-            , SAtt.y2 <| String.fromInt <| height // 2
+            [ SAtt.x1 <| String.fromInt <| width // 2
+            , SAtt.y1 <| String.fromInt <| 0
+            , SAtt.x2 <| String.fromInt <| width // 2
+            , SAtt.y2 <| String.fromInt <| height
             , SAtt.stroke "black"
             , SAtt.strokeWidth "2"
             ]
             []
          , S.line
-            [ SAtt.x1 "1"
-            , SAtt.y1 <| String.fromInt <| (height // 2) - 4
-            , SAtt.x2 "1"
-            , SAtt.y2 <| String.fromInt <| (height // 2) + 4
+            [ SAtt.x1 <| String.fromInt <| (width // 2) - 4
+            , SAtt.y1 "1"
+            , SAtt.x2 <| String.fromInt <| (width // 2) + 4
+            , SAtt.y2 "1"
             , SAtt.stroke "black"
             , SAtt.strokeWidth "2"
             ]
             []
          , S.line
-            [ SAtt.x1 <| String.fromInt <| (width - 1)
-            , SAtt.y1 <| String.fromInt <| (height // 2) - 4
-            , SAtt.x2 <| String.fromInt <| (width - 1)
-            , SAtt.y2 <| String.fromInt <| (height // 2) + 4
+            [ SAtt.x1 <| String.fromInt <| (width // 2) - 4
+            , SAtt.y1 <| String.fromInt <| height - 1
+            , SAtt.x2 <| String.fromInt <| (width // 2) + 4
+            , SAtt.y2 <| String.fromInt <| height - 1
             , SAtt.stroke "black"
             , SAtt.strokeWidth "2"
             ]
@@ -269,18 +268,18 @@ designToMarker :
     -> S.Svg Msg
 designToMarker { width, height, radius, firstDate, lastDate } ( randomShift, ( index, design ) ) =
     S.circle
-        [ SAtt.cx <|
+        [ SAtt.cx <| String.fromInt <| width // 2
+        , SAtt.cy <|
             String.fromInt <|
                 (dateToPosition
                     { firstDate = firstDate
                     , lastDate = lastDate
                     , date = design.depositionDate
-                    , width = width
+                    , height = height
                     , radius = radius
                     }
                     + randomShift
                 )
-        , SAtt.cy <| String.fromInt <| height // 2
         , SAtt.r <| String.fromInt radius
         , SAtt.fill "#68b0ab"
         , SAtt.strokeWidth "0.5"
@@ -295,11 +294,11 @@ dateToPosition :
     { firstDate : Date
     , lastDate : Date
     , date : Date
-    , width : Int
+    , height : Int
     , radius : Int
     }
     -> Int
-dateToPosition { firstDate, lastDate, date, width, radius } =
+dateToPosition { firstDate, lastDate, date, height, radius } =
     let
         dateRange =
             Date.diff Days lastDate firstDate
@@ -313,7 +312,7 @@ dateToPosition { firstDate, lastDate, date, width, radius } =
             dateDelta / dateRange
     in
     fraction
-        * toFloat (width - (2 * radius))
+        * toFloat (height - (2 * radius))
         |> round
         |> (+) 3
 
@@ -322,13 +321,13 @@ details : Maybe Data.Design -> Element msg
 details mDesign =
     column
         [ centerX
-        , width
-            (fill |> maximum 640)
+        , width <|
+            fillPortion 11
+        , height fill
         ]
         [ el
             (h1Font
                 ++ [ width fill
-                   , height <| fillPortion 5
                    , padding 20
                    , Background.color <| rgb255 255 255 255
                    ]
@@ -353,8 +352,7 @@ designDetailsView : Data.Design -> Element msg
 designDetailsView design =
     column
         [ centerX
-        , width
-            (fill |> maximum 640)
+        , width fill
         , padding 20
         , spacing 30
         ]
