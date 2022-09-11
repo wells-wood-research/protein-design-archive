@@ -40,7 +40,7 @@ init =
 
 gen1000Numbers : Random.Generator (List Int)
 gen1000Numbers =
-    Random.list 100 (Random.int -50 50)
+    Random.list 100 (Random.int -2 2)
 
 
 
@@ -80,6 +80,9 @@ portraitView model =
         , height fill
         ]
         [ title
+
+        -- , el [ width fill ]
+        --    (paragraph [ centerX ] [ text "This will be an input box." ])
         , row [ width fill ]
             [ timeline model
             , details model.focusedDesign
@@ -178,7 +181,7 @@ timelineGraphic { firstDate, lastDate } randomNumbers designs =
             20
 
         height =
-            240
+            360
 
         radius =
             2
@@ -270,7 +273,7 @@ designToMarker :
     -> S.Svg Msg
 designToMarker { width, height, radius, firstDate, lastDate } ( randomShift, ( index, design ) ) =
     S.circle
-        [ SAtt.cx <| String.fromInt <| width // 2
+        [ SAtt.cx <| String.fromInt <| width // 2 + randomShift
         , SAtt.cy <|
             String.fromInt <|
                 (dateToPosition
@@ -283,7 +286,7 @@ designToMarker { width, height, radius, firstDate, lastDate } ( randomShift, ( i
                     + randomShift
                 )
         , SAtt.r <| String.fromInt radius
-        , SAtt.fill "#68b0ab"
+        , SAtt.fill <| Data.classificationToColour design.classification
         , SAtt.strokeWidth "0.5"
         , SAtt.stroke "black"
         , SAtt.cursor "pointer"
@@ -397,13 +400,8 @@ designDetailsView design =
                     ]
                 , paragraph
                     bodyFont
-                    [ "Design Method: Rational"
-                        |> text
-                    ]
-                , paragraph
-                    bodyFont
-                    [ "Experimental Method: "
-                        ++ design.method
+                    [ "Design Classification: "
+                        ++ Data.classificationToString design.classification
                         |> text
                     ]
                 , paragraph
@@ -420,17 +418,16 @@ designDetailsView design =
                         , Font.underline
                         ]
                         { url =
-                            "https://www.doi.org/"
-                                ++ design.doi
+                            design.doiLink
                         , label =
-                            design.publicationTitle
+                            design.doiLink
                                 |> text
                         }
                     ]
                 , paragraph
                     bodyFont
                     [ "Authors: "
-                        ++ String.join ", " design.authors
+                        ++ design.authors
                         |> text
                     ]
                 ]
@@ -445,8 +442,7 @@ designDetailsView design =
                 ]
             , paragraph
                 monospacedFont
-                [ String.join "\n" design.sequences
-                    |> text
+                [ "WIP" |> text
                 ]
             ]
         , column

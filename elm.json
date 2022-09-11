@@ -17,6 +17,7 @@
             "elm-community/list-extra": "8.5.1",
             "feathericons/elm-feather": "1.5.0",
             "justinmimbs/date": "4.0.0",
+            "lovasoa/elm-csv": "1.1.7",
             "mdgriffith/elm-ui": "1.1.8"
         },
         "indirect": {
