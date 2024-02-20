@@ -1,0 +1,4094 @@
+[
+    {
+        "PDB":"1AL1",
+        "Data":{
+            "rcsb_id":"1AL1",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"1990-07-02T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1AL1"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":1,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.7
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":null
+            },
+            "refine":[
+                {
+                    "b_iso_mean":null
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"SYNTHETIC PROTEIN MODEL"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XELLKKLLEELKG"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":6
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"SO4",
+                            "name":"SULFATE ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"SYNTHETIC PROTEIN MODEL         ",
+        "Date":"02-JUL-90",
+        "Authors":"C.P.HILL,D.H.ANDERSON,L.WESSON,W.F.DEGRADO,D.EISENBERG               ",
+        "DOI":"http:\/\/dx.doi.org\/10.1126\/science.2382133",
+        "Pubmed ID":2382133.0
+    },
+    {
+        "PDB":"1BB1",
+        "Data":{
+            "rcsb_id":"1BB1",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":null,
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"1998-04-28T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1BB1"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":1,
+                "deposited_polymer_entity_instance_count":3,
+                "disulfide_bond_count":0,
+                "polymer_composition":"heteromeric protein",
+                "resolution_combined":[
+                    1.8
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":null
+            },
+            "refine":[
+                {
+                    "b_iso_mean":18.8
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN DESIGN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XAEIAAIEYEQAAIKEEIAAIKDKIAAIKEYIAAIX"
+                    }
+                },
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XEKIAAIKEEQAAIEEEIQAIKEEIAAIKYLIAQIX"
+                    }
+                },
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XAEIAAIKYKQAAIKNEIAAIKQEIAAIEQMIAAIX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":3
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"CL",
+                            "name":"CHLORIDE ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN DESIGN         ",
+        "Date":"28-APR-98",
+        "Authors":"S.NAUTIYAL,T.ALBER                                                   ",
+        "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.8.1.84",
+        "Pubmed ID":10210186.0
+    },
+    {
+        "PDB":"1BYZ",
+        "Data":{
+            "rcsb_id":"1BYZ",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, SITTING DROP",
+                    "pH":8
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"1998-10-20T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1BYZ"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":7,
+                "deposited_polymer_entity_instance_count":4,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    0.9
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":null
+            },
+            "refine":[
+                {
+                    "b_iso_mean":null
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XELLKKLLEELKG"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":4
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"ETA",
+                            "name":"ETHANOLAMINE"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MPD",
+                            "name":"(4S)-2-METHYL-2,4-PENTANEDIOL"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"CL",
+                            "name":"CHLORIDE ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MRD",
+                            "name":"(4R)-2-METHYLPENTANE-2,4-DIOL"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"20-OCT-98",
+        "Authors":"G.G.PRIVE,D.H.ANDERSON,L.WESSON,D.CASCIO,D.EISENBERG                 ",
+        "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.8.7.1400",
+        "Pubmed ID":10422828.0
+    },
+    {
+        "PDB":"1COS",
+        "Data":{
+            "rcsb_id":"1COS",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"1993-01-22T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1COS"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":3,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.1
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":null
+            },
+            "refine":[
+                {
+                    "b_iso_mean":null
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"ALPHA-HELICAL BUNDLE"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XEWEALEKKLAALESKLQALEKKLEALEHGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":3
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"original de novo design",
+        "Keywords":"ALPHA-HELICAL BUNDLE          ",
+        "Date":"22-JAN-93",
+        "Authors":"B.LOVEJOY,S.CHOE,D.CASCIO,D.K.MCRORIE,W.DEGRADO,D.EISENBERG          ",
+        "DOI":"http:\/\/dx.doi.org\/10.1126\/science.8446897",
+        "Pubmed ID":8446897.0
+    },
+    {
+        "PDB":"1DJF",
+        "Data":{
+            "rcsb_id":"1DJF",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"1999-12-03T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1DJF"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/bi000208x"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"QAPAYKKAAKKLAES"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"03-DEC-99",
+        "Authors":"R.MONTSERRET,M.J.MCLEISH,A.BOCKMANN,C.GEOURJON,F.PENIN               ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/bi000208x",
+        "Pubmed ID":10913242.0
+    },
+    {
+        "PDB":"1EC5",
+        "Data":{
+            "rcsb_id":"1EC5",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":4.6
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2000-01-25T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1EC5"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":3,
+                "deposited_polymer_entity_instance_count":3,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.5
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.97.12.6298"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":41.4
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XDYLRELLKLELQLIKQYREALEYVKLPVLAKILEDEEKHIEWLETILGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"ZN",
+                            "name":"ZINC ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"25-JAN-00",
+        "Authors":"S.GEREMIA                                                            ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.97.12.6298",
+        "Pubmed ID":10841536.0
+    },
+    {
+        "PDB":"1FME",
+        "Data":{
+            "rcsb_id":"1FME",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2000-08-16T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1FME"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1006\/jmbi.2000.4345"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"EQYTAKYKGRTFRNEKELRDFIEKFKGR"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"16-AUG-00",
+        "Authors":"C.A.SARISKY,S.L.MAYO                                                 ",
+        "DOI":"http:\/\/dx.doi.org\/10.1006\/jmbi.2000.4345",
+        "Pubmed ID":11292351.0
+    },
+    {
+        "PDB":"1FMH",
+        "Data":{
+            "rcsb_id":"1FMH",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2000-08-17T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1FMH"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":1,
+                "polymer_composition":"heteromeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/bi001242e"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"TRANSCRIPTION"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XEVAQLEKEVAQAEAENYQLEQEVAQLEHECGX"
+                    }
+                },
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XEVQALKKRVQALKARNYAAKQKVQALRHKCGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"original de novo design",
+        "Keywords":"TRANSCRIPTION              ",
+        "Date":"17-AUG-00",
+        "Authors":"D.N.MARTI,I.JELESAROV,H.R.BOSSHARD                                   ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/bi001242e",
+        "Pubmed ID":11041845.0
+    },
+    {
+        "PDB":"1FSD",
+        "Data":{
+            "rcsb_id":"1FSD",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"1997-06-09T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1FSD"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1126\/science.278.5335.82"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"NOVEL SEQUENCE"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"QQYTAKIKGRTFRNEKELRDFIEKFKGR"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"original de novo design",
+        "Keywords":"NOVEL SEQUENCE             ",
+        "Date":"09-JUN-97",
+        "Authors":"B.I.DAHIYAT,S.L.MAYO                                                 ",
+        "DOI":"http:\/\/dx.doi.org\/10.1126\/science.278.5335.82",
+        "Pubmed ID":9311930.0
+    },
+    {
+        "PDB":"1FSV",
+        "Data":{
+            "rcsb_id":"1FSV",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"1997-10-26T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1FSV"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1126\/science.278.5335.82"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"BETA BETA ALPHA MOTIF"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"QQYTAKIKGRTFRNEKELRDFIEKFKGR"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"BETA BETA ALPHA MOTIF          ",
+        "Date":"26-OCT-97",
+        "Authors":"B.I.DAHIYAT,S.L.MAYO                                                 ",
+        "DOI":"http:\/\/dx.doi.org\/10.1126\/science.278.5335.82",
+        "Pubmed ID":9311930.0
+    },
+    {
+        "PDB":"1G6U",
+        "Data":{
+            "rcsb_id":"1G6U",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION",
+                    "pH":6.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2000-11-07T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1G6U"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":2,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.48
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.98.4.1404"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":16.5
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"SLAALKSELQALKKEGFSPEELAALESELQALEKKLAALKSKLQALKG"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":6
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"SO4",
+                            "name":"SULFATE ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"TFA",
+                            "name":"trifluoroacetic acid"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"07-NOV-00",
+        "Authors":"N.L.OGIHARA,G.GHIRLANDA,J.W.BRYSON,M.GINGERY,W.F.DEGRADO,D.EISENBERG ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.98.4.1404",
+        "Pubmed ID":11171963.0
+    },
+    {
+        "PDB":"1HCW",
+        "Data":{
+            "rcsb_id":"1HCW",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"1996-09-20T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1HCW"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":null
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"GROWTH RESPONSE PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XYTVPSATFSRSDELAKLLRLHAGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"original de novo design",
+        "Keywords":"GROWTH RESPONSE PROTEIN         ",
+        "Date":"20-SEP-96",
+        "Authors":"B.IMPERIALI,M.STRUTHERS,R.P.CHENG                                    ",
+        "DOI":"http:\/\/dx.doi.org\/10.1126\/science.271.5247.342",
+        "Pubmed ID":8553067.0
+    },
+    {
+        "PDB":"1HQJ",
+        "Data":{
+            "rcsb_id":"1HQJ",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":5.6
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2000-12-18T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1HQJ"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":25,
+                "deposited_polymer_entity_instance_count":12,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.2
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":null
+            },
+            "refine":[
+                {
+                    "b_iso_mean":null
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"DELERRIRELEARIK"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":3
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":3
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":3
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":3
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":12
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"PB",
+                            "name":"LEAD (II) ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"SIN",
+                            "name":"SUCCINIC ACID"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"SO4",
+                            "name":"SULFATE ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"18-DEC-00",
+        "Authors":"P.BURKHARD,M.MEIER,A.LUSTIG                                          ",
+        "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.9.12.2294",
+        "Pubmed ID":11206050.0
+    },
+    {
+        "PDB":"1IC9",
+        "Data":{
+            "rcsb_id":"1IC9",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-03-30T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1IC9"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1038\/88604"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"SKYEYTIPSYTFRGPGCPTLKPAITVRCE"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"engineered",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"30-MAR-01",
+        "Authors":"J.J.OTTESEN,B.IMPERIALI                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1038\/88604",
+        "Pubmed ID":11373623.0
+    },
+    {
+        "PDB":"1ICL",
+        "Data":{
+            "rcsb_id":"1ICL",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-04-02T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1ICL"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1038\/88604"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"SKYEYTVPSYTFRGPGCPTVKPAISLRCE"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"engineered",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"02-APR-01",
+        "Authors":"J.J.OTTESEN,B.IMPERIALI                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1038\/88604",
+        "Pubmed ID":11373623.0
+    },
+    {
+        "PDB":"1ICO",
+        "Data":{
+            "rcsb_id":"1ICO",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-04-02T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1ICO"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1038\/88604"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"SKYEYTIPSYTFRGPGCPTVKPAVTIRCE"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"engineered",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"02-APR-01",
+        "Authors":"J.J.OTTESEN,B.IMPERIALI                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1038\/88604",
+        "Pubmed ID":11373623.0
+    },
+    {
+        "PDB":"1J4M",
+        "Data":{
+            "rcsb_id":"1J4M",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-10-10T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1J4M"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.012583999"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"RGKWTYNGITYEGR"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"engineered",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"10-OCT-01",
+        "Authors":"M.T.PASTOR,M.LOPEZ DE LA PAZ,E.LACROIX,L.SERRANO,E.PEREZ-PAYA        ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.012583999",
+        "Pubmed ID":11782528.0
+    },
+    {
+        "PDB":"1JM0",
+        "Data":{
+            "rcsb_id":"1JM0",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2001-07-17T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1JM0"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":14,
+                "deposited_polymer_entity_instance_count":6,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.7
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja010506x"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":26.02
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XDYLRELLKLELQAIKQYREALEYVKLPVLAKILEDEEKHIEWLETILGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MN",
+                            "name":"MANGANESE (II) ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"DMS",
+                            "name":"DIMETHYL SULFOXIDE"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"17-JUL-01",
+        "Authors":"L.DI COSTANZO,S.GEREMIA                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja010506x",
+        "Pubmed ID":11749531.0
+    },
+    {
+        "PDB":"1JMB",
+        "Data":{
+            "rcsb_id":"1JMB",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2001-07-18T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1JMB"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":5,
+                "deposited_polymer_entity_instance_count":3,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.2
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja010506x"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":41.8
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XDYLRELLKLELQAIKQYREALEYVKLPVLAKILEDEEKHIEWLETILGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MN",
+                            "name":"MANGANESE (II) ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"DMS",
+                            "name":"DIMETHYL SULFOXIDE"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"18-JUL-01",
+        "Authors":"L.DI COSTANZO,S.GEREMIA                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja010506x",
+        "Pubmed ID":11749531.0
+    },
+    {
+        "PDB":"1JY4",
+        "Data":{
+            "rcsb_id":"1JY4",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-09-11T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1JY4"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja0174276"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"RGECKFTVPGRTALNTPAVQKWHFVLPGYKCEILA"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"11-SEP-01",
+        "Authors":"J.VENKATRAMAN,G.A.NAGANA GOWDA,P.BALARAM                             ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja0174276",
+        "Pubmed ID":11982362.0
+    },
+    {
+        "PDB":"1JY6",
+        "Data":{
+            "rcsb_id":"1JY6",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-09-11T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1JY6"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja0174276"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"RGECKFTVPGRTALNTPAVQKWHFVLPGYKCEILA"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"11-SEP-01",
+        "Authors":"J.VENKATRAMAN,G.A.NAGANA GOWDA,P.BALARAM                             ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja0174276",
+        "Pubmed ID":11982362.0
+    },
+    {
+        "PDB":"1JY9",
+        "Data":{
+            "rcsb_id":"1JY9",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-09-11T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1JY9"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.211536998"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"TTTTRYVEVPGKKILQTTTT"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"11-SEP-01",
+        "Authors":"H.E.STANGER,F.A.SYUD,J.F.ESPINOSA,I.GIRIAT,T.MUIR,S.H.GELLMAN        ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.211536998",
+        "Pubmed ID":11593011.0
+    },
+    {
+        "PDB":"1K09",
+        "Data":{
+            "rcsb_id":"1K09",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-09-18T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1K09"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":0,
+                "polymer_composition":"heteromeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1110\/ps.4440102"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XKAKIIRYFYNAKDGLAQTFVYGGCX"
+                    }
+                },
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XKARIIRYFYNAKDGKAQTFVYGGCX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"18-SEP-01",
+        "Authors":"N.CARULLA,C.WOODWARD,G.BARANY                                        ",
+        "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.4440102",
+        "Pubmed ID":12021452.0
+    },
+    {
+        "PDB":"1K43",
+        "Data":{
+            "rcsb_id":"1K43",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2001-10-05T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1K43"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.012583999"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"RGKWTYNGITYEGR"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"05-OCT-01",
+        "Authors":"M.T.PASTOR,M.LOPEZ DE LA PAZ,E.LACROIX,L.SERRANO,E.PEREZ-PAYA        ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.012583999",
+        "Pubmed ID":11782528.0
+    },
+    {
+        "PDB":"1KD8",
+        "Data":{
+            "rcsb_id":"1KD8",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.7
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2001-11-12T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1KD8"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":6,
+                "disulfide_bond_count":3,
+                "polymer_composition":"heteromeric protein",
+                "resolution_combined":[
+                    1.9
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.261563398"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":35.8
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XEVKQLEAEVEEIESEVWHLENEVARLEKENAECEA"
+                    }
+                },
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XKVKQLKAKVEELKSKLWHLKNKVARLKKKNAECKA"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"engineered",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"12-NOV-01",
+        "Authors":"A.E.KEATING,V.N.MALASHKEVICH,B.TIDOR,P.S.KIM                         ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.261563398",
+        "Pubmed ID":11752430.0
+    },
+    {
+        "PDB":"1KD9",
+        "Data":{
+            "rcsb_id":"1KD9",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.7
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2001-11-12T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1KD9"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":6,
+                "disulfide_bond_count":3,
+                "polymer_composition":"heteromeric protein",
+                "resolution_combined":[
+                    2.1
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.261563398"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":58.2
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XEVKQLEAEVEELESELWHLENEVARLEKENAECEA"
+                    }
+                },
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XKVKQLKAKVEELKSKLWHLKNKVARLKKKNAECKA"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"engineered",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"12-NOV-01",
+        "Authors":"A.E.KEATING,V.N.MALASHKEVICH,B.TIDOR,P.S.KIM                         ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.261563398",
+        "Pubmed ID":11752430.0
+    },
+    {
+        "PDB":"1KDD",
+        "Data":{
+            "rcsb_id":"1KDD",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.7
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2001-11-12T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1KDD"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":6,
+                "disulfide_bond_count":2,
+                "polymer_composition":"heteromeric protein",
+                "resolution_combined":[
+                    2.14
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.261563398"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":59.1
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XKVKQLKAKVEELKSKLWHLKNKVARLKKKNAECKA"
+                    }
+                },
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XEVKQLEAEVEELESEIWHLENEVARLEKENAECEA"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"engineered",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"12-NOV-01",
+        "Authors":"A.E.KEATING,V.N.MALASHKEVICH,B.TIDOR,P.S.KIM                         ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.261563398",
+        "Pubmed ID":11752430.0
+    },
+    {
+        "PDB":"1KYC",
+        "Data":{
+            "rcsb_id":"1KYC",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-02-04T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1KYC"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":3,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.45
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1016\/S0022-2836(02)00114-6"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":null
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"EELRRRIEELERRIRX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":3
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"SO4",
+                            "name":"SULFATE ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"SIN",
+                            "name":"SUCCINIC ACID"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"04-FEB-02",
+        "Authors":"P.BURKHARD,S.IVANINSKII,A.LUSTIG                                     ",
+        "DOI":"http:\/\/dx.doi.org\/10.1016\/S0022-2836(02)00114-6",
+        "Pubmed ID":12054832.0
+    },
+    {
+        "PDB":"1L2Y",
+        "Data":{
+            "rcsb_id":"1L2Y",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-02-25T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1L2Y"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1038\/nsb798"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"NLYIQWLKDGGPSSGRPPPS"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"evolved",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"25-FEB-02",
+        "Authors":"J.W.NEIDIGH,R.M.FESINMEYER,N.H.ANDERSEN                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1038\/nsb798",
+        "Pubmed ID":11979279.0
+    },
+    {
+        "PDB":"1L4X",
+        "Data":{
+            "rcsb_id":"1L4X",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":4.6
+                },
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":4.6
+                },
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":9
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-03-06T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1L4X"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":10,
+                "deposited_polymer_entity_instance_count":8,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1006\/jsbi.2002.4467"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":55
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"DELERAIRELAARIKX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":8
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"SIN",
+                            "name":"SUCCINIC ACID"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"CL",
+                            "name":"CHLORIDE ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MG",
+                            "name":"MAGNESIUM ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"06-MAR-02",
+        "Authors":"M.MEIER,A.LUSTIG,U.AEBI,P.BURKHARD                                   ",
+        "DOI":"http:\/\/dx.doi.org\/10.1006\/jsbi.2002.4467",
+        "Pubmed ID":12064934.0
+    },
+    {
+        "PDB":"1LE0",
+        "Data":{
+            "rcsb_id":"1LE0",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-04-09T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1LE0"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.091100898"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"SWTWEGNKWTWKX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"09-APR-02",
+        "Authors":"A.G.COCHRAN,N.J.SKELTON,M.A.STAROVASNIK                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.091100898",
+        "Pubmed ID":11331745.0
+    },
+    {
+        "PDB":"1LE1",
+        "Data":{
+            "rcsb_id":"1LE1",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-04-09T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1LE1"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.091100898"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"SWTWENGKWTWKX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"09-APR-02",
+        "Authors":"A.G.COCHRAN,N.J.SKELTON,M.A.STAROVASNIK                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.091100898",
+        "Pubmed ID":11331745.0
+    },
+    {
+        "PDB":"1LE3",
+        "Data":{
+            "rcsb_id":"1LE3",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-04-09T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1LE3"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.091100898"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"PROTEIN BINDING"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"GEWTWDDATKTWTWTEX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"PROTEIN BINDING             ",
+        "Date":"09-APR-02",
+        "Authors":"A.G.COCHRAN,N.J.SKELTON,M.A.STAROVASNIK                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.091100898",
+        "Pubmed ID":11331745.0
+    },
+    {
+        "PDB":"1LQ7",
+        "Data":{
+            "rcsb_id":"1LQ7",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-05-09T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1LQ7"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja0264201"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"GSRVKALEEKVKALEEKVKALGGGGRIEELKKKWEELKKKIEELGGGGEVKKVEEEVKKLEEEIKKL"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"09-MAY-02",
+        "Authors":"Q.-H.DAI,C.TOMMOS,E.J.FUENTES,M.BLOMBERG,P.L.DUTTON,A.J.WAND         ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja0264201",
+        "Pubmed ID":12224922.0
+    },
+    {
+        "PDB":"1LT1",
+        "Data":{
+            "rcsb_id":"1LT1",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-05-20T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1LT1"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":12,
+                "deposited_polymer_entity_instance_count":8,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.91
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1002\/anie.200390127"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":21.179
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XDYLRELLKLELQGIKQYREALEYVKLPVLAKILEDEEKHIEWLETILGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MN",
+                            "name":"MANGANESE (II) ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"20-MAY-02",
+        "Authors":"L.DI COSTANZO,S.GEREMIA                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1002\/anie.200390127",
+        "Pubmed ID":12569505.0
+    },
+    {
+        "PDB":"1M3W",
+        "Data":{
+            "rcsb_id":"1M3W",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-07-01T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1M3W"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":2,
+                "deposited_polymer_entity_instance_count":4,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.8
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1016\/S0022-2836(02)01441-9"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":39.5
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"CGGGEIWKLHEEFLKKFEELLKLHEERLKKMX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":4
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"HG",
+                            "name":"MERCURY (II) ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"01-JUL-02",
+        "Authors":"S.S.HUANG,B.R.GIBNEY,S.E.STAYROOK,P.L.DUTTON,M.LEWIS                 ",
+        "DOI":"http:\/\/dx.doi.org\/10.1016\/s0022-2836(02)01441-9",
+        "Pubmed ID":12589764.0
+    },
+    {
+        "PDB":"1MJ0",
+        "Data":{
+            "rcsb_id":"1MJ0",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":4.8
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-08-26T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1MJ0"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":3,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.031
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.0337680100"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":17.984
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"MRGSHHHHHHGSDLGKKLLEAARAGQDDEVRILMANGADVNATDNDGYTPLHLAASNGHLEIVEVLLKNGADVNASDLTGITPLHLAAATGHLEIVEVLLKHGADVNAYDNDGHTPLHLAAKYGHLEIVEVLLKHGADVNAQDKFGKTAFDISIDNGNEDLAEILQ"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"SO4",
+                            "name":"SULFATE ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"TRS",
+                            "name":"2-AMINO-2-HYDROXYMETHYL-PROPANE-1,3-DIOL"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"26-AUG-02",
+        "Authors":"A.KOHL,H.K.BINZ,P.FORRER,M.T.STUMPP,A.PLUECKTHUN,                     M.G.GRUETTER                                                        ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0337680100",
+        "Pubmed ID":12566564.0
+    },
+    {
+        "PDB":"1N09",
+        "Data":{
+            "rcsb_id":"1N09",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-10-11T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1N09"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja028075l"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XCTWEGNKLTCX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"11-OCT-02",
+        "Authors":"S.J.RUSSELL,T.BLANDL,N.J.SKELTON,A.G.COCHRAN                         ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja028075l",
+        "Pubmed ID":12517150.0
+    },
+    {
+        "PDB":"1N0A",
+        "Data":{
+            "rcsb_id":"1N0A",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-10-11T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1N0A"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1110\/ps.0228603"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XCTWEPDGKLTCX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"11-OCT-02",
+        "Authors":"T.BLANDL,A.G.COCHRAN,N.J.SKELTON                                     ",
+        "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.0228603",
+        "Pubmed ID":12538887.0
+    },
+    {
+        "PDB":"1N0C",
+        "Data":{
+            "rcsb_id":"1N0C",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-10-11T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1N0C"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja028075l"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XCHWEGNKLVCX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"11-OCT-02",
+        "Authors":"S.J.RUSSEL,T.BLANDL,N.J.SKELTON,A.G.COCHRAN                          ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja028075l",
+        "Pubmed ID":12517150.0
+    },
+    {
+        "PDB":"1N0D",
+        "Data":{
+            "rcsb_id":"1N0D",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2002-10-11T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1N0D"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":1,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja028075l"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XCVWEGNKLHCX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"11-OCT-02",
+        "Authors":"S.J.RUSSELL,T.BLANDL,N.J.SKELTON,A.G.COCHRAN                         ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja028075l",
+        "Pubmed ID":12517150.0
+    },
+    {
+        "PDB":"1N0Q",
+        "Data":{
+            "rcsb_id":"1N0Q",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-10-14T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1N0Q"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":1,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.26
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.252537899"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":12.618
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"STRUCTURAL PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"NGRTPLHLAARNGHLEVVKLLLEAGADVNAKDKNGRTPLHLAARNGHLEVVKLLLEAGADVNAKDKNGRTPLHLAARNGHLEVVKLLLEAGAY"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"TFA",
+                            "name":"trifluoroacetic acid"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"STRUCTURAL PROTEIN           ",
+        "Date":"14-OCT-02",
+        "Authors":"L.K.MOSAVI,D.L.MINOR JR.,Z.-Y.PENG                                   ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.252537899",
+        "Pubmed ID":12461176.0
+    },
+    {
+        "PDB":"1N0R",
+        "Data":{
+            "rcsb_id":"1N0R",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":6.4
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-10-14T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1N0R"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":2,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.5
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.252537899"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":9.619
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"STRUCTURAL PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"NGRTPLHLAARNGHLEVVKLLLEAGADVNAKDKNGRTPLHLAARNGHLEVVKLLLEAGADVNAKDKNGRTPLHLAARNGHLEVVKLLLEAGADVNAKDKNGRTPLHLAARNGHLEVVKLLLEAGAY"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"BR",
+                            "name":"BROMIDE ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"STRUCTURAL PROTEIN           ",
+        "Date":"14-OCT-02",
+        "Authors":"L.K.MOSAVI,D.L.MINOR JR.,Z.-Y.PENG                                   ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.252537899",
+        "Pubmed ID":12461176.0
+    },
+    {
+        "PDB":"1NA0",
+        "Data":{
+            "rcsb_id":"1NA0",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":8
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-11-26T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1NA0"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":12,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.6
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1016\/S0969-2126(03)00076-5"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":12.652
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"GAMDPGNSAEAWYNLGNAYYKQGDYDEAIEYYQKALELDPNNAEAWYNLGNAYYKQGDYDEAIEYYQKALELDPNNAEAWYNLGNAYYKQGDYDEAIEYYQKALELDPNNAEAKQNLGNAKQKQG"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"PB",
+                            "name":"LEAD (II) ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"ACT",
+                            "name":"ACETATE ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"CL",
+                            "name":"CHLORIDE ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"NA",
+                            "name":"SODIUM ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MG",
+                            "name":"MAGNESIUM ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"IPT",
+                            "name":"1-methylethyl 1-thio-beta-D-galactopyranoside"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"26-NOV-02",
+        "Authors":"E.MAIN,Y.XIONG,M.COCCO,L.D'ANDREA,L.REGAN                            ",
+        "DOI":"http:\/\/dx.doi.org\/10.1016\/s0969-2126(03)00076-5",
+        "Pubmed ID":12737816.0
+    },
+    {
+        "PDB":"1NA3",
+        "Data":{
+            "rcsb_id":"1NA3",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":8
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2002-11-26T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1NA3"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":5,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.55
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1016\/S0969-2126(03)00076-5"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":12.877
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"GAMDPGNSAEAWYNLGNAYYKQGDYDEAIEYYQKALELDPNNAEAWYNLGNAYYKQGDYDEAIEYYQKALELDPNNAEAKQNLGNAKQKQG"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"TRS",
+                            "name":"2-AMINO-2-HYDROXYMETHYL-PROPANE-1,3-DIOL"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"IPT",
+                            "name":"1-methylethyl 1-thio-beta-D-galactopyranoside"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MG",
+                            "name":"MAGNESIUM ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"26-NOV-02",
+        "Authors":"E.MAIN,Y.XIONG,M.COCCO,L.D'ANDREA,L.REGAN                            ",
+        "DOI":"http:\/\/dx.doi.org\/10.1016\/s0969-2126(03)00076-5",
+        "Pubmed ID":12737816.0
+    },
+    {
+        "PDB":"1NVO",
+        "Data":{
+            "rcsb_id":"1NVO",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2003-02-04T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1NVO"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.0730771100"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"UNKNOWN FUNCTION"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XDYLRELLKLELQLIKQYREALEYVKLPVLAKILEDEEKHIEWLETILGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"UNKNOWN FUNCTION            ",
+        "Date":"04-FEB-03",
+        "Authors":"O.MAGLIO,F.NASTRI,V.PAVONE,A.LOMBARDI,W.F.DEGRADO                    ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0730771100",
+        "Pubmed ID":12655072.0
+    },
+    {
+        "PDB":"1OVR",
+        "Data":{
+            "rcsb_id":"1OVR",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2003-03-27T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1OVR"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":5,
+                "deposited_polymer_entity_instance_count":4,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.99
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja054199x"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":32.402
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XDYLRELLKLELQLIKQYREALEYVKLPVLAKILEDEEKHIEWLETILGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"MN",
+                            "name":"MANGANESE (II) ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"27-MAR-03",
+        "Authors":"L.DI COSTANZO,S.GEREMIA                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja054199x",
+        "Pubmed ID":16332076.0
+    },
+    {
+        "PDB":"1OVU",
+        "Data":{
+            "rcsb_id":"1OVU",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2003-03-27T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1OVU"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":7,
+                "deposited_polymer_entity_instance_count":4,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    3.1
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja054199x"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":58.981
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XDYLRELLKLELQAIKQYREALEYVKLPVLAKILEDEEKHIEWLETILGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"CO",
+                            "name":"COBALT (II) ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"27-MAR-03",
+        "Authors":"L.DI COSTANZO,S.GEREMIA                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja054199x",
+        "Pubmed ID":16332076.0
+    },
+    {
+        "PDB":"1OVV",
+        "Data":{
+            "rcsb_id":"1OVV",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2003-03-27T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1OVV"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":7,
+                "deposited_polymer_entity_instance_count":6,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.9
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja054199x"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":61.7
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XDYLRELLKLELQAIKQYREALEYVKLPVLAKILEDEEKHIEWLETILGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":6
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"CO",
+                            "name":"COBALT (II) ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"27-MAR-03",
+        "Authors":"L.DI COSTANZO,S.GEREMIA                                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja054199x",
+        "Pubmed ID":16332076.0
+    },
+    {
+        "PDB":"1P68",
+        "Data":{
+            "rcsb_id":"1P68",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2003-04-29T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1P68"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.1835644100"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"MYGKLNDLLEDLQEVLKNLHKNWHGGKDNLHDVDNHLQNVIEDIHDFMQGGGSGGKLQEMMKEFQQVLDELNNHLQGGKHTVHHIEQNIKEIFHHLEELVHR"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"29-APR-03",
+        "Authors":"Y.WEI,S.KIM,D.FELA,J.BAUM,M.H.HECHT                                  ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.1835644100",
+        "Pubmed ID":14593201.0
+    },
+    {
+        "PDB":"1PBZ",
+        "Data":{
+            "rcsb_id":"1PBZ",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"2003-05-15T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1PBZ"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":1,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":2,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.2231273100"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XCGAEAAKAHAKAAEAGCX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"PC3",
+                            "name":"COPROPORPHYRIN I CONTAINING CO(III)"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"small, non-systematic, and other",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"15-MAY-03",
+        "Authors":"J.WANG,M.M.ROSENBLATT,K.S.SUSLICK                                    ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.2231273100",
+        "Pubmed ID":14595023.0
+    },
+    {
+        "PDB":"1PSV",
+        "Data":{
+            "rcsb_id":"1PSV",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"1997-10-29T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1PSV"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1006\/jmbi.1997.1341"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DESIGNED PEPTIDE"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"KPYTARIKGRTFSNEKELRDFLETFTGR"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"engineered",
+        "Keywords":"DESIGNED PEPTIDE            ",
+        "Date":"29-OCT-97",
+        "Authors":"B.I.DAHIYAT,C.A.SARISKY,S.L.MAYO                                     ",
+        "DOI":"http:\/\/dx.doi.org\/10.1006\/jmbi.1997.1341",
+        "Pubmed ID":9367772.0
+    },
+    {
+        "PDB":"1PYZ",
+        "Data":{
+            "rcsb_id":"1PYZ",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"EVAPORATION",
+                    "pH":null
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2003-07-09T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1PYZ"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":2,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.25
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1007\/s00775-004-0600-x"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":null
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"METAL BINDING PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XESQLHSNKRX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":4
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"CL",
+                            "name":"CHLORIDE ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"DEU",
+                            "name":"CO(III)-(DEUTEROPORPHYRIN IX)"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"engineered",
+        "Keywords":"METAL BINDING PROTEIN          ",
+        "Date":"09-JUL-03",
+        "Authors":"L.DI COSTANZO,S.GEREMIA,L.RANDACCIO,F.NASTRI,O.MAGLIO,A.LOMBARDI,     V.PAVONE                                                            ",
+        "DOI":"http:\/\/dx.doi.org\/10.1007\/s00775-004-0600-x",
+        "Pubmed ID":15551102.0
+    },
+    {
+        "PDB":"1QP6",
+        "Data":{
+            "rcsb_id":"1QP6",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"SOLUTION NMR"
+                }
+            ],
+            "exptl_crystal_grow":null,
+            "rcsb_accession_info":{
+                "deposit_date":"1999-06-01T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1QP6"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":2,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":null
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1021\/ja9733649"
+            },
+            "refine":null,
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"GEVEELEKKFKELWKGPRRGEIEELHKKFHELIKG"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":2
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"01-JUN-99",
+        "Authors":"R.B.HILL,W.F.DEGRADO                                                 ",
+        "DOI":"http:\/\/dx.doi.org\/10.1021\/ja9733649",
+        "Pubmed ID":null
+    },
+    {
+        "PDB":"1QYS",
+        "Data":{
+            "rcsb_id":"1QYS",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP, STREAK SEEDING",
+                    "pH":6.6
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2003-09-11T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1QYS"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.5
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1126\/science.1089427"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":65.5
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"MGDIQVQVNIDDNGKNFDYTYTVTTESELQKVLNELMDYIKKQGAKRVRISITARTKKEAEKFAAILIKVFAELGYNDINVTFDGDTVTVEGQLEGGSLEHHHHHH"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":1
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"11-SEP-03",
+        "Authors":"B.KUHLMAN,G.DANTAS,G.C.IRETON,G.VARANI,B.L.STODDARD,D.BAKER          ",
+        "DOI":"http:\/\/dx.doi.org\/10.1126\/science.1089427",
+        "Pubmed ID":14631033.0
+    },
+    {
+        "PDB":"1RH4",
+        "Data":{
+            "rcsb_id":"1RH4",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":null,
+                    "pH":8.1
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"1998-10-07T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1RH4"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":3,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.9
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1126\/science.282.5393.1462"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":null
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"COILED COIL"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XAALAQIKKEIAYLLAKIKAEILAALKKIKQEIAX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":4
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"IPA",
+                            "name":"ISOPROPYL ALCOHOL"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"COILED COIL               ",
+        "Date":"07-OCT-98",
+        "Authors":"P.B.HARBURY,J.J.PLECS,B.TIDOR,T.ALBER,P.S.KIM                        ",
+        "DOI":"http:\/\/dx.doi.org\/10.1126\/science.282.5393.1462",
+        "Pubmed ID":9822371.0
+    },
+    {
+        "PDB":"1S9Z",
+        "Data":{
+            "rcsb_id":"1S9Z",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":6.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2004-02-06T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1S9Z"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":2,
+                "deposited_polymer_entity_instance_count":1,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    2.01
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.0306786101"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":49.2
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XSIRELEARIRELELRIG"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":3
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"NA",
+                            "name":"SODIUM ION"
+                        }
+                    }
+                },
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"ZN",
+                            "name":"ZINC ION"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"original de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"06-FEB-04",
+        "Authors":"R.A.KAMMERER,D.KOSTREWA,J.ZURDO,A.DETKEN,C.GARCIA-ECHEVERRIA,         J.D.GREEN,S.A.MULLER,B.H.MEIER,F.K.WINKLER,C.M.DOBSON,M.O.STEINMETZ ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0306786101",
+        "Pubmed ID":15070736.0
+    },
+    {
+        "PDB":"1SN9",
+        "Data":{
+            "rcsb_id":"1SN9",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":8.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2004-03-10T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1SN9"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":0,
+                "deposited_polymer_entity_instance_count":4,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.2
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.0401245101"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":22.3
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XYRIPSYDFADELAKLLRQAAGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":4
+                    }
+                }
+            ],
+            "nonpolymer_entities":null
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"10-MAR-04",
+        "Authors":"M.H.ALI,E.PEISACH,K.N.ALLEN,B.IMPERIALI                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0401245101",
+        "Pubmed ID":15302930.0
+    },
+    {
+        "PDB":"1SNA",
+        "Data":{
+            "rcsb_id":"1SNA",
+            "em_3d_reconstruction":null,
+            "exptl":[
+                {
+                    "method":"X-RAY DIFFRACTION"
+                }
+            ],
+            "exptl_crystal_grow":[
+                {
+                    "method":"VAPOR DIFFUSION, HANGING DROP",
+                    "pH":7.5
+                }
+            ],
+            "rcsb_accession_info":{
+                "deposit_date":"2004-03-10T00:00:00Z"
+            },
+            "rcsb_entry_container_identifiers":{
+                "entry_id":"1SNA"
+            },
+            "rcsb_entry_info":{
+                "deposited_nonpolymer_entity_instance_count":1,
+                "deposited_polymer_entity_instance_count":4,
+                "disulfide_bond_count":0,
+                "polymer_composition":"homomeric protein",
+                "resolution_combined":[
+                    1.5
+                ]
+            },
+            "rcsb_primary_citation":{
+                "pdbx_database_id_DOI":"10.1073\/pnas.0401245101"
+            },
+            "refine":[
+                {
+                    "b_iso_mean":15.2
+                }
+            ],
+            "struct_keywords":{
+                "pdbx_keywords":"DE NOVO PROTEIN"
+            },
+            "polymer_entities":[
+                {
+                    "entity_poly":{
+                        "pdbx_seq_one_letter_code_can":"XYRIPSYDFADELMKLLRQAAGX"
+                    }
+                }
+            ],
+            "assemblies":[
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":4
+                    }
+                },
+                {
+                    "rcsb_assembly_info":{
+                        "polymer_entity_instance_count":4
+                    }
+                }
+            ],
+            "nonpolymer_entities":[
+                {
+                    "nonpolymer_comp":{
+                        "chem_comp":{
+                            "id":"IPA",
+                            "name":"ISOPROPYL ALCOHOL"
+                        }
+                    }
+                }
+            ]
+        },
+        "Classification":"relative of another de novo design",
+        "Keywords":"DE NOVO PROTEIN             ",
+        "Date":"10-MAR-04",
+        "Authors":"M.H.ALI,E.PEISACH,K.N.ALLEN,B.IMPERIALI                              ",
+        "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0401245101",
+        "Pubmed ID":15302930.0
+    }
+]
