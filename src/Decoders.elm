@@ -5,7 +5,6 @@ module Decoders exposing (..)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
-import Html.Attributes exposing (datetime)
 
 -- TYPES
 
