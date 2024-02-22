@@ -25,7 +25,7 @@ import Time exposing (Month(..))
 
 
 type alias Model =
-    { proteinStructures : List ProteinStructure -- competition to Data.Design
+    { proteinStructures : List ProteinStructure
     , proteinDesigns : List ProteinDesign
     , focusedProteinDesign : Maybe ProteinDesign
     , randomNumbers : List Int
@@ -45,7 +45,7 @@ type alias ProteinDesign =
     , classification : Classification
     , authors : String
     , pubmedID : Int
-    , abstract : Maybe String
+    , abstract : String
     }
 
 type Classification
@@ -153,8 +153,7 @@ proteinStructureToDesign proteinStructure =
             proteinStructure.keywords
 
         depositionDate =
-            stringToIsoDate proteinStructure.date
-                |> Date.fromIsoString
+            Date.fromIsoString proteinStructure.date
                 |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)
 
         picturePath =
@@ -177,11 +176,13 @@ proteinStructureToDesign proteinStructure =
 
         authors =
             proteinStructure.authors
+                |> List.map (\author -> String.join " " author.forename ++ " " ++ String.join " " author.surname)
+                |> String.join ", "
 
         pubmedID =
             proteinStructure.pubmed_id
 
-        abstract = Nothing
+        abstract = proteinStructure.abstract
 
     in
     ProteinDesign pdbCode structuralKeywords depositionDate picturePath doiLink sequences classification authors pubmedID abstract |> Just
@@ -564,9 +565,8 @@ designDetailsView proteinDesign =
                     ]
                 , paragraph
                     bodyFont
-                    [ "Structural Keywords: "
-                        ++ proteinDesign.structuralKeywords
-                        |> text
+                    [ text "Structural Keywords: "
+                    , el [Font.italic] (text proteinDesign.structuralKeywords)
                     ]
                 , paragraph
                     bodyFont
@@ -617,13 +617,11 @@ designDetailsView proteinDesign =
                 [ text "Description"
                 ]
             , paragraph
-                bodyFont
-                [ case proteinDesign.abstract of
-                    Just abstract ->
-                        text abstract
-
-                    Nothing ->
-                        text "Abstract not available"
+                (bodyFont
+                    ++ [ Font.justify ]
+                )
+                [ proteinDesign.abstract
+                    |> text 
                 ]
             ]
 {-
@@ -707,82 +705,6 @@ classificationToColour classification =
 
         Unknown ->
             "#333333"
-
-stringToIsoDate : String -> String
-stringToIsoDate date =
-    case String.split "-" date of
-        [ day, month, year ] ->
-            let
-                fixedYear =
-                    String.toInt year
-                        |> Maybe.withDefault 60
-                        |> (\y ->
-                                if y < 50 then
-                                    "20" ++ (String.fromInt y |> yearStringTo2Char)
-
-                                else
-                                    "19" ++ (String.fromInt y |> yearStringTo2Char)
-                           )
-            in
-            fixedYear ++ "-" ++ monthStringToNumberString month ++ "-" ++ day
-
-        _ ->
-            "1950-01-01"
-
-yearStringTo2Char : String -> String
-yearStringTo2Char year =
-    case String.length year of
-        2 ->
-            year
-
-        1 ->
-            "0" ++ year
-
-        _ ->
-            "00"
-
-monthStringToNumberString : String -> String
-monthStringToNumberString month =
-    case month of
-        "JAN" ->
-            "01"
-
-        "FEB" ->
-            "02"
-
-        "MAR" ->
-            "04"
-
-        "APR" ->
-            "04"
-
-        "MAY" ->
-            "05"
-
-        "JUN" ->
-            "06"
-
-        "JUL" ->
-            "07"
-
-        "AUG" ->
-            "08"
-
-        "SEP" ->
-            "09"
-
-        "OCT" ->
-            "10"
-
-        "NOV" ->
-            "11"
-
-        "DEC" ->
-            "12"
-
-        _ ->
-            "01"
-
 
 ---- PROGRAM ----
 

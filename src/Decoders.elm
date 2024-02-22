@@ -60,6 +60,10 @@ type alias ExptlCrystalGrow =
 type alias Exptl =
     { method : String }
 
+type alias Author =
+    { forename : List String 
+    , surname : List String }
+
 type alias Data =
     { rcsb_id : String
     , em3DReconstruction : Maybe String
@@ -82,9 +86,10 @@ type alias ProteinStructure =
     , classification : String
     , keywords : String
     , date : String
-    , authors : String
+    , authors : List Author
     , doi : String
     , pubmed_id : Int
+    , abstract : String
     }
 
 -- DECODERS
@@ -173,6 +178,12 @@ exptlDecoder =
     Decode.succeed Exptl
         |> required "method" string
 
+authorDecoder : Decoder Author
+authorDecoder =
+    Decode.succeed Author
+        |> required "forename" (list string)
+        |> required "surname" (list string)
+
 dataDecoder : Decoder Data
 dataDecoder =
     Decode.succeed Data
@@ -198,6 +209,7 @@ proteinStructureDecoder =
         |> required "Classification" string
         |> required "Keywords" string
         |> required "Date" string
-        |> required "Authors" string
+        |> required "Authors" (list authorDecoder)
         |> required "DOI" string
         |> required "Pubmed ID" int
+        |> required "Abstract" string

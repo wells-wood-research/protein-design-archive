@@ -11,7 +11,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"1990-07-02T00:00:00Z"
+                "deposit_date":"1990-07-02"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1AL1"
@@ -68,40 +68,50 @@
         },
         "Classification":"original de novo design",
         "Keywords":"synthetic protein model         ",
-        "Date":"1990-07-02T00:00:00.000",
+        "Date":"1990-07-02",
         "Authors":[
             {
                 "forename":[
                     "C",
                     "P"
                 ],
-                "surname":"Hill"
+                "surname":[
+                    "Hill"
+                ]
             },
             {
                 "forename":[
                     "D",
                     "H"
                 ],
-                "surname":"Anderson"
+                "surname":[
+                    "Anderson"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Wesson"
+                "surname":[
+                    "Wesson"
+                ]
             },
             {
                 "forename":[
                     "W",
                     "F"
                 ],
-                "surname":"Degrado"
+                "surname":[
+                    "Degrado"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Eisenberg"
+                "surname":[
+                    "Eisenberg"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1126\/science.2382133",
@@ -125,7 +135,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"1998-04-28T00:00:00Z"
+                "deposit_date":"1998-04-28"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1BB1"
@@ -187,19 +197,23 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein design         ",
-        "Date":"1998-04-28T00:00:00.000",
+        "Date":"1998-04-28",
         "Authors":[
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Nautiyal"
+                "surname":[
+                    "Nautiyal"
+                ]
             },
             {
                 "forename":[
                     "T"
                 ],
-                "surname":"Alber"
+                "surname":[
+                    "Alber"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.8.1.84",
@@ -223,7 +237,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"1998-10-20T00:00:00Z"
+                "deposit_date":"1998-10-20"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1BYZ"
@@ -299,39 +313,49 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"1998-10-20T00:00:00.000",
+        "Date":"1998-10-20",
         "Authors":[
             {
                 "forename":[
                     "G",
                     "G"
                 ],
-                "surname":"Prive"
+                "surname":[
+                    "Prive"
+                ]
             },
             {
                 "forename":[
                     "D",
                     "H"
                 ],
-                "surname":"Anderson"
+                "surname":[
+                    "Anderson"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Wesson"
+                "surname":[
+                    "Wesson"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Cascio"
+                "surname":[
+                    "Cascio"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Eisenberg"
+                "surname":[
+                    "Eisenberg"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.8.7.1400",
@@ -350,7 +374,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"1993-01-22T00:00:00Z"
+                "deposit_date":"1993-01-22"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1COS"
@@ -393,44 +417,56 @@
         },
         "Classification":"original de novo design",
         "Keywords":"alpha-helical bundle          ",
-        "Date":"1993-01-22T00:00:00.000",
+        "Date":"1993-01-22",
         "Authors":[
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Lovejoy"
+                "surname":[
+                    "Lovejoy"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Choe"
+                "surname":[
+                    "Choe"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Cascio"
+                "surname":[
+                    "Cascio"
+                ]
             },
             {
                 "forename":[
                     "D",
                     "K"
                 ],
-                "surname":"Mcrorie"
+                "surname":[
+                    "Mcrorie"
+                ]
             },
             {
                 "forename":[
                     "W"
                 ],
-                "surname":"Degrado"
+                "surname":[
+                    "Degrado"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Eisenberg"
+                "surname":[
+                    "Eisenberg"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1126\/science.8446897",
@@ -449,7 +485,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"1999-12-03T00:00:00Z"
+                "deposit_date":"1999-12-03"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1DJF"
@@ -486,38 +522,48 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"1999-12-03T00:00:00.000",
+        "Date":"1999-12-03",
         "Authors":[
             {
                 "forename":[
                     "R"
                 ],
-                "surname":"Montserret"
+                "surname":[
+                    "Montserret"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "J"
                 ],
-                "surname":"Mcleish"
+                "surname":[
+                    "Mcleish"
+                ]
             },
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Bockmann"
+                "surname":[
+                    "Bockmann"
+                ]
             },
             {
                 "forename":[
                     "C"
                 ],
-                "surname":"Geourjon"
+                "surname":[
+                    "Geourjon"
+                ]
             },
             {
                 "forename":[
                     "F"
                 ],
-                "surname":"Penin"
+                "surname":[
+                    "Penin"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/bi000208x",
@@ -541,7 +587,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2000-01-25T00:00:00Z"
+                "deposit_date":"2000-01-25"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1EC5"
@@ -598,13 +644,15 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2000-01-25T00:00:00.000",
+        "Date":"2000-01-25",
         "Authors":[
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Geremia"
+                "surname":[
+                    "Geremia"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.97.12.6298",
@@ -623,7 +671,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2000-08-16T00:00:00Z"
+                "deposit_date":"2000-08-16"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1FME"
@@ -660,21 +708,25 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2000-08-16T00:00:00.000",
+        "Date":"2000-08-16",
         "Authors":[
             {
                 "forename":[
                     "C",
                     "A"
                 ],
-                "surname":"Sarisky"
+                "surname":[
+                    "Sarisky"
+                ]
             },
             {
                 "forename":[
                     "S",
                     "L"
                 ],
-                "surname":"Mayo"
+                "surname":[
+                    "Mayo"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1006\/jmbi.2000.4345",
@@ -693,7 +745,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2000-08-17T00:00:00Z"
+                "deposit_date":"2000-08-17"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1FMH"
@@ -735,27 +787,33 @@
         },
         "Classification":"original de novo design",
         "Keywords":"transcription              ",
-        "Date":"2000-08-17T00:00:00.000",
+        "Date":"2000-08-17",
         "Authors":[
             {
                 "forename":[
                     "D",
                     "N"
                 ],
-                "surname":"Marti"
+                "surname":[
+                    "Marti"
+                ]
             },
             {
                 "forename":[
                     "I"
                 ],
-                "surname":"Jelesarov"
+                "surname":[
+                    "Jelesarov"
+                ]
             },
             {
                 "forename":[
                     "H",
                     "R"
                 ],
-                "surname":"Bosshard"
+                "surname":[
+                    "Bosshard"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/bi001242e",
@@ -774,7 +832,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"1997-06-09T00:00:00Z"
+                "deposit_date":"1997-06-09"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1FSD"
@@ -811,21 +869,25 @@
         },
         "Classification":"original de novo design",
         "Keywords":"novel sequence             ",
-        "Date":"1997-06-09T00:00:00.000",
+        "Date":"1997-06-09",
         "Authors":[
             {
                 "forename":[
                     "B",
                     "I"
                 ],
-                "surname":"Dahiyat"
+                "surname":[
+                    "Dahiyat"
+                ]
             },
             {
                 "forename":[
                     "S",
                     "L"
                 ],
-                "surname":"Mayo"
+                "surname":[
+                    "Mayo"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1126\/science.278.5335.82",
@@ -844,7 +906,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"1997-10-26T00:00:00Z"
+                "deposit_date":"1997-10-26"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1FSV"
@@ -881,21 +943,25 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"beta beta alpha motif          ",
-        "Date":"1997-10-26T00:00:00.000",
+        "Date":"1997-10-26",
         "Authors":[
             {
                 "forename":[
                     "B",
                     "I"
                 ],
-                "surname":"Dahiyat"
+                "surname":[
+                    "Dahiyat"
+                ]
             },
             {
                 "forename":[
                     "S",
                     "L"
                 ],
-                "surname":"Mayo"
+                "surname":[
+                    "Mayo"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1126\/science.278.5335.82",
@@ -919,7 +985,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2000-11-07T00:00:00Z"
+                "deposit_date":"2000-11-07"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1G6U"
@@ -984,46 +1050,58 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2000-11-07T00:00:00.000",
+        "Date":"2000-11-07",
         "Authors":[
             {
                 "forename":[
                     "N",
                     "L"
                 ],
-                "surname":"Ogihara"
+                "surname":[
+                    "Ogihara"
+                ]
             },
             {
                 "forename":[
                     "G"
                 ],
-                "surname":"Ghirlanda"
+                "surname":[
+                    "Ghirlanda"
+                ]
             },
             {
                 "forename":[
                     "J",
                     "W"
                 ],
-                "surname":"Bryson"
+                "surname":[
+                    "Bryson"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Gingery"
+                "surname":[
+                    "Gingery"
+                ]
             },
             {
                 "forename":[
                     "W",
                     "F"
                 ],
-                "surname":"Degrado"
+                "surname":[
+                    "Degrado"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Eisenberg"
+                "surname":[
+                    "Eisenberg"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.98.4.1404",
@@ -1042,7 +1120,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"1996-09-20T00:00:00Z"
+                "deposit_date":"1996-09-20"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1HCW"
@@ -1079,26 +1157,32 @@
         },
         "Classification":"original de novo design",
         "Keywords":"growth response protein         ",
-        "Date":"1996-09-20T00:00:00.000",
+        "Date":"1996-09-20",
         "Authors":[
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Imperiali"
+                "surname":[
+                    "Imperiali"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Struthers"
+                "surname":[
+                    "Struthers"
+                ]
             },
             {
                 "forename":[
                     "R",
                     "P"
                 ],
-                "surname":"Cheng"
+                "surname":[
+                    "Cheng"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1126\/science.271.5247.342",
@@ -1122,7 +1206,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2000-12-18T00:00:00Z"
+                "deposit_date":"2000-12-18"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1HQJ"
@@ -1210,25 +1294,31 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2000-12-18T00:00:00.000",
+        "Date":"2000-12-18",
         "Authors":[
             {
                 "forename":[
                     "P"
                 ],
-                "surname":"Burkhard"
+                "surname":[
+                    "Burkhard"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Meier"
+                "surname":[
+                    "Meier"
+                ]
             },
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Lustig"
+                "surname":[
+                    "Lustig"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.9.12.2294",
@@ -1247,7 +1337,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-03-30T00:00:00Z"
+                "deposit_date":"2001-03-30"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1IC9"
@@ -1284,20 +1374,24 @@
         },
         "Classification":"engineered",
         "Keywords":"de novo protein             ",
-        "Date":"2001-03-30T00:00:00.000",
+        "Date":"2001-03-30",
         "Authors":[
             {
                 "forename":[
                     "J",
                     "J"
                 ],
-                "surname":"Ottesen"
+                "surname":[
+                    "Ottesen"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Imperiali"
+                "surname":[
+                    "Imperiali"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1038\/88604",
@@ -1316,7 +1410,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-04-02T00:00:00Z"
+                "deposit_date":"2001-04-02"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1ICL"
@@ -1353,20 +1447,24 @@
         },
         "Classification":"engineered",
         "Keywords":"de novo protein             ",
-        "Date":"2001-04-02T00:00:00.000",
+        "Date":"2001-04-02",
         "Authors":[
             {
                 "forename":[
                     "J",
                     "J"
                 ],
-                "surname":"Ottesen"
+                "surname":[
+                    "Ottesen"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Imperiali"
+                "surname":[
+                    "Imperiali"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1038\/88604",
@@ -1385,7 +1483,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-04-02T00:00:00Z"
+                "deposit_date":"2001-04-02"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1ICO"
@@ -1422,20 +1520,24 @@
         },
         "Classification":"engineered",
         "Keywords":"de novo protein             ",
-        "Date":"2001-04-02T00:00:00.000",
+        "Date":"2001-04-02",
         "Authors":[
             {
                 "forename":[
                     "J",
                     "J"
                 ],
-                "surname":"Ottesen"
+                "surname":[
+                    "Ottesen"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Imperiali"
+                "surname":[
+                    "Imperiali"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1038\/88604",
@@ -1454,7 +1556,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-10-10T00:00:00Z"
+                "deposit_date":"2001-10-10"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1J4M"
@@ -1491,38 +1593,51 @@
         },
         "Classification":"engineered",
         "Keywords":"de novo protein             ",
-        "Date":"2001-10-10T00:00:00.000",
+        "Date":"2001-10-10",
         "Authors":[
             {
                 "forename":[
                     "M",
                     "T"
                 ],
-                "surname":"Pastor"
+                "surname":[
+                    "Pastor"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Lopez de la paz"
+                "surname":[
+                    "Lopez",
+                    "De",
+                    "La",
+                    "Paz"
+                ]
             },
             {
                 "forename":[
                     "E"
                 ],
-                "surname":"Lacroix"
+                "surname":[
+                    "Lacroix"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Serrano"
+                "surname":[
+                    "Serrano"
+                ]
             },
             {
                 "forename":[
                     "E"
                 ],
-                "surname":"Perez-paya"
+                "surname":[
+                    "Perez-paya"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.012583999",
@@ -1546,7 +1661,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2001-07-17T00:00:00Z"
+                "deposit_date":"2001-07-17"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1JM0"
@@ -1616,19 +1731,24 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2001-07-17T00:00:00.000",
+        "Date":"2001-07-17",
         "Authors":[
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Di costanzo"
+                "surname":[
+                    "Di",
+                    "Costanzo"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Geremia"
+                "surname":[
+                    "Geremia"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja010506x",
@@ -1652,7 +1772,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2001-07-18T00:00:00Z"
+                "deposit_date":"2001-07-18"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1JMB"
@@ -1717,19 +1837,24 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2001-07-18T00:00:00.000",
+        "Date":"2001-07-18",
         "Authors":[
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Di costanzo"
+                "surname":[
+                    "Di",
+                    "Costanzo"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Geremia"
+                "surname":[
+                    "Geremia"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja010506x",
@@ -1748,7 +1873,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-09-11T00:00:00Z"
+                "deposit_date":"2001-09-11"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1JY4"
@@ -1785,26 +1910,33 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2001-09-11T00:00:00.000",
+        "Date":"2001-09-11",
         "Authors":[
             {
                 "forename":[
                     "J"
                 ],
-                "surname":"Venkatraman"
+                "surname":[
+                    "Venkatraman"
+                ]
             },
             {
                 "forename":[
                     "G",
                     "A"
                 ],
-                "surname":"Nagana gowda"
+                "surname":[
+                    "Nagana",
+                    "Gowda"
+                ]
             },
             {
                 "forename":[
                     "P"
                 ],
-                "surname":"Balaram"
+                "surname":[
+                    "Balaram"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja0174276",
@@ -1823,7 +1955,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-09-11T00:00:00Z"
+                "deposit_date":"2001-09-11"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1JY6"
@@ -1860,26 +1992,33 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2001-09-11T00:00:00.000",
+        "Date":"2001-09-11",
         "Authors":[
             {
                 "forename":[
                     "J"
                 ],
-                "surname":"Venkatraman"
+                "surname":[
+                    "Venkatraman"
+                ]
             },
             {
                 "forename":[
                     "G",
                     "A"
                 ],
-                "surname":"Nagana gowda"
+                "surname":[
+                    "Nagana",
+                    "Gowda"
+                ]
             },
             {
                 "forename":[
                     "P"
                 ],
-                "surname":"Balaram"
+                "surname":[
+                    "Balaram"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja0174276",
@@ -1898,7 +2037,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-09-11T00:00:00Z"
+                "deposit_date":"2001-09-11"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1JY9"
@@ -1935,47 +2074,59 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2001-09-11T00:00:00.000",
+        "Date":"2001-09-11",
         "Authors":[
             {
                 "forename":[
                     "H",
                     "E"
                 ],
-                "surname":"Stanger"
+                "surname":[
+                    "Stanger"
+                ]
             },
             {
                 "forename":[
                     "F",
                     "A"
                 ],
-                "surname":"Syud"
+                "surname":[
+                    "Syud"
+                ]
             },
             {
                 "forename":[
                     "J",
                     "F"
                 ],
-                "surname":"Espinosa"
+                "surname":[
+                    "Espinosa"
+                ]
             },
             {
                 "forename":[
                     "I"
                 ],
-                "surname":"Giriat"
+                "surname":[
+                    "Giriat"
+                ]
             },
             {
                 "forename":[
                     "T"
                 ],
-                "surname":"Muir"
+                "surname":[
+                    "Muir"
+                ]
             },
             {
                 "forename":[
                     "S",
                     "H"
                 ],
-                "surname":"Gellman"
+                "surname":[
+                    "Gellman"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.211536998",
@@ -1994,7 +2145,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-09-18T00:00:00Z"
+                "deposit_date":"2001-09-18"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1K09"
@@ -2036,25 +2187,31 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2001-09-18T00:00:00.000",
+        "Date":"2001-09-18",
         "Authors":[
             {
                 "forename":[
                     "N"
                 ],
-                "surname":"Carulla"
+                "surname":[
+                    "Carulla"
+                ]
             },
             {
                 "forename":[
                     "C"
                 ],
-                "surname":"Woodward"
+                "surname":[
+                    "Woodward"
+                ]
             },
             {
                 "forename":[
                     "G"
                 ],
-                "surname":"Barany"
+                "surname":[
+                    "Barany"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.4440102",
@@ -2073,7 +2230,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2001-10-05T00:00:00Z"
+                "deposit_date":"2001-10-05"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1K43"
@@ -2110,38 +2267,51 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2001-10-05T00:00:00.000",
+        "Date":"2001-10-05",
         "Authors":[
             {
                 "forename":[
                     "M",
                     "T"
                 ],
-                "surname":"Pastor"
+                "surname":[
+                    "Pastor"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Lopez de la paz"
+                "surname":[
+                    "Lopez",
+                    "De",
+                    "La",
+                    "Paz"
+                ]
             },
             {
                 "forename":[
                     "E"
                 ],
-                "surname":"Lacroix"
+                "surname":[
+                    "Lacroix"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Serrano"
+                "surname":[
+                    "Serrano"
+                ]
             },
             {
                 "forename":[
                     "E"
                 ],
-                "surname":"Perez-paya"
+                "surname":[
+                    "Perez-paya"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.012583999",
@@ -2165,7 +2335,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2001-11-12T00:00:00Z"
+                "deposit_date":"2001-11-12"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1KD8"
@@ -2223,34 +2393,42 @@
         },
         "Classification":"engineered",
         "Keywords":"de novo protein             ",
-        "Date":"2001-11-12T00:00:00.000",
+        "Date":"2001-11-12",
         "Authors":[
             {
                 "forename":[
                     "A",
                     "E"
                 ],
-                "surname":"Keating"
+                "surname":[
+                    "Keating"
+                ]
             },
             {
                 "forename":[
                     "V",
                     "N"
                 ],
-                "surname":"Malashkevich"
+                "surname":[
+                    "Malashkevich"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Tidor"
+                "surname":[
+                    "Tidor"
+                ]
             },
             {
                 "forename":[
                     "P",
                     "S"
                 ],
-                "surname":"Kim"
+                "surname":[
+                    "Kim"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.261563398",
@@ -2274,7 +2452,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2001-11-12T00:00:00Z"
+                "deposit_date":"2001-11-12"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1KD9"
@@ -2332,34 +2510,42 @@
         },
         "Classification":"engineered",
         "Keywords":"de novo protein             ",
-        "Date":"2001-11-12T00:00:00.000",
+        "Date":"2001-11-12",
         "Authors":[
             {
                 "forename":[
                     "A",
                     "E"
                 ],
-                "surname":"Keating"
+                "surname":[
+                    "Keating"
+                ]
             },
             {
                 "forename":[
                     "V",
                     "N"
                 ],
-                "surname":"Malashkevich"
+                "surname":[
+                    "Malashkevich"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Tidor"
+                "surname":[
+                    "Tidor"
+                ]
             },
             {
                 "forename":[
                     "P",
                     "S"
                 ],
-                "surname":"Kim"
+                "surname":[
+                    "Kim"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.261563398",
@@ -2383,7 +2569,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2001-11-12T00:00:00Z"
+                "deposit_date":"2001-11-12"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1KDD"
@@ -2441,34 +2627,42 @@
         },
         "Classification":"engineered",
         "Keywords":"de novo protein             ",
-        "Date":"2001-11-12T00:00:00.000",
+        "Date":"2001-11-12",
         "Authors":[
             {
                 "forename":[
                     "A",
                     "E"
                 ],
-                "surname":"Keating"
+                "surname":[
+                    "Keating"
+                ]
             },
             {
                 "forename":[
                     "V",
                     "N"
                 ],
-                "surname":"Malashkevich"
+                "surname":[
+                    "Malashkevich"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Tidor"
+                "surname":[
+                    "Tidor"
+                ]
             },
             {
                 "forename":[
                     "P",
                     "S"
                 ],
-                "surname":"Kim"
+                "surname":[
+                    "Kim"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.261563398",
@@ -2492,7 +2686,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-02-04T00:00:00Z"
+                "deposit_date":"2002-02-04"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1KYC"
@@ -2552,25 +2746,31 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2002-02-04T00:00:00.000",
+        "Date":"2002-02-04",
         "Authors":[
             {
                 "forename":[
                     "P"
                 ],
-                "surname":"Burkhard"
+                "surname":[
+                    "Burkhard"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Ivaninskii"
+                "surname":[
+                    "Ivaninskii"
+                ]
             },
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Lustig"
+                "surname":[
+                    "Lustig"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1016\/S0022-2836(02)00114-6",
@@ -2589,7 +2789,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-02-25T00:00:00Z"
+                "deposit_date":"2002-02-25"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1L2Y"
@@ -2626,28 +2826,34 @@
         },
         "Classification":"evolved",
         "Keywords":"de novo protein             ",
-        "Date":"2002-02-25T00:00:00.000",
+        "Date":"2002-02-25",
         "Authors":[
             {
                 "forename":[
                     "J",
                     "W"
                 ],
-                "surname":"Neidigh"
+                "surname":[
+                    "Neidigh"
+                ]
             },
             {
                 "forename":[
                     "R",
                     "M"
                 ],
-                "surname":"Fesinmeyer"
+                "surname":[
+                    "Fesinmeyer"
+                ]
             },
             {
                 "forename":[
                     "N",
                     "H"
                 ],
-                "surname":"Andersen"
+                "surname":[
+                    "Andersen"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1038\/nsb798",
@@ -2679,7 +2885,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-03-06T00:00:00Z"
+                "deposit_date":"2002-03-06"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1L4X"
@@ -2747,31 +2953,39 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2002-03-06T00:00:00.000",
+        "Date":"2002-03-06",
         "Authors":[
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Meier"
+                "surname":[
+                    "Meier"
+                ]
             },
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Lustig"
+                "surname":[
+                    "Lustig"
+                ]
             },
             {
                 "forename":[
                     "U"
                 ],
-                "surname":"Aebi"
+                "surname":[
+                    "Aebi"
+                ]
             },
             {
                 "forename":[
                     "P"
                 ],
-                "surname":"Burkhard"
+                "surname":[
+                    "Burkhard"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1006\/jsbi.2002.4467",
@@ -2790,7 +3004,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-04-09T00:00:00Z"
+                "deposit_date":"2002-04-09"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1LE0"
@@ -2827,28 +3041,34 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2002-04-09T00:00:00.000",
+        "Date":"2002-04-09",
         "Authors":[
             {
                 "forename":[
                     "A",
                     "G"
                 ],
-                "surname":"Cochran"
+                "surname":[
+                    "Cochran"
+                ]
             },
             {
                 "forename":[
                     "N",
                     "J"
                 ],
-                "surname":"Skelton"
+                "surname":[
+                    "Skelton"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "A"
                 ],
-                "surname":"Starovasnik"
+                "surname":[
+                    "Starovasnik"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.091100898",
@@ -2867,7 +3087,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-04-09T00:00:00Z"
+                "deposit_date":"2002-04-09"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1LE1"
@@ -2904,28 +3124,34 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2002-04-09T00:00:00.000",
+        "Date":"2002-04-09",
         "Authors":[
             {
                 "forename":[
                     "A",
                     "G"
                 ],
-                "surname":"Cochran"
+                "surname":[
+                    "Cochran"
+                ]
             },
             {
                 "forename":[
                     "N",
                     "J"
                 ],
-                "surname":"Skelton"
+                "surname":[
+                    "Skelton"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "A"
                 ],
-                "surname":"Starovasnik"
+                "surname":[
+                    "Starovasnik"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.091100898",
@@ -2944,7 +3170,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-04-09T00:00:00Z"
+                "deposit_date":"2002-04-09"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1LE3"
@@ -2981,28 +3207,34 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"protein binding             ",
-        "Date":"2002-04-09T00:00:00.000",
+        "Date":"2002-04-09",
         "Authors":[
             {
                 "forename":[
                     "A",
                     "G"
                 ],
-                "surname":"Cochran"
+                "surname":[
+                    "Cochran"
+                ]
             },
             {
                 "forename":[
                     "N",
                     "J"
                 ],
-                "surname":"Skelton"
+                "surname":[
+                    "Skelton"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "A"
                 ],
-                "surname":"Starovasnik"
+                "surname":[
+                    "Starovasnik"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.091100898",
@@ -3021,7 +3253,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-05-09T00:00:00Z"
+                "deposit_date":"2002-05-09"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1LQ7"
@@ -3058,47 +3290,59 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2002-05-09T00:00:00.000",
+        "Date":"2002-05-09",
         "Authors":[
             {
                 "forename":[
                     "Q",
                     "-h"
                 ],
-                "surname":"Dai"
+                "surname":[
+                    "Dai"
+                ]
             },
             {
                 "forename":[
                     "C"
                 ],
-                "surname":"Tommos"
+                "surname":[
+                    "Tommos"
+                ]
             },
             {
                 "forename":[
                     "E",
                     "J"
                 ],
-                "surname":"Fuentes"
+                "surname":[
+                    "Fuentes"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Blomberg"
+                "surname":[
+                    "Blomberg"
+                ]
             },
             {
                 "forename":[
                     "P",
                     "L"
                 ],
-                "surname":"Dutton"
+                "surname":[
+                    "Dutton"
+                ]
             },
             {
                 "forename":[
                     "A",
                     "J"
                 ],
-                "surname":"Wand"
+                "surname":[
+                    "Wand"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja0264201",
@@ -3122,7 +3366,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-05-20T00:00:00Z"
+                "deposit_date":"2002-05-20"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1LT1"
@@ -3189,19 +3433,24 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2002-05-20T00:00:00.000",
+        "Date":"2002-05-20",
         "Authors":[
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Di costanzo"
+                "surname":[
+                    "Di",
+                    "Costanzo"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Geremia"
+                "surname":[
+                    "Geremia"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1002\/anie.200390127",
@@ -3225,7 +3474,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-07-01T00:00:00Z"
+                "deposit_date":"2002-07-01"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1M3W"
@@ -3277,41 +3526,51 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2002-07-01T00:00:00.000",
+        "Date":"2002-07-01",
         "Authors":[
             {
                 "forename":[
                     "S",
                     "S"
                 ],
-                "surname":"Huang"
+                "surname":[
+                    "Huang"
+                ]
             },
             {
                 "forename":[
                     "B",
                     "R"
                 ],
-                "surname":"Gibney"
+                "surname":[
+                    "Gibney"
+                ]
             },
             {
                 "forename":[
                     "S",
                     "E"
                 ],
-                "surname":"Stayrook"
+                "surname":[
+                    "Stayrook"
+                ]
             },
             {
                 "forename":[
                     "P",
                     "L"
                 ],
-                "surname":"Dutton"
+                "surname":[
+                    "Dutton"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Lewis"
+                "surname":[
+                    "Lewis"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1016\/s0022-2836(02)01441-9",
@@ -3335,7 +3594,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-08-26T00:00:00Z"
+                "deposit_date":"2002-08-26"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1MJ0"
@@ -3395,46 +3654,58 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2002-08-26T00:00:00.000",
+        "Date":"2002-08-26",
         "Authors":[
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Kohl"
+                "surname":[
+                    "Kohl"
+                ]
             },
             {
                 "forename":[
                     "H",
                     "K"
                 ],
-                "surname":"Binz"
+                "surname":[
+                    "Binz"
+                ]
             },
             {
                 "forename":[
                     "P"
                 ],
-                "surname":"Forrer"
+                "surname":[
+                    "Forrer"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "T"
                 ],
-                "surname":"Stumpp"
+                "surname":[
+                    "Stumpp"
+                ]
             },
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Plueckthun"
+                "surname":[
+                    "Plueckthun"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "G"
                 ],
-                "surname":"Gruetter"
+                "surname":[
+                    "Gruetter"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0337680100",
@@ -3453,7 +3724,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-10-11T00:00:00Z"
+                "deposit_date":"2002-10-11"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1N09"
@@ -3490,34 +3761,42 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2002-10-11T00:00:00.000",
+        "Date":"2002-10-11",
         "Authors":[
             {
                 "forename":[
                     "S",
                     "J"
                 ],
-                "surname":"Russell"
+                "surname":[
+                    "Russell"
+                ]
             },
             {
                 "forename":[
                     "T"
                 ],
-                "surname":"Blandl"
+                "surname":[
+                    "Blandl"
+                ]
             },
             {
                 "forename":[
                     "N",
                     "J"
                 ],
-                "surname":"Skelton"
+                "surname":[
+                    "Skelton"
+                ]
             },
             {
                 "forename":[
                     "A",
                     "G"
                 ],
-                "surname":"Cochran"
+                "surname":[
+                    "Cochran"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja028075l",
@@ -3536,7 +3815,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-10-11T00:00:00Z"
+                "deposit_date":"2002-10-11"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1N0A"
@@ -3573,27 +3852,33 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2002-10-11T00:00:00.000",
+        "Date":"2002-10-11",
         "Authors":[
             {
                 "forename":[
                     "T"
                 ],
-                "surname":"Blandl"
+                "surname":[
+                    "Blandl"
+                ]
             },
             {
                 "forename":[
                     "A",
                     "G"
                 ],
-                "surname":"Cochran"
+                "surname":[
+                    "Cochran"
+                ]
             },
             {
                 "forename":[
                     "N",
                     "J"
                 ],
-                "surname":"Skelton"
+                "surname":[
+                    "Skelton"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1110\/ps.0228603",
@@ -3612,7 +3897,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-10-11T00:00:00Z"
+                "deposit_date":"2002-10-11"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1N0C"
@@ -3649,34 +3934,42 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2002-10-11T00:00:00.000",
+        "Date":"2002-10-11",
         "Authors":[
             {
                 "forename":[
                     "S",
                     "J"
                 ],
-                "surname":"Russel"
+                "surname":[
+                    "Russel"
+                ]
             },
             {
                 "forename":[
                     "T"
                 ],
-                "surname":"Blandl"
+                "surname":[
+                    "Blandl"
+                ]
             },
             {
                 "forename":[
                     "N",
                     "J"
                 ],
-                "surname":"Skelton"
+                "surname":[
+                    "Skelton"
+                ]
             },
             {
                 "forename":[
                     "A",
                     "G"
                 ],
-                "surname":"Cochran"
+                "surname":[
+                    "Cochran"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja028075l",
@@ -3695,7 +3988,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2002-10-11T00:00:00Z"
+                "deposit_date":"2002-10-11"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1N0D"
@@ -3732,34 +4025,42 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2002-10-11T00:00:00.000",
+        "Date":"2002-10-11",
         "Authors":[
             {
                 "forename":[
                     "S",
                     "J"
                 ],
-                "surname":"Russell"
+                "surname":[
+                    "Russell"
+                ]
             },
             {
                 "forename":[
                     "T"
                 ],
-                "surname":"Blandl"
+                "surname":[
+                    "Blandl"
+                ]
             },
             {
                 "forename":[
                     "N",
                     "J"
                 ],
-                "surname":"Skelton"
+                "surname":[
+                    "Skelton"
+                ]
             },
             {
                 "forename":[
                     "A",
                     "G"
                 ],
-                "surname":"Cochran"
+                "surname":[
+                    "Cochran"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja028075l",
@@ -3783,7 +4084,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-10-14T00:00:00Z"
+                "deposit_date":"2002-10-14"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1N0Q"
@@ -3835,14 +4136,16 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"structural protein           ",
-        "Date":"2002-10-14T00:00:00.000",
+        "Date":"2002-10-14",
         "Authors":[
             {
                 "forename":[
                     "L",
                     "K"
                 ],
-                "surname":"Mosavi"
+                "surname":[
+                    "Mosavi"
+                ]
             },
             {
                 "forename":[
@@ -3850,14 +4153,18 @@
                     "L",
                     "Minor jr"
                 ],
-                "surname":""
+                "surname":[
+                    ""
+                ]
             },
             {
                 "forename":[
                     "Z",
                     "-y"
                 ],
-                "surname":"Peng"
+                "surname":[
+                    "Peng"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.252537899",
@@ -3881,7 +4188,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-10-14T00:00:00Z"
+                "deposit_date":"2002-10-14"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1N0R"
@@ -3933,14 +4240,16 @@
         },
         "Classification":"original de novo design",
         "Keywords":"structural protein           ",
-        "Date":"2002-10-14T00:00:00.000",
+        "Date":"2002-10-14",
         "Authors":[
             {
                 "forename":[
                     "L",
                     "K"
                 ],
-                "surname":"Mosavi"
+                "surname":[
+                    "Mosavi"
+                ]
             },
             {
                 "forename":[
@@ -3948,14 +4257,18 @@
                     "L",
                     "Minor jr"
                 ],
-                "surname":""
+                "surname":[
+                    ""
+                ]
             },
             {
                 "forename":[
                     "Z",
                     "-y"
                 ],
-                "surname":"Peng"
+                "surname":[
+                    "Peng"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.252537899",
@@ -3979,7 +4292,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-11-26T00:00:00Z"
+                "deposit_date":"2002-11-26"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1NA0"
@@ -4076,37 +4389,47 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2002-11-26T00:00:00.000",
+        "Date":"2002-11-26",
         "Authors":[
             {
                 "forename":[
                     "E"
                 ],
-                "surname":"Main"
+                "surname":[
+                    "Main"
+                ]
             },
             {
                 "forename":[
                     "Y"
                 ],
-                "surname":"Xiong"
+                "surname":[
+                    "Xiong"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Cocco"
+                "surname":[
+                    "Cocco"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"D'andrea"
+                "surname":[
+                    "D'andrea"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Regan"
+                "surname":[
+                    "Regan"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1016\/s0969-2126(03)00076-5",
@@ -4130,7 +4453,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2002-11-26T00:00:00Z"
+                "deposit_date":"2002-11-26"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1NA3"
@@ -4203,37 +4526,47 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2002-11-26T00:00:00.000",
+        "Date":"2002-11-26",
         "Authors":[
             {
                 "forename":[
                     "E"
                 ],
-                "surname":"Main"
+                "surname":[
+                    "Main"
+                ]
             },
             {
                 "forename":[
                     "Y"
                 ],
-                "surname":"Xiong"
+                "surname":[
+                    "Xiong"
+                ]
             },
             {
                 "forename":[
                     "M"
                 ],
-                "surname":"Cocco"
+                "surname":[
+                    "Cocco"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"D'andrea"
+                "surname":[
+                    "D'andrea"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Regan"
+                "surname":[
+                    "Regan"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1016\/s0969-2126(03)00076-5",
@@ -4252,7 +4585,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2003-02-04T00:00:00Z"
+                "deposit_date":"2003-02-04"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1NVO"
@@ -4289,38 +4622,48 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"unknown function            ",
-        "Date":"2003-02-04T00:00:00.000",
+        "Date":"2003-02-04",
         "Authors":[
             {
                 "forename":[
                     "O"
                 ],
-                "surname":"Maglio"
+                "surname":[
+                    "Maglio"
+                ]
             },
             {
                 "forename":[
                     "F"
                 ],
-                "surname":"Nastri"
+                "surname":[
+                    "Nastri"
+                ]
             },
             {
                 "forename":[
                     "V"
                 ],
-                "surname":"Pavone"
+                "surname":[
+                    "Pavone"
+                ]
             },
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Lombardi"
+                "surname":[
+                    "Lombardi"
+                ]
             },
             {
                 "forename":[
                     "W",
                     "F"
                 ],
-                "surname":"Degrado"
+                "surname":[
+                    "Degrado"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0730771100",
@@ -4344,7 +4687,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2003-03-27T00:00:00Z"
+                "deposit_date":"2003-03-27"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1OVR"
@@ -4406,19 +4749,24 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2003-03-27T00:00:00.000",
+        "Date":"2003-03-27",
         "Authors":[
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Di costanzo"
+                "surname":[
+                    "Di",
+                    "Costanzo"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Geremia"
+                "surname":[
+                    "Geremia"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja054199x",
@@ -4442,7 +4790,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2003-03-27T00:00:00Z"
+                "deposit_date":"2003-03-27"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1OVU"
@@ -4504,19 +4852,24 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2003-03-27T00:00:00.000",
+        "Date":"2003-03-27",
         "Authors":[
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Di costanzo"
+                "surname":[
+                    "Di",
+                    "Costanzo"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Geremia"
+                "surname":[
+                    "Geremia"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja054199x",
@@ -4540,7 +4893,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2003-03-27T00:00:00Z"
+                "deposit_date":"2003-03-27"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1OVV"
@@ -4607,19 +4960,24 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2003-03-27T00:00:00.000",
+        "Date":"2003-03-27",
         "Authors":[
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Di costanzo"
+                "surname":[
+                    "Di",
+                    "Costanzo"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Geremia"
+                "surname":[
+                    "Geremia"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja054199x",
@@ -4638,7 +4996,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2003-04-29T00:00:00Z"
+                "deposit_date":"2003-04-29"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1P68"
@@ -4675,38 +5033,48 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2003-04-29T00:00:00.000",
+        "Date":"2003-04-29",
         "Authors":[
             {
                 "forename":[
                     "Y"
                 ],
-                "surname":"Wei"
+                "surname":[
+                    "Wei"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Kim"
+                "surname":[
+                    "Kim"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Fela"
+                "surname":[
+                    "Fela"
+                ]
             },
             {
                 "forename":[
                     "J"
                 ],
-                "surname":"Baum"
+                "surname":[
+                    "Baum"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "H"
                 ],
-                "surname":"Hecht"
+                "surname":[
+                    "Hecht"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.1835644100",
@@ -4725,7 +5093,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"2003-05-15T00:00:00Z"
+                "deposit_date":"2003-05-15"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1PBZ"
@@ -4771,27 +5139,33 @@
         },
         "Classification":"small, non-systematic, and other",
         "Keywords":"de novo protein             ",
-        "Date":"2003-05-15T00:00:00.000",
+        "Date":"2003-05-15",
         "Authors":[
             {
                 "forename":[
                     "J"
                 ],
-                "surname":"Wang"
+                "surname":[
+                    "Wang"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "M"
                 ],
-                "surname":"Rosenblatt"
+                "surname":[
+                    "Rosenblatt"
+                ]
             },
             {
                 "forename":[
                     "K",
                     "S"
                 ],
-                "surname":"Suslick"
+                "surname":[
+                    "Suslick"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.2231273100",
@@ -4810,7 +5184,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"1997-10-29T00:00:00Z"
+                "deposit_date":"1997-10-29"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1PSV"
@@ -4847,28 +5221,34 @@
         },
         "Classification":"engineered",
         "Keywords":"designed peptide            ",
-        "Date":"1997-10-29T00:00:00.000",
+        "Date":"1997-10-29",
         "Authors":[
             {
                 "forename":[
                     "B",
                     "I"
                 ],
-                "surname":"Dahiyat"
+                "surname":[
+                    "Dahiyat"
+                ]
             },
             {
                 "forename":[
                     "C",
                     "A"
                 ],
-                "surname":"Sarisky"
+                "surname":[
+                    "Sarisky"
+                ]
             },
             {
                 "forename":[
                     "S",
                     "L"
                 ],
-                "surname":"Mayo"
+                "surname":[
+                    "Mayo"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1006\/jmbi.1997.1341",
@@ -4892,7 +5272,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2003-07-09T00:00:00Z"
+                "deposit_date":"2003-07-09"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1PYZ"
@@ -4957,49 +5337,64 @@
         },
         "Classification":"engineered",
         "Keywords":"metal binding protein          ",
-        "Date":"2003-07-09T00:00:00.000",
+        "Date":"2003-07-09",
         "Authors":[
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Di costanzo"
+                "surname":[
+                    "Di",
+                    "Costanzo"
+                ]
             },
             {
                 "forename":[
                     "S"
                 ],
-                "surname":"Geremia"
+                "surname":[
+                    "Geremia"
+                ]
             },
             {
                 "forename":[
                     "L"
                 ],
-                "surname":"Randaccio"
+                "surname":[
+                    "Randaccio"
+                ]
             },
             {
                 "forename":[
                     "F"
                 ],
-                "surname":"Nastri"
+                "surname":[
+                    "Nastri"
+                ]
             },
             {
                 "forename":[
                     "O"
                 ],
-                "surname":"Maglio"
+                "surname":[
+                    "Maglio"
+                ]
             },
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Lombardi"
+                "surname":[
+                    "Lombardi"
+                ]
             },
             {
                 "forename":[
                     "V"
                 ],
-                "surname":"Pavone"
+                "surname":[
+                    "Pavone"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1007\/s00775-004-0600-x",
@@ -5018,7 +5413,7 @@
             ],
             "exptl_crystal_grow":null,
             "rcsb_accession_info":{
-                "deposit_date":"1999-06-01T00:00:00Z"
+                "deposit_date":"1999-06-01"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1QP6"
@@ -5055,21 +5450,25 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"1999-06-01T00:00:00.000",
+        "Date":"1999-06-01",
         "Authors":[
             {
                 "forename":[
                     "R",
                     "B"
                 ],
-                "surname":"Hill"
+                "surname":[
+                    "Hill"
+                ]
             },
             {
                 "forename":[
                     "W",
                     "F"
                 ],
-                "surname":"Degrado"
+                "surname":[
+                    "Degrado"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1021\/ja9733649",
@@ -5093,7 +5492,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2003-09-11T00:00:00Z"
+                "deposit_date":"2003-09-11"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1QYS"
@@ -5136,45 +5535,57 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2003-09-11T00:00:00.000",
+        "Date":"2003-09-11",
         "Authors":[
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Kuhlman"
+                "surname":[
+                    "Kuhlman"
+                ]
             },
             {
                 "forename":[
                     "G"
                 ],
-                "surname":"Dantas"
+                "surname":[
+                    "Dantas"
+                ]
             },
             {
                 "forename":[
                     "G",
                     "C"
                 ],
-                "surname":"Ireton"
+                "surname":[
+                    "Ireton"
+                ]
             },
             {
                 "forename":[
                     "G"
                 ],
-                "surname":"Varani"
+                "surname":[
+                    "Varani"
+                ]
             },
             {
                 "forename":[
                     "B",
                     "L"
                 ],
-                "surname":"Stoddard"
+                "surname":[
+                    "Stoddard"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Baker"
+                "surname":[
+                    "Baker"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1126\/science.1089427",
@@ -5198,7 +5609,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"1998-10-07T00:00:00Z"
+                "deposit_date":"1998-10-07"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1RH4"
@@ -5250,40 +5661,50 @@
         },
         "Classification":"original de novo design",
         "Keywords":"coiled coil               ",
-        "Date":"1998-10-07T00:00:00.000",
+        "Date":"1998-10-07",
         "Authors":[
             {
                 "forename":[
                     "P",
                     "B"
                 ],
-                "surname":"Harbury"
+                "surname":[
+                    "Harbury"
+                ]
             },
             {
                 "forename":[
                     "J",
                     "J"
                 ],
-                "surname":"Plecs"
+                "surname":[
+                    "Plecs"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Tidor"
+                "surname":[
+                    "Tidor"
+                ]
             },
             {
                 "forename":[
                     "T"
                 ],
-                "surname":"Alber"
+                "surname":[
+                    "Alber"
+                ]
             },
             {
                 "forename":[
                     "P",
                     "S"
                 ],
-                "surname":"Kim"
+                "surname":[
+                    "Kim"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1126\/science.282.5393.1462",
@@ -5307,7 +5728,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2004-02-06T00:00:00Z"
+                "deposit_date":"2004-02-06"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1S9Z"
@@ -5367,80 +5788,102 @@
         },
         "Classification":"original de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2004-02-06T00:00:00.000",
+        "Date":"2004-02-06",
         "Authors":[
             {
                 "forename":[
                     "R",
                     "A"
                 ],
-                "surname":"Kammerer"
+                "surname":[
+                    "Kammerer"
+                ]
             },
             {
                 "forename":[
                     "D"
                 ],
-                "surname":"Kostrewa"
+                "surname":[
+                    "Kostrewa"
+                ]
             },
             {
                 "forename":[
                     "J"
                 ],
-                "surname":"Zurdo"
+                "surname":[
+                    "Zurdo"
+                ]
             },
             {
                 "forename":[
                     "A"
                 ],
-                "surname":"Detken"
+                "surname":[
+                    "Detken"
+                ]
             },
             {
                 "forename":[
                     "C"
                 ],
-                "surname":"Garcia-echeverria"
+                "surname":[
+                    "Garcia-echeverria"
+                ]
             },
             {
                 "forename":[
                     "J",
                     "D"
                 ],
-                "surname":"Green"
+                "surname":[
+                    "Green"
+                ]
             },
             {
                 "forename":[
                     "S",
                     "A"
                 ],
-                "surname":"Muller"
+                "surname":[
+                    "Muller"
+                ]
             },
             {
                 "forename":[
                     "B",
                     "H"
                 ],
-                "surname":"Meier"
+                "surname":[
+                    "Meier"
+                ]
             },
             {
                 "forename":[
                     "F",
                     "K"
                 ],
-                "surname":"Winkler"
+                "surname":[
+                    "Winkler"
+                ]
             },
             {
                 "forename":[
                     "C",
                     "M"
                 ],
-                "surname":"Dobson"
+                "surname":[
+                    "Dobson"
+                ]
             },
             {
                 "forename":[
                     "M",
                     "O"
                 ],
-                "surname":"Steinmetz"
+                "surname":[
+                    "Steinmetz"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0306786101",
@@ -5464,7 +5907,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2004-03-10T00:00:00Z"
+                "deposit_date":"2004-03-10"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1SN9"
@@ -5507,33 +5950,41 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2004-03-10T00:00:00.000",
+        "Date":"2004-03-10",
         "Authors":[
             {
                 "forename":[
                     "M",
                     "H"
                 ],
-                "surname":"Ali"
+                "surname":[
+                    "Ali"
+                ]
             },
             {
                 "forename":[
                     "E"
                 ],
-                "surname":"Peisach"
+                "surname":[
+                    "Peisach"
+                ]
             },
             {
                 "forename":[
                     "K",
                     "N"
                 ],
-                "surname":"Allen"
+                "surname":[
+                    "Allen"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Imperiali"
+                "surname":[
+                    "Imperiali"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0401245101",
@@ -5557,7 +6008,7 @@
                 }
             ],
             "rcsb_accession_info":{
-                "deposit_date":"2004-03-10T00:00:00Z"
+                "deposit_date":"2004-03-10"
             },
             "rcsb_entry_container_identifiers":{
                 "entry_id":"1SNA"
@@ -5614,33 +6065,41 @@
         },
         "Classification":"relative of another de novo design",
         "Keywords":"de novo protein             ",
-        "Date":"2004-03-10T00:00:00.000",
+        "Date":"2004-03-10",
         "Authors":[
             {
                 "forename":[
                     "M",
                     "H"
                 ],
-                "surname":"Ali"
+                "surname":[
+                    "Ali"
+                ]
             },
             {
                 "forename":[
                     "E"
                 ],
-                "surname":"Peisach"
+                "surname":[
+                    "Peisach"
+                ]
             },
             {
                 "forename":[
                     "K",
                     "N"
                 ],
-                "surname":"Allen"
+                "surname":[
+                    "Allen"
+                ]
             },
             {
                 "forename":[
                     "B"
                 ],
-                "surname":"Imperiali"
+                "surname":[
+                    "Imperiali"
+                ]
             }
         ],
         "DOI":"http:\/\/dx.doi.org\/10.1073\/pnas.0401245101",
