@@ -14,11 +14,12 @@ import Http
 import Json.Decode exposing (Decoder, list)
 import List.Extra as ListEx
 import Random
-import Task
 import Svg as S
 import Svg.Attributes as SAtt
 import Svg.Events as SEvents
+import Task
 import Time exposing (Month(..))
+
 
 
 ---- MODEL ----
@@ -32,8 +33,10 @@ type alias Model =
     , searchPhrase : String
     }
 
+
 type alias ProteinStructure =
     Decoders.ProteinStructure
+
 
 type alias ProteinDesign =
     { pdbCode : String
@@ -48,12 +51,14 @@ type alias ProteinDesign =
     , abstract : String
     }
 
+
 type Classification
     = OriginalDeNovo
     | RelativeDeNovo
     | Small
     | Engineered
     | Unknown
+
 
 init : ( Model, Cmd Msg )
 init =
@@ -70,9 +75,11 @@ init =
         ]
     )
 
+
 gen1000Numbers : Random.Generator (List Int)
 gen1000Numbers =
     Random.list 100 (Random.int -2 2)
+
 
 
 ---- UPDATE ----
@@ -106,13 +113,15 @@ update msg model =
             case result of
                 Ok proteinDataJson ->
                     let
-                        (proteinDesigns,_) = processProteinStructures proteinDataJson
+                        ( proteinDesigns, _ ) =
+                            processProteinStructures proteinDataJson
                     in
                     ( { model | proteinStructures = proteinDataJson, proteinDesigns = proteinDesigns }, Cmd.none )
 
                 Err str ->
                     let
-                        _ = Debug.log "decode error" str
+                        _ =
+                            Debug.log "decode error" str
                     in
                     ( { model | proteinStructures = [] }, Cmd.none )
 
@@ -120,7 +129,9 @@ update msg model =
             ( { model | proteinDesigns = processedDesigns }, Cmd.none )
 
 
+
 ---- INITIATE STRUCTURES ----
+
 
 getData : Cmd Msg
 getData =
@@ -129,19 +140,23 @@ getData =
         , expect = Http.expectJson DesignsDataReceived proteinStructuresDecoder
         }
 
+
 proteinStructuresDecoder : Decoder (List ProteinStructure)
 proteinStructuresDecoder =
     list Decoders.proteinStructureDecoder
 
-processProteinStructures : List ProteinStructure -> (List ProteinDesign, Cmd Msg)
+
+processProteinStructures : List ProteinStructure -> ( List ProteinDesign, Cmd Msg )
 processProteinStructures proteinStructures =
     let
-        processedDesigns = proteinStructures |> List.filterMap proteinStructureToDesign
+        processedDesigns =
+            proteinStructures |> List.filterMap proteinStructureToDesign
     in
     ( processedDesigns
-    , Task.succeed ( ProcessedProteinDesigns processedDesigns )
+    , Task.succeed (ProcessedProteinDesigns processedDesigns)
         |> Task.perform identity
     )
+
 
 proteinStructureToDesign : ProteinStructure -> Maybe ProteinDesign
 proteinStructureToDesign proteinStructure =
@@ -182,10 +197,11 @@ proteinStructureToDesign proteinStructure =
         pubmedID =
             proteinStructure.pubmed_id
 
-        abstract = proteinStructure.abstract
-
+        abstract =
+            proteinStructure.abstract
     in
     ProteinDesign pdbCode structuralKeywords depositionDate picturePath doiLink sequences classification authors pubmedID abstract |> Just
+
 
 
 ---- VIEW ----
@@ -195,6 +211,7 @@ view : Model -> Html Msg
 view model =
     layout [] <|
         portraitView model
+
 
 portraitView : Model -> Element Msg
 portraitView model =
@@ -211,6 +228,7 @@ portraitView model =
             ]
         ]
 
+
 title : Element msg
 title =
     el
@@ -223,6 +241,7 @@ title =
         )
     <|
         paragraph [] [ text "Protein Design Archive" ]
+
 
 sidebar : Element Msg
 sidebar =
@@ -238,6 +257,7 @@ sidebar =
         , filterButton
         ]
 
+
 searchArea : Element Msg
 searchArea =
     row
@@ -250,6 +270,7 @@ searchArea =
         , searchButton
         ]
 
+
 searchButton : Element Msg
 searchButton =
     Input.button
@@ -258,6 +279,7 @@ searchButton =
         { label = sidebarButton FeatherIcons.search
         , onPress = ClickedDesign 1 |> Just
         }
+
 
 searchField : Element Msg
 searchField =
@@ -272,6 +294,7 @@ searchField =
         , label = Input.labelLeft [] none
         }
 
+
 filterButton : Element Msg
 filterButton =
     Input.button
@@ -279,6 +302,7 @@ filterButton =
         { label = sidebarButton FeatherIcons.filter
         , onPress = ClickedDesign 21 |> Just
         }
+
 
 sidebarButton : FeatherIcons.Icon -> Element Msg
 sidebarButton icon =
@@ -290,6 +314,7 @@ sidebarButton icon =
             |> FeatherIcons.toHtml []
             |> html
         )
+
 
 timeline : Model -> Element Msg
 timeline { proteinDesigns, randomNumbers } =
@@ -332,6 +357,7 @@ timeline { proteinDesigns, randomNumbers } =
                 ]
             ]
         ]
+
 
 timelineGraphic : { firstDate : Date, lastDate : Date } -> List Int -> List ProteinDesign -> Html Msg
 timelineGraphic { firstDate, lastDate } randomNumbers proteinDesigns =
@@ -399,6 +425,7 @@ timelineGraphic { firstDate, lastDate } randomNumbers proteinDesigns =
                )
         )
 
+
 getFirstAndLastDate : List ProteinDesign -> { firstDate : Date, lastDate : Date }
 getFirstAndLastDate proteinDesigns =
     let
@@ -419,6 +446,7 @@ getFirstAndLastDate proteinDesigns =
                 |> Maybe.withDefault (Date.fromCalendarDate 2100 Dec 31)
     in
     { firstDate = firstDesignDate, lastDate = lastDesignDate }
+
 
 designToMarker :
     { width : Int
@@ -452,6 +480,7 @@ designToMarker { width, height, radius, firstDate, lastDate } ( randomShift, ( i
         ]
         []
 
+
 dateToPosition :
     { firstDate : Date
     , lastDate : Date
@@ -477,6 +506,7 @@ dateToPosition { firstDate, lastDate, date, height, radius } =
         * toFloat (height - (2 * radius))
         |> round
         |> (+) 3
+
 
 details : Maybe ProteinDesign -> Element msg
 details mDesign =
@@ -508,9 +538,6 @@ details mDesign =
                 designDetailsView design
         ]
 
-stringToElement : String -> Element msg
-stringToElement string =
-    text string
 
 designDetailsView : ProteinDesign -> Element msg
 designDetailsView proteinDesign =
@@ -566,7 +593,7 @@ designDetailsView proteinDesign =
                 , paragraph
                     bodyFont
                     [ text "Structural Keywords: "
-                    , el [Font.italic] (text proteinDesign.structuralKeywords)
+                    , el [ Font.italic ] (text proteinDesign.structuralKeywords)
                     ]
                 , paragraph
                     bodyFont
@@ -600,12 +627,18 @@ designDetailsView proteinDesign =
                 ]
             , paragraph
                 monospacedFont
-                [ column [ width ( fill |> maximum 800 ) ] <|
-                    List.map stringToElement
-                        ( List.indexedMap
-                            (\index str -> "chain " ++ String.fromInt (index + 1) ++ ": " ++ str)
-                            proteinDesign.sequences
+                [ column [ width (fill |> maximum 800) ] <|
+                    List.indexedMap
+                        (\index str ->
+                            paragraph []
+                                [ text <|
+                                    "chain "
+                                        ++ String.fromInt (index + 1)
+                                        ++ ": "
+                                        ++ str
+                                ]
                         )
+                        proteinDesign.sequences
                 ]
             ]
         , column
@@ -621,28 +654,30 @@ designDetailsView proteinDesign =
                     ++ [ Font.justify ]
                 )
                 [ proteinDesign.abstract
-                    |> text 
+                    |> text
                 ]
             ]
-{-
-        , paragraph
-            h2Font
-            [ text "Structural Similarity"
-            ]
-        , paragraph
-            h2Font
-            [ text "Homologues"
-            ]
-        , paragraph
-            h2Font
-            [ text "Sequence Metrics"
-            ]
-        , paragraph
-            h2Font
-            [ text "DE-STRESS Metrics"
-            ]
--}
+
+        {-
+           , paragraph
+               h2Font
+               [ text "Structural Similarity"
+               ]
+           , paragraph
+               h2Font
+               [ text "Homologues"
+               ]
+           , paragraph
+               h2Font
+               [ text "Sequence Metrics"
+               ]
+           , paragraph
+               h2Font
+               [ text "DE-STRESS Metrics"
+               ]
+        -}
         ]
+
 
 extractSequencesFromPolyEntity : PolyEntities -> List String
 extractSequencesFromPolyEntity polyEntity =
@@ -651,6 +686,7 @@ extractSequencesFromPolyEntity polyEntity =
             polyEntity.entity_poly
     in
     [ entityPoly.pdbx_seq_one_letter_code_can ]
+
 
 rawStringToClassfication : String -> Classification
 rawStringToClassfication string =
@@ -670,6 +706,7 @@ rawStringToClassfication string =
         _ ->
             Unknown
 
+
 classificationToString : Classification -> String
 classificationToString classification =
     case classification of
@@ -687,6 +724,7 @@ classificationToString classification =
 
         Unknown ->
             "Unknown"
+
 
 classificationToColour : Classification -> String
 classificationToColour classification =
@@ -706,6 +744,8 @@ classificationToColour classification =
         Unknown ->
             "#333333"
 
+
+
 ---- PROGRAM ----
 
 
@@ -717,6 +757,7 @@ main =
         , update = update
         , subscriptions = always Sub.none
         }
+
 
 
 ---- STYLE ----
@@ -737,6 +778,7 @@ titleFont =
     , Font.size 40
     ]
 
+
 h1Font : List (Attribute msg)
 h1Font =
     [ Font.family
@@ -745,6 +787,7 @@ h1Font =
         ]
     , Font.size 32
     ]
+
 
 h2Font : List (Attribute msg)
 h2Font =
@@ -755,6 +798,7 @@ h2Font =
     , Font.size 24
     ]
 
+
 bodyFont : List (Attribute msg)
 bodyFont =
     [ Font.family
@@ -764,6 +808,7 @@ bodyFont =
     , Font.size 16
     , Font.alignLeft
     ]
+
 
 monospacedFont : List (Attribute msg)
 monospacedFont =
