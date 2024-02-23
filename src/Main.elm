@@ -626,9 +626,7 @@ designDetailsView proteinDesign =
                 [ text "Sequence"
                 ]
             , column
-                ([ width (fill |> maximum 800) ]
-                    ++ monospacedFont
-                )
+                (width (fill |> maximum 800) :: monospacedFont)
               <|
                 List.indexedMap
                     (\index str ->
