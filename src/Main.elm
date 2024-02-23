@@ -625,21 +625,22 @@ designDetailsView proteinDesign =
                 h2Font
                 [ text "Sequence"
                 ]
-            , paragraph
-                monospacedFont
-                [ column [ width (fill |> maximum 800) ] <|
-                    List.indexedMap
-                        (\index str ->
-                            paragraph []
-                                [ text <|
-                                    "chain "
-                                        ++ String.fromInt (index + 1)
-                                        ++ ": "
-                                        ++ str
-                                ]
-                        )
-                        proteinDesign.sequences
-                ]
+            , column
+                ([ width (fill |> maximum 800) ]
+                    ++ monospacedFont
+                )
+              <|
+                List.indexedMap
+                    (\index str ->
+                        paragraph []
+                            [ text <|
+                                "chain "
+                                    ++ String.fromInt (index + 1)
+                                    ++ ": "
+                                    ++ str
+                            ]
+                    )
+                    proteinDesign.sequences
             ]
         , column
             [ width fill
