@@ -474,8 +474,15 @@ sidebarButton icon =
 
 
 timeline : Model -> Element Msg
-timeline { proteinDesigns, randomNumbers } =
+timeline { proteinDesigns, filters, randomNumbers } =
     let
+        filterValues =
+            Dict.values filters
+
+        filteredDesigns =
+            proteinDesigns
+                |> List.filterMap (\d -> DesignFilter.meetsAllFilters filterValues d)
+
         timelineDates =
             getFirstAndLastDate proteinDesigns
     in
@@ -500,7 +507,7 @@ timeline { proteinDesigns, randomNumbers } =
                     |> String.fromInt
                     |> text
                 ]
-            , html (timelineGraphic timelineDates randomNumbers proteinDesigns)
+            , html (timelineGraphic timelineDates randomNumbers filteredDesigns)
             , paragraph
                 (bodyFont
                     ++ [ Font.center

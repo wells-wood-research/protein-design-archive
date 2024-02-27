@@ -28,6 +28,7 @@ searchableText design =
     , design.abstract
     ]
         |> String.join "\n"
+        |> String.toLower
 
 
 type Classification

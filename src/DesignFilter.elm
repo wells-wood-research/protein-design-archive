@@ -37,7 +37,7 @@ designMeetsFilter design filter =
         ContainsText searchString ->
             design
                 |> searchableText
-                |> String.contains searchString
+                |> String.contains (String.toLower searchString)
 
         DateRange _ _ ->
             Debug.todo "do this"
