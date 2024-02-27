@@ -297,13 +297,13 @@ sidebar model =
                , Background.color <| rgb255 105 109 125
                ]
         )
-        [ searchArea model
+        [ searchArea
         , filterArea model
         ]
 
 
-searchArea : Model -> Element Msg
-searchArea model =
+searchArea : Element Msg
+searchArea =
     row
         (bodyFont
             ++ [ Font.alignLeft
@@ -435,33 +435,20 @@ checkboxIcon isChecked =
         [ width <| px 25
         , height <| px 25
         , padding 4
-        , Border.rounded 6
-        , Border.width 2
-        , Border.color color.blue
         ]
     <|
         el
             [ width fill
             , height fill
-            , Border.rounded 4
+            , Border.rounded 3
             , Background.color <|
                 if isChecked then
-                    color.lightBlue
+                    rgb255 104 176 171
 
                 else
-                    color.white
+                    rgb255 255 255 255
             ]
             none
-
-
-color : { blue : Color, darkCharcoal : Color, lightBlue : Color, lightGrey : Color, white : Color }
-color =
-    { blue = rgb255 0x72 0x9F 0xCF
-    , darkCharcoal = rgb255 0x2E 0x34 0x36
-    , lightBlue = rgb255 0xC5 0xE8 0xF7
-    , lightGrey = rgb255 0xE0 0xE0 0xE0
-    , white = rgb255 0xFF 0xFF 0xFF
-    }
 
 
 sidebarButton : FeatherIcons.Icon -> Element Msg
