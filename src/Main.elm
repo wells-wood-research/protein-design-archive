@@ -297,13 +297,13 @@ sidebar model =
                , Background.color <| rgb255 105 109 125
                ]
         )
-        [ searchArea
+        [ searchArea model.searchPhrase
         , filterArea model
         ]
 
 
-searchArea : Element Msg
-searchArea =
+searchArea : String -> Element Msg
+searchArea searchPhrase =
     row
         (bodyFont
             ++ [ Font.alignLeft
@@ -311,7 +311,7 @@ searchArea =
                , paddingXY 0 10
                ]
         )
-        [ searchField
+        [ elmUiSearchField searchPhrase
         , searchButton
         ]
 
@@ -323,6 +323,17 @@ searchButton =
         ]
         { label = sidebarButton FeatherIcons.search
         , onPress = SearchSubmit |> Just
+        }
+
+
+elmUiSearchField : String -> Element Msg
+elmUiSearchField currentText =
+    Input.text
+        []
+        { onChange = SearchInput
+        , text = currentText
+        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
+        , label = Input.labelHidden "Filter Designs Search Box"
         }
 
 
