@@ -1,15 +1,18 @@
 module Main exposing (..)
 
 import Browser
+import Browser.Events exposing (onKeyPress)
 import Date exposing (Date, Unit(..))
 import Decoders exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font
+import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
-import Html exposing (Html)
+import Html exposing (Html, div, input)
+import Html.Attributes exposing (placeholder, type_)
+import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode exposing (Decoder, list)
 import List.Extra as ListEx
@@ -31,6 +34,9 @@ type alias Model =
     , focusedProteinDesign : Maybe ProteinDesign
     , randomNumbers : List Int
     , searchPhrase : String
+    , checkbox : Bool
+    , checkboxFalse : Bool
+    , filter : Filter
     }
 
 
@@ -60,6 +66,15 @@ type Classification
     | Unknown
 
 
+type alias Filter =
+    { classificationOriginal : Bool
+    , classificationRelative : Bool
+    , classificationSmall : Bool
+    , classificationEngineered : Bool
+    , classificationUnknown : Bool
+    }
+
+
 init : ( Model, Cmd Msg )
 init =
     ( { proteinStructures = []
@@ -67,6 +82,15 @@ init =
       , focusedProteinDesign = Nothing
       , randomNumbers = []
       , searchPhrase = ""
+      , checkbox = False
+      , checkboxFalse = False
+      , filter =
+            { classificationOriginal = False
+            , classificationRelative = False
+            , classificationSmall = False
+            , classificationEngineered = False
+            , classificationUnknown = False
+            }
       }
     , Cmd.batch
         [ Random.generate RandomNumbers gen1000Numbers
@@ -89,9 +113,12 @@ type Msg
     = ClickedDesign Int
     | RandomNumbers (List Int)
     | SearchInput String
+    | SearchSubmit
+    | ClearSearchField
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinStructure))
     | ProcessedProteinDesigns (List ProteinDesign)
+    | UserToggledCheckbox Bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -103,8 +130,18 @@ update msg model =
         RandomNumbers numbers ->
             ( { model | randomNumbers = numbers }, Cmd.none )
 
-        SearchInput result ->
-            ( { model | searchPhrase = result }, Cmd.none )
+        SearchInput newSearchPhrase ->
+            ( { model | searchPhrase = newSearchPhrase }, Cmd.none )
+
+        SearchSubmit ->
+            if String.trim model.searchPhrase /= "" then
+                ( { model | focusedProteinDesign = ListEx.getAt 4 model.proteinDesigns }, Cmd.none )
+
+            else
+                ( model, Cmd.none )
+
+        ClearSearchField ->
+            ( model, Cmd.none )
 
         SendDesignsHttpRequest ->
             ( { model | proteinStructures = [] }, getData )
@@ -127,6 +164,13 @@ update msg model =
 
         ProcessedProteinDesigns processedDesigns ->
             ( { model | proteinDesigns = processedDesigns }, Cmd.none )
+
+        UserToggledCheckbox checkbox ->
+            if checkbox then
+                ( { model | focusedProteinDesign = ListEx.getAt 3 model.proteinDesigns }, Cmd.none )
+
+            else
+                ( { model | focusedProteinDesign = Nothing }, Cmd.none )
 
 
 
@@ -224,7 +268,7 @@ portraitView model =
         , row [ width fill ]
             [ timeline model
             , details model.focusedProteinDesign
-            , sidebar
+            , sidebar model
             ]
         ]
 
@@ -243,27 +287,28 @@ title =
         paragraph [] [ text "Protein Design Archive" ]
 
 
-sidebar : Element Msg
-sidebar =
+sidebar : Model -> Element Msg
+sidebar model =
     column
         (bodyFont
-            ++ [ width <| fillPortion 2
+            ++ [ width (fill |> maximum 150)
                , height fill
                , Font.center
                , Background.color <| rgb255 105 109 125
                ]
         )
-        [ searchArea
-        , filterButton
+        [ searchArea model
+        , filterArea model
         ]
 
 
-searchArea : Element Msg
-searchArea =
+searchArea : Model -> Element Msg
+searchArea model =
     row
         (bodyFont
             ++ [ Font.alignLeft
                , Background.color <| rgb255 105 109 125
+               , paddingXY 0 10
                ]
         )
         [ searchField
@@ -277,31 +322,146 @@ searchButton =
         [ padding 3
         ]
         { label = sidebarButton FeatherIcons.search
-        , onPress = ClickedDesign 1 |> Just
+        , onPress = SearchSubmit |> Just
         }
 
 
 searchField : Element Msg
 searchField =
-    Input.text
-        [ padding 3
-        , Background.color <| rgb255 255 255 255
-        , width fill
+    html <|
+        div [ Html.Attributes.style "padding" "5px" ]
+            [ input
+                [ type_ "text"
+                , placeholder "Enter search phrase here"
+                , onInput SearchInput
+                , onClick ClearSearchField
+                , Html.Attributes.style "width" "90%"
+                ]
+                []
+            ]
+
+
+filterArea : Model -> Element Msg
+filterArea model =
+    column
+        (bodyFont
+            ++ [ Font.alignLeft
+               , Background.color <| rgb255 105 109 125
+               , width fill
+               ]
+        )
+        [ row []
+            [ paragraph [ paddingXY 5 0 ]
+                [ text "Press button to filter:" ]
+            , filterButton
+            ]
+        , filterField model
         ]
-        { onChange = SearchInput
-        , text = ""
-        , placeholder = Input.placeholder [] none |> Just
-        , label = Input.labelLeft [] none
-        }
 
 
 filterButton : Element Msg
 filterButton =
     Input.button
-        [ padding 3 ]
+        [ padding 3
+        , alignTop
+        ]
         { label = sidebarButton FeatherIcons.filter
-        , onPress = ClickedDesign 21 |> Just
+        , onPress = ClickedDesign 2 |> Just
         }
+
+
+filterField : Model -> Element Msg
+filterField model =
+    column [ paddingXY 20 10 ]
+        [ paragraph [ Font.bold, paddingXY 0 10 ]
+            [ text "Classification:" ]
+        , classificationFilter model
+        ]
+
+
+classificationFilter : Model -> Element Msg
+classificationFilter model =
+    column []
+        [ filterCheckbox ( model, "classificationOriginalDeNovo" )
+        , filterCheckbox ( model, "classificationRelativeDeNovo" )
+        , filterCheckbox ( model, "classificationSmall" )
+        , filterCheckbox ( model, "classificationEngineered" )
+        , filterCheckbox ( model, "classificationUnknown" )
+        ]
+
+
+filterCheckbox : ( Model, String ) -> Element Msg
+filterCheckbox ( model, checkboxType ) =
+    let
+        checkboxLabel =
+            case checkboxType of
+                "classificationOriginalDeNovo" ->
+                    text "original"
+
+                "classificationRelativeDeNovo" ->
+                    text "relative"
+
+                "classificationSmall" ->
+                    text "small"
+
+                "classificationEngineered" ->
+                    text "engineered"
+
+                "classificationUnknown" ->
+                    text "unknown"
+
+                _ ->
+                    Debug.todo "error"
+
+        filterType =
+            case checkboxType of
+                "classificationOriginalDeNovo" ->
+                    True
+
+                _ ->
+                    False
+    in
+    Input.checkbox [ padding 3 ]
+        { onChange = UserToggledCheckbox
+        , icon = checkboxIcon
+        , checked = model.checkbox
+        , label = Input.labelRight [ centerY ] checkboxLabel
+        }
+
+
+checkboxIcon : Bool -> Element msg
+checkboxIcon isChecked =
+    el
+        [ width <| px 25
+        , height <| px 25
+        , padding 4
+        , Border.rounded 6
+        , Border.width 2
+        , Border.color color.blue
+        ]
+    <|
+        el
+            [ width fill
+            , height fill
+            , Border.rounded 4
+            , Background.color <|
+                if isChecked then
+                    color.lightBlue
+
+                else
+                    color.white
+            ]
+            none
+
+
+color : { blue : Color, darkCharcoal : Color, lightBlue : Color, lightGrey : Color, white : Color }
+color =
+    { blue = rgb255 0x72 0x9F 0xCF
+    , darkCharcoal = rgb255 0x2E 0x34 0x36
+    , lightBlue = rgb255 0xC5 0xE8 0xF7
+    , lightGrey = rgb255 0xE0 0xE0 0xE0
+    , white = rgb255 0xFF 0xFF 0xFF
+    }
 
 
 sidebarButton : FeatherIcons.Icon -> Element Msg
@@ -754,8 +914,28 @@ main =
         { view = view
         , init = \_ -> init
         , update = update
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    onKeyPress keyDecoder
+
+
+keyDecoder : Json.Decode.Decoder Msg
+keyDecoder =
+    Json.Decode.map toKey (Json.Decode.field "key" Json.Decode.string)
+
+
+toKey : String -> Msg
+toKey keyValue =
+    case keyValue of
+        "Enter" ->
+            SearchSubmit
+
+        _ ->
+            ClearSearchField
 
 
 
