@@ -4,6 +4,8 @@ import Browser
 import Browser.Events exposing (onKeyPress)
 import Date exposing (Date, Unit(..))
 import Decoders exposing (..)
+import DesignFilter exposing (DesignFilter(..))
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -16,12 +18,18 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode exposing (Decoder, list)
 import List.Extra as ListEx
+import ProteinDesign exposing (..)
 import Random
 import Svg as S
 import Svg.Attributes as SAtt
 import Svg.Events as SEvents
 import Task
 import Time exposing (Month(..))
+
+
+searchTextKey : String
+searchTextKey =
+    "search-text-string"
 
 
 
@@ -33,6 +41,9 @@ type alias Model =
     , proteinDesigns : List ProteinDesign
     , focusedProteinDesign : Maybe ProteinDesign
     , randomNumbers : List Int
+    , filters : Dict String DesignFilter
+
+    -- To be removed
     , searchPhrase : String
     , checkbox : Bool
     , checkboxFalse : Bool
@@ -42,28 +53,6 @@ type alias Model =
 
 type alias ProteinStructure =
     Decoders.ProteinStructure
-
-
-type alias ProteinDesign =
-    { pdbCode : String
-    , structuralKeywords : String
-    , depositionDate : Date.Date
-    , picturePath : String
-    , doiLink : String
-    , sequences : List String
-    , classification : Classification
-    , authors : String
-    , pubmedID : Int
-    , abstract : String
-    }
-
-
-type Classification
-    = OriginalDeNovo
-    | RelativeDeNovo
-    | Small
-    | Engineered
-    | Unknown
 
 
 type alias Filter =
@@ -81,6 +70,7 @@ init =
       , proteinDesigns = []
       , focusedProteinDesign = Nothing
       , randomNumbers = []
+      , filters = Dict.empty
       , searchPhrase = ""
       , checkbox = False
       , checkboxFalse = False
@@ -112,6 +102,7 @@ gen1000Numbers =
 type Msg
     = ClickedDesign Int
     | RandomNumbers (List Int)
+    | UpdateFilters String DesignFilter
     | SearchInput String
     | SearchSubmit
     | ClearSearchField
@@ -129,6 +120,11 @@ update msg model =
 
         RandomNumbers numbers ->
             ( { model | randomNumbers = numbers }, Cmd.none )
+
+        UpdateFilters key newFilter ->
+            ( { model | filters = Dict.insert key newFilter model.filters }
+            , Cmd.none
+            )
 
         SearchInput newSearchPhrase ->
             ( { model | searchPhrase = newSearchPhrase }, Cmd.none )
@@ -297,13 +293,16 @@ sidebar model =
                , Background.color <| rgb255 105 109 125
                ]
         )
-        [ searchArea model.searchPhrase
+        [ searchArea
+            (Dict.get searchTextKey model.filters
+                |> Maybe.map DesignFilter.toString
+            )
         , filterArea model
         ]
 
 
-searchArea : String -> Element Msg
-searchArea searchPhrase =
+searchArea : Maybe String -> Element Msg
+searchArea mSearchPhrase =
     row
         (bodyFont
             ++ [ Font.alignLeft
@@ -311,7 +310,7 @@ searchArea searchPhrase =
                , paddingXY 0 10
                ]
         )
-        [ elmUiSearchField searchPhrase
+        [ elmUiSearchField mSearchPhrase
         , searchButton
         ]
 
@@ -326,12 +325,12 @@ searchButton =
         }
 
 
-elmUiSearchField : String -> Element Msg
-elmUiSearchField currentText =
+elmUiSearchField : Maybe String -> Element Msg
+elmUiSearchField mCurrentText =
     Input.text
         []
-        { onChange = SearchInput
-        , text = currentText
+        { onChange = \string -> UpdateFilters searchTextKey (ContainsText string)
+        , text = Maybe.withDefault "" mCurrentText
         , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
         , label = Input.labelHidden "Filter Designs Search Box"
         }
@@ -843,63 +842,6 @@ extractSequencesFromPolyEntity polyEntity =
             polyEntity.entity_poly
     in
     [ entityPoly.pdbx_seq_one_letter_code_can ]
-
-
-rawStringToClassfication : String -> Classification
-rawStringToClassfication string =
-    case string of
-        "original de novo design" ->
-            OriginalDeNovo
-
-        "relative of another de novo design" ->
-            RelativeDeNovo
-
-        "small, non-systematic, and other" ->
-            Small
-
-        "engineered" ->
-            Engineered
-
-        _ ->
-            Unknown
-
-
-classificationToString : Classification -> String
-classificationToString classification =
-    case classification of
-        OriginalDeNovo ->
-            "Original De Novo"
-
-        RelativeDeNovo ->
-            "Relative De Novo"
-
-        Small ->
-            "Small, Non-Systematic, Other"
-
-        Engineered ->
-            "Engineered"
-
-        Unknown ->
-            "Unknown"
-
-
-classificationToColour : Classification -> String
-classificationToColour classification =
-    case classification of
-        OriginalDeNovo ->
-            "#ff0000"
-
-        RelativeDeNovo ->
-            "#00ff00"
-
-        Small ->
-            "#ffffff"
-
-        Engineered ->
-            "#0000ff"
-
-        Unknown ->
-            "#333333"
 
 
 
