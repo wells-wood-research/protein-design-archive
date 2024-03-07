@@ -10,13 +10,14 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font exposing (center)
-import Element.Input as Input
-import FeatherIcons
+import Element.Input as Input exposing (checkbox)
+import FeatherIcons exposing (alignCenter)
 import Html exposing (Html, div, input)
 import Html.Attributes exposing (placeholder, type_)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode exposing (Decoder, list)
+import List exposing (minimum)
 import List.Extra as ListEx
 import ProteinDesign exposing (..)
 import Random
@@ -32,6 +33,62 @@ searchTextKey =
     "search-text-string"
 
 
+classificationOriginalDeNovoKey : String
+classificationOriginalDeNovoKey =
+    "design-classification-original"
+
+
+classificationRelativeDeNovoKey : String
+classificationRelativeDeNovoKey =
+    "design-classification-relative"
+
+
+classificationSmallKey : String
+classificationSmallKey =
+    "design-classification-small"
+
+
+classificationEngineeredKey : String
+classificationEngineeredKey =
+    "design-classification-engineered"
+
+
+classificationUnknownKey : String
+classificationUnknownKey =
+    "design-classification-unknown"
+
+
+dateStartKey : String
+dateStartKey =
+    "deposition-date-start"
+
+
+dateEndKey : String
+dateEndKey =
+    "deposition-date-end"
+
+
+defaultStartDate : Date
+defaultStartDate =
+    Date.fromCalendarDate 1900 Jan 1
+
+
+defaultEndDate : Date
+defaultEndDate =
+    Date.fromCalendarDate 2100 Dec 31
+
+
+checkboxDict : Dict String Bool
+checkboxDict =
+    Dict.fromList
+        [ ( classificationOriginalDeNovoKey, False )
+        , ( classificationRelativeDeNovoKey, False )
+        , ( classificationSmallKey, False )
+        , ( classificationEngineeredKey, False )
+        , ( classificationUnknownKey, False )
+        ]
+
+
 
 ---- MODEL ----
 
@@ -42,26 +99,14 @@ type alias Model =
     , focusedProteinDesign : Maybe ProteinDesign
     , randomNumbers : List Int
     , filters : Dict String DesignFilter
-
-    -- To be removed
-    , searchPhrase : String
-    , checkbox : Bool
-    , checkboxFalse : Bool
-    , filter : Filter
+    , checkbox : Dict String Bool
+    , mStartDate : Maybe String
+    , mEndDate : Maybe String
     }
 
 
 type alias ProteinStructure =
     Decoders.ProteinStructure
-
-
-type alias Filter =
-    { classificationOriginal : Bool
-    , classificationRelative : Bool
-    , classificationSmall : Bool
-    , classificationEngineered : Bool
-    , classificationUnknown : Bool
-    }
 
 
 init : ( Model, Cmd Msg )
@@ -71,16 +116,9 @@ init =
       , focusedProteinDesign = Nothing
       , randomNumbers = []
       , filters = Dict.empty
-      , searchPhrase = ""
-      , checkbox = False
-      , checkboxFalse = False
-      , filter =
-            { classificationOriginal = False
-            , classificationRelative = False
-            , classificationSmall = False
-            , classificationEngineered = False
-            , classificationUnknown = False
-            }
+      , checkbox = checkboxDict
+      , mStartDate = Just ""
+      , mEndDate = Just ""
       }
     , Cmd.batch
         [ Random.generate RandomNumbers gen1000Numbers
@@ -103,13 +141,13 @@ type Msg
     = ClickedDesign Int
     | RandomNumbers (List Int)
     | UpdateFilters String DesignFilter
-    | SearchInput String
-    | SearchSubmit
-    | ClearSearchField
+    | UpdateCheckbox String Bool
+    | UpdateStartDateTextField String
+    | UpdateEndDateTextField String
+    | ClearAllFilters
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinStructure))
     | ProcessedProteinDesigns (List ProteinDesign)
-    | UserToggledCheckbox Bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -126,18 +164,65 @@ update msg model =
             , Cmd.none
             )
 
-        SearchInput newSearchPhrase ->
-            ( { model | searchPhrase = newSearchPhrase }, Cmd.none )
+        UpdateCheckbox key checkboxStatus ->
+            ( { model | checkbox = Dict.insert key checkboxStatus model.checkbox }
+            , Task.succeed (UpdateFilters key (DesignFilter.toDesignFilter key))
+                |> Task.perform identity
+            )
 
-        SearchSubmit ->
-            if String.trim model.searchPhrase /= "" then
-                ( { model | focusedProteinDesign = ListEx.getAt 4 model.proteinDesigns }, Cmd.none )
+        UpdateStartDateTextField phrase ->
+            ( { model | mStartDate = phrase |> Just }
+            , if String.right 1 phrase /= "-" then
+                case Date.fromIsoString phrase of
+                    Err _ ->
+                        Task.succeed (UpdateFilters dateStartKey (DateStart defaultStartDate))
+                            |> Task.perform identity
 
-            else
-                ( model, Cmd.none )
+                    Ok date ->
+                        Task.succeed (UpdateFilters dateStartKey (DateStart date))
+                            |> Task.perform identity
 
-        ClearSearchField ->
-            ( model, Cmd.none )
+              else
+                case Date.fromIsoString (String.dropRight 1 phrase) of
+                    Err _ ->
+                        Task.succeed (UpdateFilters dateStartKey (DateStart defaultStartDate))
+                            |> Task.perform identity
+
+                    Ok date ->
+                        Task.succeed (UpdateFilters dateStartKey (DateStart date))
+                            |> Task.perform identity
+            )
+
+        UpdateEndDateTextField phrase ->
+            ( { model | mEndDate = phrase |> Just }
+            , if String.right 1 phrase /= "-" then
+                case Date.fromIsoString phrase of
+                    Err _ ->
+                        Task.succeed (UpdateFilters dateEndKey (DateEnd defaultEndDate))
+                            |> Task.perform identity
+
+                    Ok date ->
+                        Task.succeed (UpdateFilters dateEndKey (DateEnd date))
+                            |> Task.perform identity
+
+              else
+                case Date.fromIsoString (String.dropRight 1 phrase) of
+                    Err _ ->
+                        Task.succeed (UpdateFilters dateEndKey (DateEnd defaultEndDate))
+                            |> Task.perform identity
+
+                    Ok date ->
+                        Task.succeed (UpdateFilters dateEndKey (DateEnd date))
+                            |> Task.perform identity
+            )
+
+        ClearAllFilters ->
+            ( { model
+                | filters = Dict.empty
+                , checkbox = checkboxDict
+              }
+            , Cmd.none
+            )
 
         SendDesignsHttpRequest ->
             ( { model | proteinStructures = [] }, getData )
@@ -160,13 +245,6 @@ update msg model =
 
         ProcessedProteinDesigns processedDesigns ->
             ( { model | proteinDesigns = processedDesigns }, Cmd.none )
-
-        UserToggledCheckbox checkbox ->
-            if checkbox then
-                ( { model | focusedProteinDesign = ListEx.getAt 3 model.proteinDesigns }, Cmd.none )
-
-            else
-                ( { model | focusedProteinDesign = Nothing }, Cmd.none )
 
 
 
@@ -287,10 +365,11 @@ sidebar : Model -> Element Msg
 sidebar model =
     column
         (bodyFont
-            ++ [ width (fill |> maximum 150)
+            ++ [ width <| fillPortion 3
                , height fill
-               , Font.center
                , Background.color <| rgb255 105 109 125
+               , paddingXY 10 10
+               , spacing 10
                ]
         )
         [ searchArea
@@ -304,13 +383,8 @@ sidebar model =
 searchArea : Maybe String -> Element Msg
 searchArea mSearchPhrase =
     row
-        (bodyFont
-            ++ [ Font.alignLeft
-               , Background.color <| rgb255 105 109 125
-               , paddingXY 0 10
-               ]
-        )
-        [ elmUiSearchField mSearchPhrase
+        bodyFont
+        [ searchField mSearchPhrase
         , searchButton
         ]
 
@@ -318,15 +392,15 @@ searchArea mSearchPhrase =
 searchButton : Element Msg
 searchButton =
     Input.button
-        [ padding 3
+        [ padding 5
         ]
         { label = sidebarButton FeatherIcons.search
-        , onPress = SearchSubmit |> Just
+        , onPress = ClearAllFilters |> Just
         }
 
 
-elmUiSearchField : Maybe String -> Element Msg
-elmUiSearchField mCurrentText =
+searchField : Maybe String -> Element Msg
+searchField mCurrentText =
     Input.text
         []
         { onChange = \string -> UpdateFilters searchTextKey (ContainsText string)
@@ -336,33 +410,13 @@ elmUiSearchField mCurrentText =
         }
 
 
-searchField : Element Msg
-searchField =
-    html <|
-        div [ Html.Attributes.style "padding" "5px" ]
-            [ input
-                [ type_ "text"
-                , placeholder "Enter search phrase here"
-                , onInput SearchInput
-                , onClick ClearSearchField
-                , Html.Attributes.style "width" "90%"
-                ]
-                []
-            ]
-
-
 filterArea : Model -> Element Msg
 filterArea model =
     column
-        (bodyFont
-            ++ [ Font.alignLeft
-               , Background.color <| rgb255 105 109 125
-               , width fill
-               ]
-        )
+        bodyFont
         [ row []
-            [ paragraph [ paddingXY 5 0 ]
-                [ text "Press button to filter:" ]
+            [ paragraph []
+                [ text "Press button to clear filters:" ]
             , filterButton
             ]
         , filterField model
@@ -372,70 +426,95 @@ filterArea model =
 filterButton : Element Msg
 filterButton =
     Input.button
-        [ padding 3
-        , alignTop
-        ]
+        [ padding 5 ]
         { label = sidebarButton FeatherIcons.filter
-        , onPress = ClickedDesign 2 |> Just
+        , onPress = ClearAllFilters |> Just
         }
 
 
 filterField : Model -> Element Msg
 filterField model =
-    column [ paddingXY 20 10 ]
+    column
+        [ paddingXY 0 10 ]
         [ paragraph [ Font.bold, paddingXY 0 10 ]
+            [ text "Deposit date:" ]
+        , dateStartField model
+        , dateEndField model
+        , paragraph [ Font.bold, paddingXY 0 10 ]
             [ text "Classification:" ]
         , classificationFilter model
+        , paragraph [ Font.bold, paddingXY 0 10 ]
+            [ text "Keywords:" ]
+        , keywordsFilter model
+        ]
+
+
+dateStartField : Model -> Element Msg
+dateStartField model =
+    column [ spacing 3 ]
+        [ row [ width fill, spacing 5 ]
+            [ Input.text
+                [ width <| fillPortion 5 ]
+                { onChange =
+                    \string ->
+                        UpdateStartDateTextField string
+                , text = Maybe.withDefault "" model.mStartDate
+                , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
+                , label = Input.labelHidden "Filter Designs by Date - start"
+                }
+            , paragraph [ width <| fillPortion 3 ] [ text <| "Start date" ]
+            ]
+        ]
+
+
+dateEndField : Model -> Element Msg
+dateEndField model =
+    column [ spacing 3 ]
+        [ row [ width fill, spacing 5 ]
+            [ Input.text
+                [ width <| fillPortion 5 ]
+                { onChange =
+                    \string ->
+                        UpdateEndDateTextField string
+                , text = Maybe.withDefault "" model.mEndDate
+                , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
+                , label = Input.labelHidden "Filter Designs by Date - end"
+                }
+            , paragraph [ width <| fillPortion 3 ] [ text <| "End date" ]
+            ]
         ]
 
 
 classificationFilter : Model -> Element Msg
 classificationFilter model =
     column []
-        [ filterCheckbox ( model, "classificationOriginalDeNovo" )
-        , filterCheckbox ( model, "classificationRelativeDeNovo" )
-        , filterCheckbox ( model, "classificationSmall" )
-        , filterCheckbox ( model, "classificationEngineered" )
-        , filterCheckbox ( model, "classificationUnknown" )
+        [ filterCheckbox ( model, classificationOriginalDeNovoKey )
+        , filterCheckbox ( model, classificationRelativeDeNovoKey )
+        , filterCheckbox ( model, classificationSmallKey )
+        , filterCheckbox ( model, classificationEngineeredKey )
+        , filterCheckbox ( model, classificationUnknownKey )
         ]
 
 
+keywordsFilter : Model -> Element Msg
+keywordsFilter model =
+    column []
+        [ filterCheckbox ( model, classificationUnknownKey ) ]
+
+
 filterCheckbox : ( Model, String ) -> Element Msg
-filterCheckbox ( model, checkboxType ) =
-    let
-        checkboxLabel =
-            case checkboxType of
-                "classificationOriginalDeNovo" ->
-                    text "original"
-
-                "classificationRelativeDeNovo" ->
-                    text "relative"
-
-                "classificationSmall" ->
-                    text "small"
-
-                "classificationEngineered" ->
-                    text "engineered"
-
-                "classificationUnknown" ->
-                    text "unknown"
-
-                _ ->
-                    Debug.todo "error"
-
-        filterType =
-            case checkboxType of
-                "classificationOriginalDeNovo" ->
-                    True
-
-                _ ->
-                    False
-    in
+filterCheckbox ( model, dictKey ) =
     Input.checkbox [ padding 3 ]
-        { onChange = UserToggledCheckbox
+        { onChange = \checkboxStatus -> UpdateCheckbox dictKey checkboxStatus
         , icon = checkboxIcon
-        , checked = model.checkbox
-        , label = Input.labelRight [ centerY ] checkboxLabel
+        , checked =
+            case Dict.get dictKey model.checkbox of
+                Just value ->
+                    value
+
+                Nothing ->
+                    False
+        , label = Input.labelRight [ centerY, width fill ] (paragraph [] <| [ text <| dictKey ])
         }
 
 
@@ -601,13 +680,13 @@ getFirstAndLastDate proteinDesigns =
         firstDesignDate =
             List.head sortedDesigns
                 |> Maybe.map .depositionDate
-                |> Maybe.withDefault (Date.fromCalendarDate 1900 Jan 1)
+                |> Maybe.withDefault defaultStartDate
 
         lastDesignDate =
             List.reverse sortedDesigns
                 |> List.head
                 |> Maybe.map .depositionDate
-                |> Maybe.withDefault (Date.fromCalendarDate 2100 Dec 31)
+                |> Maybe.withDefault defaultEndDate
     in
     { firstDate = firstDesignDate, lastDate = lastDesignDate }
 
@@ -735,7 +814,7 @@ designDetailsView proteinDesign =
                         , Font.underline
                         ]
                         { url =
-                            "https://www.ebi.ac.uk/pdbe/entry/pdb/"
+                            "https://www.rcsb.org/structure/"
                                 ++ proteinDesign.pdbCode
                         , label =
                             proteinDesign.pdbCode
@@ -861,28 +940,8 @@ main =
         { view = view
         , init = \_ -> init
         , update = update
-        , subscriptions = subscriptions
+        , subscriptions = always Sub.none
         }
-
-
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    onKeyPress keyDecoder
-
-
-keyDecoder : Json.Decode.Decoder Msg
-keyDecoder =
-    Json.Decode.map toKey (Json.Decode.field "key" Json.Decode.string)
-
-
-toKey : String -> Msg
-toKey keyValue =
-    case keyValue of
-        "Enter" ->
-            SearchSubmit
-
-        _ ->
-            ClearSearchField
 
 
 
