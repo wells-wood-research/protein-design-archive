@@ -89,6 +89,11 @@ checkboxDict =
         ]
 
 
+keyToLabel : String -> String
+keyToLabel label =
+    DesignFilter.toString <| DesignFilter.toDesignFilter label
+
+
 
 ---- MODEL ----
 
@@ -144,6 +149,7 @@ type Msg
     | UpdateCheckbox String Bool
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
+    | ClearFilter String
     | ClearAllFilters
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinStructure))
@@ -166,8 +172,13 @@ update msg model =
 
         UpdateCheckbox key checkboxStatus ->
             ( { model | checkbox = Dict.insert key checkboxStatus model.checkbox }
-            , Task.succeed (UpdateFilters key (DesignFilter.toDesignFilter key))
-                |> Task.perform identity
+            , if checkboxStatus then
+                Task.succeed (UpdateFilters key (DesignFilter.toDesignFilter key))
+                    |> Task.perform identity
+
+              else
+                Task.succeed (ClearFilter key)
+                    |> Task.perform identity
             )
 
         UpdateStartDateTextField phrase ->
@@ -214,6 +225,11 @@ update msg model =
                     Ok date ->
                         Task.succeed (UpdateFilters dateEndKey (DateEnd date))
                             |> Task.perform identity
+            )
+
+        ClearFilter key ->
+            ( { model | filters = Dict.remove key model.filters }
+            , Cmd.none
             )
 
         ClearAllFilters ->
@@ -283,7 +299,7 @@ proteinStructureToDesign proteinStructure =
             String.toLower proteinStructure.identifier
 
         structuralKeywords =
-            proteinStructure.keywords
+            String.trim proteinStructure.keywords
 
         depositionDate =
             Date.fromIsoString proteinStructure.date
@@ -514,7 +530,7 @@ filterCheckbox ( model, dictKey ) =
 
                 Nothing ->
                     False
-        , label = Input.labelRight [ centerY, width fill ] (paragraph [] <| [ text <| dictKey ])
+        , label = Input.labelRight [ centerY, width fill ] (paragraph [] <| [ text <| keyToLabel dictKey ])
         }
 
 
