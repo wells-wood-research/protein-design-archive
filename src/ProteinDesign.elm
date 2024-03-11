@@ -5,7 +5,7 @@ import Date exposing (Date, Unit(..))
 
 type alias ProteinDesign =
     { pdbCode : String
-    , structuralKeywords : String
+    , structuralKeywords : Keyword
     , depositionDate : Date
     , picturePath : String
     , doiLink : String
@@ -20,7 +20,7 @@ type alias ProteinDesign =
 searchableText : ProteinDesign -> String
 searchableText design =
     [ design.pdbCode
-    , design.structuralKeywords
+    , keywordToString design.structuralKeywords
     , design.doiLink
     , String.join " " design.sequences
     , classificationToString design.classification
@@ -39,8 +39,8 @@ type Classification
     | Unknown
 
 
-rawStringToClassfication : String -> Classification
-rawStringToClassfication string =
+stringToClassfication : String -> Classification
+stringToClassfication string =
     case string of
         "original de novo design" ->
             OriginalDeNovo
@@ -94,3 +94,111 @@ classificationToColour classification =
 
         Unknown ->
             "#333333"
+
+
+type Keyword
+    = Synthetic
+    | DeNovo
+    | Novel
+    | Designed
+    | ProteinBinding
+    | MetalBinding
+    | Transcription
+    | Growth
+    | Structural
+    | AlphaHelicalBundle
+    | BetaBetaAlpha
+    | CoiledCoil
+    | UnknownFunction
+
+
+stringToKeyword : String -> Keyword
+stringToKeyword string =
+    case string of
+        "synthetic protein model" ->
+            Synthetic
+
+        "de novo protein" ->
+            DeNovo
+
+        "de novo protein design" ->
+            DeNovo
+
+        "novel sequence" ->
+            Novel
+
+        "designed peptide" ->
+            Designed
+
+        "protein binding" ->
+            ProteinBinding
+
+        "metal binding protein" ->
+            MetalBinding
+
+        "transcription" ->
+            Transcription
+
+        "growth response protein" ->
+            Growth
+
+        "structural protein" ->
+            Structural
+
+        "unknown function" ->
+            UnknownFunction
+
+        "alpha-helical bundle" ->
+            AlphaHelicalBundle
+
+        "beta beta alpha motif" ->
+            BetaBetaAlpha
+
+        "coiled coil" ->
+            CoiledCoil
+
+        _ ->
+            UnknownFunction
+
+
+keywordToString : Keyword -> String
+keywordToString keyword =
+    case keyword of
+        Synthetic ->
+            "synthetic"
+
+        DeNovo ->
+            "de novo"
+
+        Novel ->
+            "novel sequence"
+
+        Designed ->
+            "designed peptide"
+
+        ProteinBinding ->
+            "protein binding"
+
+        MetalBinding ->
+            "metal binding"
+
+        Transcription ->
+            "transcription"
+
+        Growth ->
+            "growth response"
+
+        Structural ->
+            "structural"
+
+        UnknownFunction ->
+            "unknown"
+
+        AlphaHelicalBundle ->
+            "alpha-helical bundle"
+
+        BetaBetaAlpha ->
+            "beta-beta-alpha motif"
+
+        CoiledCoil ->
+            "coiled-coil"

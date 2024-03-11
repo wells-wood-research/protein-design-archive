@@ -2,7 +2,7 @@ module DesignFilter exposing (..)
 
 import Date
 import List exposing (filter)
-import ProteinDesign exposing (Classification(..), ProteinDesign, classificationToString, searchableText)
+import ProteinDesign exposing (Classification(..), Keyword(..), ProteinDesign, classificationToString, keywordToString, searchableText)
 
 
 type DesignFilter
@@ -10,6 +10,7 @@ type DesignFilter
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
+    | Tag Keyword
 
 
 toString : DesignFilter -> String
@@ -26,6 +27,9 @@ toString filter =
 
         DesignClass classification ->
             classificationToString classification
+
+        Tag keyword ->
+            keywordToString keyword
 
 
 toDesignFilter : String -> DesignFilter
@@ -45,6 +49,45 @@ toDesignFilter key =
 
         "design-classification-unknown" ->
             DesignClass Unknown
+
+        "design-keyword-synthetic" ->
+            Tag Synthetic
+
+        "design-keyword-de-novo" ->
+            Tag DeNovo
+
+        "design-keyword-novel" ->
+            Tag Novel
+
+        "design-keyword-designed" ->
+            Tag Designed
+
+        "design-keyword-protein-binding" ->
+            Tag ProteinBinding
+
+        "design-keyword-metal-binding" ->
+            Tag MetalBinding
+
+        "design-keyword-transcription" ->
+            Tag Transcription
+
+        "design-keyword-growth" ->
+            Tag Growth
+
+        "design-keyword-structural" ->
+            Tag Structural
+
+        "design-keyword-alpha-helical-bundle" ->
+            Tag AlphaHelicalBundle
+
+        "design-keyword-beta-beta-alpha" ->
+            Tag BetaBetaAlpha
+
+        "design-keyword-coiled-coil" ->
+            Tag CoiledCoil
+
+        "design-keyword-unknown" ->
+            Tag UnknownFunction
 
         _ ->
             ContainsText ""
@@ -86,3 +129,6 @@ meetsOneFilter design filter =
 
         DesignClass classification ->
             classification == design.classification
+
+        Tag keyword ->
+            keyword == design.structuralKeywords

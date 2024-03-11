@@ -58,6 +58,71 @@ classificationUnknownKey =
     "design-classification-unknown"
 
 
+keywordSyntheticKey : String
+keywordSyntheticKey =
+    "design-keyword-synthetic"
+
+
+keywordDeNovoKey : String
+keywordDeNovoKey =
+    "design-keyword-de-novo"
+
+
+keywordNovelKey : String
+keywordNovelKey =
+    "design-keyword-novel"
+
+
+keywordDesignedKey : String
+keywordDesignedKey =
+    "design-keyword-designed"
+
+
+keywordProteinBindingKey : String
+keywordProteinBindingKey =
+    "design-keyword-protein-binding"
+
+
+keywordMetalBindingKey : String
+keywordMetalBindingKey =
+    "design-keyword-metal-binding"
+
+
+keywordTranscriptionKey : String
+keywordTranscriptionKey =
+    "design-keyword-transcription"
+
+
+keywordGrowthKey : String
+keywordGrowthKey =
+    "design-keyword-growth"
+
+
+keywordStructuralKey : String
+keywordStructuralKey =
+    "design-keyword-structural"
+
+
+keywordAlphaHelicalBundleKey : String
+keywordAlphaHelicalBundleKey =
+    "design-keyword-alpha-helical-bundle"
+
+
+keywordBetaBetaAlphaKey : String
+keywordBetaBetaAlphaKey =
+    "design-keyword-beta-beta-alpha"
+
+
+keywordCoiledCoilKey : String
+keywordCoiledCoilKey =
+    "design-keyword-coiled-coil"
+
+
+keywordUnknownFunctionKey : String
+keywordUnknownFunctionKey =
+    "design-keyword-unknown"
+
+
 dateStartKey : String
 dateStartKey =
     "deposition-date-start"
@@ -86,6 +151,19 @@ checkboxDict =
         , ( classificationSmallKey, False )
         , ( classificationEngineeredKey, False )
         , ( classificationUnknownKey, False )
+        , ( keywordSyntheticKey, False )
+        , ( keywordDeNovoKey, False )
+        , ( keywordNovelKey, False )
+        , ( keywordDesignedKey, False )
+        , ( keywordProteinBindingKey, False )
+        , ( keywordMetalBindingKey, False )
+        , ( keywordTranscriptionKey, False )
+        , ( keywordGrowthKey, False )
+        , ( keywordStructuralKey, False )
+        , ( keywordAlphaHelicalBundleKey, False )
+        , ( keywordBetaBetaAlphaKey, False )
+        , ( keywordCoiledCoilKey, False )
+        , ( keywordUnknownFunctionKey, False )
         ]
 
 
@@ -299,7 +377,7 @@ proteinStructureToDesign proteinStructure =
             String.toLower proteinStructure.identifier
 
         structuralKeywords =
-            String.trim proteinStructure.keywords
+            stringToKeyword <| String.trim proteinStructure.keywords
 
         depositionDate =
             Date.fromIsoString proteinStructure.date
@@ -321,7 +399,7 @@ proteinStructureToDesign proteinStructure =
             List.concatMap (\polyEntity -> extractSequencesFromPolyEntity polyEntity) proteinStructure.data.polymerEntities
 
         classification =
-            rawStringToClassfication proteinStructure.classification
+            stringToClassfication proteinStructure.classification
 
         authors =
             proteinStructure.authors
@@ -515,7 +593,20 @@ classificationFilter model =
 keywordsFilter : Model -> Element Msg
 keywordsFilter model =
     column []
-        [ filterCheckbox ( model, classificationUnknownKey ) ]
+        [ filterCheckbox ( model, keywordDeNovoKey )
+        , filterCheckbox ( model, keywordSyntheticKey )
+        , filterCheckbox ( model, keywordNovelKey )
+        , filterCheckbox ( model, keywordDesignedKey )
+        , filterCheckbox ( model, keywordProteinBindingKey )
+        , filterCheckbox ( model, keywordMetalBindingKey )
+        , filterCheckbox ( model, keywordTranscriptionKey )
+        , filterCheckbox ( model, keywordGrowthKey )
+        , filterCheckbox ( model, keywordStructuralKey )
+        , filterCheckbox ( model, keywordAlphaHelicalBundleKey )
+        , filterCheckbox ( model, keywordBetaBetaAlphaKey )
+        , filterCheckbox ( model, keywordCoiledCoilKey )
+        , filterCheckbox ( model, keywordUnknownFunctionKey )
+        ]
 
 
 filterCheckbox : ( Model, String ) -> Element Msg
@@ -852,7 +943,7 @@ designDetailsView proteinDesign =
                 , paragraph
                     bodyFont
                     [ text "Structural Keywords: "
-                    , el [ Font.italic ] (text proteinDesign.structuralKeywords)
+                    , el [ Font.italic ] (text <| keywordToString proteinDesign.structuralKeywords)
                     ]
                 , paragraph
                     bodyFont
