@@ -260,27 +260,22 @@ update msg model =
             )
 
         UpdateStartDateTextField phrase ->
-            ( { model | mStartDate = phrase |> Just }
-            , if String.right 1 phrase /= "-" then
-                case Date.fromIsoString phrase of
-                    Err _ ->
-                        Task.succeed (UpdateFilters dateStartKey (DateStart defaultStartDate))
-                            |> Task.perform identity
+            case
+                Date.fromIsoString
+                    (if String.right 1 phrase /= "-" then
+                        phrase
 
-                    Ok date ->
-                        Task.succeed (UpdateFilters dateStartKey (DateStart date))
-                            |> Task.perform identity
+                     else
+                        String.dropRight 1 phrase
+                    )
+            of
+                Err _ ->
+                    { model | mStartDate = phrase |> Just }
+                        |> update (UpdateFilters dateStartKey (DateStart defaultStartDate))
 
-              else
-                case Date.fromIsoString (String.dropRight 1 phrase) of
-                    Err _ ->
-                        Task.succeed (UpdateFilters dateStartKey (DateStart defaultStartDate))
-                            |> Task.perform identity
-
-                    Ok date ->
-                        Task.succeed (UpdateFilters dateStartKey (DateStart date))
-                            |> Task.perform identity
-            )
+                Ok date ->
+                    { model | mStartDate = phrase |> Just }
+                        |> update (UpdateFilters dateStartKey (DateStart date))
 
         UpdateEndDateTextField phrase ->
             ( { model | mEndDate = phrase |> Just }
