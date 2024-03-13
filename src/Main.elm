@@ -233,18 +233,20 @@ portraitView model =
         ]
 
 
-title : Element msg
+title : Element Msg
 title =
     el
         (titleFont
             ++ [ width fill
                , padding 30
                , Background.color <| rgb255 143 192 169
-               , Font.center
                ]
         )
     <|
-        paragraph [] [ text "Protein Design Archive" ]
+        Input.button [ centerX ]
+            { label = paragraph [] [ text "Protein Design Archive" ]
+            , onPress = Just Home
+            }
 
 
 sidebar : Element Msg
