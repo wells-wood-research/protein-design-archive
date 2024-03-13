@@ -94,7 +94,6 @@ type Msg
     | ClearAllFilters
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinStructure))
-    | ProcessedProteinDesigns (List ProteinDesign)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -162,26 +161,15 @@ update msg model =
             )
 
         SendDesignsHttpRequest ->
-            ( { model | proteinStructures = [] }, getData )
+            ( model, getData )
 
         DesignsDataReceived result ->
             case result of
                 Ok proteinDataJson ->
-                    let
-                        ( proteinDesigns, _ ) =
-                            processProteinStructures proteinDataJson
-                    in
-                    ( { model | proteinStructures = proteinDataJson, proteinDesigns = proteinDesigns }, Cmd.none )
+                    ( { model | proteinStructures = proteinDataJson, proteinDesigns = processProteinStructures proteinDataJson }, Cmd.none )
 
-                Err str ->
-                    let
-                        _ =
-                            Debug.log "decode error" str
-                    in
+                Err _ ->
                     ( { model | proteinStructures = [] }, Cmd.none )
-
-        ProcessedProteinDesigns processedDesigns ->
-            ( { model | proteinDesigns = processedDesigns }, Cmd.none )
 
 
 
@@ -201,16 +189,9 @@ proteinStructuresDecoder =
     list Decoders.proteinStructureDecoder
 
 
-processProteinStructures : List ProteinStructure -> ( List ProteinDesign, Cmd Msg )
+processProteinStructures : List ProteinStructure -> List ProteinDesign
 processProteinStructures proteinStructures =
-    let
-        processedDesigns =
-            proteinStructures |> List.filterMap proteinStructureToDesign
-    in
-    ( processedDesigns
-    , Task.succeed (ProcessedProteinDesigns processedDesigns)
-        |> Task.perform identity
-    )
+    List.filterMap proteinStructureToDesign proteinStructures
 
 
 proteinStructureToDesign : ProteinStructure -> Maybe ProteinDesign
