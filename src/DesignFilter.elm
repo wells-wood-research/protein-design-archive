@@ -14,6 +14,29 @@ type DesignFilter
     | Tag Keyword
 
 
+defaultKeys :
+    { dateStartKey : String
+    , dateEndKey : String
+    , searchTextKey : String
+    , classificationOriginalDeNovoKey : String
+    , classificationRelativeDeNovoKey : String
+    , classificationSmallKey : String
+    , classificationEngineeredKey : String
+    , classificationUnknownKey : String
+    , keywordSyntheticKey : String
+    , keywordDeNovoKey : String
+    , keywordNovelKey : String
+    , keywordDesignedKey : String
+    , keywordProteinBindingKey : String
+    , keywordMetalBindingKey : String
+    , keywordTranscriptionKey : String
+    , keywordGrowthKey : String
+    , keywordStructuralKey : String
+    , keywordAlphaHelicalBundleKey : String
+    , keywordBetaBetaAlphaKey : String
+    , keywordCoiledCoilKey : String
+    , keywordUnknownFunctionKey : String
+    }
 defaultKeys =
     { dateStartKey = "deposition-date-start"
     , dateEndKey = "deposition-date-end"

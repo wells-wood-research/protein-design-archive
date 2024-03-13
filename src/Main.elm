@@ -4,7 +4,8 @@ import Browser
 import Browser.Events exposing (onKeyPress)
 import Date exposing (Date, Unit(..))
 import Decoders exposing (..)
-import DesignFilter exposing (DesignFilter(..))
+import DesignDate exposing (dateToPosition, defaultEndDate, defaultStartDate, getFirstAndLastDate, isValidIsoDate, removeHyphenFromIsoDate)
+import DesignFilter exposing (DesignFilter(..), defaultKeys, keyToLabel)
 import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
@@ -21,93 +22,12 @@ import List exposing (minimum)
 import List.Extra as ListEx
 import ProteinDesign exposing (..)
 import Random
+import Style exposing (..)
 import Svg as S
 import Svg.Attributes as SAtt
 import Svg.Events as SEvents
 import Task
 import Time exposing (Month(..))
-
-
-defaultKeys =
-    { dateStartKey = "deposition-date-start"
-    , dateEndKey = "deposition-date-end"
-    , searchTextKey = "search-text-string"
-    , classificationOriginalDeNovoKey = "design-classification-original"
-    , classificationRelativeDeNovoKey = "design-classification-relative"
-    , classificationSmallKey = "design-classification-small"
-    , classificationEngineeredKey = "design-classification-engineered"
-    , classificationUnknownKey = "design-classification-unknown"
-    , keywordSyntheticKey = "design-keyword-synthetic"
-    , keywordDeNovoKey = "design-keyword-de-novo"
-    , keywordNovelKey = "design-keyword-novel"
-    , keywordDesignedKey = "design-keyword-designed"
-    , keywordProteinBindingKey = "design-keyword-protein-binding"
-    , keywordMetalBindingKey = "design-keyword-metal-binding"
-    , keywordTranscriptionKey = "design-keyword-transcription"
-    , keywordGrowthKey = "design-keyword-growth"
-    , keywordStructuralKey = "design-keyword-structural"
-    , keywordAlphaHelicalBundleKey = "design-keyword-alpha-helical-bundle"
-    , keywordBetaBetaAlphaKey = "design-keyword-beta-beta-alpha"
-    , keywordCoiledCoilKey = "design-keyword-coiled-coil"
-    , keywordUnknownFunctionKey = "design-keyword-unknown"
-    }
-
-
-checkboxDict : Dict String Bool
-checkboxDict =
-    Dict.fromList
-        [ ( defaultKeys.classificationOriginalDeNovoKey, False )
-        , ( defaultKeys.classificationRelativeDeNovoKey, False )
-        , ( defaultKeys.classificationSmallKey, False )
-        , ( defaultKeys.classificationEngineeredKey, False )
-        , ( defaultKeys.classificationUnknownKey, False )
-        , ( defaultKeys.keywordSyntheticKey, False )
-        , ( defaultKeys.keywordDeNovoKey, False )
-        , ( defaultKeys.keywordNovelKey, False )
-        , ( defaultKeys.keywordDesignedKey, False )
-        , ( defaultKeys.keywordProteinBindingKey, False )
-        , ( defaultKeys.keywordMetalBindingKey, False )
-        , ( defaultKeys.keywordTranscriptionKey, False )
-        , ( defaultKeys.keywordGrowthKey, False )
-        , ( defaultKeys.keywordStructuralKey, False )
-        , ( defaultKeys.keywordAlphaHelicalBundleKey, False )
-        , ( defaultKeys.keywordBetaBetaAlphaKey, False )
-        , ( defaultKeys.keywordCoiledCoilKey, False )
-        , ( defaultKeys.keywordUnknownFunctionKey, False )
-        ]
-
-
-defaultStartDate : Date
-defaultStartDate =
-    Date.fromCalendarDate 1900 Jan 1
-
-
-defaultEndDate : Date
-defaultEndDate =
-    Date.fromCalendarDate 2100 Dec 31
-
-
-removeHyphenFromIsoDate : String -> String
-removeHyphenFromIsoDate string =
-    if String.right 1 string /= "-" then
-        string
-
-    else
-        String.dropRight 1 string
-
-
-isValidIsoDate : String -> Bool
-isValidIsoDate string =
-    let
-        phrase =
-            removeHyphenFromIsoDate string
-    in
-    case Date.fromIsoString phrase of
-        Err _ ->
-            False
-
-        Ok _ ->
-            True
 
 
 ifEmptyOrNot : String -> Maybe String
@@ -117,11 +37,6 @@ ifEmptyOrNot string =
 
     else
         Just string
-
-
-keyToLabel : String -> String
-keyToLabel label =
-    DesignFilter.toString <| DesignFilter.toDesignFilter label
 
 
 
@@ -151,7 +66,7 @@ init =
       , focusedProteinDesign = Nothing
       , randomNumbers = []
       , filters = Dict.empty
-      , checkbox = checkboxDict
+      , checkbox = DesignFilter.checkboxDict
       , mStartDate = Nothing
       , mEndDate = Nothing
       }
@@ -245,7 +160,7 @@ update msg model =
         ClearAllFilters ->
             ( { model
                 | filters = Dict.empty
-                , checkbox = checkboxDict
+                , checkbox = DesignFilter.checkboxDict
               }
             , Cmd.none
             )
@@ -345,6 +260,15 @@ proteinStructureToDesign proteinStructure =
             proteinStructure.abstract
     in
     ProteinDesign pdbCode structuralKeywords depositionDate picturePath doiLink sequences classification authors pubmedID abstract |> Just
+
+
+extractSequencesFromPolyEntity : PolyEntities -> List String
+extractSequencesFromPolyEntity polyEntity =
+    let
+        entityPoly =
+            polyEntity.entity_poly
+    in
+    [ entityPoly.pdbx_seq_one_letter_code_can ]
 
 
 
@@ -563,6 +487,18 @@ filterCheckbox ( model, dictKey ) =
         }
 
 
+sidebarButton : FeatherIcons.Icon -> Element Msg
+sidebarButton icon =
+    el
+        [ Border.solid
+        , Border.width 2
+        ]
+        (icon
+            |> FeatherIcons.toHtml []
+            |> html
+        )
+
+
 checkboxIcon : Bool -> Element msg
 checkboxIcon isChecked =
     el
@@ -583,18 +519,6 @@ checkboxIcon isChecked =
                     rgb255 255 255 255
             ]
             none
-
-
-sidebarButton : FeatherIcons.Icon -> Element Msg
-sidebarButton icon =
-    el
-        [ Border.solid
-        , Border.width 2
-        ]
-        (icon
-            |> FeatherIcons.toHtml []
-            |> html
-        )
 
 
 timeline : Model -> Element Msg
@@ -714,28 +638,6 @@ timelineGraphic { firstDate, lastDate } randomNumbers proteinDesigns =
         )
 
 
-getFirstAndLastDate : List ProteinDesign -> { firstDate : Date, lastDate : Date }
-getFirstAndLastDate proteinDesigns =
-    let
-        sortedDesigns =
-            List.sortWith
-                (\a b -> Date.compare a.depositionDate b.depositionDate)
-                proteinDesigns
-
-        firstDesignDate =
-            List.head sortedDesigns
-                |> Maybe.map .depositionDate
-                |> Maybe.withDefault defaultStartDate
-
-        lastDesignDate =
-            List.reverse sortedDesigns
-                |> List.head
-                |> Maybe.map .depositionDate
-                |> Maybe.withDefault defaultEndDate
-    in
-    { firstDate = firstDesignDate, lastDate = lastDesignDate }
-
-
 designToMarker :
     { width : Int
     , height : Int
@@ -767,33 +669,6 @@ designToMarker { width, height, radius, firstDate, lastDate } ( randomShift, ( i
         , SEvents.onClick <| ClickedDesign index
         ]
         []
-
-
-dateToPosition :
-    { firstDate : Date
-    , lastDate : Date
-    , date : Date
-    , height : Int
-    , radius : Int
-    }
-    -> Int
-dateToPosition { firstDate, lastDate, date, height, radius } =
-    let
-        dateRange =
-            Date.diff Days lastDate firstDate
-                |> toFloat
-
-        dateDelta =
-            Date.diff Days date firstDate
-                |> toFloat
-
-        fraction =
-            dateDelta / dateRange
-    in
-    fraction
-        * toFloat (height - (2 * radius))
-        |> round
-        |> (+) 3
 
 
 details : Maybe ProteinDesign -> Element msg
@@ -944,35 +819,7 @@ designDetailsView proteinDesign =
                     |> text
                 ]
             ]
-
-        {-
-           , paragraph
-               h2Font
-               [ text "Structural Similarity"
-               ]
-           , paragraph
-               h2Font
-               [ text "Homologues"
-               ]
-           , paragraph
-               h2Font
-               [ text "Sequence Metrics"
-               ]
-           , paragraph
-               h2Font
-               [ text "DE-STRESS Metrics"
-               ]
-        -}
         ]
-
-
-extractSequencesFromPolyEntity : PolyEntities -> List String
-extractSequencesFromPolyEntity polyEntity =
-    let
-        entityPoly =
-            polyEntity.entity_poly
-    in
-    [ entityPoly.pdbx_seq_one_letter_code_can ]
 
 
 
@@ -987,64 +834,3 @@ main =
         , update = update
         , subscriptions = always Sub.none
         }
-
-
-
----- STYLE ----
--- https://coolors.co/faf3dd-c8d5b9-8fc0a9-68b0ab-696d7d
--- eggshell 250 243 221
--- tea green 200 213 185
--- cambridge blue 143 192 169
--- verdigris 104 176 171
--- payne's gray 105 109 125
-
-
-titleFont : List (Attribute msg)
-titleFont =
-    [ Font.family
-        [ Font.typeface "Barlow"
-        , Font.sansSerif
-        ]
-    , Font.size 40
-    ]
-
-
-h1Font : List (Attribute msg)
-h1Font =
-    [ Font.family
-        [ Font.typeface "Lato"
-        , Font.sansSerif
-        ]
-    , Font.size 32
-    ]
-
-
-h2Font : List (Attribute msg)
-h2Font =
-    [ Font.family
-        [ Font.typeface "Lato"
-        , Font.sansSerif
-        ]
-    , Font.size 24
-    ]
-
-
-bodyFont : List (Attribute msg)
-bodyFont =
-    [ Font.family
-        [ Font.typeface "Lato"
-        , Font.sansSerif
-        ]
-    , Font.size 16
-    , Font.alignLeft
-    ]
-
-
-monospacedFont : List (Attribute msg)
-monospacedFont =
-    [ Font.family
-        [ Font.typeface "Fira Code"
-        , Font.sansSerif
-        ]
-    , Font.size 16
-    ]

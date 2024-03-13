@@ -1,6 +1,7 @@
 module DesignDate exposing (..)
 
 import Date exposing (Date, Unit(..))
+import ProteinDesign exposing (..)
 import Time exposing (Month(..))
 
 
@@ -35,3 +36,52 @@ isValidIsoDate string =
 
         Ok _ ->
             True
+
+
+getFirstAndLastDate : List ProteinDesign -> { firstDate : Date, lastDate : Date }
+getFirstAndLastDate proteinDesigns =
+    let
+        sortedDesigns =
+            List.sortWith
+                (\a b -> Date.compare a.depositionDate b.depositionDate)
+                proteinDesigns
+
+        firstDesignDate =
+            List.head sortedDesigns
+                |> Maybe.map .depositionDate
+                |> Maybe.withDefault defaultStartDate
+
+        lastDesignDate =
+            List.reverse sortedDesigns
+                |> List.head
+                |> Maybe.map .depositionDate
+                |> Maybe.withDefault defaultEndDate
+    in
+    { firstDate = firstDesignDate, lastDate = lastDesignDate }
+
+
+dateToPosition :
+    { firstDate : Date
+    , lastDate : Date
+    , date : Date
+    , height : Int
+    , radius : Int
+    }
+    -> Int
+dateToPosition { firstDate, lastDate, date, height, radius } =
+    let
+        dateRange =
+            Date.diff Days lastDate firstDate
+                |> toFloat
+
+        dateDelta =
+            Date.diff Days date firstDate
+                |> toFloat
+
+        fraction =
+            dateDelta / dateRange
+    in
+    fraction
+        * toFloat (height - (2 * radius))
+        |> round
+        |> (+) 3
