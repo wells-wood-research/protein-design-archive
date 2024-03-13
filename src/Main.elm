@@ -16,7 +16,7 @@ import Html exposing (Html, div, input)
 import Html.Attributes exposing (placeholder, type_)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode exposing (Decoder, list)
+import Json.Decode exposing (Decoder, list, string)
 import List exposing (minimum)
 import List.Extra as ListEx
 import ProteinDesign exposing (..)
@@ -98,12 +98,25 @@ removeHyphenFromIsoDate string =
 
 isValidIsoDate : String -> Bool
 isValidIsoDate string =
-    case Date.fromIsoString string of
+    let
+        phrase =
+            removeHyphenFromIsoDate string
+    in
+    case Date.fromIsoString phrase of
         Err _ ->
             False
 
         Ok _ ->
             True
+
+
+ifEmptyOrNot : String -> Maybe String
+ifEmptyOrNot string =
+    if String.isEmpty string then
+        Nothing
+
+    else
+        Just string
 
 
 keyToLabel : String -> String
@@ -139,8 +152,8 @@ init =
       , randomNumbers = []
       , filters = Dict.empty
       , checkbox = checkboxDict
-      , mStartDate = Just ""
-      , mEndDate = Just ""
+      , mStartDate = Nothing
+      , mEndDate = Nothing
       }
     , Cmd.batch
         [ Random.generate RandomNumbers gen1000Numbers
@@ -203,11 +216,11 @@ update msg model =
             in
             case Date.fromIsoString phrase of
                 Err _ ->
-                    { model | mStartDate = string |> Just }
+                    { model | mStartDate = ifEmptyOrNot string }
                         |> update (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
 
                 Ok date ->
-                    { model | mStartDate = string |> Just }
+                    { model | mStartDate = ifEmptyOrNot string }
                         |> update (UpdateFilters defaultKeys.dateStartKey (DateStart date))
 
         UpdateEndDateTextField string ->
@@ -217,11 +230,11 @@ update msg model =
             in
             case Date.fromIsoString phrase of
                 Err _ ->
-                    { model | mEndDate = string |> Just }
+                    { model | mStartDate = ifEmptyOrNot string }
                         |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
 
                 Ok date ->
-                    { model | mStartDate = string |> Just }
+                    { model | mStartDate = ifEmptyOrNot string }
                         |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
 
         ClearFilter key ->
@@ -467,7 +480,19 @@ dateStartField model =
     column [ spacing 3 ]
         [ row [ width fill, spacing 5 ]
             [ Input.text
-                [ width <| fillPortion 5 ]
+                [ width <| fillPortion 5
+                , Background.color <|
+                    case model.mStartDate of
+                        Nothing ->
+                            rgb255 255 255 255
+
+                        Just string ->
+                            if isValidIsoDate string then
+                                rgb255 223 255 214
+
+                            else
+                                rgb255 255 215 213
+                ]
                 { onChange =
                     \string ->
                         UpdateStartDateTextField string
@@ -485,7 +510,19 @@ dateEndField model =
     column [ spacing 3 ]
         [ row [ width fill, spacing 5 ]
             [ Input.text
-                [ width <| fillPortion 5 ]
+                [ width <| fillPortion 5
+                , Background.color <|
+                    case model.mStartDate of
+                        Nothing ->
+                            rgb255 255 255 255
+
+                        Just string ->
+                            if isValidIsoDate string then
+                                rgb255 223 255 214
+
+                            else
+                                rgb255 255 215 213
+                ]
                 { onChange =
                     \string ->
                         UpdateEndDateTextField string
