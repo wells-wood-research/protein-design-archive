@@ -1,6 +1,7 @@
 module DesignFilter exposing (..)
 
 import Date
+import Dict exposing (Dict)
 import List exposing (filter)
 import ProteinDesign exposing (Classification(..), Keyword(..), ProteinDesign, classificationToString, keywordToString, searchableText)
 
@@ -11,6 +12,55 @@ type DesignFilter
     | DateEnd Date.Date
     | DesignClass Classification
     | Tag Keyword
+
+
+defaultKeys =
+    { dateStartKey = "deposition-date-start"
+    , dateEndKey = "deposition-date-end"
+    , searchTextKey = "search-text-string"
+    , classificationOriginalDeNovoKey = "design-classification-original"
+    , classificationRelativeDeNovoKey = "design-classification-relative"
+    , classificationSmallKey = "design-classification-small"
+    , classificationEngineeredKey = "design-classification-engineered"
+    , classificationUnknownKey = "design-classification-unknown"
+    , keywordSyntheticKey = "design-keyword-synthetic"
+    , keywordDeNovoKey = "design-keyword-de-novo"
+    , keywordNovelKey = "design-keyword-novel"
+    , keywordDesignedKey = "design-keyword-designed"
+    , keywordProteinBindingKey = "design-keyword-protein-binding"
+    , keywordMetalBindingKey = "design-keyword-metal-binding"
+    , keywordTranscriptionKey = "design-keyword-transcription"
+    , keywordGrowthKey = "design-keyword-growth"
+    , keywordStructuralKey = "design-keyword-structural"
+    , keywordAlphaHelicalBundleKey = "design-keyword-alpha-helical-bundle"
+    , keywordBetaBetaAlphaKey = "design-keyword-beta-beta-alpha"
+    , keywordCoiledCoilKey = "design-keyword-coiled-coil"
+    , keywordUnknownFunctionKey = "design-keyword-unknown"
+    }
+
+
+checkboxDict : Dict String Bool
+checkboxDict =
+    Dict.fromList
+        [ ( defaultKeys.classificationOriginalDeNovoKey, False )
+        , ( defaultKeys.classificationRelativeDeNovoKey, False )
+        , ( defaultKeys.classificationSmallKey, False )
+        , ( defaultKeys.classificationEngineeredKey, False )
+        , ( defaultKeys.classificationUnknownKey, False )
+        , ( defaultKeys.keywordSyntheticKey, False )
+        , ( defaultKeys.keywordDeNovoKey, False )
+        , ( defaultKeys.keywordNovelKey, False )
+        , ( defaultKeys.keywordDesignedKey, False )
+        , ( defaultKeys.keywordProteinBindingKey, False )
+        , ( defaultKeys.keywordMetalBindingKey, False )
+        , ( defaultKeys.keywordTranscriptionKey, False )
+        , ( defaultKeys.keywordGrowthKey, False )
+        , ( defaultKeys.keywordStructuralKey, False )
+        , ( defaultKeys.keywordAlphaHelicalBundleKey, False )
+        , ( defaultKeys.keywordBetaBetaAlphaKey, False )
+        , ( defaultKeys.keywordCoiledCoilKey, False )
+        , ( defaultKeys.keywordUnknownFunctionKey, False )
+        ]
 
 
 toString : DesignFilter -> String
@@ -91,6 +141,11 @@ toDesignFilter key =
 
         _ ->
             ContainsText ""
+
+
+keyToLabel : String -> String
+keyToLabel label =
+    toString <| toDesignFilter label
 
 
 meetsAllFilters : List DesignFilter -> ProteinDesign -> Maybe ProteinDesign
