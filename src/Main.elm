@@ -28,109 +28,53 @@ import Task
 import Time exposing (Month(..))
 
 
-searchTextKey : String
-searchTextKey =
-    "search-text-string"
+defaultKeys =
+    { dateStartKey = "deposition-date-start"
+    , dateEndKey = "deposition-date-end"
+    , searchTextKey = "search-text-string"
+    , classificationOriginalDeNovoKey = "design-classification-original"
+    , classificationRelativeDeNovoKey = "design-classification-relative"
+    , classificationSmallKey = "design-classification-small"
+    , classificationEngineeredKey = "design-classification-engineered"
+    , classificationUnknownKey = "design-classification-unknown"
+    , keywordSyntheticKey = "design-keyword-synthetic"
+    , keywordDeNovoKey = "design-keyword-de-novo"
+    , keywordNovelKey = "design-keyword-novel"
+    , keywordDesignedKey = "design-keyword-designed"
+    , keywordProteinBindingKey = "design-keyword-protein-binding"
+    , keywordMetalBindingKey = "design-keyword-metal-binding"
+    , keywordTranscriptionKey = "design-keyword-transcription"
+    , keywordGrowthKey = "design-keyword-growth"
+    , keywordStructuralKey = "design-keyword-structural"
+    , keywordAlphaHelicalBundleKey = "design-keyword-alpha-helical-bundle"
+    , keywordBetaBetaAlphaKey = "design-keyword-beta-beta-alpha"
+    , keywordCoiledCoilKey = "design-keyword-coiled-coil"
+    , keywordUnknownFunctionKey = "design-keyword-unknown"
+    }
 
 
-classificationOriginalDeNovoKey : String
-classificationOriginalDeNovoKey =
-    "design-classification-original"
-
-
-classificationRelativeDeNovoKey : String
-classificationRelativeDeNovoKey =
-    "design-classification-relative"
-
-
-classificationSmallKey : String
-classificationSmallKey =
-    "design-classification-small"
-
-
-classificationEngineeredKey : String
-classificationEngineeredKey =
-    "design-classification-engineered"
-
-
-classificationUnknownKey : String
-classificationUnknownKey =
-    "design-classification-unknown"
-
-
-keywordSyntheticKey : String
-keywordSyntheticKey =
-    "design-keyword-synthetic"
-
-
-keywordDeNovoKey : String
-keywordDeNovoKey =
-    "design-keyword-de-novo"
-
-
-keywordNovelKey : String
-keywordNovelKey =
-    "design-keyword-novel"
-
-
-keywordDesignedKey : String
-keywordDesignedKey =
-    "design-keyword-designed"
-
-
-keywordProteinBindingKey : String
-keywordProteinBindingKey =
-    "design-keyword-protein-binding"
-
-
-keywordMetalBindingKey : String
-keywordMetalBindingKey =
-    "design-keyword-metal-binding"
-
-
-keywordTranscriptionKey : String
-keywordTranscriptionKey =
-    "design-keyword-transcription"
-
-
-keywordGrowthKey : String
-keywordGrowthKey =
-    "design-keyword-growth"
-
-
-keywordStructuralKey : String
-keywordStructuralKey =
-    "design-keyword-structural"
-
-
-keywordAlphaHelicalBundleKey : String
-keywordAlphaHelicalBundleKey =
-    "design-keyword-alpha-helical-bundle"
-
-
-keywordBetaBetaAlphaKey : String
-keywordBetaBetaAlphaKey =
-    "design-keyword-beta-beta-alpha"
-
-
-keywordCoiledCoilKey : String
-keywordCoiledCoilKey =
-    "design-keyword-coiled-coil"
-
-
-keywordUnknownFunctionKey : String
-keywordUnknownFunctionKey =
-    "design-keyword-unknown"
-
-
-dateStartKey : String
-dateStartKey =
-    "deposition-date-start"
-
-
-dateEndKey : String
-dateEndKey =
-    "deposition-date-end"
+checkboxDict : Dict String Bool
+checkboxDict =
+    Dict.fromList
+        [ ( defaultKeys.classificationOriginalDeNovoKey, False )
+        , ( defaultKeys.classificationRelativeDeNovoKey, False )
+        , ( defaultKeys.classificationSmallKey, False )
+        , ( defaultKeys.classificationEngineeredKey, False )
+        , ( defaultKeys.classificationUnknownKey, False )
+        , ( defaultKeys.keywordSyntheticKey, False )
+        , ( defaultKeys.keywordDeNovoKey, False )
+        , ( defaultKeys.keywordNovelKey, False )
+        , ( defaultKeys.keywordDesignedKey, False )
+        , ( defaultKeys.keywordProteinBindingKey, False )
+        , ( defaultKeys.keywordMetalBindingKey, False )
+        , ( defaultKeys.keywordTranscriptionKey, False )
+        , ( defaultKeys.keywordGrowthKey, False )
+        , ( defaultKeys.keywordStructuralKey, False )
+        , ( defaultKeys.keywordAlphaHelicalBundleKey, False )
+        , ( defaultKeys.keywordBetaBetaAlphaKey, False )
+        , ( defaultKeys.keywordCoiledCoilKey, False )
+        , ( defaultKeys.keywordUnknownFunctionKey, False )
+        ]
 
 
 defaultStartDate : Date
@@ -143,28 +87,23 @@ defaultEndDate =
     Date.fromCalendarDate 2100 Dec 31
 
 
-checkboxDict : Dict String Bool
-checkboxDict =
-    Dict.fromList
-        [ ( classificationOriginalDeNovoKey, False )
-        , ( classificationRelativeDeNovoKey, False )
-        , ( classificationSmallKey, False )
-        , ( classificationEngineeredKey, False )
-        , ( classificationUnknownKey, False )
-        , ( keywordSyntheticKey, False )
-        , ( keywordDeNovoKey, False )
-        , ( keywordNovelKey, False )
-        , ( keywordDesignedKey, False )
-        , ( keywordProteinBindingKey, False )
-        , ( keywordMetalBindingKey, False )
-        , ( keywordTranscriptionKey, False )
-        , ( keywordGrowthKey, False )
-        , ( keywordStructuralKey, False )
-        , ( keywordAlphaHelicalBundleKey, False )
-        , ( keywordBetaBetaAlphaKey, False )
-        , ( keywordCoiledCoilKey, False )
-        , ( keywordUnknownFunctionKey, False )
-        ]
+removeHyphenFromIsoDate : String -> String
+removeHyphenFromIsoDate string =
+    if String.right 1 string /= "-" then
+        string
+
+    else
+        String.dropRight 1 string
+
+
+isValidIsoDate : String -> Bool
+isValidIsoDate string =
+    case Date.fromIsoString string of
+        Err _ ->
+            False
+
+        Ok _ ->
+            True
 
 
 keyToLabel : String -> String
@@ -249,56 +188,41 @@ update msg model =
             )
 
         UpdateCheckbox key checkboxStatus ->
-            ( { model | checkbox = Dict.insert key checkboxStatus model.checkbox }
-            , if checkboxStatus then
-                Task.succeed (UpdateFilters key (DesignFilter.toDesignFilter key))
-                    |> Task.perform identity
+            { model | checkbox = Dict.insert key checkboxStatus model.checkbox }
+                |> (if checkboxStatus then
+                        update (UpdateFilters key (DesignFilter.toDesignFilter key))
 
-              else
-                Task.succeed (ClearFilter key)
-                    |> Task.perform identity
-            )
+                    else
+                        update (ClearFilter key)
+                   )
 
-        UpdateStartDateTextField phrase ->
-            case
-                Date.fromIsoString
-                    (if String.right 1 phrase /= "-" then
-                        phrase
-
-                     else
-                        String.dropRight 1 phrase
-                    )
-            of
+        UpdateStartDateTextField string ->
+            let
+                phrase =
+                    removeHyphenFromIsoDate string
+            in
+            case Date.fromIsoString phrase of
                 Err _ ->
                     { model | mStartDate = phrase |> Just }
-                        |> update (UpdateFilters dateStartKey (DateStart defaultStartDate))
+                        |> update (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
 
                 Ok date ->
                     { model | mStartDate = phrase |> Just }
-                        |> update (UpdateFilters dateStartKey (DateStart date))
+                        |> update (UpdateFilters defaultKeys.dateStartKey (DateStart date))
 
-        UpdateEndDateTextField phrase ->
-            ( { model | mEndDate = phrase |> Just }
-            , if String.right 1 phrase /= "-" then
-                case Date.fromIsoString phrase of
-                    Err _ ->
-                        Task.succeed (UpdateFilters dateEndKey (DateEnd defaultEndDate))
-                            |> Task.perform identity
+        UpdateEndDateTextField string ->
+            let
+                phrase =
+                    removeHyphenFromIsoDate string
+            in
+            case Date.fromIsoString phrase of
+                Err _ ->
+                    { model | mEndDate = phrase |> Just }
+                        |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
 
-                    Ok date ->
-                        Task.succeed (UpdateFilters dateEndKey (DateEnd date))
-                            |> Task.perform identity
-
-              else
-                case Date.fromIsoString (String.dropRight 1 phrase) of
-                    Err _ ->
-                        Task.succeed (UpdateFilters dateEndKey (DateEnd defaultEndDate))
-                            |> Task.perform identity
-
-                    Ok date ->
-                        Task.succeed (UpdateFilters dateEndKey (DateEnd date))
-                            |> Task.perform identity
-            )
+                Ok date ->
+                    { model | mStartDate = phrase |> Just }
+                        |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
 
         ClearFilter key ->
             ( { model | filters = Dict.remove key model.filters }
@@ -462,7 +386,7 @@ sidebar model =
                ]
         )
         [ searchArea
-            (Dict.get searchTextKey model.filters
+            (Dict.get defaultKeys.searchTextKey model.filters
                 |> Maybe.map DesignFilter.toString
             )
         , filterArea model
@@ -492,7 +416,7 @@ searchField : Maybe String -> Element Msg
 searchField mCurrentText =
     Input.text
         []
-        { onChange = \string -> UpdateFilters searchTextKey (ContainsText string)
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextKey (ContainsText string)
         , text = Maybe.withDefault "" mCurrentText
         , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
         , label = Input.labelHidden "Filter Designs Search Box"
@@ -576,32 +500,14 @@ dateEndField model =
 
 classificationFilter : Model -> Element Msg
 classificationFilter model =
-    column []
-        [ filterCheckbox ( model, classificationOriginalDeNovoKey )
-        , filterCheckbox ( model, classificationRelativeDeNovoKey )
-        , filterCheckbox ( model, classificationSmallKey )
-        , filterCheckbox ( model, classificationEngineeredKey )
-        , filterCheckbox ( model, classificationUnknownKey )
-        ]
+    column [] <|
+        List.map (\label -> filterCheckbox ( model, label )) [ defaultKeys.classificationOriginalDeNovoKey, defaultKeys.classificationRelativeDeNovoKey, defaultKeys.classificationSmallKey, defaultKeys.classificationEngineeredKey, defaultKeys.classificationUnknownKey ]
 
 
 keywordsFilter : Model -> Element Msg
 keywordsFilter model =
-    column []
-        [ filterCheckbox ( model, keywordDeNovoKey )
-        , filterCheckbox ( model, keywordSyntheticKey )
-        , filterCheckbox ( model, keywordNovelKey )
-        , filterCheckbox ( model, keywordDesignedKey )
-        , filterCheckbox ( model, keywordProteinBindingKey )
-        , filterCheckbox ( model, keywordMetalBindingKey )
-        , filterCheckbox ( model, keywordTranscriptionKey )
-        , filterCheckbox ( model, keywordGrowthKey )
-        , filterCheckbox ( model, keywordStructuralKey )
-        , filterCheckbox ( model, keywordAlphaHelicalBundleKey )
-        , filterCheckbox ( model, keywordBetaBetaAlphaKey )
-        , filterCheckbox ( model, keywordCoiledCoilKey )
-        , filterCheckbox ( model, keywordUnknownFunctionKey )
-        ]
+    column [] <|
+        List.map (\label -> filterCheckbox ( model, label )) [ defaultKeys.keywordDeNovoKey, defaultKeys.keywordSyntheticKey, defaultKeys.keywordNovelKey, defaultKeys.keywordDesignedKey, defaultKeys.keywordProteinBindingKey, defaultKeys.keywordMetalBindingKey, defaultKeys.keywordTranscriptionKey, defaultKeys.keywordGrowthKey, defaultKeys.keywordStructuralKey, defaultKeys.keywordAlphaHelicalBundleKey, defaultKeys.keywordBetaBetaAlphaKey, defaultKeys.keywordCoiledCoilKey, defaultKeys.keywordUnknownFunctionKey ]
 
 
 filterCheckbox : ( Model, String ) -> Element Msg
