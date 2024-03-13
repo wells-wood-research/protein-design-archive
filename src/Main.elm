@@ -230,11 +230,11 @@ update msg model =
             in
             case Date.fromIsoString phrase of
                 Err _ ->
-                    { model | mStartDate = ifEmptyOrNot string }
+                    { model | mEndDate = ifEmptyOrNot string }
                         |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
 
                 Ok date ->
-                    { model | mStartDate = ifEmptyOrNot string }
+                    { model | mEndDate = ifEmptyOrNot string }
                         |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
 
         ClearFilter key ->
@@ -512,7 +512,7 @@ dateEndField model =
             [ Input.text
                 [ width <| fillPortion 5
                 , Background.color <|
-                    case model.mStartDate of
+                    case model.mEndDate of
                         Nothing ->
                             rgb255 255 255 255
 
