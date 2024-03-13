@@ -1,7 +1,6 @@
 module Main exposing (..)
 
 import Browser
-import Browser.Events exposing (onKeyPress)
 import Date exposing (Date, Unit(..))
 import Decoders exposing (..)
 import DesignDate exposing (dateToPosition, defaultEndDate, defaultStartDate, getFirstAndLastDate, isValidIsoDate, removeHyphenFromIsoDate)
@@ -10,15 +9,12 @@ import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font exposing (center)
-import Element.Input as Input exposing (checkbox)
-import FeatherIcons exposing (alignCenter)
-import Html exposing (Html, div, input)
-import Html.Attributes exposing (placeholder, type_)
-import Html.Events exposing (onClick, onInput)
+import Element.Font as Font
+import Element.Input as Input
+import FeatherIcons
+import Html exposing (Html)
 import Http
 import Json.Decode exposing (Decoder, list, string)
-import List exposing (minimum)
 import List.Extra as ListEx
 import ProteinDesign exposing (..)
 import Random
