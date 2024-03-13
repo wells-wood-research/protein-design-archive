@@ -203,11 +203,11 @@ update msg model =
             in
             case Date.fromIsoString phrase of
                 Err _ ->
-                    { model | mStartDate = phrase |> Just }
+                    { model | mStartDate = string |> Just }
                         |> update (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
 
                 Ok date ->
-                    { model | mStartDate = phrase |> Just }
+                    { model | mStartDate = string |> Just }
                         |> update (UpdateFilters defaultKeys.dateStartKey (DateStart date))
 
         UpdateEndDateTextField string ->
@@ -217,11 +217,11 @@ update msg model =
             in
             case Date.fromIsoString phrase of
                 Err _ ->
-                    { model | mEndDate = phrase |> Just }
+                    { model | mEndDate = string |> Just }
                         |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
 
                 Ok date ->
-                    { model | mStartDate = phrase |> Just }
+                    { model | mStartDate = string |> Just }
                         |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
 
         ClearFilter key ->
