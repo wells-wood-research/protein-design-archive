@@ -84,7 +84,8 @@ gen1000Numbers =
 
 
 type Msg
-    = ClickedDesign Int
+    = Home
+    | ClickedDesign Int
     | RandomNumbers (List Int)
     | UpdateFilters String DesignFilter
     | UpdateCheckbox String Bool
@@ -99,6 +100,9 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Home ->
+            ( { model | focusedProteinDesign = Nothing }, Cmd.none )
+
         ClickedDesign index ->
             ( { model | focusedProteinDesign = ListEx.getAt index model.proteinDesigns }, Cmd.none )
 
@@ -274,18 +278,20 @@ portraitView model =
         ]
 
 
-title : Element msg
+title : Element Msg
 title =
     el
         (titleFont
             ++ [ width fill
                , padding 30
                , Background.color <| rgb255 143 192 169
-               , Font.center
                ]
         )
     <|
-        paragraph [] [ text "Protein Design Archive" ]
+        Input.button [ centerX ]
+            { label = paragraph [] [ text "Protein Design Archive" ]
+            , onPress = Just Home
+            }
 
 
 sidebar : Model -> Element Msg
@@ -299,12 +305,40 @@ sidebar model =
                , spacing 10
                ]
         )
-        [ searchArea
+        [ homeArea
+        , searchArea
             (Dict.get defaultKeys.searchTextKey model.filters
                 |> Maybe.map DesignFilter.toString
             )
         , filterArea model
         ]
+
+
+homeArea : Element Msg
+homeArea =
+    row
+        (bodyFont
+            ++ [ Font.alignLeft
+               , Background.color <| rgb255 105 109 125
+               , paddingXY 10 10
+               , spacing 10
+               ]
+        )
+        [ row []
+            [ paragraph []
+                [ text "Home:" ]
+            , homeButton
+            ]
+        ]
+
+
+homeButton : Element Msg
+homeButton =
+    Input.button
+        [ padding 5 ]
+        { label = sidebarButton FeatherIcons.home
+        , onPress = Just Home
+        }
 
 
 searchArea : Maybe String -> Element Msg
