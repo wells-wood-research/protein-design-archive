@@ -1,0 +1,430 @@
+Identifier,StructureData,,,,,,Polymer EntityData,
+Entry ID,Structure Author,PubMed ID,Release Date,PDB ID,Structure Title,Stucture Keywords,Source Organism,Taxonomy ID
+8GJC,"Kreutzer, A.G., Ruttenberg, S.M., Nowick, J.S.",38163326,1/17/24,8GJC,X-ray crystallographic structure of a beta-hairpin peptide derived from Abeta 17-35. (ORN)LVFFAED(ORN)GAI(N-Me-Ile)GLM,DE NOVO PROTEIN,synthetic construct,32630
+8GJD,"Kreutzer, A.G., Ruttenberg, S.M., Nowick, J.S., Truex, N.L.",38163326,1/17/24,8GJD,X-ray crystallographic structure of a beta-hairpin peptide derived from Abeta 17-36. (ORN)LVFFAED(ORN)AII(N-Me-Gly)LMV,DE NOVO PROTEIN,synthetic construct,32630
+8U5A,"Kalvet, I., Bera, A.K., Baker, D.",38194293,1/17/24,8U5A,"Improving protein expression, stability, and function with ProteinMPNN",DE NOVO PROTEIN,synthetic construct,32630
+8GJG,"Leung, P.J.Y., Bera, A.K., Torres, S.V., Baker, D., Kang, A.",38109936,1/10/24,8GJG,De novo design of high-affinity protein binders to bioactive helical peptides,DE NOVO PROTEIN,synthetic construct,32630
+8GJI,"Torres, S.V., Leung, P.J.Y., Bera, A.K., Baker, D., Kang, A.",38109936,1/10/24,8GJI,De novo design of high-affinity protein binders to bioactive helical peptides,DE NOVO PROTEIN,synthetic construct,32630
+8T5E,"Torres, S.V., Leung, P.J.Y., Bera, A.K., Baker, D., Kang, A.",38109936,1/10/24,8T5E,De novo design of high-affinity protein binders to bioactive helical peptides,DE NOVO PROTEIN,synthetic construct,32630
+8UGC,"Davila-Hernandez, F., Bera, A.K., Kang, A., Baker, D.",38097544,12/27/23,8UGC,FD15: Flat repeat helix-turn-helix-turn protein,DE NOVO PROTEIN,synthetic construct,32630
+8CUS,"Bera, A.K., Li, Z., Baker, D.",37845322,11/1/23,8CUS,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8CUT,"Bera, A.K., Li, Z., Baker, D.",37845322,11/1/23,8CUT,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8CUU,"Bera, A.K., Li, Z., Baker, D.",37845322,11/1/23,8CUU,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8CUV,"Bera, A.K., Li, Z., Baker, D.",37845322,11/1/23,8CUV,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8CUW,"Bera, A.K., Li, Z., Baker, D.",37845322,11/1/23,8CUW,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8CUX,"Bera, A.K., Natterman, U., Baker, D.",37845322,11/1/23,8CUX,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8CWS,"Bera, A.K., Li, Z., Baker, D.",37845322,11/1/23,8CWS,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8CWY,"Li, Z., Borst, A.J., Baker, D.",37845322,11/1/23,8CWY,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8CWZ,"Bera, A.K., Li, Z., Baker, D.",37845322,11/1/23,8CWZ,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8FAR,"Bera, A.K., Li, Z., Baker, D.",37845322,11/1/23,8FAR,Accurate computational design of genetically encoded 3D protein crystals,DE NOVO PROTEIN,synthetic construct,32630
+8ETQ,"Doyle, L.A., Kibler, R.D., Bradley, P., Stoddard, B.L.",37875492,10/25/23,8ETQ,Designed pentafoil knot protein folded into a trefoil knot,DE NOVO PROTEIN,synthetic construct,32630
+8OYS,"Pacesa, M., Correia, B.E.",,10/18/23,8OYS,De novo designed TIM barrel fold TBF_24,DE NOVO PROTEIN,synthetic construct,32630
+8OYV,"Pacesa, M., Correia, B.E.",,10/18/23,8OYV,De novo designed Claudin fold CLF_4,DE NOVO PROTEIN,synthetic construct,32630
+8OYW,"Pacesa, M., Correia, B.E.",,10/18/23,8OYW,De novo designed rhomboid protease-like fold RPF_9,DE NOVO PROTEIN,synthetic construct,32630
+8OYX,"Pacesa, M., Correia, B.E.",,10/18/23,8OYX,De novo designed soluble GPCR-like fold GLF_18,DE NOVO PROTEIN,synthetic construct,32630
+8OYY,"Pacesa, M., Correia, B.E.",,10/18/23,8OYY,De novo designed soluble GPCR-like fold GLF_32,DE NOVO PROTEIN,synthetic construct,32630
+8JYT,"Zhu, X.X.",,10/11/23,8JYT,Ancestral imine reducatase N560,DE NOVO PROTEIN,synthetic construct,32630
+8BL6,"Nadal, M., Roel-Touris, J., Marcos, E.",37741853,10/4/23,8BL6,De novo single-chain immunoglobulin dimer scIg12+EF3a,DE NOVO PROTEIN,synthetic construct,32630
+8J1W,"Hu, X., Xu, Y.",,10/4/23,8J1W,A near-infrared fluorescent protein of de novo backbone design,DE NOVO PROTEIN,synthetic construct,32630
+8J1X,"Hu, X., Xu, Y.",,10/4/23,8J1X,A near-infrared fluorescent protein of de novo backbone design,DE NOVO PROTEIN,synthetic construct,32630
+8J98,"Hu, X., Xu, Y.",,10/4/23,8J98,A near-infrared fluorescent protein of de novo backbone design,DE NOVO PROTEIN,synthetic construct,32630
+8B45,"Kumar, P., Martin, F.J.O., Dawson, W.M., Zieleniewski, F., Woolfson, D.N.",,9/27/23,8B45,"Structure of CC-Tri with Aib@b,c: CC-Tri-(UbUc)4",DE NOVO PROTEIN,synthetic construct,32630
+8FJE,"Bera, A.K., An, L., Baker, D.",37770718,9/27/23,8FJE,The five-repeat design E8,DE NOVO PROTEIN,synthetic construct,32630
+8FJF,"Bera, A.K., An, L., Baker, D.",37770718,9/27/23,8FJF,The three-repeat design H10,DE NOVO PROTEIN,synthetic construct,32630
+8FJG,"Bera, A.K., An, L., Baker, D.",37770718,9/27/23,8FJG,The two-repeat design H12,DE NOVO PROTEIN,synthetic construct,32630
+8TCF,"Campbell, M.G., Fernandez, A., Roy, A., Kraft, J., Baker, D.",37704610,9/27/23,8TCF,Integrin alpha-v beta-8 in complex with minibinder B8_BP_dsulf,DE NOVO PROTEIN,Homo sapiens,9606
+8TCG,"Campbell, M.G., Fernandez, A., Roy, A., Kraft, J., Baker, D.",37704610,9/27/23,8TCG,Integrin alpha-v beta-6 in complex with minibinder B6_BP_dslf,DE NOVO PROTEIN,Homo sapiens,9606
+8B15,"Martin, F.J.O., Dawson, W.M., Woolfson, D.N.",,9/20/23,8B15,A pentameric barrel state of a de novo coiled-coil assembly: CC-Pent2-I10Q,DE NOVO PROTEIN,synthetic construct,32630
+8B16,"Martin, F.J.O., Dawson, W.M., Woolfson, D.N.",,9/20/23,8B16,A hexameric barrel state of a de novo coiled-coil assembly: CC-Pent2-I17Q,DE NOVO PROTEIN,synthetic construct,32630
+8H7C,"Kurihara, K., Umezawa, K., Donnelly, A.E., Hecht, M.H., Arai, R.",37695900,9/20/23,8H7C,"Crystal structure of a de novo enzyme, ferric enterobactin esterase Syn-F4 (K4T) - Pt derivative",DE NOVO PROTEIN,synthetic construct,32630
+8H7D,"Kurihara, K., Umezawa, K., Donnelly, A.E., Hecht, M.H., Arai, R.",37695900,9/20/23,8H7D,"Crystal structure of a de novo enzyme, ferric enterobactin esterase Syn-F4 (K4T)",DE NOVO PROTEIN,synthetic construct,32630
+8H7E,"Kurihara, K., Umezawa, K., Donnelly, A.E., Hecht, M.H., Arai, R.",37695900,9/20/23,8H7E,"Crystal structure of a de novo enzyme, ferric enterobactin esterase Syn-F4 (K4T) at 2.0 angstrom resolution",DE NOVO PROTEIN,synthetic construct,32630
+8GL3,"Goldbach, N., Bera, A.K., Baker, D., Kang, A.",37632837,9/6/23,8GL3,De novo design of monomeric helical bundles for pH-controlled membrane lysis,DE NOVO PROTEIN,synthetic construct,32630
+8TXS,"McShan, A.C., Torres, M.P.",,9/6/23,8TXS,Solution NMR structure of designed peptide BH26 (RGVTVPHNGESKDYSV),DE NOVO PROTEIN,synthetic construct,32630
+8G8I,"Bethel, N.P., Borst, A.J.",37667012,8/30/23,8G8I,C3HR3_9r_shift4: Extendable repeat protein fiber,DE NOVO PROTEIN,synthetic construct,32630
+8GA9,"Bethel, N.P., Borst, A.J.",37667012,8/30/23,8GA9,C4HR1_4r: Extendable repeat protein tetramer,DE NOVO PROTEIN,synthetic construct,32630
+8GAA,"Bethel, N.P., Borst, A.J., Baker, D.",37667012,8/30/23,8GAA,C6HR1_4r: Extendable repeat protein hexamer,DE NOVO PROTEIN,synthetic construct,32630
+8GAQ,"Bethel, N.P., Borst, A.J.",37667012,8/30/23,8GAQ,C5HR2_4r: Extendable repeat protein pentamer,DE NOVO PROTEIN,synthetic construct,32630
+8ERW,"Bick, M.J., Parmeggiani, F., Bethel, N.P., Sankaran, B., Baker, D.",37667012,8/23/23,8ERW,Precisely patterned nanofibers made from extendable protein multiplexes,DE NOVO PROTEIN,synthetic construct,32630
+8AED,"Mittl, P., Gloegl, M.",37605043,8/16/23,8AED,Broadly neutralizing DARPin bnD.9 in complex with the HIV-1 envelope variable loop 3 peptide V3 (BG505),DE NOVO PROTEIN,synthetic construct,32630
+8AH9,"Mittl, P., Oualb Chaib, A., Hilvert, D.",,8/16/23,8AH9,De novo retro-aldolase RAbetaB-16.1,DE NOVO PROTEIN,synthetic construct,32630
+8E1E,"Bera, A.K., Gerben, S., Baker, D.",36627259,8/16/23,8E1E,Scaffolding protein functional sites using deep learning,DE NOVO PROTEIN,synthetic construct,32630
+8EOV,"Bera, A.K., Bethel, N.P.",37667012,8/16/23,8EOV,Precisely patterned nanofibers made from extendable protein multiplexes,DE NOVO PROTEIN,synthetic construct,32630
+8EOX,"Bera, A.K., Bethel, N.P.",37667012,8/16/23,8EOX,Precisely patterned nanofibers made from extendable protein multiplexes,DE NOVO PROTEIN,synthetic construct,32630
+8EOZ,"Bera, A.K., Bethel, N.P., Kang, A.",37667012,8/16/23,8EOZ,Precisely patterned nanofibers made from extendable protein multiplexes,DE NOVO PROTEIN,synthetic construct,32630
+8FIH,"Bera, A.K., Broerman, A., Baker, D.",,8/16/23,8FIH,Multi-state design of two-state switchable hinge proteins,DE NOVO PROTEIN,synthetic construct,32630
+8FIN,"Bera, A.K., Leung, P.J.Y., Baker, D.",,8/16/23,8FIN,Multi-state design of two-state switchable hinge proteins,DE NOVO PROTEIN,synthetic construct,32630
+8FIQ,"Bera, A.K., Leung, P.J.Y., Baker, D.",,8/16/23,8FIQ,Multi-state design of two-state switchable hinge proteins,DE NOVO PROTEIN,synthetic construct,32630
+8FIT,"Bera, A.K., Praetorius, F., Baker, D.",,8/16/23,8FIT,Multi-state design of two-state switchable hinge proteins,DE NOVO PROTEIN,synthetic construct,32630
+8FVT,"Bera, A.K., Broerman, A., Baker, D.",,8/16/23,8FVT,Multi-state design of two-state switchable hinge proteins,DE NOVO PROTEIN,synthetic construct,32630
+8JKU,"Zhu, X.X., Zheng, G.W.",,8/9/23,8JKU,Ancestal imine reductase,DE NOVO PROTEIN,synthetic construct,32630
+8P4Y,"Satler, T., Hadzi, S., Jerala, R.",37486611,8/2/23,8P4Y,Coiled-coil protein origami triangle,DE NOVO PROTEIN,synthetic construct,32630
+8JU8,"Zhang, L.",,7/26/23,8JU8,de novo designed protein,DE NOVO PROTEIN,synthetic construct,32630
+7YH8,"Liang, M., Li, S., Wang, T., Liu, L., Lu, P.",,7/19/23,7YH8,Crystal structure of a heterochiral protein complex,DE NOVO PROTEIN,synthetic construct,32630
+8EK4,"Bera, A.K., De Haas, R.J.",37364125,7/12/23,8EK4,De novo designed ice-binding proteins from twist-constrained helices,DE NOVO PROTEIN,synthetic construct,32630
+8SJF,"Hoffnagle, A.H., Tezcan, F.A.",37352018,7/5/23,8SJF,Apo Structure of Computationally Designed Homotrimer Tet4,DE NOVO PROTEIN,synthetic construct,32630
+8SJG,"Hoffnagle, A.M., Tezcan, F.A.",37352018,7/5/23,8SJG,Zn-Bound Structure of Computationally Designed Homotrimer Tet4,DE NOVO PROTEIN,synthetic construct,32630
+8SJH,"Hoffnagle, A.M., Tezcan, F.A.",37352018,7/5/23,8SJH,Zn-Bound Structure of Computationally Designed Homotrimer TP1,DE NOVO PROTEIN,synthetic construct,32630
+8SJI,"Hoffnagle, A.M., Tezcan, F.A.",37352018,7/5/23,8SJI,Apo Structure of Computationally Designed Homotrimer TP1,DE NOVO PROTEIN,synthetic construct,32630
+8FLX,"Kibler, R.D., Kennedy, M.A., Stoddard, B.L., Lee, S.",,6/28/23,8FLX,De novo designed homotrimer; the fusion product of BGL17 and DHR59,DE NOVO PROTEIN,synthetic construct,32630
+8JPA,"Hu, X., Xu, Y.",,6/28/23,8JPA,De novo design cavitated protein without predefined topology,DE NOVO PROTEIN,synthetic construct,32630
+8T61,"McShan, A.C., Torres, M.P.",,6/28/23,8T61,Solution NMR structure of designed peptide BH33 (RHYYKFNSTGRHYHYY),DE NOVO PROTEIN,synthetic construct,32630
+8T62,"McShan, A.C., Torres, M.P.",,6/28/23,8T62,Solution NMR structure of designed peptide BH21 (TMIEDPEAGHFHTSSA),DE NOVO PROTEIN,synthetic construct,32630
+8T63,"McShan, A.C., Torres, M.P.",,6/28/23,8T63,Solution NMR structure of designed peptide PH1 (WHMWNTVPNAKQVIAA),DE NOVO PROTEIN,synthetic construct,32630
+8BCS,"Edgell, C.L., Mylemans, B., Naudin, E.A., Smith, A.J., Savery, N.J., Woolfson, D.N.",37224449,6/7/23,8BCS,"X-ray crystal structure of a de novo designed helix-loop-helix homodimer in an anti arrangement, CC-HP1.0",DE NOVO PROTEIN,synthetic construct,32630
+8BCT,"Naudin, E.A., Mylemans, B., Smith, A.J., Savery, N.J., Woolfson, D.N.",37224449,6/7/23,8BCT,"X-ray crystal structure of a de novo selected helix-loop-helix heterodimer in a syn arrangement, 26alpha/26beta",DE NOVO PROTEIN,synthetic construct,32630
+8EC9,"Kreutzer, A.G., Yoo, S., Nowick, J.S.",37216514,5/31/23,8EC9,Covalently stabilized triangular trimer derived from Abeta16-36 with p-iodo-phenylalanine,DE NOVO PROTEIN,synthetic construct,32630
+8ECA,"Kreutzer, A.G., Yoo, S., Nowick, J.S.",37216514,5/31/23,8ECA,Covalently stabilized triangular trimer derived from Abeta16-36,DE NOVO PROTEIN,synthetic construct,32630
+8DPY,"Lu, B., Vecchioni, S., Nazzaro, A., Arora, P.S.",37170337,5/24/23,8DPY,Synthetic Beta Sheet Macrocycle Stabilized by Hydrogen Bond Surrogates,DE NOVO PROTEIN,synthetic construct,32630
+8F4X,"Borst, A.J., Baker, D.",37079676,5/10/23,8F4X,Top-down design of protein architectures with reinforcement learning,DE NOVO PROTEIN,synthetic construct,32630
+8F53,"Borst, A.J., Baker, D.",37079676,5/10/23,8F53,Top-down design of protein architectures with reinforcement learning,DE NOVO PROTEIN,synthetic construct,32630
+8F54,"Borst, A.J., Baker, D.",37079676,5/10/23,8F54,Top-down design of protein architectures with reinforcement learning,DE NOVO PROTEIN,synthetic construct,32630
+8FWD,"Skotheim, R., Borst, A.J., Baker, D.",37216343,5/10/23,8FWD,Fast and versatile sequence- independent protein docking for nanomaterials design using RPXDock,DE NOVO PROTEIN,synthetic construct,32630
+7UNH,"Kennedy, M.A., Stoddard, B.L., Ennist, N.M.",,4/19/23,7UNH,"De novo designed chlorophyll dimer protein in apo state, SP2",DE NOVO PROTEIN,synthetic construct,32630
+7UNI,"Kennedy, M.A., Stoddard, B.L., Ennist, N.M.",,4/19/23,7UNI,"De novo designed chlorophyll dimer protein with Zn pheophorbide a methyl ester, SP2-ZnPPaM",DE NOVO PROTEIN,synthetic construct,32630
+7UNJ,"Kennedy, M.A., Stoddard, B.L., Ennist, N.M.",,4/19/23,7UNJ,"De novo designed chlorophyll dimer protein with Zn pheophorbide a methyl ester matching geometry of purple bacterial special pair, SP1-ZnPPaM",DE NOVO PROTEIN,synthetic construct,32630
+8I8Y,"Hu, X.",37722056,4/19/23,8I8Y,A mutant of the C-terminal complex of proteins 4.1G and NuMA,DE NOVO PROTEIN,synthetic construct,32630
+8E0L,"Kennedy, M.A., Kibler, R., Stoddard, B.L.",,4/12/23,8E0L,"Homotrimeric variant of tcTRP9, BGL06",DE NOVO PROTEIN,synthetic construct,32630
+8E0M,"Kibler, R., Stoddard, B.L., Kennedy, M.A.",,4/12/23,8E0M,"Homotrimeric variant of tcTRP9, BGL15",DE NOVO PROTEIN,synthetic construct,32630
+8E0N,"Kibler, R., Stoddard, B.L., Kennedy, M.A.",,4/12/23,8E0N,"Homotrimeric variant of tcTRP9, BGL18",DE NOVO PROTEIN,synthetic construct,32630
+8E0O,"Kibler, R., Stoddard, B.L., Kennedy, M.A.",,4/12/23,8E0O,"Heterotrimeric variant of tcTRP9, hetBGL03-15-18",DE NOVO PROTEIN,synthetic construct,32630
+8.00E+12,"Kibler, R., Stoddard, B.L., Kennedy, M.A.",,4/12/23,8.00E+12,"Homotrimeric variant of tcTRP9, BGL14",DE NOVO PROTEIN,synthetic construct,32630
+7UE2,"Chang, Y., Ekiert, D.C., Bhabha, G.",37020023,3/29/23,7UE2,Crystal structure of designed helical repeat protein RPB_PLP3_R6 bound to PLPx6 peptide,DE NOVO PROTEIN,synthetic construct,32630
+7Z7C,"Mittl, P.R., Gloegl, M.",37605043,3/29/23,7Z7C,Broadly neutralizing DARPin bnD.8 in complex with the HIV-1 envelope variable loop 3 peptide V3 (BF520),DE NOVO PROTEIN,synthetic construct,32630
+8DZ8,"Jude, K.M., Spangler, J.B., Garcia, K.C.",37024727,3/29/23,8DZ8,"Neoleukin 4, a de novo designed IL-4 mimetic",DE NOVO PROTEIN,synthetic construct,32630
+7UDJ,"Redler, R.L., Chang, Y., Bhabha, G., Ekiert, D.",37020023,3/22/23,7UDJ,Crystal structure of designed helical repeat protein RPB_PEW3_R4 bound to PAWx4 peptide,DE NOVO PROTEIN,synthetic construct,32630
+7UDK,"Chang, Y., Redler, R.L., Bhabha, G., Ekiert, D.C.",37020023,3/22/23,7UDK,Crystal structure of designed helical repeat protein RPB_LRP2_R4 bound to LRPx4 peptide,DE NOVO PROTEIN,synthetic construct,32630
+7UDL,"Chang, Y., Redler, R.L., Bhabha, G., Ekiert, D.C.",37020023,3/22/23,7UDL,Crystal structure of designed helical repeat protein RPB_PLP1_R6 bound to PLPx6 peptide,DE NOVO PROTEIN,synthetic construct,32630
+7UDM,"Chang, Y., Redler, R.L., Bhabha, G., Ekiert, D.C.",37020023,3/22/23,7UDM,Crystal structure of designed helical repeat protein RPB_PLP1_R6 in alternative conformation 1 (with peptide),DE NOVO PROTEIN,synthetic construct,32630
+7UDN,"Chang, Y., Redler, R.L., Bhabha, G., Ekiert, D.C.",37020023,3/22/23,7UDN,Crystal structure of designed helical repeat protein RPB_PLP1_R6 in alternative conformation 2,DE NOVO PROTEIN,synthetic construct,32630
+7UDO,"Redler, R.L., Chang, Y., Bhabha, G., Ekiert, D.C.",37020023,3/22/23,7UDO,"Crystal structure of designed helical repeat protein RPB_LRP2_R4 (proteolysis fragment?), forming pseudopolymeric filaments",DE NOVO PROTEIN,synthetic construct,32630
+7UR7,"Bera, A.K., Kim, D., Baker, D.",36897987,3/22/23,7UR7,"17_bp_sh3, a small beta-barrel de novo designed protein",DE NOVO PROTEIN,synthetic construct,32630
+7UR8,"Bera, A.K., Kim, D., Baker, D.",36897987,3/22/23,7UR8,"170_h_ob, a small beta-barrel de novo designed protein",DE NOVO PROTEIN,synthetic construct,32630
+7UWY,"Peterson, F.C., Kim, D.E., Jensen, D.R., Saleem, A., Chow, C.M., Volkman, B.F., Baker, D.",36897987,3/22/23,7UWY,NMR solution structure of the De novo designed small beta-barrel protein 29_bp_sh3,DE NOVO PROTEIN,synthetic construct,32630
+7UWZ,"Peterson, F.C., Kim, D.E., Jensen, D.R., Saleem, A., Chow, C.M., Volkman, B.F., Baker, D.",36897987,3/22/23,7UWZ,NMR solution structure of the De novo designed small beta-barrel protein 33_bp_sh3,DE NOVO PROTEIN,synthetic construct,32630
+8FBI,"Wang, J.Y., Khmelinskaia, A., Bera, A.K., King, N.P.",36888664,3/22/23,8FBI,Improving the secretion of designed protein assemblies through negative design of cryptic transmembrane domains,DE NOVO PROTEIN,synthetic construct,32630
+8FBJ,"Wang, J.Y., Khmelinskaia, A., Bera, A.K., King, N.P.",36888664,3/22/23,8FBJ,Improving the secretion of designed protein assemblies through negative design of cryptic transmembrane domains,DE NOVO PROTEIN,synthetic construct,32630
+8FBK,"Wang, J.Y., Khmelinskaia, A., Bera, A.K., King, N.P.",36888664,3/22/23,8FBK,Improving the secretion of designed protein assemblies through negative design of cryptic transmembrane domains,DE NOVO PROTEIN,synthetic construct,32630
+8FBN,"Wang, J.Y., Khmelinskaia, A., Bera, A.K., King, N.P.",36888664,3/22/23,8FBN,Improving the secretion of designed protein assemblies through negative design of cryptic transmembrane domains,DE NOVO PROTEIN,synthetic construct,32630
+8FBO,"Wang, J.Y., Khmelinskaia, A., Bera, A.K., King, N.P.",36888664,3/22/23,8FBO,Improving the secretion of designed protein assemblies through negative design of cryptic transmembrane domains,DE NOVO PROTEIN,synthetic construct,32630
+5SBG,"Di Costanzo, L., La Gatta, S., Chino, M.",,2/15/23,5SBG,The crystal structure of METP in complex with Zn at a resolution of 1.34 A.,DE NOVO PROTEIN,synthetic construct,32630
+5SBI,"Di Costanzo, L., La Gatta, S., Leone, L., Chino, M.",,2/15/23,5SBI,The crystal structure of METP in complex with Co at a resolution of 1.80A.,DE NOVO PROTEIN,synthetic construct,32630
+5SBJ,"Di Costanzo, L., La Gatta, S., Pavone, V.",,2/15/23,5SBJ,The crystal structure of METP in complex with Cd at a resolution of 1.29 A.,DE NOVO PROTEIN,synthetic construct,32630
+7QWA,"Martin, F.J.O., Zieleniewski, F., Dawson, W.M., Woolfson, D.N.",,2/1/23,7QWA,CC-Type2-(UgUe)4,DE NOVO PROTEIN,synthetic construct,32630
+7QWB,"Martin, F.J.O., Zieleniewski, F., Dawson, W.M., Woolfson, D.N.",,2/1/23,7QWB,CC-Type2-(Ue)4,DE NOVO PROTEIN,synthetic construct,32630
+7QWC,"Martin, F.J.O., Zieleniewski, F., Dawson, W.M., Woolfson, D.N.",,2/1/23,7QWC,CC-Type1-(UbUc)4,DE NOVO PROTEIN,synthetic construct,32630
+7QWD,"Martin, F.J.O., Zieleniewski, F., Dawson, W.M., Woolfson, D.N.",,2/1/23,7QWD,CC-Type2-(Ug)4,DE NOVO PROTEIN,synthetic construct,32630
+7QWE,"Martin, F.J.O., Zieleniewski, F., Dawson, W.M., Woolfson, D.N.",,2/1/23,7QWE,CC-Type2-(Ug)4,DE NOVO PROTEIN,synthetic construct,32630
+7TMA,"Nguyen, A.I.",35390261,1/25/23,7TMA,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TME,"Nguyen, A.I.",35390261,1/25/23,7TME,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+8.00E+55,"Gerben, S., Borst, A.J., Baker, D.",36627259,1/25/23,8.00E+55,Design of Diverse Asymmetric Pockets in de novo Homo-oligomeric Proteins,DE NOVO PROTEIN,synthetic construct,32630
+7UEK,"Chu, A.E., Fernandez, D., Huang, P.-S.",37850141,1/18/23,7UEK,Crystal structure of a de novo designed ovoid TIM barrel OT3,DE NOVO PROTEIN,synthetic construct,32630
+8HDU,"Hu, X., Xu, Y.",,1/18/23,8HDU,De novo design cavitated protein without predefined topology,DE NOVO PROTEIN,synthetic construct,32630
+8HDV,"Hu, X., Xu, Y.",,1/18/23,8HDV,De novo design cavitated protein without predefined topology,DE NOVO PROTEIN,synthetic construct,32630
+7XM1,"Ohara, N., Kawakami, N., Arai, R., Adachi, N., Moriya, T., Kawasaki, M., Miyamoto, K.",36541447,1/4/23,7XM1,Cryo-EM structure of mTIP60-Ba (metal-ion induced TIP60 (K67E) complex with barium ions,DE NOVO PROTEIN,synthetic construct,32630
+7UPO,"Chang, Y., Bhabha, G., Ekiert, D.C.",36522429,12/14/22,7UPO,Crystal structure of designed heterotrimeric assembly DHT03,DE NOVO PROTEIN,synthetic construct,32630
+7UPP,"Chang, Y., Bhabha, G., Ekiert, D.C.",36522429,12/14/22,7UPP,Crystal structure of designed heterotrimeric assembly DHT03_2arm_A21/B21/C long,DE NOVO PROTEIN,synthetic construct,32630
+7UPQ,"Chang, Y., Bhabha, G., Ekiert, D.C.",36522429,12/14/22,7UPQ,Crystal structure of designed heterotrimeric assembly DHT03_1arm_A21/B/C,DE NOVO PROTEIN,synthetic construct,32630
+8A19,"Mittl, P.R.E.",36458615,12/7/22,8A19,Structure of a leucinostatin derivative determined by host lattice display : L1E4V1 construct,DE NOVO PROTEIN,synthetic construct,32630
+8A1A,"Mittl, P.R.E.",36458615,12/7/22,8A1A,Structure of a leucinostatin derivative determined by host lattice display : L1F11V1 construct,DE NOVO PROTEIN,synthetic construct,32630
+8BFD,"Kumar, P., Paterson, N.G., Woolfson, D.N.",35732733,11/23/22,8BFD,Racemic structure of PK-7 (310HD-U2U5),DE NOVO PROTEIN,synthetic construct,32630
+8BFE,"Kumar, P., Paterson, N.G., Woolfson, D.N.",35732733,11/23/22,8BFE,A dimeric de novo coiled-coil assembly: PK-2 (CC-TypeN-LaUbUcLd),DE NOVO PROTEIN,synthetic construct,32630
+7Q3J,"Norrild, R.K., Johansson, K.E., O'Shea, C., Lindorff-Larsen, K., Winther, J.R., Morth, J.P.",36452862,11/16/22,7Q3J,Computationally designed thioredoxin subjected to stability optimizing mutations.,DE NOVO PROTEIN,synthetic construct,32630
+7Q3K,"Norrild, R.K., Johansson, K.E., O'Shea, C., Lindorff-Larsen, K., Winther, J.R., Morth, J.P.",36452862,11/16/22,7Q3K,Computationally designed thioredoxin subjected to stability optimizing mutations.,DE NOVO PROTEIN,synthetic construct,32630
+7SQ5,"Takushi, B., Doyle, L., Stoddard, B.L., Bradley, P.",37875492,11/9/22,7SQ5,"Designed trefoil knot protein, variant 3",DE NOVO PROTEIN,synthetic construct,32630
+7SKN,"Mendes, S.R., Eckhard, U., Marcos, E., Gomis-Ruth, F.X.",,10/12/22,7SKN,De novo synthetic protein DIG8-CC (tetragonal space group),DE NOVO PROTEIN,synthetic construct,32630
+7SKO,"Mendes, S.R., Eckhard, U., Marcos, E., Gomis-Ruth, F.X.",,10/12/22,7SKO,De novo synthetic protein DIG8-CC (orthogonal space group),DE NOVO PROTEIN,synthetic construct,32630
+7SKP,"Mendes, S.R., Eckhard, U., Marcos, E., Gomis-Ruth, F.X.",,10/12/22,7SKP,De novo synthetic protein DIG14 (tetragonal space group),DE NOVO PROTEIN,synthetic construct,32630
+8A3G,"Naudin, E.A., Mylemans, B., Albanese, K.I., Woolfson, D.N.",36320580,10/5/22,8A3G,"X-ray crystal structure of a de novo designed antiparallel coiled-coil homotetramer with 4 heptad repeats, apCC-Tet*",DE NOVO PROTEIN,synthetic construct,32630
+8A3I,"Naudin, E.A., Mylemans, B., Albanese, K.I., Woolfson, D.N.",36320580,10/5/22,8A3I,"X-ray crystal structure of a de novo designed antiparallel coiled-coil homotetramer with 3 heptad repeats, apCC-Tet*3",DE NOVO PROTEIN,synthetic construct,32630
+8A3J,"Naudin, E.A., Mylemans, B., Albanese, K.I., Woolfson, D.N.",36320580,10/5/22,8A3J,"X-ray crystal structure of a de novo designed antiparallel coiled-coil heterotetramer with 3 heptad repeats, apCC-Tet*3-A2B2",DE NOVO PROTEIN,synthetic construct,32630
+8A3K,"Albanese, K.I., Mylemans, B., Naudin, E.A., Woolfson, D.N.",36320580,10/5/22,8A3K,"X-ray crystal structure of a de novo designed single-chain antiparallel 4-helix coiled-coil bundle, sc-apCC-4",DE NOVO PROTEIN,synthetic construct,32630
+8CYK,"Ragotte, R.J., Bera, A.K., Milles, L.F., Wicky, B.I.M., Baker, D.",36108050,9/28/22,8CYK,Crystal structure of hallucinated protein HALC1_878,DE NOVO PROTEIN,synthetic construct,32630
+8D03,"Ragotte, R.J., Bera, A.K., Wicky, B.I.M., Milles, L.F., Baker, D.",36108048,9/28/22,8D03,Hallucinated C2 protein assembly HALC2_068,DE NOVO PROTEIN,synthetic construct,32630
+8D04,"Ragotte, R.J., Bera, A.K., Wicky, B.I.M., Milles, L.F., Baker, D.",36108048,9/28/22,8D04,Hallucinated C2 protein assembly HALC2_062,DE NOVO PROTEIN,synthetic construct,32630
+8D05,"Ragotte, R.J., Bera, A.K., Wicky, B.I.M., Milles, L.F., Baker, D.",36108048,9/28/22,8D05,Hallucinated C2 protein assembly HALC2_065,DE NOVO PROTEIN,synthetic construct,32630
+8D06,"Ragotte, R.J., Bera, A.K., Wicky, B.I.M., Milles, L.F., Baker, D.",36108048,9/28/22,8D06,Hallucinated C3 protein assembly HALC3_104,DE NOVO PROTEIN,synthetic construct,32630
+8D07,"Ragotte, R.J., Bera, A.K., Wicky, B.I.M., Milles, L.F., Baker, D.",36108048,9/28/22,8D07,Hallucinated C3 protein assembly HALC3_109,DE NOVO PROTEIN,synthetic construct,32630
+8D08,"Ragotte, R.J., Bera, A.K., Wicky, B.I.M., Milles, L.F., Baker, D.",36108048,9/28/22,8D08,Hallucinated C4 protein assembly HALC4_135,DE NOVO PROTEIN,synthetic construct,32630
+8D09,"Ragotte, R.J., Bera, A.K., Wicky, B.I.M., Milles, L.F., Baker, D.",36108048,9/28/22,8D09,Hallucinated C4 protein assembly HALC4_136,DE NOVO PROTEIN,synthetic construct,32630
+8D9O,"Ennist, N.M., Stayrook, S.E., Dutton, P.L., Moser, C.C.",36213121,9/28/22,8D9O,De Novo Photosynthetic Reaction Center Protein in Apo-State,DE NOVO PROTEIN,synthetic construct,32630
+8D9P,"Ennist, N.M., Stayrook, S.E., Dutton, P.L., Moser, C.C.",36213121,9/28/22,8D9P,De Novo Photosynthetic Reaction Center Protein Equipped with Heme B and Mn(II) cations,DE NOVO PROTEIN,synthetic construct,32630
+7UBC,"Ramelot, T.A., Tejero, R., Monteltione, G.T.",36041435,9/14/22,7UBC,Solution NMR structure of 9-residue Rosetta-designed cyclic peptide D9.16 in d6-DMSO with cis/trans switching,DE NOVO PROTEIN,synthetic construct,32630
+7UBD,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,7UBD,Solution NMR structure of 8-residue Rosetta-designed cyclic peptide D8.31 in d6-DMSO with cis/trans switching (A-CC conformation),DE NOVO PROTEIN,synthetic construct,32630
+7UBE,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,7UBE,Solution NMR structure of 8-residue Rosetta-designed cyclic peptide D8.21 in d6-DMSO with cis/trans switching,DE NOVO PROTEIN,synthetic construct,32630
+7UBF,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,7UBF,"Solution NMR structure of 8-residue Rosetta-designed cyclic peptide D8.21 in 50% d6-DMSO and 50% water with cis/trans switching (CC conformation, 50%)",DE NOVO PROTEIN,synthetic construct,32630
+7UBG,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,7UBG,Solution NMR structure of 9-residue Rosetta-designed cyclic peptide D9.16 in CDCl3 with cis/trans switching (A-TT conformation),DE NOVO PROTEIN,synthetic construct,32630
+7UBH,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,7UBH,Solution NMR structure of 8-residue Rosetta-designed cyclic peptide D8.31 in CDCl3 with cis/trans switching,DE NOVO PROTEIN,synthetic construct,32630
+7UBI,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,7UBI,"Solution NMR structure of 8-residue Rosetta-designed cyclic peptide D8.21 in CDCl3 with cis/trans switching (TT conformation, 47%)",DE NOVO PROTEIN,synthetic construct,32630
+7UCP,"Bhardwaj, G., Baker, D., Rettie, S., Glynn, C., Sawaya, M.",36041435,9/14/22,7UCP,computationally designed macrocycle,DE NOVO PROTEIN,synthetic construct,32630
+7UZL,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,7UZL,Solution NMR structure of 9-residue Rosetta-designed cyclic peptide D9.16 in CDCl3 with cis/trans switching (B-TC conformation),DE NOVO PROTEIN,synthetic construct,32630
+8CTO,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,8CTO,Solution NMR structure of 8-residue Rosetta-designed cyclic peptide D8.31 in d6-DMSO with cis/trans switching (B-CT conformation),DE NOVO PROTEIN,synthetic construct,32630
+8CUN,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,8CUN,"Solution NMR structure of 8-residue Rosetta-designed cyclic peptide D8.21 in 50% d6-DMSO and 50% water with cis/trans switching (CC conformation, 50%)",DE NOVO PROTEIN,synthetic construct,32630
+8CWA,"Ramelot, T.A., Tejero, R., Montelione, G.T.",36041435,9/14/22,8CWA,"Solution NMR structure of 8-residue Rosetta-designed cyclic peptide D8.21 in CDCl3 with cis/trans switching (TC conformation, 53%)",DE NOVO PROTEIN,synthetic construct,32630
+7LMV,"Dong, X., Bera, A.K., Roy, A., Shi, L., Springer, T.A., Baker, D.",,8/10/22,7LMV,SPECIFIC INHIBITOR OF INTEGRIN ALPHA-V BETA-6,DE NOVO PROTEIN,synthetic construct,32630
+7LMX,"Dong, X., Bera, A.K., Roy, A., Shi, L., Springer, T.A., Baker, D.",,8/10/22,7LMX,A HIGHLY SPECIFIC INHIBITOR OF INTEGRIN ALPHA-V BETA-6 WITH A DISULFIDE,DE NOVO PROTEIN,synthetic construct,32630
+8DT0,"Bera, A.K., Watson, J., Baker, D.",35862514,8/10/22,8DT0,Scaffolding protein functional sites using deep learning,DE NOVO PROTEIN,synthetic construct,32630
+7RMX,"Bera, A.K., Hicks, D.R., Kang, A., Sankaran, B., Baker, D.",35862457,8/3/22,7RMX,Structure of De Novo designed tunable symmetric protein pockets,DE NOVO PROTEIN,synthetic construct,32630
+7RMY,"Bera, A.K., Hicks, D.R., Kang, A., Sankaran, B., Baker, D.",35862457,8/3/22,7RMY,"De Novo designed tunable protein pockets, D_3-337",DE NOVO PROTEIN,synthetic construct,32630
+7Q1Q,"Shanmugaratnam, S., Rhys, G.G., Dawson, W.M., Woolfson, D.N., Hocker, B.",35836017,7/20/22,7Q1Q,De novo designed homo-dimeric antiparallel helices Homomer-S,DE NOVO PROTEIN,synthetic construct,32630
+7Q1R,"Shanmugaratnam, S., Rhys, G.G., Dawson, W.M., Woolfson, D.N., Hocker, B.",35836017,7/20/22,7Q1R,A de novo designed homo-dimeric antiparallel coiled coil apCC-Di,DE NOVO PROTEIN,synthetic construct,32630
+7Q1S,"Shanmugaratnam, S., Rhys, G.G., Dawson, W.M., Woolfson, D.N., Hocker, B.",35836017,7/20/22,7Q1S,A de novo designed hetero-dimeric antiparallel coiled coil apCC-Di-AB_var,DE NOVO PROTEIN,synthetic construct,32630
+7Q1T,"Shanmugaratnam, S., Rhys, G.G., Dawson, W.M., Woolfson, D.N., Hocker, B.",35836017,7/20/22,7Q1T,A de novo designed hetero-dimeric antiparallel coiled coil apCC-Di-AB,DE NOVO PROTEIN,synthetic construct,32630
+7LDF,"Urbauer, J.L., Strauch, E.M.",36418330,7/13/22,7LDF,High resolution NMR solution structure of a de novo designed minimal thioredoxin fold protein,DE NOVO PROTEIN,synthetic construct,32630
+7SQ3,"Takushi, B., Doyle, L., Stoddard, B.L., Bradley, P.",37875492,6/29/22,7SQ3,"Designed trefoil knot protein, variant 1",DE NOVO PROTEIN,synthetic construct,32630
+7SQ4,"Takushi, B., Doyle, L., Stoddard, B.L., Bradley, P.",37875492,6/29/22,7SQ4,"Designed trefoil knot protein, variant 2",DE NOVO PROTEIN,synthetic construct,32630
+7TJL,"Cummins, M.C., Jacobs, T.M., Kuhlman, B.",,6/29/22,7TJL,"Crystal structure of de novo designed protein, SEWN0.1",DE NOVO PROTEIN,synthetic construct,32630
+8A09,"Martin, F.J.O., Rhys, G.G., Dawson, W.M., Woolfson, D.N.",36693847,6/15/22,8A09,A hexameric barrel state of a de novo coiled-coil assembly: CC-Type2-(QgLaId)4,DE NOVO PROTEIN,synthetic construct,32630
+7VQL,"Zhang, L.",,6/8/22,7VQL,de novo designed based on 1r26,DE NOVO PROTEIN,synthetic construct,32630
+7VQV,"Zhang, L.",,6/8/22,7VQV,de novo design based on 1r26,DE NOVO PROTEIN,synthetic construct,32630
+7VQW,"Zhang, L.",,6/8/22,7VQW,de novo designed protein based on 1r26,DE NOVO PROTEIN,synthetic construct,32630
+7VTY,"Zhang, L.",,6/8/22,7VTY,de novo designed protein,DE NOVO PROTEIN,synthetic construct,32630
+7VU4,"Zhang, L.",,6/8/22,7VU4,de novo design based on 1r26,DE NOVO PROTEIN,synthetic construct,32630
+7ZYU,"Wang, L., Kempf, G.",,6/1/22,7ZYU,HDAC6 ZnF domain inhibitor - DARPin (Designed Ankyrin repeat protein) F10,DE NOVO PROTEIN,Homo sapiens,9606
+7RKC,"Kennedy, M.A., Stoddard, B.L., Hicks, D.R., Bera, A.K.",35862457,5/18/22,7RKC,"Computationally designed tunable C2 symmetric tandem repeat homodimer, D_3_633",DE NOVO PROTEIN,synthetic construct,32630
+7S5B,"Walsh, S.T.R., Cao, L., Baker, D.",35332283,5/11/22,7S5B,Unbound State of a De novo designed Protein Binder to the Human Interleukin-7 Receptor,DE NOVO PROTEIN,synthetic construct,32630
+7QDI,"Kumar, P., Paterson, N.G., Woolfson, D.N.",35732733,4/27/22,7QDI,Structure of octameric left-handed 310-helix bundle: D-310HD,DE NOVO PROTEIN,synthetic construct,32630
+7QDJ,"Kumar, P., Paterson, N.G., Woolfson, D.N.",35732733,4/27/22,7QDJ,Racemic structure of PK-10 and PK-11,DE NOVO PROTEIN,synthetic construct,32630
+7QDK,"Kumar, P., Paterson, N.G., Woolfson, D.N.",35732733,4/27/22,7QDK,A trimeric de novo coiled-coil assembly: CC-TypeN-LaLd,DE NOVO PROTEIN,synthetic construct,32630
+7N3T,"Jude, K.M., Cao, L., Garcia, K.C.",35332283,4/20/22,7N3T,TrkA ECD complex with designed miniprotein ligand,DE NOVO PROTEIN,Homo sapiens,9606
+7TLS,"Nguyen, A.I.",35390261,4/20/22,7TLS,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TLU,"Nguyen, A.I.",35390261,4/20/22,7TLU,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TM1,"Nguyen, A.I.",35390261,4/20/22,7TM1,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TM2,"Nguyen, A.I.",35390261,4/20/22,7TM2,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TMH,"Nguyen, A.I.",35390261,4/20/22,7TMH,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TMI,"Nguyen, A.I.",35390261,4/20/22,7TMI,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TMJ,"Nguyen, A.I.",35390261,4/20/22,7TMJ,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TMK,"Nguyen, A.I.",35390261,4/20/22,7TMK,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7TML,"Nguyen, A.I.",35390261,4/20/22,7TML,Porous framework formed by assembly of a bipyridyl-conjugated helical peptide,DE NOVO PROTEIN,synthetic construct,32630
+7N1K,"Park, J.S., Lee, S.",35332283,4/6/22,7N1K,Crystal structure of a de novo-designed mini-protein targeting FGFR,DE NOVO PROTEIN,synthetic construct,32630
+7ZBS,"Socha, O., Jakubec, D.",,4/6/22,7ZBS,Solution NMR structure of the HTH_8cm consensus miniprotein in 30% TFE at 278K,DE NOVO PROTEIN,synthetic construct,32630
+7LZ3,"Dowling, Q., Volkman, H.E., Gray, E.E., Ovchinnikov, S., Cambier, S., Bera, A.K., Bick, M., Kang, A., Stetson, D.B., King, N.P.",36593311,3/16/22,7LZ3,Computational design of constitutively active cGAS,DE NOVO PROTEIN,synthetic construct,32630
+7SMJ,"Mathews, I.I., Anand-Achim, N., Huang, P.",35136054,3/16/22,7SMJ,"F2N structure, protein design with deep learning",DE NOVO PROTEIN,synthetic construct,32630
+7NFF,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFF,An octameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-I24A.,DE NOVO PROTEIN,synthetic construct,32630
+7NFG,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFG,A hexameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-L14A.,DE NOVO PROTEIN,synthetic construct,32630
+7NFH,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFH,A heptameric barrel state of a de novo coiled-coil assembly: CC-Type2-(MaId)4.,DE NOVO PROTEIN,synthetic construct,32630
+7NFI,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFI,An octameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-L7Y.,DE NOVO PROTEIN,synthetic construct,32630
+7NFJ,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFJ,A heptameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-L28Y.,DE NOVO PROTEIN,synthetic construct,32630
+7NFK,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFK,An octameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-I24S.,DE NOVO PROTEIN,synthetic construct,32630
+7NFL,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFL,An octameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-I24N.,DE NOVO PROTEIN,synthetic construct,32630
+7NFM,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFM,An octameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-L21K.,DE NOVO PROTEIN,synthetic construct,32630
+7NFN,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFN,A heptameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-L21N-I24N.,DE NOVO PROTEIN,synthetic construct,32630
+7NFO,"Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFO,A hexameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-I17C.,DE NOVO PROTEIN,synthetic construct,32630
+7NFP,"Burton, A.J., Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",36693847,3/2/22,7NFP,A heptameric barrel state of a de novo coiled-coil assembly: CC-Type2-(LaId)4-I17K,DE NOVO PROTEIN,synthetic construct,32630
+7T03,"Pulavarti, S., Szyperski, T., Yuen, S., Maguire, J., Griffin, J., Kuhlman, B.",35128921,3/2/22,7T03,NMR structure of a designed cold unfolding four helix bundle,DE NOVO PROTEIN,synthetic construct,32630
+7T2Y,"Harrison, J.S., Kuhlman, B., Szyperski, T., Premkumar, L., Maguire, J., Pulavarti, S., Yuen, S.",35128921,3/2/22,7T2Y,X-ray structure of a designed cold unfolding four helix bundle,DE NOVO PROTEIN,synthetic construct,32630
+7MCC,"Mathews, I.I., Anand-Achim, N., Perez, C.P., Huang, P.S.",35136054,1/19/22,7MCC,Crystal structure of an AI-designed TIM-barrel F2C,DE NOVO PROTEIN,synthetic construct,32630
+7MCD,"Mathews, I.I., Anand-Achim, N., Perez, C.P., Huang, P.",35136054,1/19/22,7MCD,Crystal structure of an AI-designed TIM-barrel F15C,DE NOVO PROTEIN,synthetic construct,32630
+7MWQ,"Bera, A.K., Sahtoe, D.D., Kang, A., Praetorius, F., Baker, D.",35050655,1/19/22,7MWQ,Structure of De Novo designed beta sheet heterodimer LHD29A53/B53,DE NOVO PROTEIN,synthetic construct,32630
+7MWR,"Bera, A.K., Sahtoe, D.D., Kang, A., Praetorius, F., Baker, D.",35050655,1/19/22,7MWR,Structure of De Novo designed beta sheet heterodimer LHD101A53/B4,DE NOVO PROTEIN,synthetic construct,32630
+7M0Q,"Pellock, S.J., Bera, A.K., Anishchenko, I., Baker, D.",34853475,12/29/21,7M0Q,Crystal structure of deep network hallucinated protein 0738_mod,DE NOVO PROTEIN,synthetic construct,32630
+7DNE,"Wu, Y., Plueckthun, A.",34795280,12/22/21,7DNE,DARPin 5m3_D12 in complex with V3-IY (MN) crown mimetic,DE NOVO PROTEIN,synthetic construct,32630
+7K3H,"Pellock, S.J., Anishchenko, I., Chidyausiku, T.M., Bera, A.K., DiMaio, F., Baker, D.",34853475,12/22/21,7K3H,Crystal structure of deep network hallucinated protein 0217,DE NOVO PROTEIN,synthetic construct,32630
+7DNF,"Wu, Y., Plueckthun, A.",34795280,12/15/21,7DNF,DARPin 63_B7 in complex with V3-IY (MN) crown mimetic,DE NOVO PROTEIN,synthetic construct,32630
+7DNG,"Wu, Y., Plueckthun, A.",34795280,12/15/21,7DNG,DARPin 63_B7 in complex with linear V3-crown (MN) peptide,DE NOVO PROTEIN,synthetic construct,32630
+7KUW,"Bera, A.K., Stewart, L., Kang, A.S., Baker, D.",35286324,12/15/21,7KUW,High-throughput design and refinement of stable proteins using sequence-only models,DE NOVO PROTEIN,synthetic construct,32630
+7M5T,"Ramelot, T.A., Hao, J., Baker, D., Montelione, G.T.",34853475,12/15/21,7M5T,Solution NMR structure of de novo designed protein 0515,DE NOVO PROTEIN,synthetic construct,32630
+7OSU,"Romero-Romero, S., Kordes, S., Hocker, B.",34865275,12/15/21,7OSU,"sTIM11noCys-SB, a de novo designed TIM barrel with a salt-bridge cluster (crystal form 1)",DE NOVO PROTEIN,synthetic construct,32630
+7OSV,"Kordes, S., Romero-Romero, S., Hocker, B.",34865275,12/15/21,7OSV,"DeNovoTIM6-SB, a de novo designed TIM barrel with a salt-bridge cluster (crystal form 1)",DE NOVO PROTEIN,synthetic construct,32630
+7OT7,"Romero-Romero, S., Kordes, S., Hocker, B.",34865275,12/15/21,7OT7,"sTIM11noCys-SB, a de novo designed TIM barrel with a salt-bridge cluster (crystal form 2)",DE NOVO PROTEIN,synthetic construct,32630
+7OT8,"Kordes, S., Romero-Romero, S., Hocker, B.",34865275,12/15/21,7OT8,"DeNovoTIM6-SB, a de novo designed TIM barrel with a salt-bridge cluster (crystal form 2)",DE NOVO PROTEIN,synthetic construct,32630
+7P12,"Kordes, S., Romero-Romero, S., Hocker, B.",34865275,12/15/21,7P12,"DeNovoTIM13-SB, a de novo designed TIM barrel with a salt-bridge cluster",DE NOVO PROTEIN,synthetic construct,32630
+7DKK,"Bin, H.",35140398,12/8/21,7DKK,De novo design protein XM2H,DE NOVO PROTEIN,synthetic construct,32630
+7DKO,"Bin, H.",35140398,12/8/21,7DKO,De novo design protein AM2M,DE NOVO PROTEIN,synthetic construct,32630
+7DMF,"Xu, Y.",35140398,12/8/21,7DMF,A de novo protein that rigidly extends the structure of tVHS-like domain in tepsin with a new designed domain,DE NOVO PROTEIN,synthetic construct,32630
+7B4T,"Friedrich, N., Stiegeler, E., Glogl, M., Lemmin, T., Hansen, S., Kadelka, C., Wu, Y., Ernst, P., Maliqi, L., Foulkes, C., Morin, M., Eroglu, M., Liechti, T., Ivan, B., Reinberg, T., Schaefer, J., Karakus, U., Ursprung, S., Mann, A., Rusert, P., Kouyos, R.D., Robinson, J.A., Gunthard, H.F., Pluckthun, A., Trkola, A.",34795280,11/24/21,7B4T,Broadly neutralizing DARPin bnD.1 in complex with the HIV-1 envelope variable loop 3 crown mimetic peptide V3-IF (BG505),DE NOVO PROTEIN,synthetic construct,32630
+7B4U,"Friedrich, N., Stiegeler, E., Glogl, M., Lemmin, T., Hansen, S., Kadelka, C., Wu, Y., Ernst, P., Maliqi, L., Foulkes, C., Morin, M., Eroglu, M., Liechti, T., Ivan, B., Reinberg, T., Schaefer, J., Karakus, U., Ursprung, S., Mann, A., Rusert, P., Kouyos, R.D., Robinson, J.A., Gunthard, H.F., Pluckthun, A., Trkola, A.",34795280,11/24/21,7B4U,Broadly neutralizing DARPin bnD.2 in complex with the HIV-1 envelope variable loop 3 crown mimetic peptide V3-IF (BG505),DE NOVO PROTEIN,synthetic construct,32630
+7B4V,"Friedrich, N., Stiegeler, E., Glogl, M., Lemmin, T., Hansen, S., Kadelka, C., Wu, Y., Ernst, P., Maliqi, L., Foulkes, C., Morin, M., Eroglu, M., Liechti, T., Ivan, B., Reinberg, T., Schaefer, J., Karakus, U., Ursprung, S., Mann, A., Rusert, P., Kouyos, R.D., Robinson, J.A., Gunthard, H.F., Pluckthun, A., Trkola, A.",34795280,11/24/21,7B4V,Broadly neutralizing DARPin bnD.2 in complex with the HIV-1 envelope variable loop 3 crown mimetic peptide V3-IF (BG505),DE NOVO PROTEIN,synthetic construct,32630
+7B4W,"Friedrich, N., Stiegeler, E., Glogl, M., Lemmin, T., Hansen, S., Kadelka, C., Wu, Y., Ernst, P., Maliqi, L., Foulkes, C., Morin, M., Eroglu, M., Liechti, T., Ivan, B., Reinberg, T., Schaefer, J., Karakus, U., Ursprung, S., Mann, A., Rusert, P., Kouyos, R.D., Robinson, J.A., Gunthard, H.F., Pluckthun, A., Trkola, A.",34795280,11/24/21,7B4W,Broadly neutralizing DARPin bnD.3 in complex with the HIV-1 envelope variable loop 3 crown mimetic peptide V3-IF (BG505),DE NOVO PROTEIN,synthetic construct,32630
+6WMK,"Bera, A.K., Sahtoe, D.D., Kang, A., Sankaran, B., Baker, D.",35050655,11/10/21,6WMK,Crystal structure of beta sheet heterodimer LHD29,DE NOVO PROTEIN,synthetic construct,32630
+7AH0,"Hutchins, G.H., Parnell, A.E., Anderson, J.L.R.",37487099,10/6/21,7AH0,"Crystal structure of the de novo designed two-heme binding protein, 4D2",DE NOVO PROTEIN,synthetic construct,32630
+7NY0,"ElGamacy, M., Coles, M.",35618709,10/6/21,7NY0,Solution structure of Boskar4; a de novo designed G-CSF agonist,DE NOVO PROTEIN,synthetic construct,32630
+7BID,"Laier, I., Mylemans, B., Lee, X.Y., Voet, A.R.D.",34552189,9/22/21,7BID,"Crystal structure of v31WRAP-T, a 7-bladed designer protein",DE NOVO PROTEIN,synthetic construct,32630
+7BIE,"Lee, X.Y., Mylemans, B., Laier, I., Voet, A.R.D.",34552189,9/22/21,7BIE,"Crystal structure of nvWrap-T, a 7-bladed symmetric propeller",DE NOVO PROTEIN,synthetic construct,32630
+7BIF,"Lee, X.Y., Mylemans, B., Laier, I., Voet, A.R.D.",34552189,9/22/21,7BIF,"Crystal structure of v22WRAP-T, a 7-bladed designer protein",DE NOVO PROTEIN,synthetic construct,32630
+7BIG,"Lee, X.Y., Mylemans, B., Laier, I., Voet, A.R.D.",34552189,9/22/21,7BIG,"Crystal structure of v13WRAP-T, a 7-bladed designer protein",DE NOVO PROTEIN,synthetic construct,32630
+7EQ9,"Obata, J., Kawakami, N., Tsutsumi, A., Miyamoto, K., Kikkawa, M., Arai, R.",34523636,9/15/21,7EQ9,Cryo-EM structure of designed protein nanoparticle TIP60 (Truncated Icosahedral Protein composed of 60-mer fusion proteins),DE NOVO PROTEIN,synthetic construct,32630
+7RX5,"Wang, F., Gnewou, O.M., Solemanifar, A., Xu, C., Egelman, E.H., Conticello, V.P.",35133794,9/8/21,7RX5,Cryo-EM reconstruction of Form1-N2 nanotube (Form I like),DE NOVO PROTEIN,synthetic construct,32630
+7L33,"Chakraborty, S., Wawrzak, Z., Prasad, P., Mitra, S., Prakash, D.",,8/11/21,7L33,X-ray Structure of a Cu-Bound De Novo Designed Peptide Trimer,DE NOVO PROTEIN,synthetic construct,32630
+7LIB,"Wierzbicki, M., Nowick, J.S., Li, X.",34258835,8/11/21,7LIB,X-ray crystal structure of a cyclic peptide containing beta-2-microglobulin (63-69) and a gamma-methylornithine turn unit,DE NOVO PROTEIN,synthetic construct,32630
+7DNS,"Suzuki, K., Kobayashi, N., Murata, T., Sakuma, K., Kosugi, T., Koga, R., Koga, N.",,7/28/21,7DNS,Crystal structure of domain-swapped dimer of H5_Fold-0 Elsa; de novo designed protein with an asymmetric all-alpha topology,DE NOVO PROTEIN,synthetic construct,32630
+6YQX,"Romero-Romero, S., Kordes, S., Shanmugaratnam, S., Fernandez-Velasco, D.A., Hocker, B.",34271011,7/21/21,6YQX,"Crystal structure of DeNovoTIM13, a de novo designed TIM barrel",DE NOVO PROTEIN,synthetic construct,32630
+6YQY,"Romero-Romero, S., Wiese, G.J., Kordes, S., Shanmugaratnam, S., Fernandez-Velasco, D.A., Hocker, B.",34271011,7/21/21,6YQY,"Crystal structure of sTIM11noCys, a de novo designed TIM barrel",DE NOVO PROTEIN,synthetic construct,32630
+6Z2I,"Romero-Romero, S., Kordes, S., Shanmugaratnam, S., Rodriguez-Romero, A., Fernandez-Velasco, D.A., Hocker, B.",34271011,7/21/21,6Z2I,"Crystal structure of DeNovoTIM6, a de novo designed TIM barrel",DE NOVO PROTEIN,synthetic construct,32630
+6XR1,"Hallinan, J.P., Doyle, L., Bradley, P., Stoddard, B.L.",34716407,7/14/21,6XR1,Computationally designed right-handed alpha/alpha single-chain toroid with 9 repeats,DE NOVO PROTEIN,synthetic construct,32630
+6XR2,"Hallinan, J.P., Doyle, L., Bradley, P., Stoddard, B.L.",34716407,7/14/21,6XR2,Computationally designed right-handed alpha/alpha homotrimeric toroid with 3 repeats per subunit,DE NOVO PROTEIN,synthetic construct,32630
+7ARR,"Bejger, M., Fortuna, P., Drewniak-Switalska, M., Rypniewski, W., Berlicki, L.",34032224,7/14/21,7ARR,The de novo designed hybrid alpha/beta-miniprotein,DE NOVO PROTEIN,synthetic construct,32630
+7ARS,"Bejger, M., Fortuna, P., Drewniak-Switalska, M., Rypniewski, W., Berlicki, L.",34032224,7/14/21,7ARS,The de novo designed hybrid alpha/beta-miniprotein (with Se-Methionine),DE NOVO PROTEIN,synthetic construct,32630
+7AX0,"Mylemans, B., Vandebroek, L., Parac-Vogt, T.N., Voet, A.R.D.",34196619,6/30/21,7AX0,Crystal structure of the computationally designed Scone-E protein co-crystallized with STA form a,DE NOVO PROTEIN,synthetic construct,32630
+6XH5,"Bera, A.K., Hsia, Y., Kang, A.S., Baker, D.",33863889,6/2/21,6XH5,Hierarchical design of multi-scale protein complexes by combinatorial assembly of oligomeric helical bundle and repeat protein building blocks,DE NOVO PROTEIN,synthetic construct,32630
+6XI6,"Bera, A.K., Hsia, Y., Kang, A.S., Shankaran, B., Baker, D.",33863889,6/2/21,6XI6,Hierarchical design of multi-scale protein complexes by combinatorial assembly of oligomeric helical bundle and repeat protein building blocks,DE NOVO PROTEIN,synthetic construct,32630
+7A1T,"Rhys, G.G., Brady, R.L., Woolfson, D.N.",34745518,5/19/21,7A1T,A collapsed hexameric state of a de novo coiled-coil assembly: CC-Type2-(GgLaId)4-W19BrPhe.,DE NOVO PROTEIN,synthetic construct,32630
+7BO8,"Rhys, G.G., Brady, R.L., Woolfson, D.N.",33881308,5/19/21,7BO8,A hexameric de novo coiled-coil assembly: CC-Type2-(VaYd)4-Y3F-W19(BrPhe)-Y24F.,DE NOVO PROTEIN,synthetic construct,32630
+7BO9,"Rhys, G.G., Brady, R.L., Woolfson, D.N.",33881308,5/19/21,7BO9,A hexameric de novo coiled-coil assembly: CC-Type2-(VaYd)4-Y3F-W19(BrPhe).,DE NOVO PROTEIN,synthetic construct,32630
+7BOA,"Rhys, G.G., Martin, F.J.O., Brady, R.L., Woolfson, D.N.",33881308,5/19/21,7BOA,A hexameric de novo coiled-coil assembly: CC-Type2-(YaFd)4-W19(BrPhe).,DE NOVO PROTEIN,synthetic construct,32630
+7KBQ,"Liu, G., Montelione, G.T., Northeast Structural Genomics Consortium (NESG)",,5/19/21,7KBQ,"Solution NMR Structure of DE NOVO DESIGNED Rossmann 3x3 Fold Protein r3x3_bp3, Northeast Structural Genomics Consortium (NESG) Target OR689",DE NOVO PROTEIN,synthetic construct,32630
+6YPI,"Basler, S., Mori, T., Hilvert, D.",33526894,4/28/21,6YPI,"Structure of the engineered metallo-Diels-Alderase DA7 W16G,K58Q,L77R,T78R",DE NOVO PROTEIN,synthetic construct,32630
+7BAS,"Martin, F.J.O., Dawson, W.M., Shelley, K., Brady, R.L., Woolfson, D.N.",34745518,4/28/21,7BAS,A de novo pentameric coiled-coil assembly: CC-Type2-(TgLaId)4-W19BrPhe.,DE NOVO PROTEIN,synthetic construct,32630
+7BAT,"Martin, F.J.O., Dawson, W.M., Shelley, K., Brady, R.L., Woolfson, D.N.",34745518,4/28/21,7BAT,A hexameric barrel state of a de novo coiled-coil assembly: CC-Type2-(GgIaId)4,DE NOVO PROTEIN,synthetic construct,32630
+7BAU,"Martin, F.J.O., Dawson, W.M., Shelley, K., Brady, R.L., Woolfson, D.N.",34745518,4/28/21,7BAU,A de novo pentameric coiled-coil assembly: CC-Type2-(TgIaId)4-W19BrPhe.,DE NOVO PROTEIN,synthetic construct,32630
+7BAV,"Martin, F.J.O., Dawson, W.M., Shelley, K., Brady, R.L., Woolfson, D.N.",34745518,4/28/21,7BAV,A de novo pentameric coiled-coil assembly: CC-Type2-(TgLaId)4-W19BrPhe.,DE NOVO PROTEIN,synthetic construct,32630
+7BAW,"Martin, F.J.O., Dawson, W.M., Brady, R.L., Woolfson, D.N.",34745518,4/28/21,7BAW,A heptameric barrel state of a de novo coiled-coil assembly: CC-Type2-(GgIaId)4,DE NOVO PROTEIN,synthetic construct,32630
+7BIM,"Shelley, K.L., Rhys, G.G., Dawson, W.M., Brady, R.L., Woolfson, D.N.",34745518,4/21/21,7BIM,"A de novo designed nonameric coiled coil, CC-Type2-(GgLaId)4",DE NOVO PROTEIN,synthetic construct,32630
+7BWW,"Basler, S., Mori, T., Hilvert, D.",33526894,4/21/21,7BWW,Structure of the engineered metallo-Diels-Alderase DA7 W16S,DE NOVO PROTEIN,synthetic construct,32630
+6YAZ,"Scott, A.J., Brady, R.L., Woolfson, D.N.",33972753,4/7/21,6YAZ,Crystal structure of a parallel hexameric coiled coil CC-Type2-(TaId)5,DE NOVO PROTEIN,synthetic construct,32630
+6YB0,"Scott, A.J., Brady, R.L., Woolfson, D.N.",33972753,4/7/21,6YB0,Crystal structure of a parallel hexameric coiled coil CC-Type2-(TaSd)2,DE NOVO PROTEIN,synthetic construct,32630
+6YB1,"Kratochvil, H.T., Liu, L., Scott, A.J., Woolfson, D.N., DeGrado, W.F.",33972753,4/7/21,6YB1,Crystal structure of an antiparallel octameric transmembrane coiled coil K2-CCTM-VbIc,DE NOVO PROTEIN,synthetic construct,32630
+6YB2,"Scott, A.J., Brady, R.L., Woolfson, D.N.",33972753,4/7/21,6YB2,Crystal structure of a parallel hexameric coiled coil CC-Type2-(TaId)2,DE NOVO PROTEIN,synthetic construct,32630
+6Z35,"Baumgart, M., Roepke, M., Muehlbauer, M., Asami, S., Mader, S., Fredriksson, K., Groll, M., Gamiz-Hernandez, A.P., Kaila, V.R.I.",33767131,4/7/21,6Z35,De-novo Maquette 2 protein with buried ion-pair,DE NOVO PROTEIN,synthetic construct,32630
+7BQM,"Kobayashi, N., Sugiki, T., Fujiwara, T., Sakuma, K., Kosugi, T., Koga, R., Koga, N.",,4/7/21,7BQM,Solution NMR structure of fold-0 Chantal; de novo designed protein with an asymmetric all-alpha topology,DE NOVO PROTEIN,synthetic construct,32630
+7BQN,"Kobayashi, N., Sugiki, T., Fujiwara, T., Sakuma, K., Kosugi, T., Koga, R., Koga, N.",,4/7/21,7BQN,Solution NMR structure of fold-C Rei; de novo designed protein with an asymmetric all-alpha topology,DE NOVO PROTEIN,synthetic construct,32630
+7BQQ,"Kobayashi, N., Sugiki, T., Fujiwara, T., Sakuma, K., Kosugi, T., Koga, R., Koga, N.",,4/7/21,7BQQ,Solution NMR structure of fold-Z Gogy; de novo designed protein with an asymmetric all-alpha topology,DE NOVO PROTEIN,synthetic construct,32630
+7BQR,"Kobayashi, N., Nagashima, T., Sakuma, K., Kosugi, T., Koga, R., Koga, N.",,4/7/21,7BQR,Solution NMR structure of fold-K Mussoc; de novo designed protein with an asymmetric all-alpha topology,DE NOVO PROTEIN,synthetic construct,32630
+7BQS,"Kobayashi, N., Nagashima, T., Sakuma, K., Kosugi, T., Koga, R., Koga, N.",,4/7/21,7BQS,Solution NMR structure of fold-U Nomur; de novo designed protein with an asymmetric all-alpha topology,DE NOVO PROTEIN,synthetic construct,32630
+7A8S,"Shanmugaratnam, S., Wiese, J.G., Hocker, B.",33723882,3/24/21,7A8S,de novo designed ba8-barrel sTIM11 with an alpha-helical extension,DE NOVO PROTEIN,synthetic construct,32630
+7BPL,"Kobayashi, N., Sugiki, T., Fujiwara, T., Minami, S., Koga, R., Chikenji, G., Koga, N.",,3/24/21,7BPL,Solution NMR structure of NF1; de novo designed protein with a novel fold,DE NOVO PROTEIN,synthetic construct,32630
+7BPM,"Kobayashi, N., Sugiki, T., Fujiwara, T., Minami, S., Koga, R., Chikenji, G., Koga, N.",,3/24/21,7BPM,Solution NMR structure of NF2; de novo designed protein with a novel fold,DE NOVO PROTEIN,synthetic construct,32630
+7BPN,"Kobayashi, N., Sugiki, T., Fujiwara, T., Minami, S., Koga, R., Chikenji, G., Koga, N.",,3/24/21,7BPN,Solution NMR structure of NF7; de novo designed protein with a novel fold,DE NOVO PROTEIN,synthetic construct,32630
+7BPP,"Kobayashi, N., Sugiki, T., Fujiwara, T., Minami, S., Koga, R., Chikenji, G., Koga, N.",,3/24/21,7BPP,Solution NMR structure of NF5; de novo designed protein with a novel fold,DE NOVO PROTEIN,synthetic construct,32630
+7BQB,"Kobayashi, N., Nagashima, T., Minami, S., Koga, R., Chikenji, G., Koga, N.",,3/24/21,7BQB,Solution NMR structure of NF6; de novo designed protein with a novel fold,DE NOVO PROTEIN,synthetic construct,32630
+7BQC,"Kobayashi, N., Nagashima, T., Minami, S., Koga, R., Chikenji, T., Koga, N.",,3/24/21,7BQC,Solution NMR structure of NF4; de novo designed protein with a novel fold,DE NOVO PROTEIN,synthetic construct,32630
+7BQD,"Kobayashi, N., Sugiki, T., Fujiwara, T., Minami, S., Koga, R., Chikenji, G., Koga, N.",,3/24/21,7BQD,Solution NMR structure of NF8 (knot fold); de novo designed protein with a novel fold,DE NOVO PROTEIN,synthetic construct,32630
+7BQE,"Kobayashi, N., Sugiki, T., Fujiwara, T., Minami, S., Koga, R., Chikenji, G., Koga, N.",,3/24/21,7BQE,Solution NMR structure of NF3; de novo designed protein with a novel fold,DE NOVO PROTEIN,synthetic construct,32630
+6Z0L,"McEwen, A.G., Poussin-Courmontagne, P., Naudin, E.A., DeGrado, W.F., Torbeev, V.",33635059,3/17/21,6Z0L,Het-N2 - De novo designed three-helix heterodimer with Cysteine at the N2 position of the alpha-helix,DE NOVO PROTEIN,synthetic construct,32630
+6Z0M,"McEwen, A.G., Poussin-Courmontagne, P., Naudin, E.A., DeGrado, W.F., Torbeev, V.",33635059,3/17/21,6Z0M,Het-Ncap - De novo designed three-helix heterodimer with Cysteine at the Ncap position of the alpha-helix,DE NOVO PROTEIN,synthetic construct,32630
+7BEY,"McEwen, A.G., Poussin-Courmontagne, P., Naudin, E.A., DeGrado, W.F., Torbeev, V.",33635059,3/17/21,7BEY,Het-N2-SO3- - De novo designed three-helix heterodimer with Cysteine S-sulfate at the N2 position of the alpha-helix,DE NOVO PROTEIN,synthetic construct,32630
+6X9Z,"Bera, A.K., Vorobieva, A.A., Kang, A.S., Baker, D.",33602829,2/17/21,6X9Z,De novo design of transmembrane beta-barrels,DE NOVO PROTEIN,synthetic construct,32630
+6ZT1,"Rhys, G.G., Brady, R.L., Woolfson, D.N.",33750792,2/3/21,6ZT1,Two states of a de novo hexameric coiled coil assembly CC-Type2-(LaIdGe)4,DE NOVO PROTEIN,synthetic construct,32630
+6TVJ,"Guardiola, S., Varese, M., Garcia, J., Giralt, E.",34163753,1/27/21,6TVJ,Solution structure of PD-i3 peptide inhibitor of the human PD-1 extracellular domain,DE NOVO PROTEIN,synthetic construct,32630
+6TT6,"Guardiola, S., Varese, M., Garcia, J., Giralt, E.",,1/13/21,6TT6,Solution structure of PD-i6 peptide inhibitor of the human PD-1 extracellular domain,DE NOVO PROTEIN,synthetic construct,32630
+7AWY,"Mylemans, B., Voet, A.R.D.",34196619,1/13/21,7AWY,Crystal structure of the computationally designed Scone-R protein,DE NOVO PROTEIN,synthetic construct,32630
+7AWZ,"Mylemans, B., Voet, A.R.D.",34196619,1/13/21,7AWZ,Crystal structure of the computationally designed Scone-E protein,DE NOVO PROTEIN,synthetic construct,32630
+7AX2,"Mylemans, B., Vandebroek, L., Parac-Vogt, T.N., Voet, A.R.D.",34196619,1/13/21,7AX2,"Crystal structure of the computationally designed Scone-E protein co-crystallized with STA, form b",DE NOVO PROTEIN,synthetic construct,32630
+6XNS,"Bick, M.J., Hsia, Y., Sankaran, B., Baker, D.",33863889,12/23/20,6XNS,C3_crown-05,DE NOVO PROTEIN,synthetic construct,32630
+6XSS,"Redler, R.L., Edman, N.I., Baker, D., Ekiert, D., Bhabha, G.",33863889,12/23/20,6XSS,CryoEM structure of designed helical fusion protein C4_nat_HFuse-7900,DE NOVO PROTEIN,synthetic construct,32630
+6XT4,"Bick, M.J., Hsia, Y., Sankaran, B., Baker, D.",33863889,12/23/20,6XT4,C3_HD-1069 (1BH-69) - fusion protein of helical bundle and repeat protein,DE NOVO PROTEIN,synthetic construct,32630
+7CBC,"Lee, H., Oh, B.-H., Baker, D.",33503651,12/23/20,7CBC,Crystal structure of a de novo designed switch protein caging a hemagglutinin binder,DE NOVO PROTEIN,synthetic construct,32630
+6Y7N,"Vandebroek, L., Noguchi, H., Parac-Vogt, T.N., Van Meervelt, L., Voet, A.R.D.",,12/16/20,6Y7N,The crystal structure of the eight-bladed symmetrical designer protein Tako8 in the presence of tellurotungstic Anderson-Evans (TEW),DE NOVO PROTEIN,synthetic construct,32630
+6Y7O,"Vandebroek, L., Noguchi, H., Parac-Vogt, T.N., Van Meervelt, L., Voet, A.R.D.",,12/16/20,6Y7O,The complex between the eight-bladed symmetrical designer protein Tako8 and the silicotungstic acid Keggin (STA),DE NOVO PROTEIN,synthetic construct,32630
+6Y7P,"Vandebroek, L., Noguchi, H., Parac-Vogt, T.N., Van Meervelt, L., Voet, A.R.D.",,12/16/20,6Y7P,The complex between the eight-bladed symmetrical designer protein Tako8 and 1:2 zirconium(IV) Wells-Dawson (ZrWD),DE NOVO PROTEIN,synthetic construct,32630
+6V67,"Bick, M.J., Bryan, C.M., Baker, D., Dimaio, F., Kang, A.",34272285,12/9/20,6V67,Apo Structure of the De Novo PD-1 Binding Miniprotein GR918.2,DE NOVO PROTEIN,synthetic construct,32630
+7JH6,"Schmidt, N., Liu, L., DeGrado, W.F.",33318174,12/9/20,7JH6,De novo designed two-domain di-Zn(II) and porphyrin-binding protein,DE NOVO PROTEIN,synthetic construct,32630
+6UF4,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UF4,"S2 symmetric peptide design number 4 crystal form 2, Pugsley",DE NOVO PROTEIN,synthetic construct,32630
+6UF7,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UF7,"S2 symmetric peptide design number 5, Uncle Fester",DE NOVO PROTEIN,synthetic construct,32630
+6UF8,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UF8,"S2 symmetric peptide design number 6, London Bridge",DE NOVO PROTEIN,synthetic construct,32630
+6UF9,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UF9,"S4 symmetric peptide design number 1, Tim apo form",DE NOVO PROTEIN,synthetic construct,32630
+6UFA,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UFA,"S4 symmetric peptide design number 1, Tim zinc-bound form",DE NOVO PROTEIN,synthetic construct,32630
+6UFU,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UFU,"C2 symmetric peptide design number 1, Zappy, crystal form 1",DE NOVO PROTEIN,synthetic construct,32630
+6UG2,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UG2,"C2 symmetric peptide design number 1, Zappy, crystal form 2",DE NOVO PROTEIN,synthetic construct,32630
+6UG3,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UG3,"C3 symmetric peptide design number 1, Sporty, crystal form 1",DE NOVO PROTEIN,synthetic construct,32630
+6UG6,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UG6,"C3 symmetric peptide design number 1, Sporty, crystal form 2",DE NOVO PROTEIN,synthetic construct,32630
+6UGB,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UGB,"C3 symmetric peptide design number 2, Baby Basil",DE NOVO PROTEIN,synthetic construct,32630
+6UGC,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,12/2/20,6UGC,C3 symmetric peptide design number 3,DE NOVO PROTEIN,synthetic construct,32630
+6WVS,"Bick, M.J., Haydon, I.C., Caldwell, S.J., Zeymer, C., Huang, P., Fernandez-Velasco, D.A., Baker, D.",33203677,11/25/20,6WVS,Hyperstable de novo TIM barrel variant DeNovoTIM15,DE NOVO PROTEIN,synthetic construct,32630
+6WXO,"Caldwell, S.J., Zeymer, C., Haydon, I.C., Huang, P., Hilvert, D., Baker, D.",33203677,11/25/20,6WXO,De novo TIM barrel-ferredoxin fold fusion homodimer with 2-histidine 2-glutamate centre TFD-HE,DE NOVO PROTEIN,synthetic construct,32630
+6WXP,"Caldwell, S.J., Zeymer, C., Haydon, I.C., Huang, P., Hilvert, D., Baker, D.",33203677,11/25/20,6WXP,De novo TIM barrel-ferredoxin fold fusion homodimer with 4-glutamate centre TFD-EE,DE NOVO PROTEIN,synthetic construct,32630
+6ZV9,"Caldwell, S., Haydon, I., Piperidou, N., Huang, P., Hilvert, D., Baker, D., Zeymer, C.",33203677,11/25/20,6ZV9,Terbium(III)-bound de novo TIM barrel-ferredoxin fold fusion dimer with 4-glutamate binding site and tryptophan antenna (TFD-EE N6W),DE NOVO PROTEIN,synthetic construct,32630
+6REO,"Noguchi, H., Clarke, D.E., Gryspeerdt, J.L., Feyter, S.D., Voet, A.R.D.",,11/18/20,6REO,Crystal structure of 3fPizza6-SH with Sulphate ion,DE NOVO PROTEIN,synthetic construct,32630
+6RLH,"Noguchi, H., Voet, A.R.D.",,11/18/20,6RLH,The structure of 3fPizza6-SH obtained via vapour diffusion,DE NOVO PROTEIN,synthetic construct,32630
+6RLI,"Noguchi, H., Voet, A.R.D.",,11/18/20,6RLI,The structure of the self-assembled 3fPizza6-SH crystal,DE NOVO PROTEIN,synthetic construct,32630
+6YWC,"Yang, C., Sesterhenn, F., Pojer, F., Correia, B.E.",33398169,10/7/20,6YWC,De novo designed protein 4E1H_95 in complex with 101F antibody,DE NOVO PROTEIN,Homo sapiens,9606
+6YWD,"Yang, C., Sesterhenn, F., Pojer, F., Correia, B.E.",33398169,10/7/20,6YWD,De novo designed protein 4H_01 in complex with Mota antibody,DE NOVO PROTEIN,Homo sapiens,9606
+7C0N,"He, C., Wu, S., Chi, C., Zhang, W., Ma, M., Lai, L., Dong, S.",32946227,10/7/20,7C0N,Crystal structure of a self-assembling galactosylated peptide homodimer,DE NOVO PROTEIN,synthetic construct,32630
+6UCX,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,9/23/20,6UCX,"S2 symmetric peptide design number 1, Wednesday",DE NOVO PROTEIN,synthetic construct,32630
+6UD9,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,9/23/20,6UD9,"S2 symmetric peptide design number 2, Morticia",DE NOVO PROTEIN,synthetic construct,32630
+6UDR,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,9/23/20,6UDR,"S2 symmetric peptide design number 3 crystal form 1, Lurch",DE NOVO PROTEIN,synthetic construct,32630
+6UDW,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,9/23/20,6UDW,"S2 symmetric peptide design number 3 crystal form 2, Lurch",DE NOVO PROTEIN,synthetic construct,32630
+6UDZ,"Mulligan, V.K., Kang, C.S., Antselovich, I., Sawaya, M.R., Yeates, T.O., Baker, D.",33058266,9/23/20,6UDZ,"S2 symmetric peptide design number 4 crystal form 1, Pugsley",DE NOVO PROTEIN,synthetic construct,32630
+7JH5,"Bick, M.J., Lajoie, M.J., Boyken, S.E., Sankaran, B., Baker, D.",32820060,9/2/20,7JH5,Co-LOCKR: de novo designed protein switch,DE NOVO PROTEIN,synthetic construct,32630
+6W6X,"Polizzi, N.F.",32883865,8/26/20,6W6X,Crystal Structure of ABLE Apo-protein,DE NOVO PROTEIN,synthetic construct,32630
+6W70,"Polizzi, N.F.",32883865,8/26/20,6W70,Crystal Structure of apixaban-bound ABLE,DE NOVO PROTEIN,synthetic construct,32630
+6X8N,"Polizzi, N.F.",32883865,8/26/20,6X8N,Crystal Structure of H49A ABLE mutant,DE NOVO PROTEIN,synthetic construct,32630
+6U1S,"Johnson, M.J., Reggiano, G., Xu, C., Lu, P., Hsia, Y., Brunette, T.J., DiMaio, F., Baker, D., Kollman, J.",,8/19/20,6U1S,"Cryo-EM structure of a de novo designed 16-helix transmembrane nanopore, TMHC8_R.",DE NOVO PROTEIN,synthetic construct,32630
+6VG7,"Pan, X., Zhang, Y., Kelly, M., Kortemme, T.",32855341,8/19/20,6VG7,De novo designed Rossmann fold protein ROS2_49223,DE NOVO PROTEIN,synthetic construct,32630
+6VGA,"Pan, X., Zhang, Y., Kelly, M., Kortemme, T.",32855341,8/19/20,6VGA,De novo designed Rossmann fold protein ROS2_835,DE NOVO PROTEIN,synthetic construct,32630
+6VGB,"Pan, X., Zhang, Y., Kelly, M., Kortemme, T.",32855341,8/19/20,6VGB,De novo designed Rossmann fold protein ROS2_36830,DE NOVO PROTEIN,synthetic construct,32630
+6W90,"Thompson, M.C., Pan, X., Liu, L., Fraser, J.S., Kortemme, T.",32855341,8/19/20,6W90,De novo designed NTF2 fold protein NT-9,DE NOVO PROTEIN,synthetic construct,32630
+6V8E,"Sankaran, B., Ueda, G., Zwart, P.H., Baker, D.",32748788,8/12/20,6V8E,Computationally designed C3-symmetric homotrimer from TPR repeat protein,DE NOVO PROTEIN,synthetic construct,32630
+6VFH,"Antanasijevic, A., Ward, A.B.",32748788,8/12/20,6VFH,De novo designed tetrahedral nanoparticle T33_dn10,DE NOVO PROTEIN,synthetic construct,32630
+6VFI,"Antanasijevic, A., Ward, A.B.",32748788,8/12/20,6VFI,De novo designed octahedral nanoparticle O43_dn18,DE NOVO PROTEIN,synthetic construct,32630
+6VFJ,"Antanasijevic, A., Ward, A.B.",32748788,8/12/20,6VFJ,De novo designed icosahedral nanoparticle I53_dn5,DE NOVO PROTEIN,synthetic construct,32630
+6VL5,"Ward, A.B., Antanasijevic, A.",32802411,8/12/20,6VL5,"BG505 SOSIP reconstructed from a designed tetrahedral nanoparticle, BG505 SOSIP-T33_dn2",DE NOVO PROTEIN,synthetic construct,32630
+6VL6,"Ward, A.B., Antanasijevic, A.",32802411,8/12/20,6VL6,De novo designed tetrahedral nanoparticle T33_dn2 presenting BG505 SOSIP trimers,DE NOVO PROTEIN,synthetic construct,32630
+6VEH,"Bick, M.J., Ueda, G., Baker, D.",32748788,8/5/20,6VEH,Computationally designed C3-symmetric homotrimer from HEAT repeat protein,DE NOVO PROTEIN,synthetic construct,32630
+6XEH,"Liu, G., Montelione, G.T., Northeast Structural Genomics Consortium (NESG)",,8/5/20,6XEH,"Solution NMR Structure of DE NOVO DESIGNED Rossmann 2x3 Fold Protein r2x3_168, Northeast Structural Genomics Consortium (NESG) Target OR386",DE NOVO PROTEIN,synthetic construct,32630
+6VFK,"Antanasijevic, A., Ward, A.B.",32780770,7/22/20,6VFK,De novo designed tetrahedral nanoparticle T33_dn10 displaying 4 copies of BG505-SOSIP trimer on the surface,DE NOVO PROTEIN,synthetic construct,32630
+6VFL,"Antanasijevic, A., Ward, A.B.",32780770,7/22/20,6VFL,BG505-SOSIP model reconstructed by subparticle extraction and refinement from a tetrahedral nanoparticle T33_dn10,DE NOVO PROTEIN,synthetic construct,32630
+6REI,"Noguchi, H., Clarke, D.E., Gryspeerdt, J.L., Feyter, S.D., Voet, A.R.D.",,5/13/20,6REI,Crystal structure of Pizza6-S with Cd2+,DE NOVO PROTEIN,synthetic construct,32630
+6REL,"Noguchi, H., Clarke, D.E., Gryspeerdt, J.L., Feyter, S.D., Voet, A.R.D.",,5/13/20,6REL,Crystal structure of Pizza6-SH with CdCl2 nanocrystal,DE NOVO PROTEIN,synthetic construct,32630
+6REM,"Noguchi, H., Clarke, D.E., Gryspeerdt, J.L., Feyter, S.D., Voet, A.R.D.",,5/13/20,6REM,Crystal structure of Pizza6-SH with Sulphate ion,DE NOVO PROTEIN,synthetic construct,32630
+6TJB,"Laier, I., Mylemans, B., Noguchi, H., Voet, A.R.D.",32343866,5/6/20,6TJB,Crystal structure of the computationally designed Cake2 protein,DE NOVO PROTEIN,synthetic construct,32630
+6TJC,"Laier, I., Mylemans, B., Voet, A.R.D., Noguchi, H.",32343866,5/6/20,6TJC,Crystal structure of the computationally designed Cake3 protein,DE NOVO PROTEIN,synthetic construct,32630
+6TJD,"Laier, I., Mylemans, B., Noguchi, H., Voet, A.R.D.",32343866,5/6/20,6TJD,Crystal structure of the computationally designed Cake4 protein,DE NOVO PROTEIN,synthetic construct,32630
+6TJE,"Mylemans, B., Laier, I., Noguchi, H., Voet, A.R.D.",32343866,5/6/20,6TJE,Crystal structure of the computationally designed Cake5 protein,DE NOVO PROTEIN,synthetic construct,32630
+6TJF,"Mylemans, B., Laier, I., Voet, A.R.D., Noguchi, H.",32343866,5/6/20,6TJF,Crystal structure of the computationally designed Cake6 protein,DE NOVO PROTEIN,synthetic construct,32630
+6TJG,"Laier, I., Mylemans, B., Noguchi, H., Voet, A.R.D.",32343866,5/6/20,6TJG,Crystal structure of the computationally designed Cake8 protein,DE NOVO PROTEIN,synthetic construct,32630
+6TJH,"Mylemans, B., Laier, I., Noguchi, H., Voet, A.R.D.",32343866,5/6/20,6TJH,Crystal structure of the computationally designed Cake9 protein,DE NOVO PROTEIN,synthetic construct,32630
+6TJI,"Laier, I., Mylemans, B., Voet, A.R.D., Noguchi, H.",32343866,5/6/20,6TJI,Crystal structure of the computationally designed Cake10 protein,DE NOVO PROTEIN,synthetic construct,32630
+6OS8,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6OS8,Coiled-coil Trimer with Glu:p-fluorophenylalanine:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6OSD,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6OSD,Coiled-coil Trimer with Glu:Phe:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6OV9,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6OV9,Coiled-coil Trimer with Glu:p-nitrophenylalanine:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6OVS,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6OVS,Coiled-coil Trimer with Glu:Tyr:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6OVU,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6OVU,"Coiled-coil Trimer with Glu:3,4-difluorophenylalanine:Lys Triad",DE NOVO PROTEIN,synthetic construct,32630
+6OVV,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6OVV,Coiled-coil Trimer with Glu:4-pyridinylalanine:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6Q1W,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6Q1W,Coiled-coil Trimer with Glu:Val:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6Q22,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6Q22,Coiled-coil Trimer with Glu:Aminobutyric acid:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6Q25,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6Q25,Coiled-coil Trimer with Glu:Leu:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6U47,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6U47,Coiled-coil Trimer with Glu:Ala:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6V4Y,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6V4Y,Coiled-coil Trimer with Glu:Tyr:Lys Triad with a K7A mutation,DE NOVO PROTEIN,synthetic construct,32630
+6V50,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6V50,Coiled-coil Trimer with Glu:Ser:Lys Triad with K7A mutation,DE NOVO PROTEIN,synthetic construct,32630
+6V57,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6V57,Coiled-coil Trimer with Glu:Norvaline:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6V58,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6V58,Coiled-coil Trimer with Glu:Norleucine:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6V5G,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6V5G,Coiled-coil Trimer with Ala:Leu:Lys Triad,DE NOVO PROTEIN,synthetic construct,32630
+6V5I,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6V5I,Coiled-coil Trimer with Ala:Leu:Ala Triad,DE NOVO PROTEIN,synthetic construct,32630
+6V5J,"Smith, M.S., Stern, K.L., Billings, W.M., Price, J.L.",32270676,4/29/20,6V5J,Coiled-coil Trimer with Glu:Leu:Ala Triad,DE NOVO PROTEIN,synthetic construct,32630
+6NX2,"Wei, K.Y., Bick, M.J.",32188784,4/22/20,6NX2,Crystal structure of computationally designed protein AAA,DE NOVO PROTEIN,synthetic construct,32630
+6NXM,"Wei, K.Y., Bick, M.J.",32188784,4/22/20,6NXM,Crystal structure of computationally designed protein XAA_GVDQ,DE NOVO PROTEIN,synthetic construct,32630
+6NY8,"Wei, K.Y., Bick, M.J.",32188784,4/22/20,6NY8,Crystal structure of computationally designed protein XAA_GVDQ with calcium,DE NOVO PROTEIN,synthetic construct,32630
+6NYE,"Wei, K.Y., Bick, M.J.",32188784,4/22/20,6NYE,Crystal structure of computationally designed protein XAX,DE NOVO PROTEIN,synthetic construct,32630
+6NYI,"Wei, K.Y., Bick, M.J.",32188784,4/22/20,6NYI,Crystal structure of computationally designed protein XXA,DE NOVO PROTEIN,synthetic construct,32630
+6NYK,"Wei, K.Y., Bick, M.J.",32188784,4/22/20,6NYK,Crystal structure of computationally designed protein XAX_GGDQ,DE NOVO PROTEIN,synthetic construct,32630
+6NZ1,"Wei, K.Y., Bick, M.J.",32188784,4/22/20,6NZ1,Crystal structure of computationally designed protein XXA_GVDQ,DE NOVO PROTEIN,synthetic construct,32630
+6NZ3,"Wei, K.Y., Bick, M.J.",32188784,4/22/20,6NZ3,Crystal structure of computationally designed protein XAA_GGHN,DE NOVO PROTEIN,synthetic construct,32630
+6O0C,"Wei, K.Y., Moschidi, D., Nerli, S., Sgourakis, N., Baker, D.",32188784,4/22/20,6O0C,NMR ensemble of computationally designed protein XAA_GVDQ mutant M4L,DE NOVO PROTEIN,synthetic construct,32630
+6O0I,"Wei, K.Y., Moschidi, D., Nerli, S., Sgourakis, N., Baker, D.",32188784,4/22/20,6O0I,NMR ensemble of computationally designed protein XAA,DE NOVO PROTEIN,synthetic construct,32630
+6WI5,"Bera, A.K., Koepnick, B., Boykov, A., Baker, D.",,4/22/20,6WI5,De novo designed protein Foldit4,DE NOVO PROTEIN,synthetic construct,32630
+6XWI,"Abriata, L.A.",32409444,4/15/20,6XWI,Solution NMR structure of the S0_2.126 designed protein,DE NOVO PROTEIN,synthetic construct,32630
+6OHH,"Doyle, L.A., Stoddard, B.L.",,4/8/20,6OHH,Structure of EF1p2_mFAP2b bound to DFHBI,DE NOVO PROTEIN,synthetic construct,32630
+6W3W,"Bera, A.K., Basanta, B., Dimaio, F., Sankaran, B., Baker, D.",32839327,4/8/20,6W3W,An enumerative algorithm for de novo design of proteins with diverse pocket structures,DE NOVO PROTEIN,synthetic construct,32630
+6W40,"Bera, A.K., Basanta, B., Sankaran, B., Baker, D.",32839327,4/8/20,6W40,An enumerative algorithm for de novo design of proteins with diverse pocket structures,DE NOVO PROTEIN,synthetic construct,32630
+6SRW,"Bloch, J.S., Pinkas, D.M., Hilvert, D.",,4/1/20,6SRW,"Kemp Eliminase HG3.17 mutant Q50F, E47N, N300D Complexed with Transition State Analog 6-Nitrobenzotriazole",DE NOVO PROTEIN,synthetic construct,32630
+6SRY,"Bloch, J.S., Pinkas, D.M., Hilvert, D.",,4/1/20,6SRY,"Kemp Eliminase HG3.17 mutant Q50S, E47N, N300D Complexed with Transition State Analog 6-Nitrobenzotriazole",DE NOVO PROTEIN,synthetic construct,32630
+6SRZ,"Bloch, J.S., Pinkas, D.M., Hilvert, D.",,4/1/20,6SRZ,"Kemp Eliminase HG3.17 mutant Q50H, E47N, N300D Complexed with Transition State Analog 6-Nitrobenzotriazole",DE NOVO PROTEIN,synthetic construct,32630
+6SS1,"Bloch, J.S., Pinkas, D.M., Hilvert, D.",,4/1/20,6SS1,"Kemp Eliminase HG3.17 mutant Q50A, E47N, N300D Complexed with Transition State Analog 6-Nitrobenzotriazole",DE NOVO PROTEIN,synthetic construct,32630
+6SS3,"Bloch, J.S., Pinkas, D.M., Hilvert, D.",,4/1/20,6SS3,"Kemp Eliminase HG3.17 mutant Q50K, E47N, N300D Complexed with Transition State Analog 6-Nitrobenzotriazole",DE NOVO PROTEIN,synthetic construct,32630
+6TU6,"Bloch, J.S., Hilvert, D.",,4/1/20,6TU6,"Kemp Eliminase HG3.17 mutant Q50M, E47N, N300D Complexed with Transition State Analog 6-Nitrobenzotriazole",DE NOVO PROTEIN,synthetic construct,32630
+6OLO,"Schieb, K.A., Horne, W.S.",31204733,3/25/20,6OLO,Controlling the Self-Assembly of Synthetic Metal-Coordinating Coiled-Coil Peptides: Hexagonal Lattice from a Trimeric Coiled Coil,DE NOVO PROTEIN,synthetic construct,32630
+6O35,"Bick, M.J., Xu, C., Sankaran, B., Baker, D.",32848250,3/18/20,6O35,Crystal structure of a de novo designed octameric helical-bundle protein,DE NOVO PROTEIN,synthetic construct,32630
+6QSD,"Noguchi, H., Vandebroek, L., Kamata, K., Tame, J.R.H., Van Meervelt, L., Parac-Vogt, T.N., Voet, A.R.D.",32869783,3/18/20,6QSD,Crystal structure of Pizza6S,DE NOVO PROTEIN,synthetic construct,32630
+6QSE,"Noguchi, H., Vandebroek, L., Kamata, K., Tame, J.R.H., Van Meervelt, L., Parac-Vogt, T.N., Voet, A.R.D.",32869783,3/18/20,6QSE,Crystal structure of Pizza6S in the presence of Anderson-Evans (TEW),DE NOVO PROTEIN,synthetic construct,32630
+6QSF,"Noguchi, H., Vandebroek, L., Kamata, K., Tame, J.R.H., Van Meervelt, L., Parac-Vogt, T.N., Voet, A.R.D.",32869783,3/18/20,6QSF,Crystal structure of Pizza6S in the presence of Keggin (STA),DE NOVO PROTEIN,synthetic construct,32630
+6QSG,"Noguchi, H., Vandebroek, L., Kamata, K., Tame, J.R.H., Van Meervelt, L., Parac-Vogt, T.N., Voet, A.R.D.",32869783,3/18/20,6QSG,Crystal structure of the hybrid bioinorganic complex of Pizza6S and Keggin (STA),DE NOVO PROTEIN,synthetic construct,32630
+6QSH,"Noguchi, H., Vandebroek, L., Kamata, K., Tame, J.R.H., Van Meervelt, L., Parac-Vogt, T.N., Voet, A.R.D.",32869783,3/18/20,6QSH,Crystal structure of the hybrid bioinorganic complex of Pizza6S linked by the 1:2 Ce-substituted Keggin,DE NOVO PROTEIN,synthetic construct,32630
+6XXZ,"Edgell, C.L., Savery, N.J., Woolfson, D.N.",32133841,3/18/20,6XXZ,"Crystal structure of a de novo designed parallel four-helix coiled coil, 2-EK-4",DE NOVO PROTEIN,synthetic construct,32630
+6XY0,"Edgell, C.L., Savery, N.J., Woolfson, D.N.",32133841,3/18/20,6XY0,"Crystal structure of a de novo designed parallel four-helix coiled coil, 3-EK-4",DE NOVO PROTEIN,synthetic construct,32630
+6XY1,"Edgell, C.L., Savery, N.J., Woolfson, D.N.",32133841,3/18/20,6XY1,"Crystal structure of a de novo designed parallel four-helix coiled coil, 4-KE-4.",DE NOVO PROTEIN,synthetic construct,32630
+6Y06,"ElGamacy, M., Coles, M.",33351791,3/18/20,6Y06,Moevan: a designed granulopoietic protein by topological rescaffolding,DE NOVO PROTEIN,synthetic construct,32630
+6Y07,"ElGamacy, M., Coles, M.",33351791,3/18/20,6Y07,Designing a Granulopoietic Protein by Topological Rescaffolding 1: Sohair,DE NOVO PROTEIN,synthetic construct,32630
+6MCD,"Tolbert, A.E., Ruckthong, L., Stuckey, J.A., Pecoraro, V.L.",32123337,3/4/20,6MCD,Crystal Structure of tris-thiolate Pb(II) complex with adjacent water in a de novo Three Stranded Coiled Coil Peptide,DE NOVO PROTEIN,synthetic construct,32630
+6OWD,"Biok, N.A., Bingman, C.A., Gellman, S.H.",31738525,3/4/20,6OWD,Arginine Containing Reengineered Coiled-Coiled Dimer to Examine the Impact of Proximal Cation Identity on Hydrophobically-Driven Assembly,DE NOVO PROTEIN,synthetic construct,32630
+6EGP,"Ruckthong, L., Stuckey, J.A., Pecoraro, V.L.",,2/26/20,6EGP,Crystal Structure of a Trigonal Pyramidal Pb(II)S3 Complex in a Three-stranded Coiled coil Peptide,DE NOVO PROTEIN,synthetic construct,32630
+6OLN,"Scheib, K.A., Horne, W.S.",31204733,2/19/20,6OLN,Controlling the Self-Assembly of Synthetic Metal-Coordinating Coiled-Coil Peptides: Orthorhombic Lattice from a Trimeric Coiled Coil,DE NOVO PROTEIN,synthetic construct,32630
+6S9L,"Ernst, P., Zosel, F., Reichen, C., Schuler, B., Pluckthun, A.",31985201,2/19/20,6S9L,Designed Armadillo Repeat protein Lock1 bound to (KR)4KLSF target,DE NOVO PROTEIN,synthetic construct,32630
+6S9M,"Ernst, P., Zosel, F., Reichen, C., Schuler, B., Pluckthun, A.",31985201,2/19/20,6S9M,Designed Armadillo Repeat protein Lock2 fused to target peptide KRKRKAKITW,DE NOVO PROTEIN,synthetic construct,32630
+6S9N,"Ernst, P., Zosel, F., Reichen, C., Schuler, B., Pluckthun, A.",31985201,2/19/20,6S9N,Designed Armadillo Repeat protein Lock2 fused to target peptide KRKRKAKLSF,DE NOVO PROTEIN,synthetic construct,32630
+6S9O,"Ernst, P., Zosel, F., Reichen, C., Schuler, B., Pluckthun, A.",31985201,2/19/20,6S9O,Designed Armadillo Repeat protein internal Lock1 fused to target peptide KRKRKLKFKR,DE NOVO PROTEIN,synthetic construct,32630
+6S9P,"Ernst, P., Zosel, F., Reichen, C., Schuler, B., Pluckthun, A.",31985201,2/19/20,6S9P,Designed Armadillo Repeat protein internal Lock2 fused to target peptide KRKAKITWKR,DE NOVO PROTEIN,synthetic construct,32630
+6KOS,"Kimura, N., Arai, R.",31951376,1/29/20,6KOS,"Crystal structure of SUWA (Super WA20), a hyper-stable de novo protein with a dimeric bisecting topology",DE NOVO PROTEIN,synthetic construct,32630
+6R28,"Murphy, N.P., Mott, H.R., Owen, D.",31959628,1/29/20,6R28,"Structure of peptide P7, which binds Cdc42 and inhibits effector interactions.",DE NOVO PROTEIN,synthetic construct,32630
+6WRV,"Abraham, J., Baker, D., Sahtoe, D.D., Coscia, A., Clark, L., Olal, D.",33879614,4/28/21,6WRV,Crystal structure of computationally designed protein 3DS18 in complex with the human Transferrin receptor ectodomain,DE NOVO PROTEIN/METAL TRANSPORT,Homo sapiens,9606
+6WRX,"Abraham, J., Coscia, A., Olal, D., Sahtoe, D.D., Baker, D., Clark, L.",33879614,4/28/21,6WRX,Crystal structure of computationally designed protein 2DS25.1 in complex with the human Transferrin receptor ectodomain,DE NOVO PROTEIN/METAL TRANSPORT,Homo sapiens,9606
