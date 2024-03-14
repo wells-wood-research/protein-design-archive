@@ -571,7 +571,7 @@ designDetailsView proteinDesign =
                         , Font.underline
                         ]
                         { url =
-                            "https://www.ebi.ac.uk/pdbe/entry/pdb/"
+                            "https://www.rcsb.org/structure/"
                                 ++ proteinDesign.pdbCode
                         , label =
                             proteinDesign.pdbCode
