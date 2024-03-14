@@ -3,6 +3,9 @@ module Main exposing (..)
 import Browser
 import Date exposing (Date, Unit(..))
 import Decoders exposing (..)
+import DesignDate exposing (dateToPosition, defaultEndDate, defaultStartDate, getFirstAndLastDate, isValidIsoDate, removeHyphenFromIsoDate)
+import DesignFilter exposing (DesignFilter(..), defaultKeys, keyToLabel)
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -11,14 +14,25 @@ import Element.Input as Input
 import FeatherIcons
 import Html exposing (Html)
 import Http
-import Json.Decode exposing (Decoder, list)
+import Json.Decode exposing (Decoder, list, string)
 import List.Extra as ListEx
+import ProteinDesign exposing (..)
 import Random
+import Style exposing (..)
 import Svg as S
 import Svg.Attributes as SAtt
 import Svg.Events as SEvents
 import Task
 import Time exposing (Month(..))
+
+
+ifEmptyOrNot : String -> Maybe String
+ifEmptyOrNot string =
+    if String.isEmpty string then
+        Nothing
+
+    else
+        Just string
 
 
 
@@ -30,34 +44,15 @@ type alias Model =
     , proteinDesigns : List ProteinDesign
     , focusedProteinDesign : Maybe ProteinDesign
     , randomNumbers : List Int
-    , searchPhrase : String
+    , filters : Dict String DesignFilter
+    , checkbox : Dict String Bool
+    , mStartDate : Maybe String
+    , mEndDate : Maybe String
     }
 
 
 type alias ProteinStructure =
     Decoders.ProteinStructure
-
-
-type alias ProteinDesign =
-    { pdbCode : String
-    , structuralKeywords : String
-    , depositionDate : Date.Date
-    , picturePath : String
-    , doiLink : String
-    , sequences : List String
-    , classification : Classification
-    , authors : String
-    , pubmedID : Int
-    , abstract : String
-    }
-
-
-type Classification
-    = OriginalDeNovo
-    | RelativeDeNovo
-    | Small
-    | Engineered
-    | Unknown
 
 
 init : ( Model, Cmd Msg )
@@ -66,7 +61,10 @@ init =
       , proteinDesigns = []
       , focusedProteinDesign = Nothing
       , randomNumbers = []
-      , searchPhrase = ""
+      , filters = Dict.empty
+      , checkbox = DesignFilter.checkboxDict
+      , mStartDate = Nothing
+      , mEndDate = Nothing
       }
     , Cmd.batch
         [ Random.generate RandomNumbers gen1000Numbers
@@ -89,10 +87,14 @@ type Msg
     = Home
     | ClickedDesign Int
     | RandomNumbers (List Int)
-    | SearchInput String
+    | UpdateFilters String DesignFilter
+    | UpdateCheckbox String Bool
+    | UpdateStartDateTextField String
+    | UpdateEndDateTextField String
+    | ClearFilter String
+    | ClearAllFilters
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinStructure))
-    | ProcessedProteinDesigns (List ProteinDesign)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -107,30 +109,71 @@ update msg model =
         RandomNumbers numbers ->
             ( { model | randomNumbers = numbers }, Cmd.none )
 
-        SearchInput result ->
-            ( { model | searchPhrase = result }, Cmd.none )
+        UpdateFilters key newFilter ->
+            ( { model | filters = Dict.insert key newFilter model.filters }
+            , Cmd.none
+            )
+
+        UpdateCheckbox key checkboxStatus ->
+            { model | checkbox = Dict.insert key checkboxStatus model.checkbox }
+                |> (if checkboxStatus then
+                        update (UpdateFilters key (DesignFilter.toDesignFilter key))
+
+                    else
+                        update (ClearFilter key)
+                   )
+
+        UpdateStartDateTextField string ->
+            let
+                phrase =
+                    removeHyphenFromIsoDate string
+            in
+            case Date.fromIsoString phrase of
+                Err _ ->
+                    { model | mStartDate = ifEmptyOrNot string }
+                        |> update (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
+
+                Ok date ->
+                    { model | mStartDate = ifEmptyOrNot string }
+                        |> update (UpdateFilters defaultKeys.dateStartKey (DateStart date))
+
+        UpdateEndDateTextField string ->
+            let
+                phrase =
+                    removeHyphenFromIsoDate string
+            in
+            case Date.fromIsoString phrase of
+                Err _ ->
+                    { model | mEndDate = ifEmptyOrNot string }
+                        |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
+
+                Ok date ->
+                    { model | mEndDate = ifEmptyOrNot string }
+                        |> update (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
+
+        ClearFilter key ->
+            ( { model | filters = Dict.remove key model.filters }
+            , Cmd.none
+            )
+
+        ClearAllFilters ->
+            ( { model
+                | filters = Dict.empty
+                , checkbox = DesignFilter.checkboxDict
+              }
+            , Cmd.none
+            )
 
         SendDesignsHttpRequest ->
-            ( { model | proteinStructures = [] }, getData )
+            ( model, getData )
 
         DesignsDataReceived result ->
             case result of
                 Ok proteinDataJson ->
-                    let
-                        ( proteinDesigns, _ ) =
-                            processProteinStructures proteinDataJson
-                    in
-                    ( { model | proteinStructures = proteinDataJson, proteinDesigns = proteinDesigns }, Cmd.none )
+                    ( { model | proteinStructures = proteinDataJson, proteinDesigns = processProteinStructures proteinDataJson }, Cmd.none )
 
-                Err str ->
-                    let
-                        _ =
-                            Debug.log "decode error" str
-                    in
+                Err _ ->
                     ( { model | proteinStructures = [] }, Cmd.none )
-
-        ProcessedProteinDesigns processedDesigns ->
-            ( { model | proteinDesigns = processedDesigns }, Cmd.none )
 
 
 
@@ -150,16 +193,9 @@ proteinStructuresDecoder =
     list Decoders.proteinStructureDecoder
 
 
-processProteinStructures : List ProteinStructure -> ( List ProteinDesign, Cmd Msg )
+processProteinStructures : List ProteinStructure -> List ProteinDesign
 processProteinStructures proteinStructures =
-    let
-        processedDesigns =
-            proteinStructures |> List.filterMap proteinStructureToDesign
-    in
-    ( processedDesigns
-    , Task.succeed (ProcessedProteinDesigns processedDesigns)
-        |> Task.perform identity
-    )
+    List.filterMap proteinStructureToDesign proteinStructures
 
 
 proteinStructureToDesign : ProteinStructure -> Maybe ProteinDesign
@@ -169,7 +205,7 @@ proteinStructureToDesign proteinStructure =
             String.toLower proteinStructure.identifier
 
         structuralKeywords =
-            proteinStructure.keywords
+            stringToKeyword <| String.trim proteinStructure.keywords
 
         depositionDate =
             Date.fromIsoString proteinStructure.date
@@ -191,7 +227,7 @@ proteinStructureToDesign proteinStructure =
             List.concatMap (\polyEntity -> extractSequencesFromPolyEntity polyEntity) proteinStructure.data.polymerEntities
 
         classification =
-            rawStringToClassfication proteinStructure.classification
+            stringToClassfication proteinStructure.classification
 
         authors =
             proteinStructure.authors
@@ -205,6 +241,15 @@ proteinStructureToDesign proteinStructure =
             proteinStructure.abstract
     in
     ProteinDesign pdbCode structuralKeywords depositionDate picturePath doiLink sequences classification authors pubmedID abstract |> Just
+
+
+extractSequencesFromPolyEntity : PolyEntities -> List String
+extractSequencesFromPolyEntity polyEntity =
+    let
+        entityPoly =
+            polyEntity.entity_poly
+    in
+    [ entityPoly.pdbx_seq_one_letter_code_can ]
 
 
 
@@ -228,7 +273,7 @@ portraitView model =
         , row [ width fill ]
             [ timeline model
             , details model.focusedProteinDesign
-            , sidebar
+            , sidebar model
             ]
         ]
 
@@ -249,8 +294,8 @@ title =
             }
 
 
-sidebar : Element Msg
-sidebar =
+sidebar : Model -> Element Msg
+sidebar model =
     column
         (bodyFont
             ++ [ width <| fillPortion 3
@@ -262,7 +307,10 @@ sidebar =
         )
         [ homeArea
         , searchArea
-        , filterButton
+            (Dict.get defaultKeys.searchTextKey model.filters
+                |> Maybe.map DesignFilter.toString
+            )
+        , filterArea model
         ]
 
 
@@ -272,6 +320,8 @@ homeArea =
         (bodyFont
             ++ [ Font.alignLeft
                , Background.color <| rgb255 105 109 125
+               , paddingXY 10 10
+               , spacing 10
                ]
         )
         [ row []
@@ -291,15 +341,11 @@ homeButton =
         }
 
 
-searchArea : Element Msg
-searchArea =
+searchArea : Maybe String -> Element Msg
+searchArea mSearchPhrase =
     row
-        (bodyFont
-            ++ [ Font.alignLeft
-               , Background.color <| rgb255 105 109 125
-               ]
-        )
-        [ searchField
+        bodyFont
+        [ searchField mSearchPhrase
         , searchButton
         ]
 
@@ -307,33 +353,148 @@ searchArea =
 searchButton : Element Msg
 searchButton =
     Input.button
-        [ padding 3
+        [ padding 5
         ]
         { label = sidebarButton FeatherIcons.search
-        , onPress = ClickedDesign 1 |> Just
+        , onPress = ClearAllFilters |> Just
         }
 
 
-searchField : Element Msg
-searchField =
+searchField : Maybe String -> Element Msg
+searchField mCurrentText =
     Input.text
-        [ padding 3
-        , Background.color <| rgb255 255 255 255
-        , width fill
-        ]
-        { onChange = SearchInput
-        , text = ""
-        , placeholder = Input.placeholder [] none |> Just
-        , label = Input.labelLeft [] none
+        []
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextKey (ContainsText string)
+        , text = Maybe.withDefault "" mCurrentText
+        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
+        , label = Input.labelHidden "Filter Designs Search Box"
         }
+
+
+filterArea : Model -> Element Msg
+filterArea model =
+    column
+        bodyFont
+        [ row []
+            [ paragraph []
+                [ text "Press button to clear filters:" ]
+            , filterButton
+            ]
+        , filterField model
+        ]
 
 
 filterButton : Element Msg
 filterButton =
     Input.button
-        [ padding 3 ]
+        [ padding 5 ]
         { label = sidebarButton FeatherIcons.filter
-        , onPress = ClickedDesign 21 |> Just
+        , onPress = ClearAllFilters |> Just
+        }
+
+
+filterField : Model -> Element Msg
+filterField model =
+    column
+        [ paddingXY 0 10 ]
+        [ paragraph [ Font.bold, paddingXY 0 10 ]
+            [ text "Deposit date:" ]
+        , dateStartField model
+        , dateEndField model
+        , paragraph [ Font.bold, paddingXY 0 10 ]
+            [ text "Classification:" ]
+        , classificationFilter model
+        , paragraph [ Font.bold, paddingXY 0 10 ]
+            [ text "Keywords:" ]
+        , keywordsFilter model
+        ]
+
+
+dateStartField : Model -> Element Msg
+dateStartField model =
+    column [ spacing 3 ]
+        [ row [ width fill, spacing 5 ]
+            [ Input.text
+                [ width <| fillPortion 5
+                , Background.color <|
+                    case model.mStartDate of
+                        Nothing ->
+                            rgb255 255 255 255
+
+                        Just string ->
+                            if isValidIsoDate string then
+                                rgb255 223 255 214
+
+                            else
+                                rgb255 255 215 213
+                ]
+                { onChange =
+                    \string ->
+                        UpdateStartDateTextField string
+                , text = Maybe.withDefault "" model.mStartDate
+                , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
+                , label = Input.labelHidden "Filter Designs by Date - start"
+                }
+            , paragraph [ width <| fillPortion 3 ] [ text <| "Start date" ]
+            ]
+        ]
+
+
+dateEndField : Model -> Element Msg
+dateEndField model =
+    column [ spacing 3 ]
+        [ row [ width fill, spacing 5 ]
+            [ Input.text
+                [ width <| fillPortion 5
+                , Background.color <|
+                    case model.mEndDate of
+                        Nothing ->
+                            rgb255 255 255 255
+
+                        Just string ->
+                            if isValidIsoDate string then
+                                rgb255 223 255 214
+
+                            else
+                                rgb255 255 215 213
+                ]
+                { onChange =
+                    \string ->
+                        UpdateEndDateTextField string
+                , text = Maybe.withDefault "" model.mEndDate
+                , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
+                , label = Input.labelHidden "Filter Designs by Date - end"
+                }
+            , paragraph [ width <| fillPortion 3 ] [ text <| "End date" ]
+            ]
+        ]
+
+
+classificationFilter : Model -> Element Msg
+classificationFilter model =
+    column [] <|
+        List.map (\label -> filterCheckbox ( model, label )) [ defaultKeys.classificationOriginalDeNovoKey, defaultKeys.classificationRelativeDeNovoKey, defaultKeys.classificationSmallKey, defaultKeys.classificationEngineeredKey, defaultKeys.classificationUnknownKey ]
+
+
+keywordsFilter : Model -> Element Msg
+keywordsFilter model =
+    column [] <|
+        List.map (\label -> filterCheckbox ( model, label )) [ defaultKeys.keywordDeNovoKey, defaultKeys.keywordSyntheticKey, defaultKeys.keywordNovelKey, defaultKeys.keywordDesignedKey, defaultKeys.keywordProteinBindingKey, defaultKeys.keywordMetalBindingKey, defaultKeys.keywordTranscriptionKey, defaultKeys.keywordGrowthKey, defaultKeys.keywordStructuralKey, defaultKeys.keywordAlphaHelicalBundleKey, defaultKeys.keywordBetaBetaAlphaKey, defaultKeys.keywordCoiledCoilKey, defaultKeys.keywordUnknownFunctionKey ]
+
+
+filterCheckbox : ( Model, String ) -> Element Msg
+filterCheckbox ( model, dictKey ) =
+    Input.checkbox [ padding 3 ]
+        { onChange = \checkboxStatus -> UpdateCheckbox dictKey checkboxStatus
+        , icon = checkboxIcon
+        , checked =
+            case Dict.get dictKey model.checkbox of
+                Just value ->
+                    value
+
+                Nothing ->
+                    False
+        , label = Input.labelRight [ centerY, width fill ] (paragraph [] <| [ text <| keyToLabel dictKey ])
         }
 
 
@@ -349,9 +510,38 @@ sidebarButton icon =
         )
 
 
+checkboxIcon : Bool -> Element msg
+checkboxIcon isChecked =
+    el
+        [ width <| px 25
+        , height <| px 25
+        , padding 4
+        ]
+    <|
+        el
+            [ width fill
+            , height fill
+            , Border.rounded 3
+            , Background.color <|
+                if isChecked then
+                    rgb255 104 176 171
+
+                else
+                    rgb255 255 255 255
+            ]
+            none
+
+
 timeline : Model -> Element Msg
-timeline { proteinDesigns, randomNumbers } =
+timeline { proteinDesigns, filters, randomNumbers } =
     let
+        filterValues =
+            Dict.values filters
+
+        filteredDesigns =
+            proteinDesigns
+                |> List.filterMap (\d -> DesignFilter.meetsAllFilters filterValues d)
+
         timelineDates =
             getFirstAndLastDate proteinDesigns
     in
@@ -376,7 +566,7 @@ timeline { proteinDesigns, randomNumbers } =
                     |> String.fromInt
                     |> text
                 ]
-            , html (timelineGraphic timelineDates randomNumbers proteinDesigns)
+            , html (timelineGraphic timelineDates randomNumbers filteredDesigns)
             , paragraph
                 (bodyFont
                     ++ [ Font.center
@@ -459,28 +649,6 @@ timelineGraphic { firstDate, lastDate } randomNumbers proteinDesigns =
         )
 
 
-getFirstAndLastDate : List ProteinDesign -> { firstDate : Date, lastDate : Date }
-getFirstAndLastDate proteinDesigns =
-    let
-        sortedDesigns =
-            List.sortWith
-                (\a b -> Date.compare a.depositionDate b.depositionDate)
-                proteinDesigns
-
-        firstDesignDate =
-            List.head sortedDesigns
-                |> Maybe.map .depositionDate
-                |> Maybe.withDefault (Date.fromCalendarDate 1900 Jan 1)
-
-        lastDesignDate =
-            List.reverse sortedDesigns
-                |> List.head
-                |> Maybe.map .depositionDate
-                |> Maybe.withDefault (Date.fromCalendarDate 2100 Dec 31)
-    in
-    { firstDate = firstDesignDate, lastDate = lastDesignDate }
-
-
 designToMarker :
     { width : Int
     , height : Int
@@ -512,33 +680,6 @@ designToMarker { width, height, radius, firstDate, lastDate } ( randomShift, ( i
         , SEvents.onClick <| ClickedDesign index
         ]
         []
-
-
-dateToPosition :
-    { firstDate : Date
-    , lastDate : Date
-    , date : Date
-    , height : Int
-    , radius : Int
-    }
-    -> Int
-dateToPosition { firstDate, lastDate, date, height, radius } =
-    let
-        dateRange =
-            Date.diff Days lastDate firstDate
-                |> toFloat
-
-        dateDelta =
-            Date.diff Days date firstDate
-                |> toFloat
-
-        fraction =
-            dateDelta / dateRange
-    in
-    fraction
-        * toFloat (height - (2 * radius))
-        |> round
-        |> (+) 3
 
 
 details : Maybe ProteinDesign -> Element msg
@@ -626,7 +767,7 @@ designDetailsView proteinDesign =
                 , paragraph
                     bodyFont
                     [ text "Structural Keywords: "
-                    , el [ Font.italic ] (text proteinDesign.structuralKeywords)
+                    , el [ Font.italic ] (text <| keywordToString proteinDesign.structuralKeywords)
                     ]
                 , paragraph
                     bodyFont
@@ -689,92 +830,7 @@ designDetailsView proteinDesign =
                     |> text
                 ]
             ]
-
-        {-
-           , paragraph
-               h2Font
-               [ text "Structural Similarity"
-               ]
-           , paragraph
-               h2Font
-               [ text "Homologues"
-               ]
-           , paragraph
-               h2Font
-               [ text "Sequence Metrics"
-               ]
-           , paragraph
-               h2Font
-               [ text "DE-STRESS Metrics"
-               ]
-        -}
         ]
-
-
-extractSequencesFromPolyEntity : PolyEntities -> List String
-extractSequencesFromPolyEntity polyEntity =
-    let
-        entityPoly =
-            polyEntity.entity_poly
-    in
-    [ entityPoly.pdbx_seq_one_letter_code_can ]
-
-
-rawStringToClassfication : String -> Classification
-rawStringToClassfication string =
-    case string of
-        "original de novo design" ->
-            OriginalDeNovo
-
-        "relative of another de novo design" ->
-            RelativeDeNovo
-
-        "small, non-systematic, and other" ->
-            Small
-
-        "engineered" ->
-            Engineered
-
-        _ ->
-            Unknown
-
-
-classificationToString : Classification -> String
-classificationToString classification =
-    case classification of
-        OriginalDeNovo ->
-            "Original De Novo"
-
-        RelativeDeNovo ->
-            "Relative De Novo"
-
-        Small ->
-            "Small, Non-Systematic, Other"
-
-        Engineered ->
-            "Engineered"
-
-        Unknown ->
-            "Unknown"
-
-
-classificationToColour : Classification -> String
-classificationToColour classification =
-    case classification of
-        OriginalDeNovo ->
-            "#ff0000"
-
-        RelativeDeNovo ->
-            "#00ff00"
-
-        Small ->
-            "#ffffff"
-
-        Engineered ->
-            "#0000ff"
-
-        Unknown ->
-            "#333333"
 
 
 
@@ -789,64 +845,3 @@ main =
         , update = update
         , subscriptions = always Sub.none
         }
-
-
-
----- STYLE ----
--- https://coolors.co/faf3dd-c8d5b9-8fc0a9-68b0ab-696d7d
--- eggshell 250 243 221
--- tea green 200 213 185
--- cambridge blue 143 192 169
--- verdigris 104 176 171
--- payne's gray 105 109 125
-
-
-titleFont : List (Attribute msg)
-titleFont =
-    [ Font.family
-        [ Font.typeface "Barlow"
-        , Font.sansSerif
-        ]
-    , Font.size 40
-    ]
-
-
-h1Font : List (Attribute msg)
-h1Font =
-    [ Font.family
-        [ Font.typeface "Lato"
-        , Font.sansSerif
-        ]
-    , Font.size 32
-    ]
-
-
-h2Font : List (Attribute msg)
-h2Font =
-    [ Font.family
-        [ Font.typeface "Lato"
-        , Font.sansSerif
-        ]
-    , Font.size 24
-    ]
-
-
-bodyFont : List (Attribute msg)
-bodyFont =
-    [ Font.family
-        [ Font.typeface "Lato"
-        , Font.sansSerif
-        ]
-    , Font.size 16
-    , Font.alignLeft
-    ]
-
-
-monospacedFont : List (Attribute msg)
-monospacedFont =
-    [ Font.family
-        [ Font.typeface "Fira Code"
-        , Font.sansSerif
-        ]
-    , Font.size 16
-    ]
