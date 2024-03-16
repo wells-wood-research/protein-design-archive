@@ -1,9 +1,9 @@
 module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 
+import Components.Title
 import Date
 import Effect exposing (Effect)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Font as Font
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, classificationToString, keywordToString)
@@ -14,12 +14,12 @@ import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page shared route =
+page _ route =
     Page.new
         { init = init route.params.designId
         , update = update
         , subscriptions = subscriptions
-        , view = view
+        , view = view >> Components.Title.view
         }
 
 
@@ -71,36 +71,34 @@ subscriptions _ =
 
 view : Model -> View Msg
 view model =
-    View.fromString <| "Pages.Designs.DesignId_"
+    { title = "Design Details"
+    , attributes = [ width fill ]
+    , element = details model
+    }
 
 
-details : Maybe ProteinDesign -> Element msg
+details : Model -> Element msg
 details mDesign =
     column
-        [ centerX
-        , width <|
-            fillPortion 11
-        , height fill
-        ]
+        [ width fill ]
         [ el
             (Style.h1Font
-                ++ [ width fill
+                ++ [ centerX
                    , padding 20
-                   , Background.color <| rgb255 255 255 255
                    ]
             )
           <|
             text "Design Details"
         , case mDesign of
-            Nothing ->
+            DesignDoesNotExist ->
                 paragraph
                     (Style.bodyFont
                         ++ [ Font.center ]
                     )
-                    [ text "Click on the timeline for detailed information about a design."
+                    [ text "This design does not exist."
                     ]
 
-            Just design ->
+            LoadedDesign design ->
                 designDetailsView design
         ]
 

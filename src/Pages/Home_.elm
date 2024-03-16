@@ -1,5 +1,6 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
+import Components.Title
 import Effect exposing (Effect)
 import Element exposing (..)
 import Page exposing (Page)
@@ -14,7 +15,7 @@ page _ _ =
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view
+        , view = view >> Components.Title.view
         }
 
 
