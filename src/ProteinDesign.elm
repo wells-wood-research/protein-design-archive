@@ -1,6 +1,8 @@
 module ProteinDesign exposing (..)
 
 import Date exposing (Date, Unit(..))
+import Element exposing (..)
+import Element.Border as Border
 
 
 type alias ProteinDesign =
@@ -202,3 +204,35 @@ keywordToString keyword =
 
         CoiledCoil ->
             "coiled-coil"
+
+
+
+-- {{{ Views
+
+
+{-| A simple view that shows basic data about a design. Used for lists etc.
+-}
+designCard : ProteinDesign -> Element msg
+designCard design =
+    row
+        [ centerX
+        , spacing 5
+        ]
+        [ el
+            [ Border.width 2
+            , Border.color <| rgb255 220 220 220
+            ]
+            (image
+                [ width <| px 50
+                ]
+                { src = design.picturePath, description = "Image of design " ++ design.pdbCode }
+            )
+        , wrappedRow
+            [ width (fill |> minimum 200) ]
+            [ paragraph [] [ text <| "PDB Code: " ++ design.pdbCode ]
+            ]
+        ]
+
+
+
+-- }}}

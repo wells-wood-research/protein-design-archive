@@ -1,11 +1,17 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
+import AppError exposing (AppError(..))
 import Components.Title
 import Effect exposing (Effect)
 import Element exposing (..)
+import Http
+import Json.Decode
 import Page exposing (Page)
+import ProteinDesign exposing (ProteinDesign)
+import RawDesignData exposing (RawDesignData)
 import Route exposing (Route)
 import Shared
+import Shared.Msg exposing (Msg(..))
 import View exposing (View)
 
 
@@ -24,13 +30,15 @@ page _ _ =
 
 
 type alias Model =
-    {}
+    { designs : List ProteinDesign
+    , errors : List AppError
+    }
 
 
 init : () -> ( Model, Effect Msg )
-init () =
-    ( {}
-    , Effect.none
+init _ =
+    ( { designs = [], errors = [] }
+    , Effect.sendCmd getData
     )
 
 
@@ -39,16 +47,33 @@ init () =
 
 
 type Msg
-    = NoOp
+    = DesignsDataReceived (Result Http.Error (List RawDesignData))
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model
+        DesignsDataReceived (Ok rawDesigns) ->
+            let
+                designs =
+                    List.filterMap RawDesignData.toProteinDesign rawDesigns
+            in
+            ( { model | designs = designs }
             , Effect.none
             )
+
+        DesignsDataReceived (Err _) ->
+            ( { model | errors = DesignRequestFailed :: model.errors }
+            , Effect.none
+            )
+
+
+getData : Cmd Msg
+getData =
+    Http.get
+        { url = "/designs.json"
+        , expect = Http.expectJson DesignsDataReceived (Json.Decode.list RawDesignData.rawDesignDecoder)
+        }
 
 
 
@@ -65,8 +90,17 @@ subscriptions _ =
 
 
 view : Model -> View Msg
-view _ =
+view model =
     { title = "Protein Design Archive"
-    , attributes = []
-    , element = text "Home"
+    , attributes = [ padding 10, width fill ]
+    , element = designList model.designs
     }
+
+
+designList : List ProteinDesign -> Element msg
+designList designs =
+    column
+        [ spacing 5
+        , width fill
+        ]
+        (List.map ProteinDesign.designCard designs)
