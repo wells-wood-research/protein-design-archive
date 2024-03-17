@@ -35,7 +35,7 @@ type alias Model =
 init : () -> ( Model, Effect Msg )
 init _ =
     ( {}
-    , Effect.none
+    , Effect.resetViewport NoOp
     )
 
 

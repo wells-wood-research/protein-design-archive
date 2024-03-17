@@ -2,6 +2,7 @@ module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 
 import Components.Title
 import Date
+import Dict
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Font as Font
@@ -10,16 +11,17 @@ import ProteinDesign exposing (ProteinDesign, classificationToString, keywordToS
 import Route exposing (Route)
 import Shared
 import Style
+import Task
 import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page _ route =
+page shared route =
     Page.new
         { init = init route.params.designId
         , update = update
         , subscriptions = subscriptions
-        , view = view >> Components.Title.view
+        , view = view shared >> Components.Title.view
         }
 
 
@@ -27,15 +29,14 @@ page _ route =
 -- INIT
 
 
-type Model
-    = LoadedDesign ProteinDesign
-    | DesignDoesNotExist
+type alias Model =
+    { designId : String }
 
 
 init : String -> () -> ( Model, Effect Msg )
-init _ _ =
-    ( DesignDoesNotExist
-    , Effect.none
+init designId _ =
+    ( { designId = designId }
+    , Effect.resetViewport NoOp
     )
 
 
@@ -69,15 +70,15 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Design Details"
     , attributes = [ width fill ]
-    , element = details model
+    , element = details <| Dict.get model.designId shared.designs
     }
 
 
-details : Model -> Element msg
+details : Maybe ProteinDesign -> Element msg
 details mDesign =
     column
         [ width fill ]
@@ -90,7 +91,7 @@ details mDesign =
           <|
             text "Design Details"
         , case mDesign of
-            DesignDoesNotExist ->
+            Nothing ->
                 paragraph
                     (Style.bodyFont
                         ++ [ Font.center ]
@@ -98,7 +99,7 @@ details mDesign =
                     [ text "This design does not exist."
                     ]
 
-            LoadedDesign design ->
+            Just design ->
                 designDetailsView design
         ]
 
@@ -119,7 +120,7 @@ designDetailsView proteinDesign =
             , spacing 10
             ]
             [ image
-                []
+                [ width <| px 250 ]
                 { src = proteinDesign.picturePath
                 , description = "Structure of " ++ proteinDesign.pdbCode
                 }
