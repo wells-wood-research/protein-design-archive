@@ -2,7 +2,9 @@ module ProteinDesign exposing (..)
 
 import Date exposing (Date, Unit(..))
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 
 
 type alias ProteinDesign =
@@ -214,24 +216,34 @@ keywordToString keyword =
 -}
 designCard : ProteinDesign -> Element msg
 designCard design =
-    row
+    link
         [ centerX
-        , spacing 5
+        , width <| px 400
         ]
-        [ el
-            [ Border.width 2
-            , Border.color <| rgb255 220 220 220
-            ]
-            (image
-                [ width <| px 50
+        { url = "/designs/" ++ design.pdbCode
+        , label =
+            row
+                [ width fill
+                , spacing 4
+                , padding 4
+                , mouseOver [ Background.color <| rgb255 235 235 235 ]
                 ]
-                { src = design.picturePath, description = "Image of design " ++ design.pdbCode }
-            )
-        , wrappedRow
-            [ width (fill |> minimum 200) ]
-            [ paragraph [] [ text <| "PDB Code: " ++ design.pdbCode ]
-            ]
-        ]
+                [ el
+                    [ Border.width 2
+                    , Border.color <| rgb255 220 220 220
+                    ]
+                    (image
+                        [ width <| px 50
+                        ]
+                        { src = design.picturePath, description = "Image of design " ++ design.pdbCode }
+                    )
+                , column
+                    [ padding 2, spacing 2, width (fill |> minimum 200), alignTop ]
+                    [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdbCode ]
+                    , paragraph [ Font.color <| rgb255 130 130 130, Font.size 11 ] [ text design.authors ]
+                    ]
+                ]
+        }
 
 
 

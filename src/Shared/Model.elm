@@ -2,7 +2,10 @@ module Shared.Model exposing (Model)
 
 {-| -}
 
+import AppError exposing (AppError)
+import Dict exposing (Dict)
 import Element exposing (..)
+import ProteinDesign exposing (ProteinDesign)
 
 
 {-| Normally, this value would live in "Shared.elm"
@@ -13,4 +16,6 @@ own file, so they can be imported by `Effect.elm`
 
 -}
 type alias Model =
-    ()
+    { designs : Dict String ProteinDesign
+    , errors : List AppError
+    }

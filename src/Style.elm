@@ -20,7 +20,7 @@ titleFont =
         [ Font.typeface "Barlow"
         , Font.sansSerif
         ]
-    , Font.size 40
+    , Font.size 28
     ]
 
 

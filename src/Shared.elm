@@ -12,8 +12,12 @@ module Shared exposing
 
 -}
 
+import AppError exposing (AppError(..))
+import Dict
 import Effect exposing (Effect)
+import Http
 import Json.Decode
+import RawDesignData
 import Route exposing (Route)
 import Shared.Model
 import Shared.Msg as Msg exposing (Msg(..))
@@ -42,8 +46,8 @@ type alias Model =
 
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init _ _ =
-    ( ()
-    , Effect.none
+    ( { designs = Dict.empty, errors = [] }
+    , Effect.sendCmd getData
     )
 
 
@@ -55,11 +59,32 @@ type alias Msg =
     Msg.Msg
 
 
+getData : Cmd Msg
+getData =
+    Http.get
+        { url = "/designs.json"
+        , expect = Http.expectJson DesignsDataReceived (Json.Decode.list RawDesignData.rawDesignDecoder)
+        }
+
+
 update : Route () -> Msg -> Model -> ( Model, Effect Msg )
 update _ msg model =
     case msg of
-        NoOp ->
-            ( model, Effect.none )
+        DesignsDataReceived (Ok rawDesigns) ->
+            let
+                designs =
+                    List.filterMap RawDesignData.toProteinDesign rawDesigns
+                        |> List.map (\d -> ( d.pdbCode, d ))
+                        |> Dict.fromList
+            in
+            ( { model | designs = designs }
+            , Effect.none
+            )
+
+        DesignsDataReceived (Err _) ->
+            ( { model | errors = DesignRequestFailed :: model.errors }
+            , Effect.none
+            )
 
 
 

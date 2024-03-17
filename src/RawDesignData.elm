@@ -71,7 +71,7 @@ toProteinDesign rawData =
 
         authors =
             rawData.authors
-                |> List.map (\author -> String.join " " author.forename ++ " " ++ String.join " " author.surname)
+                |> List.map (\author -> String.join "" author.forename ++ " " ++ String.join " " author.surname)
                 |> String.join ", "
 
         pubmedID =
