@@ -1,22 +1,50 @@
 {
   "app": {
     "elm": {
-      "development": { "debugger": true },
-      "production": { "debugger": false }
+      "development": {
+        "debugger": true
+      },
+      "production": {
+        "debugger": false
+      }
     },
     "env": [],
     "html": {
       "attributes": {
-        "html": { "lang": "en" },
+        "html": {
+          "lang": "en"
+        },
         "head": {}
       },
-      "title": "Elm Land",
+      "title": "Protein Design Archive",
       "meta": [
-        { "charset": "UTF-8" },
-        { "http-equiv": "X-UA-Compatible", "content": "IE=edge" },
-        { "name": "viewport", "content": "width=device-width, initial-scale=1.0" }
+        {
+          "charset": "UTF-8"
+        },
+        {
+          "http-equiv": "X-UA-Compatible",
+          "content": "IE=edge"
+        },
+        {
+          "name": "viewport",
+          "content": "width=device-width, initial-scale=1.0"
+        }
       ],
-      "link": [],
+      "link": [
+        {
+          "rel": "preconnect",
+          "href": "https://fonts.googleapis.com"
+        },
+        {
+          "rel": "preconnect",
+          "href": "https://fonts.gstatic.com",
+          "crossorigin": ""
+        },
+        {
+          "href": "https://fonts.googleapis.com/css2?family=Fira+Code&family=Barlow:ital,wght@0,400;0,700;1,400&family=Lato:ital,wght@0,400;0,700;1,400&display=swap",
+          "rel": "stylesheet"
+        }
+      ],
       "script": []
     },
     "router": {

@@ -14,11 +14,13 @@ module Shared exposing
 
 import Dict
 import Effect exposing (Effect)
+import Http
 import Json.Decode
+import RawDesignData exposing (RawDesignData)
 import Route exposing (Route)
 import Route.Path
 import Shared.Model
-import Shared.Msg
+import Shared.Msg exposing (Msg(..))
 
 
 
@@ -43,9 +45,11 @@ type alias Model =
 
 
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
-init flagsResult route =
-    ( { designs = Dict.empty }
-    , Effect.none
+init _ _ =
+    ( { designs = Dict.empty
+      , errors = []
+      }
+    , Effect.sendCmd <| getData
     )
 
 
@@ -60,10 +64,33 @@ type alias Msg =
 update : Route () -> Msg -> Model -> ( Model, Effect Msg )
 update route msg model =
     case msg of
-        Shared.Msg.NoOp ->
+        Shared.Msg.DesignsDataReceived (Ok rawDesigns) ->
+            let
+                designs =
+                    List.filterMap RawDesignData.toProteinDesign rawDesigns
+                        |> List.map (\d -> ( d.pdbCode, d ))
+                        |> Dict.fromList
+            in
+            ( { model | designs = designs }
+            , Effect.none
+            )
+
+        Shared.Msg.DesignsDataReceived (Err err) ->
+            let
+                _ =
+                    Debug.log "Error" err
+            in
             ( model
             , Effect.none
             )
+
+
+getData : Cmd Msg
+getData =
+    Http.get
+        { url = "/designs.json"
+        , expect = Http.expectJson DesignsDataReceived (Json.Decode.list RawDesignData.rawDesignDecoder)
+        }
 
 
 
@@ -71,5 +98,5 @@ update route msg model =
 
 
 subscriptions : Route () -> Model -> Sub Msg
-subscriptions route model =
+subscriptions _ _ =
     Sub.none

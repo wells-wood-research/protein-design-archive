@@ -1,14 +1,95 @@
-module Decoders exposing (..)
+module RawDesignData exposing (..)
 
--- DECODING THE PROTEIN DATA JSON
--- mostly from chatGPT
-
+import Date
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
+import ProteinDesign exposing (ProteinDesign)
+import Time exposing (Month(..))
 
 
 
 -- TYPES
+
+
+type alias RawDesignData =
+    { identifier : String
+    , data : Data
+    , classification : String
+    , keywords : String
+    , date : String
+    , authors : List Author
+    , doi : String
+    , pubmed_id : Int
+    , abstract : String
+    }
+
+
+rawDesignDecoder : Decoder RawDesignData
+rawDesignDecoder =
+    Decode.succeed RawDesignData
+        |> required "PDB" string
+        |> required "Data" dataDecoder
+        |> required "Classification" string
+        |> required "Keywords" string
+        |> required "Date" string
+        |> required "Authors" (list authorDecoder)
+        |> required "DOI" string
+        |> required "Pubmed ID" int
+        |> required "Abstract" string
+
+
+toProteinDesign : RawDesignData -> Maybe ProteinDesign
+toProteinDesign rawData =
+    let
+        pdbCode =
+            String.toLower rawData.identifier
+
+        structuralKeywords =
+            ProteinDesign.stringToKeyword <| String.trim rawData.keywords
+
+        depositionDate =
+            Date.fromIsoString rawData.date
+                |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)
+
+        picturePath =
+            "https://cdn.rcsb.org/images/structures/"
+                ++ String.slice 1 3 pdbCode
+                ++ "/"
+                ++ pdbCode
+                ++ "/"
+                ++ pdbCode
+                ++ "_assembly-1.jpeg"
+
+        doiLink =
+            rawData.doi
+
+        sequences =
+            List.concatMap (\polyEntity -> extractSequencesFromPolyEntity polyEntity) rawData.data.polymerEntities
+
+        classification =
+            ProteinDesign.stringToClassfication rawData.classification
+
+        authors =
+            rawData.authors
+                |> List.map (\author -> String.join " " author.forename ++ " " ++ String.join " " author.surname)
+                |> String.join ", "
+
+        pubmedID =
+            rawData.pubmed_id
+
+        abstract =
+            rawData.abstract
+    in
+    ProteinDesign pdbCode structuralKeywords depositionDate picturePath doiLink sequences classification authors pubmedID abstract |> Just
+
+
+extractSequencesFromPolyEntity : PolyEntities -> List String
+extractSequencesFromPolyEntity polyEntity =
+    let
+        entityPoly =
+            polyEntity.entity_poly
+    in
+    [ entityPoly.pdbx_seq_one_letter_code_can ]
 
 
 type alias NonpolymerComp =
@@ -96,19 +177,6 @@ type alias Data =
     , polymerEntities : List PolyEntities
     , assemblies : List RcsbAssemblyInfo
     , nonpolymerEntities : Maybe (List NonpolymerEntity)
-    }
-
-
-type alias ProteinStructure =
-    { identifier : String
-    , data : Data
-    , classification : String
-    , keywords : String
-    , date : String
-    , authors : List Author
-    , doi : String
-    , pubmed_id : Int
-    , abstract : String
     }
 
 
@@ -242,17 +310,3 @@ dataDecoder =
         |> required "polymer_entities" (list polymerEntitiesDecoder)
         |> required "assemblies" (list rcsbAssemblyInfoDecoder)
         |> optional "nonpolymer_entities" (Decode.nullable (list nonpolymerEntitiesDecoder)) Nothing
-
-
-proteinStructureDecoder : Decoder ProteinStructure
-proteinStructureDecoder =
-    Decode.succeed ProteinStructure
-        |> required "PDB" string
-        |> required "Data" dataDecoder
-        |> required "Classification" string
-        |> required "Keywords" string
-        |> required "Date" string
-        |> required "Authors" (list authorDecoder)
-        |> required "DOI" string
-        |> required "Pubmed ID" int
-        |> required "Abstract" string

@@ -1,6 +1,7 @@
 module Shared.Msg exposing (Msg(..))
 
-{-| -}
+import Http
+import RawDesignData exposing (RawDesignData)
 
 
 {-| Normally, this value would live in "Shared.elm"
@@ -11,4 +12,4 @@ own file, so they can be imported by `Effect.elm`
 
 -}
 type Msg
-    = NoOp
+    = DesignsDataReceived (Result Http.Error (List RawDesignData))
