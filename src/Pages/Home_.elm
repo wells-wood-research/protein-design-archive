@@ -1,13 +1,13 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Components.Title
-import Dict
+import DesignFilter exposing (DesignFilter(..), defaultKeys)
+import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
-import Http
+import Element.Input as Input
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign)
-import RawDesignData exposing (RawDesignData)
 import Route exposing (Route)
 import Shared
 import Shared.Msg exposing (Msg(..))
@@ -29,12 +29,12 @@ page shared _ =
 
 
 type alias Model =
-    {}
+    { designFilters : Dict String DesignFilter }
 
 
 init : () -> ( Model, Effect Msg )
 init _ =
-    ( {}
+    ( { designFilters = Dict.empty }
     , Effect.resetViewport NoOp
     )
 
@@ -44,12 +44,31 @@ init _ =
 
 
 type Msg
-    = NoOp
+    = UpdateSearchString String
+    | NoOp
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
+        UpdateSearchString s ->
+            case s of
+                "" ->
+                    ( { model
+                        | designFilters =
+                            Dict.remove defaultKeys.searchTextKey model.designFilters
+                      }
+                    , Effect.none
+                    )
+
+                _ ->
+                    ( { model
+                        | designFilters =
+                            Dict.insert defaultKeys.searchTextKey (ContainsText s) model.designFilters
+                      }
+                    , Effect.none
+                    )
+
         NoOp ->
             ( model, Effect.none )
 
@@ -68,11 +87,32 @@ subscriptions _ =
 
 
 view : Shared.Model -> Model -> View Msg
-view shared _ =
+view shared model =
     { title = "Protein Design Archive"
     , attributes = [ padding 10, width fill ]
-    , element = designList <| Dict.values shared.designs
+    , element =
+        Dict.values shared.designs
+            |> homeView model
     }
+
+
+homeView : Model -> List ProteinDesign -> Element Msg
+homeView model designs =
+    column
+        [ spacing 10, width fill ]
+        [ Input.text []
+            { onChange = UpdateSearchString
+            , text =
+                Dict.get defaultKeys.searchTextKey model.designFilters
+                    |> Maybe.map DesignFilter.toString
+                    |> Maybe.withDefault ""
+            , placeholder = Just <| Input.placeholder [] (text "Enter search term...")
+            , label = Input.labelHidden "Search box"
+            }
+        , designs
+            |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
+            |> designList
+        ]
 
 
 designList : List ProteinDesign -> Element msg

@@ -30,7 +30,7 @@ h1Font =
         [ Font.typeface "Lato"
         , Font.sansSerif
         ]
-    , Font.size 32
+    , Font.size 24
     ]
 
 
