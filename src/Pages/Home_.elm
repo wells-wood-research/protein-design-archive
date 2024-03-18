@@ -19,7 +19,7 @@ import View exposing (View)
 page : Shared.Model -> Route () -> Page Model Msg
 page shared _ =
     Page.new
-        { init = init
+        { init = init shared
         , update = update shared
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view
@@ -36,15 +36,29 @@ type alias Model =
     }
 
 
-init : () -> ( Model, Effect Msg )
-init _ =
-    ( { waitingForData = True
-      , designFilters = Dict.empty
-      }
-    , Effect.batch
-        [ Effect.resetViewport NoOp
-        ]
-    )
+init : Shared.Model -> () -> ( Model, Effect Msg )
+init shared _ =
+    if Dict.isEmpty shared.designs then
+        ( { waitingForData = True
+          , designFilters = Dict.empty
+          }
+        , Effect.batch
+            [ Effect.resetViewport NoOp
+            ]
+        )
+
+    else
+        ( { waitingForData = False
+          , designFilters = Dict.empty
+          }
+        , Effect.batch
+            [ Effect.resetViewport NoOp
+            , shared.designs
+                |> Dict.values
+                |> Plots.timelinePlotData
+                |> Effect.renderVegaPlot
+            ]
+        )
 
 
 
@@ -53,7 +67,6 @@ init _ =
 
 type Msg
     = UpdateSearchString String
-    | RedrawRequested ()
     | CheckForData Time.Posix
     | NoOp
 
@@ -62,36 +75,16 @@ update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
 update shared msg model =
     case msg of
         UpdateSearchString s ->
-            case s of
-                "" ->
-                    ( { model
-                        | designFilters =
-                            Dict.remove defaultKeys.searchTextKey model.designFilters
-                      }
-                    , shared.designs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
-                        |> Plots.timelinePlotData
-                        |> Effect.renderVegaPlot
-                    )
-
-                _ ->
-                    ( { model
-                        | designFilters =
-                            Dict.insert defaultKeys.searchTextKey (ContainsText s) model.designFilters
-                      }
-                    , shared.designs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
-                        |> Plots.timelinePlotData
-                        |> Effect.renderVegaPlot
-                    )
-
-        RedrawRequested () ->
-            ( model
+            let
+                newDesignFilters =
+                    Dict.insert defaultKeys.searchTextKey (ContainsText s) model.designFilters
+            in
+            ( { model
+                | designFilters = newDesignFilters
+              }
             , shared.designs
                 |> Dict.values
-                |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
+                |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values newDesignFilters))
                 |> Plots.timelinePlotData
                 |> Effect.renderVegaPlot
             )
@@ -162,7 +155,7 @@ homeView model designs =
 
 designList : List ProteinDesign -> Element msg
 designList designs =
-    column
+    wrappedRow
         [ spacing 5
         , width fill
         ]

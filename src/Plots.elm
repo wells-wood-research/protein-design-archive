@@ -60,47 +60,10 @@ timelinePlotData designs =
                 designsTable =
                     dataFromColumns "designs" []
                         << dataColumn "year"
-                            (vNums
-                                [ 1999
-                                , 1999
-                                , 1999
-                                , 1999
-                                , 1999
-                                , 2000
-                                , 2000
-                                , 2001
-                                , 2000
-                                , 2000
-                                , 2000
-                                , 2000
-                                , 2000
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2001
-                                , 2004
-                                , 2004
-                                , 1999
-                                , 1999
-                                , 2004
-                                , 2004
-                                , 1999
-                                , 1999
-                                , 2004
-                                , 2004
-                                , 2004
-                                , 2004
-                                , 2004
-                                , 2008
-                                , 2008
-                                ]
+                            (List.map .depositionDate designs
+                                |> List.map Date.year
+                                |> List.map toFloat
+                                |> vNums
                             )
             in
             dataSource [ designsTable [] ]
@@ -121,7 +84,7 @@ timelinePlotData designs =
                     [ scType scLinear
                     , scRange raWidth
                     , scDomain (doData [ daDataset "designs", daField (field "year") ])
-                    , scDomainMin <| num 1999
+                    , scZero false
                     ]
                 << Vega.scale "cScale"
                     [ scType scOrdinal
@@ -132,14 +95,8 @@ timelinePlotData designs =
             axes
                 << axis "xScale"
                     siBottom
-                    [ List.range 1999 2009
-                        |> List.map toFloat
-                        |> vNums
-                        |> axValues
-
-                    -- , axTickSize <| num 0
-                    -- , axDomain false
-                    , axGridScale "xScale"
+                    [ axDomain false
+                    , axFormat <| str ".4"
                     ]
 
         mk =

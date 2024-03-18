@@ -217,8 +217,8 @@ keywordToString keyword =
 designCard : ProteinDesign -> Element msg
 designCard design =
     link
-        [ centerX
-        , width <| px 400
+        [ width <| px 460
+        , clip
         ]
         { url = "/designs/" ++ design.pdbCode
         , label =
