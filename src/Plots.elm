@@ -1,4 +1,4 @@
-port module Plots exposing (overviewPlots, timelineSpec, vegaPlot)
+module Plots exposing (PlotData, timelinePlotData, timelinePlotView)
 
 import Date exposing (Unit(..))
 import Element exposing (..)
@@ -11,31 +11,27 @@ import Time exposing (Month(..))
 import Vega exposing (..)
 
 
-
----- PORTS ----
-
-
-port vegaPlot : { plotId : String, spec : Spec } -> Cmd msg
+type alias PlotData =
+    { plotId : String, spec : Spec }
 
 
 
 ---- VIEWS ----
 
 
-overviewPlots : Element msg
-overviewPlots =
+timelinePlotId : String
+timelinePlotId =
+    "timeline-plot"
+
+
+timelinePlotView : Element msg
+timelinePlotView =
     column
         [ spacing 15, Element.width fill ]
-        [ el [ centerX ] <|
-            paragraph [ Font.center ]
-                [ """Click on the bars to see design/reference set details.
-                  """
-                    |> Element.text
-                ]
-        , Keyed.el [ centerX ]
-            ( "overview-plots"
+        [ Keyed.el [ centerX ]
+            ( timelinePlotId
             , Html.div
-                [ HAtt.id "overview-plots"
+                [ HAtt.id timelinePlotId
                 , HAtt.style "width" "100%"
                 , HAtt.style "width" "100%"
                 ]
@@ -56,8 +52,8 @@ overviewPlots =
 ---- VEGA SPECS ----
 
 
-timelineSpec : List ProteinDesign -> Spec
-timelineSpec designs =
+timelinePlotData : List ProteinDesign -> PlotData
+timelinePlotData designs =
     let
         ds =
             let
@@ -182,5 +178,8 @@ timelineSpec designs =
                         ]
                     ]
     in
-    toVega
-        [ Vega.width 800, Vega.height 100, Vega.padding 30, autosize [ asNone ], ds, si [], sc [], ax [], mk [] ]
+    { plotId = timelinePlotId
+    , spec =
+        toVega
+            [ Vega.width 800, Vega.height 100, Vega.padding 30, autosize [ asNone ], ds, si [], sc [], ax [], mk [] ]
+    }

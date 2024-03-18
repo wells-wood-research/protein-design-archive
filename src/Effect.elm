@@ -1,4 +1,4 @@
-module Effect exposing
+port module Effect exposing
     ( Effect
     , none, batch
     , sendCmd, sendMsg
@@ -6,7 +6,7 @@ module Effect exposing
     , pushRoutePath, replaceRoutePath
     , loadExternalUrl, back
     , map, toCmd
-    , resetViewport
+    , renderVegaPlot, resetViewport
     )
 
 {-|
@@ -27,12 +27,20 @@ module Effect exposing
 import Browser.Dom as Dom
 import Browser.Navigation
 import Dict exposing (Dict)
+import Plots exposing (PlotData)
 import Route exposing (Route)
 import Route.Path
 import Shared.Model
 import Shared.Msg
 import Task
 import Url exposing (Url)
+
+
+
+-- Ports
+
+
+port vegaPlotCmd : PlotData -> Cmd msg
 
 
 type Effect msg
@@ -49,6 +57,8 @@ type Effect msg
     | ResetViewport msg
       -- SHARED
     | SendSharedMsg Shared.Msg.Msg
+      -- PORTS
+    | RenderVegaPlot PlotData
 
 
 
@@ -152,6 +162,15 @@ resetViewport msg =
 
 
 
+-- Ports
+
+
+renderVegaPlot : PlotData -> Effect msg
+renderVegaPlot plotData =
+    RenderVegaPlot plotData
+
+
+
 -- INTERNALS
 
 
@@ -187,6 +206,9 @@ map fn effect =
 
         SendSharedMsg sharedMsg ->
             SendSharedMsg sharedMsg
+
+        RenderVegaPlot plotData ->
+            RenderVegaPlot plotData
 
 
 {-| Elm Land depends on this function to perform your effects.
@@ -230,3 +252,6 @@ toCmd options effect =
         SendSharedMsg sharedMsg ->
             Task.succeed sharedMsg
                 |> Task.perform options.fromSharedMsg
+
+        RenderVegaPlot plotData ->
+            vegaPlotCmd plotData
