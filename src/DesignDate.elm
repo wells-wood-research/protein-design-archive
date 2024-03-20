@@ -43,18 +43,18 @@ getFirstAndLastDate proteinDesigns =
     let
         sortedDesigns =
             List.sortWith
-                (\a b -> Date.compare a.depositionDate b.depositionDate)
+                (\a b -> Date.compare a.release_date b.release_date)
                 proteinDesigns
 
         firstDesignDate =
             List.head sortedDesigns
-                |> Maybe.map .depositionDate
+                |> Maybe.map .release_date
                 |> Maybe.withDefault defaultStartDate
 
         lastDesignDate =
             List.reverse sortedDesigns
                 |> List.head
-                |> Maybe.map .depositionDate
+                |> Maybe.map .release_date
                 |> Maybe.withDefault defaultEndDate
     in
     { firstDate = firstDesignDate, lastDate = lastDesignDate }

@@ -3,7 +3,7 @@ module DesignFilter exposing (..)
 import Date
 import Dict exposing (Dict)
 import List exposing (filter)
-import ProteinDesign exposing (Classification(..), Keyword(..), ProteinDesign, classificationToString, keywordToString, searchableText)
+import ProteinDesign exposing (Classification(..), ProteinDesign, Tag(..), classificationToString, searchableText, stringToClassification, stringToTag, tagToString)
 
 
 type DesignFilter
@@ -11,7 +11,7 @@ type DesignFilter
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
-    | Tag Keyword
+    | KeyTag Tag
 
 
 defaultKeys :
@@ -101,8 +101,8 @@ toString filter =
         DesignClass classification ->
             classificationToString classification
 
-        Tag keyword ->
-            keywordToString keyword
+        KeyTag tag ->
+            tagToString tag
 
 
 toDesignFilter : String -> DesignFilter
@@ -124,43 +124,43 @@ toDesignFilter key =
             DesignClass Unknown
 
         "design-keyword-synthetic" ->
-            Tag Synthetic
+            KeyTag Synthetic
 
         "design-keyword-de-novo" ->
-            Tag DeNovo
+            KeyTag DeNovo
 
         "design-keyword-novel" ->
-            Tag Novel
+            KeyTag Novel
 
         "design-keyword-designed" ->
-            Tag Designed
+            KeyTag Designed
 
         "design-keyword-protein-binding" ->
-            Tag ProteinBinding
+            KeyTag ProteinBinding
 
         "design-keyword-metal-binding" ->
-            Tag MetalBinding
+            KeyTag MetalBinding
 
         "design-keyword-transcription" ->
-            Tag Transcription
+            KeyTag Transcription
 
         "design-keyword-growth" ->
-            Tag Growth
+            KeyTag Growth
 
         "design-keyword-structural" ->
-            Tag Structural
+            KeyTag Structural
 
         "design-keyword-alpha-helical-bundle" ->
-            Tag AlphaHelicalBundle
+            KeyTag AlphaHelicalBundle
 
         "design-keyword-beta-beta-alpha" ->
-            Tag BetaBetaAlpha
+            KeyTag BetaBetaAlpha
 
         "design-keyword-coiled-coil" ->
-            Tag CoiledCoil
+            KeyTag CoiledCoil
 
         "design-keyword-unknown" ->
-            Tag UnknownFunction
+            KeyTag UnknownFunction
 
         _ ->
             ContainsText ""
@@ -192,21 +192,21 @@ meetsOneFilter design filter =
                 |> String.contains (String.toLower searchString)
 
         DateStart startDate ->
-            if Date.compare startDate design.depositionDate == LT then
+            if Date.compare startDate design.release_date == LT then
                 True
 
             else
                 False
 
         DateEnd endDate ->
-            if Date.compare endDate design.depositionDate == GT then
+            if Date.compare endDate design.release_date == GT then
                 True
 
             else
                 False
 
         DesignClass classification ->
-            classification == design.classification
+            classification == stringToClassification design.classification
 
-        Tag keyword ->
-            keyword == design.structuralKeywords
+        KeyTag tag ->
+            List.member tag (List.map stringToTag design.tags)

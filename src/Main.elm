@@ -2,7 +2,6 @@ module Main exposing (..)
 
 import Browser
 import Date exposing (Date, Unit(..))
-import Decoders exposing (..)
 import DesignDate exposing (dateToPosition, defaultEndDate, defaultStartDate, getFirstAndLastDate, isValidIsoDate, removeHyphenFromIsoDate)
 import DesignFilter exposing (DesignFilter(..), defaultKeys, keyToLabel)
 import Dict exposing (Dict)
@@ -40,8 +39,7 @@ ifEmptyOrNot string =
 
 
 type alias Model =
-    { proteinStructures : List ProteinStructure
-    , proteinDesigns : List ProteinDesign
+    { proteinDesigns : List ProteinDesign
     , focusedProteinDesign : Maybe ProteinDesign
     , randomNumbers : List Int
     , filters : Dict String DesignFilter
@@ -51,14 +49,9 @@ type alias Model =
     }
 
 
-type alias ProteinStructure =
-    Decoders.ProteinStructure
-
-
 init : ( Model, Cmd Msg )
 init =
-    ( { proteinStructures = []
-      , proteinDesigns = []
+    ( { proteinDesigns = []
       , focusedProteinDesign = Nothing
       , randomNumbers = []
       , filters = Dict.empty
@@ -94,7 +87,7 @@ type Msg
     | ClearFilter String
     | ClearAllFilters
     | SendDesignsHttpRequest
-    | DesignsDataReceived (Result Http.Error (List ProteinStructure))
+    | DesignsDataReceived (Result Http.Error (List ProteinDesign))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -170,10 +163,10 @@ update msg model =
         DesignsDataReceived result ->
             case result of
                 Ok proteinDataJson ->
-                    ( { model | proteinStructures = proteinDataJson, proteinDesigns = processProteinStructures proteinDataJson }, Cmd.none )
+                    ( { model | proteinDesigns = proteinDataJson }, Cmd.none )
 
                 Err _ ->
-                    ( { model | proteinStructures = [] }, Cmd.none )
+                    ( { model | proteinDesigns = [] }, Cmd.none )
 
 
 
@@ -183,73 +176,14 @@ update msg model =
 getData : Cmd Msg
 getData =
     Http.get
-        { url = "/designs.json"
-        , expect = Http.expectJson DesignsDataReceived proteinStructuresDecoder
+        { url = "/data.json"
+        , expect = Http.expectJson DesignsDataReceived proteinDesignsDecoder
         }
 
 
-proteinStructuresDecoder : Decoder (List ProteinStructure)
-proteinStructuresDecoder =
-    list Decoders.proteinStructureDecoder
-
-
-processProteinStructures : List ProteinStructure -> List ProteinDesign
-processProteinStructures proteinStructures =
-    List.filterMap proteinStructureToDesign proteinStructures
-
-
-proteinStructureToDesign : ProteinStructure -> Maybe ProteinDesign
-proteinStructureToDesign proteinStructure =
-    let
-        pdbCode =
-            String.toLower proteinStructure.identifier
-
-        structuralKeywords =
-            stringToKeyword <| String.trim proteinStructure.keywords
-
-        depositionDate =
-            Date.fromIsoString proteinStructure.date
-                |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)
-
-        picturePath =
-            "https://cdn.rcsb.org/images/structures/"
-                ++ String.slice 1 3 pdbCode
-                ++ "/"
-                ++ pdbCode
-                ++ "/"
-                ++ pdbCode
-                ++ "_assembly-1.jpeg"
-
-        doiLink =
-            proteinStructure.doi
-
-        sequences =
-            List.concatMap (\polyEntity -> extractSequencesFromPolyEntity polyEntity) proteinStructure.data.polymerEntities
-
-        classification =
-            stringToClassfication proteinStructure.classification
-
-        authors =
-            proteinStructure.authors
-                |> List.map (\author -> String.join " " author.forename ++ " " ++ String.join " " author.surname)
-                |> String.join ", "
-
-        pubmedID =
-            proteinStructure.pubmed_id
-
-        abstract =
-            proteinStructure.abstract
-    in
-    ProteinDesign pdbCode structuralKeywords depositionDate picturePath doiLink sequences classification authors pubmedID abstract |> Just
-
-
-extractSequencesFromPolyEntity : PolyEntities -> List String
-extractSequencesFromPolyEntity polyEntity =
-    let
-        entityPoly =
-            polyEntity.entity_poly
-    in
-    [ entityPoly.pdbx_seq_one_letter_code_can ]
+proteinDesignsDecoder : Decoder (List ProteinDesign)
+proteinDesignsDecoder =
+    list ProteinDesign.proteinDesignDecoder
 
 
 
@@ -666,14 +600,14 @@ designToMarker { width, height, radius, firstDate, lastDate } ( randomShift, ( i
                 (dateToPosition
                     { firstDate = firstDate
                     , lastDate = lastDate
-                    , date = proteinDesign.depositionDate
+                    , date = proteinDesign.release_date
                     , height = height
                     , radius = radius
                     }
                     + randomShift
                 )
         , SAtt.r <| String.fromInt radius
-        , SAtt.fill <| classificationToColour proteinDesign.classification
+        , SAtt.fill <| classificationToColour <| stringToClassification proteinDesign.classification
         , SAtt.strokeWidth "0.5"
         , SAtt.stroke "black"
         , SAtt.cursor "pointer"
@@ -728,8 +662,8 @@ designDetailsView proteinDesign =
             ]
             [ image
                 []
-                { src = proteinDesign.picturePath
-                , description = "Structure of " ++ proteinDesign.pdbCode
+                { src = proteinDesign.picture_path
+                , description = "Structure of " ++ proteinDesign.pdb
                 }
             , column
                 [ height fill
@@ -746,28 +680,28 @@ designDetailsView proteinDesign =
                         ]
                         { url =
                             "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdbCode
+                                ++ String.toLower proteinDesign.pdb
                         , label =
-                            proteinDesign.pdbCode
+                            proteinDesign.pdb
                                 |> text
                         }
                     ]
                 , paragraph
                     bodyFont
                     [ "Deposition Date: "
-                        ++ Date.toIsoString proteinDesign.depositionDate
+                        ++ Date.toIsoString proteinDesign.release_date
                         |> text
                     ]
                 , paragraph
                     bodyFont
                     [ "Design Classification: "
-                        ++ classificationToString proteinDesign.classification
+                        ++ proteinDesign.classification
                         |> text
                     ]
                 , paragraph
                     bodyFont
                     [ text "Structural Keywords: "
-                    , el [ Font.italic ] (text <| keywordToString proteinDesign.structuralKeywords)
+                    , el [ Font.italic ] (text <| String.join ", " proteinDesign.tags)
                     ]
                 , paragraph
                     bodyFont
@@ -777,16 +711,16 @@ designDetailsView proteinDesign =
                         , Font.underline
                         ]
                         { url =
-                            proteinDesign.doiLink
+                            proteinDesign.publication_id_doi
                         , label =
-                            proteinDesign.doiLink
+                            proteinDesign.publication_id_doi
                                 |> text
                         }
                     ]
                 , paragraph
                     bodyFont
                     [ "Authors: "
-                        ++ proteinDesign.authors
+                        ++ (String.join ", " <| List.map authorToString proteinDesign.authors)
                         |> text
                     ]
                 ]
@@ -799,20 +733,23 @@ designDetailsView proteinDesign =
                 h2Font
                 [ text "Sequence"
                 ]
-            , column
-                (width (fill |> maximum 800) :: monospacedFont)
-              <|
-                List.indexedMap
-                    (\index str ->
-                        paragraph []
-                            [ text <|
-                                "chain "
-                                    ++ String.fromInt (index + 1)
-                                    ++ ": "
-                                    ++ str
-                            ]
-                    )
-                    proteinDesign.sequences
+            , table []
+                { data = proteinDesign.chains
+                , columns =
+                    [ { header = text "Chain ID"
+                      , width = fill
+                      , view =
+                            \chain ->
+                                text chain.chain_id
+                      }
+                    , { header = text "Sequence"
+                      , width = fill
+                      , view =
+                            \chain ->
+                                text chain.chain_seq
+                      }
+                    ]
+                }
             ]
         , column
             [ width fill
