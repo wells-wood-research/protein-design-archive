@@ -3,7 +3,7 @@ module DesignFilter exposing (..)
 import Date
 import Dict exposing (Dict)
 import List exposing (filter)
-import ProteinDesign exposing (Classification(..), Keyword(..), ProteinDesign, classificationToString, keywordToString, searchableText)
+import ProteinDesign exposing (Classification(..), ProteinDesign, Tag(..), classificationToString, searchableText, tagToString)
 
 
 type DesignFilter
@@ -11,7 +11,7 @@ type DesignFilter
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
-    | Tag Keyword
+    | Tag Tag
 
 
 defaultKeys :
@@ -101,8 +101,8 @@ toString filter =
         DesignClass classification ->
             classificationToString classification
 
-        Tag keyword ->
-            keywordToString keyword
+        Tag tag ->
+            tagToString tag
 
 
 toDesignFilter : String -> DesignFilter
@@ -192,14 +192,14 @@ meetsOneFilter design filter =
                 |> String.contains (String.toLower searchString)
 
         DateStart startDate ->
-            if Date.compare startDate design.depositionDate == LT then
+            if Date.compare startDate design.release_date == LT then
                 True
 
             else
                 False
 
         DateEnd endDate ->
-            if Date.compare endDate design.depositionDate == GT then
+            if Date.compare endDate design.release_date == GT then
                 True
 
             else
@@ -208,5 +208,5 @@ meetsOneFilter design filter =
         DesignClass classification ->
             classification == design.classification
 
-        Tag keyword ->
-            keyword == design.structuralKeywords
+        Tag tag ->
+            List.member tag design.tags

@@ -7,7 +7,7 @@ import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Font as Font
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, classificationToString, keywordToString)
+import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, tagsToString)
 import Route exposing (Route)
 import Shared
 import Style
@@ -121,8 +121,8 @@ designDetailsView proteinDesign =
             ]
             [ image
                 [ width <| px 250 ]
-                { src = proteinDesign.picturePath
-                , description = "Structure of " ++ proteinDesign.pdbCode
+                { src = proteinDesign.picture_path
+                , description = "Structure of " ++ proteinDesign.pdb
                 }
             , column
                 [ height fill
@@ -139,16 +139,16 @@ designDetailsView proteinDesign =
                         ]
                         { url =
                             "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdbCode
+                                ++ proteinDesign.pdb
                         , label =
-                            proteinDesign.pdbCode
+                            proteinDesign.pdb
                                 |> text
                         }
                     ]
                 , paragraph
                     []
                     [ "Deposition Date: "
-                        ++ Date.toIsoString proteinDesign.depositionDate
+                        ++ Date.toIsoString proteinDesign.release_date
                         |> text
                     ]
                 , paragraph
@@ -160,7 +160,7 @@ designDetailsView proteinDesign =
                 , paragraph
                     []
                     [ text "Structural Keywords: "
-                    , el [ Font.italic ] (text <| keywordToString proteinDesign.structuralKeywords)
+                    , el [ Font.italic ] (text <| tagsToString proteinDesign.tags)
                     ]
                 , paragraph
                     []
@@ -170,16 +170,16 @@ designDetailsView proteinDesign =
                         , Font.underline
                         ]
                         { url =
-                            proteinDesign.doiLink
+                            proteinDesign.publication_id_doi
                         , label =
-                            proteinDesign.doiLink
+                            proteinDesign.publication_id_doi
                                 |> text
                         }
                     ]
                 , paragraph
                     []
                     [ "Authors: "
-                        ++ proteinDesign.authors
+                        ++ authorsToString proteinDesign.authors
                         |> text
                     ]
                 ]
@@ -192,20 +192,23 @@ designDetailsView proteinDesign =
                 Style.h2Font
                 [ text "Sequence"
                 ]
-            , column
-                (width (fill |> maximum 800) :: Style.monospacedFont)
-              <|
-                List.indexedMap
-                    (\index str ->
-                        paragraph []
-                            [ text <|
-                                "chain "
-                                    ++ String.fromInt (index + 1)
-                                    ++ ": "
-                                    ++ str
-                            ]
-                    )
-                    proteinDesign.sequences
+            , table []
+                { data = proteinDesign.chains
+                , columns =
+                    [ { header = text "Chain ID"
+                      , width = fill
+                      , view =
+                            \chain ->
+                                text chain.chain_id
+                      }
+                    , { header = text "Sequence"
+                      , width = fill
+                      , view =
+                            \chain ->
+                                text chain.chain_seq
+                      }
+                    ]
+                }
             ]
         , column
             [ width fill

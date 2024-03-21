@@ -60,7 +60,7 @@ timelinePlotData designs =
                 designsTable =
                     dataFromColumns "designs" []
                         << dataColumn "year"
-                            (List.map .depositionDate designs
+                            (List.map .release_date designs
                                 |> List.map Date.year
                                 |> List.map toFloat
                                 |> vNums

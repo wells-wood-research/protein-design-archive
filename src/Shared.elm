@@ -17,7 +17,7 @@ import Dict
 import Effect exposing (Effect)
 import Http
 import Json.Decode
-import RawDesignData
+import ProteinDesign
 import Route exposing (Route)
 import Shared.Model
 import Shared.Msg as Msg exposing (Msg(..))
@@ -62,8 +62,8 @@ type alias Msg =
 getData : Cmd Msg
 getData =
     Http.get
-        { url = "/designs.json"
-        , expect = Http.expectJson DesignsDataReceived (Json.Decode.list RawDesignData.rawDesignDecoder)
+        { url = "/data.json"
+        , expect = Http.expectJson DesignsDataReceived (Json.Decode.list ProteinDesign.rawDesignDecoder)
         }
 
 
@@ -73,8 +73,8 @@ update _ msg model =
         DesignsDataReceived (Ok rawDesigns) ->
             let
                 designs =
-                    List.filterMap RawDesignData.toProteinDesign rawDesigns
-                        |> List.map (\d -> ( d.pdbCode, d ))
+                    List.filterMap ProteinDesign.toProteinDesign rawDesigns
+                        |> List.map (\d -> ( d.pdb, d ))
                         |> Dict.fromList
             in
             ( { model | designs = designs }

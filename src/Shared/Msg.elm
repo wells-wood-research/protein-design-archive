@@ -1,7 +1,7 @@
 module Shared.Msg exposing (Msg(..))
 
 import Http
-import RawDesignData exposing (RawDesignData)
+import ProteinDesign exposing (RawDesignData)
 
 
 {-| Normally, this value would live in "Shared.elm"
