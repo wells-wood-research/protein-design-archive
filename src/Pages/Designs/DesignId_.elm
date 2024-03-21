@@ -147,7 +147,7 @@ designDetailsView proteinDesign =
                     ]
                 , paragraph
                     []
-                    [ "Deposition Date: "
+                    [ "Release Date: "
                         ++ Date.toIsoString proteinDesign.release_date
                         |> text
                     ]
@@ -160,19 +160,24 @@ designDetailsView proteinDesign =
                 , paragraph
                     []
                     [ text "Structural Keywords: "
-                    , el [ Font.italic ] (text <| tagsToString proteinDesign.tags)
+                    , el [] (text <| String.join ", " proteinDesign.tags)
                     ]
                 , paragraph
                     []
-                    [ text "Publication: "
+                    [ text "Publication citation: "
+                    , el [ Font.italic ] (text <| proteinDesign.citation)
+                    ]
+                , paragraph
+                    []
+                    [ text "Publication ISSN link: "
                     , link
                         [ Font.color <| rgb255 104 176 171
                         , Font.underline
                         ]
                         { url =
-                            proteinDesign.publication_id_doi
+                            "https://portal.issn.org/resource/ISSN/" ++ proteinDesign.publication_id_issn
                         , label =
-                            proteinDesign.publication_id_doi
+                            proteinDesign.publication_id_issn
                                 |> text
                         }
                     ]
@@ -195,13 +200,13 @@ designDetailsView proteinDesign =
             , table []
                 { data = proteinDesign.chains
                 , columns =
-                    [ { header = text "Chain ID"
+                    [ { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Chain ID" ]
                       , width = fill
                       , view =
                             \chain ->
                                 text chain.chain_id
                       }
-                    , { header = text "Sequence"
+                    , { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Sequence" ]
                       , width = fill
                       , view =
                             \chain ->
