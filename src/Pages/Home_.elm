@@ -146,8 +146,8 @@ homeView : Model -> List ProteinDesign -> Element Msg
 homeView model designs =
     column
         [ spacing 10, width fill ]
-        [ growthCurve
-        , Plots.timelinePlotView
+        [ --growthCurve
+          Plots.timelinePlotView
         , Input.text []
             { onChange = UpdateSearchString
             , text =
