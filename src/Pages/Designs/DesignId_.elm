@@ -11,7 +11,6 @@ import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToS
 import Route exposing (Route)
 import Shared
 import Style
-import Task
 import View exposing (View)
 
 
