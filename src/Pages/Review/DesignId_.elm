@@ -45,7 +45,7 @@ type alias Model =
     , classification : Dict String Bool
     , voteCheckboxDict : Dict String Bool
     , voteRemove : Bool
-    , comment : String
+    , comment : Maybe String
     }
 
 
@@ -57,7 +57,7 @@ init designId _ =
       , classification = Dict.empty
       , voteCheckboxDict = voteCheckboxDict
       , voteRemove = False
-      , comment = ""
+      , comment = Nothing
       }
     , Effect.batch
         [ Effect.resetViewport NoOp
@@ -98,6 +98,7 @@ type Msg
     | UpdateDesignVote
     | UpdateVoteCheckbox String Bool
     | ClearVoteCheckbox String
+    | UpdateComment String
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -143,6 +144,11 @@ update msg model =
 
         ClearVoteCheckbox key ->
             ( { model | voteCheckboxDict = Dict.remove key model.voteCheckboxDict, voteRemove = False }
+            , Effect.none
+            )
+
+        UpdateComment comment ->
+            ( { model | comment = Just comment }
             , Effect.none
             )
 
@@ -203,7 +209,8 @@ designDetailsView proteinDesign =
          , width fill
          , padding 20
          , spacing 30
-         , Background.color <| rgb255 174 209 246
+
+         --, Background.color <| rgb255 174 209 246
          ]
             ++ Style.bodyFont
         )
@@ -336,7 +343,7 @@ reviewArea model =
         ]
         [ classificationArea model
         , votingArea model
-        , commentArea
+        , commentArea model
         ]
 
 
@@ -436,8 +443,18 @@ checkboxIcon isChecked =
             none
 
 
-commentArea : Element msg
-commentArea =
-    paragraph
-        Style.h2Font
-        [ text "Comments" ]
+commentArea : Model -> Element Msg
+commentArea model =
+    column
+        ([ spacing 10, width fill ]
+            ++ Style.h2Font
+        )
+        [ text "Comments"
+        , Input.text
+            Style.bodyFont
+            { onChange = \string -> UpdateComment string
+            , text = Maybe.withDefault "" model.comment
+            , placeholder = Just <| Input.placeholder [] (text "Enter your comments here")
+            , label = Input.labelHidden "Design Review Comment Box"
+            }
+        ]
