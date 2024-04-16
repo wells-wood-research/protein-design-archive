@@ -5,6 +5,7 @@ import Date
 import Dict
 import Effect exposing (Effect)
 import Element exposing (..)
+import Element.Border as Border
 import Element.Font as Font
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, tagsToString)
@@ -119,11 +120,18 @@ designDetailsView proteinDesign =
             , width fill
             , spacing 10
             ]
-            [ image
-                [ width <| px 250 ]
+            [ el
+                [ padding 2
+                , Border.width 2
+                , Border.color <| rgb255 220 220 220
+
+                ] (image
+                [ width <| px 250
+                ]
                 { src = proteinDesign.picture_path
                 , description = "Structure of " ++ proteinDesign.pdb
                 }
+                )
             , column
                 [ height fill
                 , width fill

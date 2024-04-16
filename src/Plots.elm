@@ -71,11 +71,11 @@ timelinePlotData designs =
         si =
             signals
                 << signal "cx" [ siUpdate "width / 2" ]
-                << signal "cy" [ siUpdate "height / 2" ]
-                << signal "radius" [ siValue (vNum 8) ]
+                << signal "cy" [ siUpdate "height / 2 + 100" ]
+                << signal "radius" [ siValue (vNum 4) ]
                 << signal "collide" [ siValue (vNum 1) ]
-                << signal "gravityX" [ siValue (vNum 0.5) ]
-                << signal "gravityY" [ siValue (vNum 0.1) ]
+                << signal "gravityX" [ siValue (vNum 10) ]
+                << signal "gravityY" [ siValue (vNum 0.03) ]
                 << signal "static" [ siValue vTrue ]
 
         sc =
@@ -124,7 +124,7 @@ timelinePlotData designs =
                         ]
                     , mTransform
                         [ trForce
-                            [ fsIterations (num 300)
+                            [ fsIterations (num 50)
                             , fsStatic (booSignal "static")
                             , fsForces
                                 [ foCollide (numSignal "radius") [ fpIterations (numSignal "collide") ]
@@ -138,5 +138,5 @@ timelinePlotData designs =
     { plotId = timelinePlotId
     , spec =
         toVega
-            [ Vega.width 800, Vega.height 100, Vega.padding 30, autosize [ asNone ], ds, si [], sc [], ax [], mk [] ]
+            [ Vega.width 800, Vega.height 300, Vega.padding 30, ds, si [], sc [], ax [], mk [] ]
     }
