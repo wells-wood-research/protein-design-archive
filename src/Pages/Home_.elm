@@ -133,11 +133,21 @@ view shared model =
     }
 
 
+growthCurve : Element Msg
+growthCurve =
+    image
+        [ width (fill |> maximum 780), centerX ]
+        { src = "/growth_curve.png"
+        , description = "Histogram showing increase in number of de novo protein designs published from 1990 to 2026"
+        }
+
+
 homeView : Model -> List ProteinDesign -> Element Msg
 homeView model designs =
     column
         [ spacing 10, width fill ]
-        [ Plots.timelinePlotView
+        [ --growthCurve
+          Plots.timelinePlotView
         , Input.text []
             { onChange = UpdateSearchString
             , text =

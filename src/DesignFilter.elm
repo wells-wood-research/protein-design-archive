@@ -11,7 +11,10 @@ type DesignFilter
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
-    | Tag Tag
+
+
+
+--| DesignTag Tag
 
 
 defaultKeys :
@@ -101,8 +104,10 @@ toString filter =
         DesignClass classification ->
             classificationToString classification
 
-        Tag tag ->
-            tagToString tag
+
+
+--DesignTag tag ->
+--    tagToString tag
 
 
 toDesignFilter : String -> DesignFilter
@@ -123,45 +128,46 @@ toDesignFilter key =
         "design-classification-unknown" ->
             DesignClass Unknown
 
+        {---
         "design-keyword-synthetic" ->
-            Tag Synthetic
+            DesignTag Synthetic
 
         "design-keyword-de-novo" ->
-            Tag DeNovo
+            DesignTag DeNovo
 
         "design-keyword-novel" ->
-            Tag Novel
+            DesignTag Novel
 
         "design-keyword-designed" ->
-            Tag Designed
+            DesignTag Designed
 
         "design-keyword-protein-binding" ->
-            Tag ProteinBinding
+            DesignTag ProteinBinding
 
         "design-keyword-metal-binding" ->
-            Tag MetalBinding
+            DesignTag MetalBinding
 
         "design-keyword-transcription" ->
-            Tag Transcription
+            DesignTag Transcription
 
         "design-keyword-growth" ->
-            Tag Growth
+            DesignTag Growth
 
         "design-keyword-structural" ->
-            Tag Structural
+            DesignTag Structural
 
         "design-keyword-alpha-helical-bundle" ->
-            Tag AlphaHelicalBundle
+            DesignTag AlphaHelicalBundle
 
         "design-keyword-beta-beta-alpha" ->
-            Tag BetaBetaAlpha
+            DesignTag BetaBetaAlpha
 
         "design-keyword-coiled-coil" ->
-            Tag CoiledCoil
+            DesignTag CoiledCoil
 
         "design-keyword-unknown" ->
-            Tag UnknownFunction
-
+            DesignTag UnknownFunction
+--}
         _ ->
             ContainsText ""
 
@@ -208,5 +214,7 @@ meetsOneFilter design filter =
         DesignClass classification ->
             classification == design.classification
 
-        Tag tag ->
-            List.member tag design.tags
+
+
+--DesignTag tag ->
+--    List.member tag design.tags

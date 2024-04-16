@@ -17,7 +17,7 @@ type alias ProteinDesign =
     , authors : List Author
     , classification : Classification
     , keyword : List String
-    , tags : List Tag
+    , tags : List String -- List Tag
     , release_date : Date
     , citation : String
     , publication_title : String
@@ -191,19 +191,25 @@ toProteinDesign rawData =
             rawData.keyword
 
         tags =
-            List.map stringToTag rawData.tags
+            rawData.tags
 
+        --List.map stringToTag rawData.tags
         release_date =
             Date.fromIsoString rawData.release_date
                 |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)
 
+        title =
+            if String.endsWith "." rawData.publication_title then
+                String.dropRight 1 rawData.publication_title
+
+            else
+                rawData.publication_title
+
         citation =
-            [ rawData.publication_title
+            [ title
             , rawData.publication_journal_abbrev
             , rawData.publication_journal_volume
-            , rawData.publication_page_first
-            , "-"
-            , rawData.publication_page_last
+            , publication_page_range
             , rawData.publication_id_astm
             , rawData.publication_id_issn
             , rawData.publication_id_csd
@@ -222,7 +228,11 @@ toProteinDesign rawData =
             rawData.publication_journal_volume
 
         publication_page_range =
-            rawData.publication_page_first ++ "-" ++ rawData.publication_page_last
+            if String.isEmpty rawData.publication_page_first || String.isEmpty rawData.publication_page_last then
+                ""
+
+            else
+                rawData.publication_page_first ++ "-" ++ rawData.publication_page_last
 
         publication_id_astm =
             rawData.publication_id_astm
@@ -271,7 +281,7 @@ searchableText proteinDesign =
     , authorsToString proteinDesign.authors
     , classificationToString proteinDesign.classification
     , String.join " " proteinDesign.keyword
-    , tagsToString proteinDesign.tags
+    , String.join " " proteinDesign.tags -- tagsToString proteinDesign.tags
     , Date.toIsoString proteinDesign.release_date
     , proteinDesign.citation
     , proteinDesign.abstract
