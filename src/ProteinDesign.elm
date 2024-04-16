@@ -69,11 +69,13 @@ type alias RawDesignData =
 
 
 type Classification
-    = OriginalDeNovo
-    | RelativeDeNovo
-    | Small
+    = Minimal
+    | Rational
     | Engineered
-    | Unknown
+    | CompPhys
+    | CompDL
+    | Consensus
+    | Other
 
 
 type Tag
@@ -315,57 +317,75 @@ xtalToString xtal =
 stringToClassification : String -> Classification
 stringToClassification string =
     case string of
-        "original de novo design" ->
-            OriginalDeNovo
+        "minimal" ->
+            Minimal
 
-        "relative of another de novo design" ->
-            RelativeDeNovo
-
-        "small, non-systematic, and other" ->
-            Small
+        "rational" ->
+            Rational
 
         "engineered" ->
             Engineered
 
+        "computational physics-based methods" ->
+            CompPhys
+
+        "computational, Deep Learning methods" ->
+            CompDL
+
+        "consensus" ->
+            Consensus
+
         _ ->
-            Unknown
+            Other
 
 
 classificationToString : Classification -> String
 classificationToString classification =
     case classification of
-        OriginalDeNovo ->
-            "Original De Novo"
+        Minimal ->
+            "minimal"
 
-        RelativeDeNovo ->
-            "Relative De Novo"
-
-        Small ->
-            "Small, Non-Systematic, Other"
+        Rational ->
+            "rational"
 
         Engineered ->
-            "Engineered"
+            "engineered"
 
-        Unknown ->
-            "Unknown"
+        CompPhys ->
+            "computational physics-based methods"
+
+        CompDL ->
+            "computational, Deep Learning methods"
+
+        Consensus ->
+            "consensus"
+
+        Other ->
+            "other"
 
 
 classificationToColour : Classification -> String
 classificationToColour classification =
     case classification of
-        OriginalDeNovo ->
+        Minimal ->
             "#ff0000"
 
-        RelativeDeNovo ->
-            "#00ff00"
-
-        Small ->
-            "#ffffff"
+        Rational ->
+            "#ffff00"
 
         Engineered ->
             "#0000ff"
 
-        Unknown ->
+        CompPhys ->
+            "#800080"
+
+        CompDL ->
+            "008000"
+
+        Consensus ->
+            "ff00ff"
+
+        Other ->
             "#333333"
 
 

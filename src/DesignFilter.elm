@@ -21,11 +21,13 @@ defaultKeys :
     { dateStartKey : String
     , dateEndKey : String
     , searchTextKey : String
-    , classificationOriginalDeNovoKey : String
-    , classificationRelativeDeNovoKey : String
-    , classificationSmallKey : String
+    , classificationMinimalKey : String
+    , classificationRationalKey : String
     , classificationEngineeredKey : String
-    , classificationUnknownKey : String
+    , classificationCompPhysKey : String
+    , classificationCompDLKey : String
+    , classificationConsensusKey : String
+    , classificationOtherKey : String
     , keywordSyntheticKey : String
     , keywordDeNovoKey : String
     , keywordNovelKey : String
@@ -44,11 +46,13 @@ defaultKeys =
     { dateStartKey = "deposition-date-start"
     , dateEndKey = "deposition-date-end"
     , searchTextKey = "search-text-string"
-    , classificationOriginalDeNovoKey = "design-classification-original"
-    , classificationRelativeDeNovoKey = "design-classification-relative"
-    , classificationSmallKey = "design-classification-small"
+    , classificationMinimalKey = "design-classification-minimal"
+    , classificationRationalKey = "design-classification-rational"
     , classificationEngineeredKey = "design-classification-engineered"
-    , classificationUnknownKey = "design-classification-unknown"
+    , classificationCompPhysKey = "design-classification-comp-phys"
+    , classificationCompDLKey = "design-classification-comp-dl"
+    , classificationConsensusKey = "design-classification-consensus"
+    , classificationOtherKey = "design-classification-other"
     , keywordSyntheticKey = "design-keyword-synthetic"
     , keywordDeNovoKey = "design-keyword-de-novo"
     , keywordNovelKey = "design-keyword-novel"
@@ -68,11 +72,13 @@ defaultKeys =
 checkboxDict : Dict String Bool
 checkboxDict =
     Dict.fromList
-        [ ( defaultKeys.classificationOriginalDeNovoKey, False )
-        , ( defaultKeys.classificationRelativeDeNovoKey, False )
-        , ( defaultKeys.classificationSmallKey, False )
+        [ ( defaultKeys.classificationMinimalKey, False )
+        , ( defaultKeys.classificationRationalKey, False )
         , ( defaultKeys.classificationEngineeredKey, False )
-        , ( defaultKeys.classificationUnknownKey, False )
+        , ( defaultKeys.classificationCompPhysKey, False )
+        , ( defaultKeys.classificationCompDLKey, False )
+        , ( defaultKeys.classificationConsensusKey, False )
+        , ( defaultKeys.classificationOtherKey, False )
         , ( defaultKeys.keywordSyntheticKey, False )
         , ( defaultKeys.keywordDeNovoKey, False )
         , ( defaultKeys.keywordNovelKey, False )
@@ -113,20 +119,26 @@ toString filter =
 toDesignFilter : String -> DesignFilter
 toDesignFilter key =
     case key of
-        "design-classification-original" ->
-            DesignClass OriginalDeNovo
+        "design-classification-minimal" ->
+            DesignClass Minimal
 
-        "design-classification-relative" ->
-            DesignClass RelativeDeNovo
-
-        "design-classification-small" ->
-            DesignClass Small
+        "design-classification-rational" ->
+            DesignClass Rational
 
         "design-classification-engineered" ->
             DesignClass Engineered
 
-        "design-classification-unknown" ->
-            DesignClass Unknown
+        "design-classification-comp-phys" ->
+            DesignClass CompPhys
+
+        "design-classification-comp-dl" ->
+            DesignClass CompDL
+
+        "design-classification-consensus" ->
+            DesignClass Consensus
+
+        "design-classification-other" ->
+            DesignClass Other
 
         {---
         "design-keyword-synthetic" ->
