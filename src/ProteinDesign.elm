@@ -326,10 +326,10 @@ stringToClassification string =
         "engineered" ->
             Engineered
 
-        "computational physics-based methods" ->
+        "computational physics-based" ->
             CompPhys
 
-        "computational, Deep Learning methods" ->
+        "computational, Deep Learning" ->
             CompDL
 
         "consensus" ->
@@ -352,10 +352,10 @@ classificationToString classification =
             "engineered"
 
         CompPhys ->
-            "computational physics-based methods"
+            "computational physics-based"
 
         CompDL ->
-            "computational, Deep Learning methods"
+            "computational, Deep Learning"
 
         Consensus ->
             "consensus"

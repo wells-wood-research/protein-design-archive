@@ -11,6 +11,7 @@ type DesignFilter
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
+    | Vote Bool
 
 
 
@@ -41,6 +42,8 @@ defaultKeys :
     , keywordBetaBetaAlphaKey : String
     , keywordCoiledCoilKey : String
     , keywordUnknownFunctionKey : String
+    , voteKeep : String
+    , voteRemove : String
     }
 defaultKeys =
     { dateStartKey = "deposition-date-start"
@@ -66,6 +69,8 @@ defaultKeys =
     , keywordBetaBetaAlphaKey = "design-keyword-beta-beta-alpha"
     , keywordCoiledCoilKey = "design-keyword-coiled-coil"
     , keywordUnknownFunctionKey = "design-keyword-unknown"
+    , voteKeep = "vote-keep"
+    , voteRemove = "vote-remove"
     }
 
 
@@ -92,6 +97,8 @@ checkboxDict =
         , ( defaultKeys.keywordBetaBetaAlphaKey, False )
         , ( defaultKeys.keywordCoiledCoilKey, False )
         , ( defaultKeys.keywordUnknownFunctionKey, False )
+        , ( defaultKeys.voteKeep, False )
+        , ( defaultKeys.voteRemove, False )
         ]
 
 
@@ -109,6 +116,13 @@ toString filter =
 
         DesignClass classification ->
             classificationToString classification
+
+        Vote vote ->
+            if vote then
+                "keep"
+
+            else
+                "remove"
 
 
 
@@ -139,6 +153,12 @@ toDesignFilter key =
 
         "design-classification-other" ->
             DesignClass Other
+
+        "vote-keep" ->
+            Vote True
+
+        "vote-remove" ->
+            Vote False
 
         {---
         "design-keyword-synthetic" ->
@@ -226,7 +246,11 @@ meetsOneFilter design filter =
         DesignClass classification ->
             classification == design.classification
 
+        Vote _ ->
+            True
 
 
+
+-- to fix Debug.todo
 --DesignTag tag ->
 --    List.member tag design.tags

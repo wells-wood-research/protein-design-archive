@@ -2,7 +2,7 @@ module Pages.Review.DesignId_ exposing (Model, Msg, page)
 
 import Components.Title
 import Date
-import DesignFilter exposing (defaultKeys)
+import DesignFilter exposing (defaultKeys, keyToLabel)
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
@@ -10,6 +10,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
+import Html.Attributes exposing (align)
 import Page exposing (Page)
 import ProteinDesign exposing (Classification, ProteinDesign, authorsToString, classificationToString, stringToClassification, tagsToString)
 import Route exposing (Route)
@@ -40,9 +41,10 @@ page shared route =
 type alias Model =
     { designId : String
     , reviewer : String
-    , classificationCheckbox : Dict String Bool
+    , classificationCheckboxDict : Dict String Bool
     , classification : Dict String Bool
-    , voteKeep : Bool
+    , voteCheckboxDict : Dict String Bool
+    , voteRemove : Bool
     , comment : String
     }
 
@@ -51,9 +53,10 @@ init : String -> () -> ( Model, Effect Msg )
 init designId _ =
     ( { designId = designId
       , reviewer = "Marta Chronowska (default)"
-      , classificationCheckbox = classificationCheckboxDict
+      , classificationCheckboxDict = classificationCheckboxDict
       , classification = Dict.empty
-      , voteKeep = True
+      , voteCheckboxDict = voteCheckboxDict
+      , voteRemove = False
       , comment = ""
       }
     , Effect.batch
@@ -75,6 +78,14 @@ classificationCheckboxDict =
         ]
 
 
+voteCheckboxDict : Dict String Bool
+voteCheckboxDict =
+    Dict.fromList
+        [ ( defaultKeys.voteKeep, False )
+        , ( defaultKeys.voteRemove, False )
+        ]
+
+
 
 -- UPDATE
 
@@ -82,8 +93,11 @@ classificationCheckboxDict =
 type Msg
     = NoOp
     | UpdateDesignClassification String Bool
-    | UpdateCheckbox String Bool
-    | ClearCheckbox String
+    | UpdateClassificationCheckbox String Bool
+    | ClearClassificationCheckbox String
+    | UpdateDesignVote
+    | UpdateVoteCheckbox String Bool
+    | ClearVoteCheckbox String
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -99,17 +113,36 @@ update msg model =
             , Effect.none
             )
 
-        UpdateCheckbox key checkboxStatus ->
-            { model | classificationCheckbox = Dict.insert key checkboxStatus model.classificationCheckbox }
+        UpdateClassificationCheckbox key checkboxStatus ->
+            { model | classificationCheckboxDict = Dict.insert key checkboxStatus model.classificationCheckboxDict }
                 |> (if checkboxStatus then
                         update (UpdateDesignClassification key checkboxStatus)
 
                     else
-                        update (ClearCheckbox key)
+                        update (ClearClassificationCheckbox key)
                    )
 
-        ClearCheckbox key ->
-            ( { model | classificationCheckbox = Dict.remove key model.classificationCheckbox }
+        ClearClassificationCheckbox key ->
+            ( { model | classificationCheckboxDict = Dict.remove key model.classificationCheckboxDict, classification = Dict.remove key model.classification }
+            , Effect.none
+            )
+
+        UpdateDesignVote ->
+            ( { model | voteRemove = True }
+            , Effect.none
+            )
+
+        UpdateVoteCheckbox key checkboxStatus ->
+            { model | voteCheckboxDict = Dict.insert key checkboxStatus model.voteCheckboxDict }
+                |> (if checkboxStatus then
+                        update UpdateDesignVote
+
+                    else
+                        update (ClearVoteCheckbox key)
+                   )
+
+        ClearVoteCheckbox key ->
+            ( { model | voteCheckboxDict = Dict.remove key model.voteCheckboxDict, voteRemove = False }
             , Effect.none
             )
 
@@ -130,13 +163,14 @@ subscriptions _ =
 view : Shared.Model -> Model -> View Msg
 view shared model =
     { title = "Design Review"
-    , attributes = [ width fill, Background.color <| rgb255 255 176 156 ]
-    , element = details <| Dict.get model.designId shared.designs
+    , attributes = [ width fill ]
+    , element =
+        details model (Dict.get model.designId shared.designs)
     }
 
 
-details : Maybe ProteinDesign -> Element msg
-details mDesign =
+details : Model -> Maybe ProteinDesign -> Element Msg
+details model mDesign =
     column
         [ width fill ]
         [ el
@@ -158,7 +192,7 @@ details mDesign =
 
             Just design ->
                 designDetailsView design
-        , reviewArea
+        , reviewArea model
         ]
 
 
@@ -169,6 +203,7 @@ designDetailsView proteinDesign =
          , width fill
          , padding 20
          , spacing 30
+         , Background.color <| rgb255 174 209 246
          ]
             ++ Style.bodyFont
         )
@@ -290,56 +325,93 @@ designDetailsView proteinDesign =
         ]
 
 
-reviewArea : Element msg
-reviewArea =
-    column []
-        [ classificationArea
-        , votingArea
+reviewArea : Model -> Element Msg
+reviewArea model =
+    column
+        [ centerX
+        , width fill
+        , padding 20
+        , spacing 30
+        , Background.color <| rgb255 255 176 156
+        ]
+        [ classificationArea model
+        , votingArea model
         , commentArea
         ]
 
 
-classificationArea : Element msg
-classificationArea =
-    paragraph
-        Style.h2Font
-        [ text "Classification" ]
-
-
-votingArea : Element msg
-votingArea =
-    paragraph
-        Style.h2Font
-        [ text "Vote to dispose" ]
-
-
-commentArea : Element msg
-commentArea =
-    paragraph
-        Style.h2Font
-        [ text "Comments" ]
-
-
-
-{--
-            , row [] <| List.map (\label -> checkbox ( model, label )) [ defaultKeys.classificationOriginalDeNovoKey, defaultKeys.classificationRelativeDeNovoKey, defaultKeys.classificationSmallKey, defaultKeys.classificationEngineeredKey, defaultKeys.classificationUnknownKey ]
+classificationArea : Model -> Element Msg
+classificationArea model =
+    column []
+        [ paragraph
+            Style.h2Font
+            [ text "Classification" ]
+        , row [] <|
+            List.map (\label -> classificationCheckbox ( model, label ))
+                [ defaultKeys.classificationMinimalKey
+                , defaultKeys.classificationRationalKey
+                , defaultKeys.classificationEngineeredKey
+                , defaultKeys.classificationCompPhysKey
+                , defaultKeys.classificationCompDLKey
+                , defaultKeys.classificationConsensusKey
+                , defaultKeys.classificationOtherKey
+                ]
         ]
 
-checkbox : ( Model, String ) -> Element Msg
-checkbox ( model, dictKey ) =
-    Input.checkbox [ padding 3 ]
-        { onChange = \checkboxStatus -> UpdateCheckbox dictKey checkboxStatus
+
+votingArea : Model -> Element Msg
+votingArea model =
+    column []
+        [ paragraph
+            Style.h2Font
+            [ text "Vote to remove" ]
+        , row [] <|
+            List.map (\label -> voteCheckbox ( model, label )) [ defaultKeys.voteRemove ]
+        ]
+
+
+classificationCheckbox : ( Model, String ) -> Element Msg
+classificationCheckbox ( model, dictKey ) =
+    Input.checkbox [ paddingXY 3 10, alignTop ]
+        { onChange = \checkboxStatus -> UpdateClassificationCheckbox dictKey checkboxStatus
         , icon = checkboxIcon
         , checked =
-            case Dict.get dictKey model.checkbox of
+            case Dict.get dictKey model.classificationCheckboxDict of
                 Just value ->
                     value
 
                 Nothing ->
                     False
-        , label = Input.labelRight [ centerY, width fill ] (paragraph [] <| [ text <| keyToLabel dictKey ])
+        , label =
+            case Dict.get dictKey model.classificationCheckboxDict of
+                Just True ->
+                    Input.labelRight [ centerY, width fill ] (paragraph ([ Font.bold ] ++ Style.bodyFont) <| [ text <| keyToLabel dictKey ])
+
+                _ ->
+                    Input.labelRight [ centerY, width fill ] (paragraph Style.bodyFont <| [ text <| keyToLabel dictKey ])
         }
---}
+
+
+voteCheckbox : ( Model, String ) -> Element Msg
+voteCheckbox ( model, dictKey ) =
+    Input.checkbox [ paddingXY 3 10, alignTop ]
+        { onChange = \checkboxStatus -> UpdateVoteCheckbox dictKey checkboxStatus
+        , icon = checkboxIcon
+        , checked =
+            case Dict.get dictKey model.voteCheckboxDict of
+                Just value ->
+                    value
+
+                Nothing ->
+                    False
+        , label =
+            case Dict.get dictKey model.voteCheckboxDict of
+                Just True ->
+                    Input.labelRight [ centerY, width fill ] (paragraph ([ Font.bold ] ++ Style.bodyFont) <| [ text <| "Yes, I vote to REMOVE this design." ])
+
+                _ ->
+                    Input.labelRight [ centerY, width fill ] (paragraph Style.bodyFont <| [ text <| "Yes, I vote to REMOVE this design." ])
+        }
 
 
 checkboxIcon : Bool -> Element msg
@@ -362,3 +434,10 @@ checkboxIcon isChecked =
                     rgb255 255 255 255
             ]
             none
+
+
+commentArea : Element msg
+commentArea =
+    paragraph
+        Style.h2Font
+        [ text "Comments" ]
