@@ -450,11 +450,12 @@ commentArea model =
             ++ Style.h2Font
         )
         [ text "Comments"
-        , Input.text
+        , Input.multiline
             Style.bodyFont
             { onChange = \string -> UpdateComment string
             , text = Maybe.withDefault "" model.comment
             , placeholder = Just <| Input.placeholder [] (text "Enter your comments here")
             , label = Input.labelHidden "Design Review Comment Box"
+            , spellcheck = True
             }
         ]
