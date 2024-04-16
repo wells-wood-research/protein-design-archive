@@ -1,5 +1,5 @@
-from flask import Flask
 import pymongo
+from flask import Flask
 
 app = Flask(__name__)
 
@@ -33,6 +33,7 @@ def setup_test_database() -> pymongo.MongoClient:
     ]
     _ = designs.insert_many(test_designs)
     return client, pda_db, designs
+
 
 # Setup database connection
 CLIENT, PDA_DB, DESIGNS = setup_test_database()

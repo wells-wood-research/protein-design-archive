@@ -28,6 +28,8 @@ babel==2.14.0
     # via jupyterlab-server
 beautifulsoup4==4.12.3
     # via nbconvert
+black==24.4.0
+    # via python-lsp-black
 bleach==6.1.0
     # via nbconvert
 blinker==1.7.0
@@ -41,6 +43,7 @@ cffi==1.16.0
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
+    # via black
     # via flask
 colorama==0.4.6
     # via click
@@ -90,6 +93,8 @@ ipywidgets==8.1.2
     # via jupyter
 isoduration==20.11.0
     # via jsonschema
+isort==5.13.2
+    # via python-lsp-isort
 itsdangerous==2.1.2
     # via flask
 jedi==0.19.1
@@ -158,8 +163,14 @@ markupsafe==2.1.5
 matplotlib-inline==0.1.7
     # via ipykernel
     # via ipython
+mccabe==0.7.0
 mistune==3.0.2
     # via nbconvert
+mypy==1.9.0
+    # via pylsp-mypy
+mypy-extensions==1.0.0
+    # via black
+    # via mypy
 nbclient==0.10.0
     # via nbconvert
 nbconvert==7.16.3
@@ -179,19 +190,25 @@ notebook-shim==0.2.4
 overrides==7.7.0
     # via jupyter-server
 packaging==24.0
+    # via black
     # via ipykernel
     # via jupyter-server
     # via jupyterlab
     # via jupyterlab-server
     # via nbconvert
+    # via pytoolconfig
     # via qtconsole
     # via qtpy
 pandocfilters==1.5.1
     # via nbconvert
 parso==0.8.4
     # via jedi
+pathspec==0.12.1
+    # via black
 platformdirs==4.2.0
+    # via black
     # via jupyter-core
+    # via pytoolconfig
 pluggy==1.4.0
     # via python-lsp-server
 prometheus-client==0.20.0
@@ -205,11 +222,13 @@ pure-eval==0.2.2
     # via stack-data
 pycparser==2.22
     # via cffi
+pyflakes==3.2.0
 pygments==2.17.2
     # via ipython
     # via jupyter-console
     # via nbconvert
     # via qtconsole
+pylsp-mypy==0.6.8
 pymongo==4.6.3
     # via backend
 python-dateutil==2.9.0.post0
@@ -217,9 +236,16 @@ python-dateutil==2.9.0.post0
     # via jupyter-client
 python-json-logger==2.0.7
     # via jupyter-events
+python-lsp-black==2.0.0
+python-lsp-isort==0.1
 python-lsp-jsonrpc==1.1.2
     # via python-lsp-server
 python-lsp-server==1.11.0
+    # via pylsp-mypy
+    # via python-lsp-black
+    # via python-lsp-isort
+pytoolconfig==1.3.1
+    # via rope
 pywin32==306
     # via jupyter-core
 pywinpty==2.0.13
@@ -250,6 +276,7 @@ rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
     # via jsonschema
     # via jupyter-events
+rope==1.13.0
 rpds-py==0.18.0
     # via jsonschema
     # via referencing
@@ -272,6 +299,8 @@ terminado==0.18.1
     # via jupyter-server-terminals
 tinycss2==1.2.1
     # via nbconvert
+tomli==2.0.1
+    # via pylsp-mypy
 tornado==6.4
     # via ipykernel
     # via jupyter-client
@@ -299,6 +328,7 @@ types-python-dateutil==2.9.0.20240316
     # via arrow
 typing-extensions==4.11.0
     # via ipython
+    # via mypy
 ujson==5.9.0
     # via python-lsp-jsonrpc
     # via python-lsp-server
