@@ -2,6 +2,7 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Components.Title
 import DesignFilter exposing (DesignFilter(..), defaultKeys)
+import DesignDate exposing (dateToPosition, defaultEndDate, defaultStartDate, getFirstAndLastDate, isValidIsoDate, removeHyphenFromIsoDate)
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
@@ -14,6 +15,8 @@ import Shared
 import Shared.Msg exposing (Msg(..))
 import Time
 import View exposing (View)
+import Element.Background as Background
+import Date
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -33,6 +36,8 @@ page shared _ =
 type alias Model =
     { waitingForData : Bool
     , designFilters : Dict String DesignFilter
+    , mStartDate : Maybe String
+    , mEndDate : Maybe String
     }
 
 
@@ -66,7 +71,7 @@ init shared _ =
 
 
 type Msg
-    = UpdateSearchString String
+    = UpdateFilters String DesignFilter
     | CheckForData Time.Posix
     | NoOp
 
@@ -74,14 +79,12 @@ type Msg
 update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
 update shared msg model =
     case msg of
-        UpdateSearchString s ->
+        UpdateFilters key newFilter ->
             let
                 newDesignFilters =
-                    Dict.insert defaultKeys.searchTextKey (ContainsText s) model.designFilters
+                    Dict.insert key newFilter model.designFilters
             in
-            ( { model
-                | designFilters = newDesignFilters
-              }
+            ( { model | designFilters = newDesignFilters }
             , shared.designs
                 |> Dict.values
                 |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values newDesignFilters))
@@ -105,6 +108,14 @@ update shared msg model =
         NoOp ->
             ( model, Effect.none )
 
+
+ifEmptyOrNot : String -> Maybe String
+ifEmptyOrNot string =
+    if String.isEmpty string then
+        Nothing
+
+    else
+        Just string
 
 
 -- SUBSCRIPTIONS
@@ -148,15 +159,11 @@ homeView model designs =
         [ spacing 10, width fill ]
         [ --growthCurve
           Plots.timelinePlotView
-        , Input.text []
-            { onChange = UpdateSearchString
-            , text =
-                Dict.get defaultKeys.searchTextKey model.designFilters
-                    |> Maybe.map DesignFilter.toString
-                    |> Maybe.withDefault ""
-            , placeholder = Just <| Input.placeholder [] (text "Enter search term...")
-            , label = Input.labelHidden "Search box"
-            }
+        , row [ spacing 5, width fill ] 
+            [ searchArea model
+            , dateStartField model
+            , dateEndField model
+            ]
         , designs
             |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
             |> designList
@@ -170,3 +177,94 @@ designList designs =
         , width fill
         ]
         (List.map ProteinDesign.designCard designs)
+
+searchArea : Model -> Element Msg
+searchArea model =
+    Input.text
+        [ width <| fillPortion 6 ]
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextKey (ContainsText string)
+        , text =
+            Dict.get defaultKeys.searchTextKey model.designFilters
+                    |> Maybe.map DesignFilter.toString
+                    |> Maybe.withDefault ""
+        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
+        , label = Input.labelHidden "Filter Designs Search Box"
+        }
+
+dateStartField : Model -> Element Msg
+dateStartField model =
+    row [ width <| fillPortion 2 , spacing 5 ]
+            [ paragraph [] [ text "from" ]
+            , Input.text
+                [ width <| fillPortion 5
+                , Background.color <|
+                    case model.mStartDate of
+                        Nothing ->
+                            rgb255 255 255 255
+
+                        Just string ->
+                            if isValidIsoDate string then
+                                rgb255 223 255 214
+
+                            else
+                                rgb255 255 215 213
+                ]
+                { onChange =
+                    \string ->
+                        let
+                            processedString = removeHyphenFromIsoDate string
+                        in
+                        case Date.fromIsoString processedString of
+                            Err _ ->
+                                UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate)
+
+                            Ok date ->
+                                UpdateFilters defaultKeys.dateStartKey (DateStart date)
+                , text = Maybe.withDefault "" model.mStartDate
+                , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
+                , label = Input.labelHidden "Filter Designs by Date - start"
+                }
+            ]
+        
+
+
+dateEndField : Model -> Element Msg
+dateEndField model =
+    let
+        mEndDate =
+            Dict.get defaultKeys.dateEndKey model.designFilters
+                    |> Maybe.map DesignFilter.toString
+    in
+    row [ width <| fillPortion 2 , spacing 5 ]
+            [ paragraph [] [ text "to" ]
+            , Input.text
+                [ width <| fillPortion 5
+                , Background.color <|
+                    case mEndDate of
+                        Nothing ->
+                            rgb255 255 255 255
+
+                        Just string ->
+                            if isValidIsoDate string then
+                                rgb255 223 255 214
+
+                            else
+                                rgb255 255 215 213
+                ]
+                { onChange =
+                    \string ->
+                        let
+                            processedString = removeHyphenFromIsoDate string
+                        in
+                        case Date.fromIsoString processedString of
+                            Err _ ->
+                                UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate)
+
+                            Ok date ->
+                                UpdateFilters defaultKeys.dateEndKey (DateEnd date)
+                , text = Maybe.withDefault "" mEndDate
+                , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
+                , label = Input.labelHidden "Filter Designs by Date - end"
+                }
+            ]
+        
