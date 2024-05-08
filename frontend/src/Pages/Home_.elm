@@ -246,6 +246,9 @@ dateStartField model =
                     Nothing ->
                         rgb255 255 255 255
 
+                    Just "" ->
+                        rgb255 255 255 255
+
                     Just string ->
                         if isValidIsoDate string then
                             rgb255 223 255 214
@@ -272,6 +275,9 @@ dateEndField model =
             , Background.color <|
                 case model.mEndDate of
                     Nothing ->
+                        rgb255 255 255 255
+
+                    Just "" ->
                         rgb255 255 255 255
 
                     Just string ->
