@@ -65,6 +65,16 @@ timelinePlotData designs =
                                 |> List.map toFloat
                                 |> vNums
                             )
+                        << dataColumn "month"
+                            (List.map .release_date designs
+                                |> List.map Date.monthNumber
+                                |> List.map toFloat
+                                |> vNums
+                            )
+                        << dataColumn "id"
+                            (List.map .pdb designs
+                                |> vStrs
+                            )
             in
             dataSource [ designsTable [] ]
 
@@ -120,6 +130,8 @@ timelinePlotData designs =
                             [ maStroke [ vStr "purple" ]
                             , maStrokeWidth [ vNum 3 ]
                             , maZIndex [ vNum 1 ]
+                            , maCursor [ cursorValue cuPointer ]
+                            , maTooltip [ vField (field "id") ]
                             ]
                         ]
                     , mTransform
