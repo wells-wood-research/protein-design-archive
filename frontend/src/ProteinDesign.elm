@@ -36,6 +36,7 @@ type alias ProteinDesign =
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
+    , pdb_string : String
     }
 
 
@@ -65,6 +66,7 @@ type alias RawDesignData =
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
+    , pdb_string : String
     }
 
 
@@ -144,6 +146,7 @@ rawDesignDecoder =
         |> required "exptl_method" (list string)
         |> required "formula_weight" float
         |> required "synthesis_comment" string
+        |> required "pdb_string" string
 
 
 authorDecoder : Decoder Author
@@ -271,8 +274,11 @@ toProteinDesign rawData =
 
         synthesis_comment =
             rawData.synthesis_comment
+
+        pdb_string =
+            rawData.pdb_string
     in
-    ProteinDesign pdb picture_path chains authors classification keyword tags release_date citation publication_title publication_journal_abbrev publication_journal_volume publication_page_range publication_id_astm publication_id_issn publication_id_csd publication_id_doi publication_id_pubmed publication_country abstract related_pdb crystal_structure exptl_method formula_weight synthesis_comment
+    ProteinDesign pdb picture_path chains authors classification keyword tags release_date citation publication_title publication_journal_abbrev publication_journal_volume publication_page_range publication_id_astm publication_id_issn publication_id_csd publication_id_doi publication_id_pubmed publication_country abstract related_pdb crystal_structure exptl_method formula_weight synthesis_comment pdb_string
         |> Just
 
 

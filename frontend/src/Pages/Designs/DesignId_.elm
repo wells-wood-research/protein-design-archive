@@ -7,6 +7,8 @@ import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
+import Html
+import Html.Attributes as HAtt
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, tagsToString)
 import Route exposing (Route)
@@ -123,13 +125,13 @@ designDetailsView proteinDesign =
                 [ padding 2
                 , Border.width 2
                 , Border.color <| rgb255 220 220 220
-
-                ] (image
-                [ width <| px 250
                 ]
-                { src = proteinDesign.picture_path
-                , description = "Structure of " ++ proteinDesign.pdb
-                }
+                (image
+                    [ width <| px 250
+                    ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
                 )
             , column
                 [ height fill
@@ -200,28 +202,42 @@ designDetailsView proteinDesign =
             [ width fill
             , spacing 20
             ]
-            [ paragraph
+            [ column
                 Style.h2Font
-                [ text "Sequence"
+                [ text "Structure"
                 ]
-            , table []
-                { data = proteinDesign.chains
-                , columns =
-                    [ { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Chain ID" ]
-                      , width = fill
-                      , view =
-                            \chain ->
-                                text chain.chain_id
-                      }
-                    , { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Sequence" ]
-                      , width = fill
-                      , view =
-                            \chain ->
-                                text chain.chain_seq
-                      }
+            , el [ height <| px 400, width fill, padding 5, Border.width 1 ]
+                (Html.node "ngl-viewer"
+                    [ HAtt.id "viewer"
+                    , HAtt.style "width" "100%"
+                    , HAtt.style "height" "100%"
+                    , HAtt.attribute "pdb-string" proteinDesign.pdb_string
                     ]
-                }
+                    []
+                    |> html
+                )
             ]
+        , paragraph
+            Style.h2Font
+            [ text "Sequence"
+            ]
+        , table []
+            { data = proteinDesign.chains
+            , columns =
+                [ { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Chain ID" ]
+                  , width = fill
+                  , view =
+                        \chain ->
+                            text chain.chain_id
+                  }
+                , { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Sequence" ]
+                  , width = fill
+                  , view =
+                        \chain ->
+                            text chain.chain_seq
+                  }
+                ]
+            }
         , column
             [ width fill
             , spacing 20
