@@ -381,7 +381,7 @@ classificationCheckbox : ( Model, String ) -> Element Msg
 classificationCheckbox ( model, dictKey ) =
     Input.checkbox [ paddingXY 3 10, alignTop ]
         { onChange = \checkboxStatus -> UpdateClassificationCheckbox dictKey checkboxStatus
-        , icon = checkboxIcon
+        , icon = Input.defaultCheckbox
         , checked =
             case Dict.get dictKey model.classificationCheckboxDict of
                 Just value ->
@@ -392,7 +392,7 @@ classificationCheckbox ( model, dictKey ) =
         , label =
             case Dict.get dictKey model.classificationCheckboxDict of
                 Just True ->
-                    Input.labelRight [ centerY, width fill ] (paragraph ([ Font.bold ] ++ Style.bodyFont) <| [ text <| keyToLabel dictKey ])
+                    Input.labelRight [ centerY, width fill ] (paragraph (Font.bold :: Style.bodyFont) <| [ text <| keyToLabel dictKey ])
 
                 _ ->
                     Input.labelRight [ centerY, width fill ] (paragraph Style.bodyFont <| [ text <| keyToLabel dictKey ])
@@ -403,7 +403,7 @@ voteCheckbox : ( Model, String ) -> Element Msg
 voteCheckbox ( model, dictKey ) =
     Input.checkbox [ paddingXY 3 10, alignTop ]
         { onChange = \checkboxStatus -> UpdateVoteCheckbox dictKey checkboxStatus
-        , icon = checkboxIcon
+        , icon = Input.defaultCheckbox
         , checked =
             case Dict.get dictKey model.voteCheckboxDict of
                 Just value ->
@@ -414,33 +414,11 @@ voteCheckbox ( model, dictKey ) =
         , label =
             case Dict.get dictKey model.voteCheckboxDict of
                 Just True ->
-                    Input.labelRight [ centerY, width fill ] (paragraph ([ Font.bold ] ++ Style.bodyFont) <| [ text <| "Yes, I vote to REMOVE this design." ])
+                    Input.labelRight [ centerY, width fill ] (paragraph (Font.bold :: Style.bodyFont) <| [ text <| "Yes, I vote to REMOVE this design." ])
 
                 _ ->
                     Input.labelRight [ centerY, width fill ] (paragraph Style.bodyFont <| [ text <| "Yes, I vote to REMOVE this design." ])
         }
-
-
-checkboxIcon : Bool -> Element msg
-checkboxIcon isChecked =
-    el
-        [ width <| px 25
-        , height <| px 25
-        , padding 4
-        ]
-    <|
-        el
-            [ width fill
-            , height fill
-            , Border.rounded 3
-            , Background.color <|
-                if isChecked then
-                    rgb255 104 176 171
-
-                else
-                    rgb255 255 255 255
-            ]
-            none
 
 
 commentArea : Model -> Element Msg
