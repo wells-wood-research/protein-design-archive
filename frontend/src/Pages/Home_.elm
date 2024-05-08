@@ -75,6 +75,8 @@ init shared _ =
 
 type Msg
     = UpdateFilters String DesignFilter
+    | UpdateStartDateTextField String
+    | UpdateEndDateTextField String
     | CheckForData Time.Posix
     | NoOp
 
@@ -94,6 +96,42 @@ update shared msg model =
                 |> Plots.timelinePlotData
                 |> Effect.renderVegaPlot
             )
+
+        UpdateStartDateTextField string ->
+            let
+                phrase =
+                    removeHyphenFromIsoDate string
+            in
+            case Date.fromIsoString phrase of
+                Err _ ->
+                    update
+                        shared
+                        (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
+                        { model | mStartDate = ifEmptyOrNot string }
+
+                Ok date ->
+                    update
+                        shared
+                        (UpdateFilters defaultKeys.dateStartKey (DateStart date))
+                        { model | mStartDate = ifEmptyOrNot string }
+
+        UpdateEndDateTextField string ->
+            let
+                phrase =
+                    removeHyphenFromIsoDate string
+            in
+            case Date.fromIsoString phrase of
+                Err _ ->
+                    update
+                        shared
+                        (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
+                        { model | mEndDate = ifEmptyOrNot string }
+
+                Ok date ->
+                    update
+                        shared
+                        (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
+                        { model | mEndDate = ifEmptyOrNot string }
 
         CheckForData _ ->
             if Dict.isEmpty shared.designs then
@@ -200,7 +238,7 @@ searchArea model =
 dateStartField : Model -> Element Msg
 dateStartField model =
     row [ width <| fillPortion 2 ]
-        [ paragraph [ width <| shrink ] [ text "from" ]
+        [ paragraph [ width <| fillPortion 1, padding 3 ] [ text "from" ]
         , Input.text
             [ width <| fillPortion 9
             , Background.color <|
@@ -217,16 +255,7 @@ dateStartField model =
             ]
             { onChange =
                 \string ->
-                    let
-                        processedString =
-                            removeHyphenFromIsoDate string
-                    in
-                    case Date.fromIsoString processedString of
-                        Err _ ->
-                            UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate)
-
-                        Ok date ->
-                            UpdateFilters defaultKeys.dateStartKey (DateStart date)
+                    UpdateStartDateTextField string
             , text = Maybe.withDefault "" model.mStartDate
             , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
             , label = Input.labelHidden "Filter Designs by Date - start"
@@ -236,17 +265,12 @@ dateStartField model =
 
 dateEndField : Model -> Element Msg
 dateEndField model =
-    let
-        mEndDate =
-            Dict.get defaultKeys.dateEndKey model.designFilters
-                |> Maybe.map DesignFilter.toString
-    in
     row [ width <| fillPortion 2 ]
         [ paragraph [ width <| fillPortion 1, padding 3 ] [ text "to" ]
         , Input.text
             [ width <| fillPortion 9
             , Background.color <|
-                case mEndDate of
+                case model.mEndDate of
                     Nothing ->
                         rgb255 255 255 255
 
@@ -259,17 +283,8 @@ dateEndField model =
             ]
             { onChange =
                 \string ->
-                    let
-                        processedString =
-                            removeHyphenFromIsoDate string
-                    in
-                    case Date.fromIsoString processedString of
-                        Err _ ->
-                            UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate)
-
-                        Ok date ->
-                            UpdateFilters defaultKeys.dateEndKey (DateEnd date)
-            , text = Maybe.withDefault "" mEndDate
+                    UpdateEndDateTextField string
+            , text = Maybe.withDefault "" model.mEndDate
             , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
             , label = Input.labelHidden "Filter Designs by Date - end"
             }
