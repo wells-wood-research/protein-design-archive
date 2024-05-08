@@ -250,11 +250,21 @@ dateStartField model =
                         rgb255 255 255 255
 
                     Just string ->
-                        if isValidIsoDate string then
-                            rgb255 223 255 214
+                        case Date.fromIsoString <| string of
+                            Ok startDate ->
+                                case Date.fromIsoString <| Maybe.withDefault "" model.mEndDate of
+                                    Ok endDate ->
+                                        if Date.compare endDate startDate == GT then
+                                            rgb255 223 255 214
 
-                        else
-                            rgb255 255 215 213
+                                        else
+                                            rgb255 255 215 213
+
+                                    Err _ ->
+                                        rgb255 223 255 214
+
+                            Err _ ->
+                                rgb255 255 215 213
             ]
             { onChange =
                 \string ->
@@ -281,11 +291,21 @@ dateEndField model =
                         rgb255 255 255 255
 
                     Just string ->
-                        if isValidIsoDate string then
-                            rgb255 223 255 214
+                        case Date.fromIsoString <| string of
+                            Ok endDate ->
+                                case Date.fromIsoString <| Maybe.withDefault "" model.mStartDate of
+                                    Ok startDate ->
+                                        if Date.compare endDate startDate == GT then
+                                            rgb255 223 255 214
 
-                        else
-                            rgb255 255 215 213
+                                        else
+                                            rgb255 255 215 213
+
+                                    Err _ ->
+                                        rgb255 223 255 214
+
+                            Err _ ->
+                                rgb255 255 215 213
             ]
             { onChange =
                 \string ->
