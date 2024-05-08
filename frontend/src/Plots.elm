@@ -75,6 +75,10 @@ timelinePlotData designs =
                             (List.map .pdb designs
                                 |> vStrs
                             )
+                        << dataColumn "href"
+                            (List.map (\d -> "designs/" ++ d.pdb) designs
+                                |> vStrs
+                            )
             in
             dataSource [ designsTable [] ]
 
@@ -132,6 +136,7 @@ timelinePlotData designs =
                             , maZIndex [ vNum 1 ]
                             , maCursor [ cursorValue cuPointer ]
                             , maTooltip [ vField (field "id") ]
+                            , maHRef [ vField (field "href") ]
                             ]
                         ]
                     , mTransform
