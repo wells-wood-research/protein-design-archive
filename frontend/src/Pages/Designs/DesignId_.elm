@@ -9,6 +9,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input exposing (button)
+import Element.Keyed as Keyed
 import FeatherIcons
 import Html
 import Html.Attributes as HAtt
@@ -275,8 +276,16 @@ designDetailsView proteinDesign =
                 Style.h2Font
                 [ text "Structure"
                 ]
-            , el [ height <| px 400, width <| px 800, padding 5, Border.width 1, Border.rounded 3 ]
-                (Html.node "ngl-viewer"
+            , Keyed.el
+                [ height <| px 400
+                , width <| px 850
+                , padding 5
+                , Border.width 2
+                , Border.rounded 3
+                , Border.color <| rgb255 220 220 220
+                ]
+                ( proteinDesign.pdb
+                , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
                     , HAtt.style "width" "100%"
                     , HAtt.style "height" "100%"
@@ -290,25 +299,50 @@ designDetailsView proteinDesign =
             Style.h2Font
             [ text "Sequence"
             ]
-        , table []
+        , table
+            [ padding 2 ]
             { data = proteinDesign.chains
             , columns =
-                [ { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Chain ID" ]
+                [ { header =
+                        paragraph
+                            [ Font.bold
+                            , paddingXY 0 10
+                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                            , Border.color <| rgb255 220 220 220
+                            ]
+                            [ text "Chain ID" ]
                   , width = px 150
                   , view =
                         \chain ->
-                            text chain.chain_id
+                            paragraph
+                                Style.monospacedFont
+                                [ column
+                                    [ width (fill |> maximum 150)
+                                    , height fill
+                                    , scrollbarX
+                                    , paddingXY 5 10
+                                    ]
+                                    [ text chain.chain_id ]
+                                ]
                   }
-                , { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Sequence" ]
+                , { header =
+                        paragraph
+                            [ Font.bold
+                            , paddingXY 0 10
+                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                            , Border.color <| rgb255 220 220 220
+                            ]
+                            [ text "Sequence" ]
                   , width = fill
                   , view =
                         \chain ->
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum 650)
+                                    [ width (fill |> maximum 700)
                                     , height fill
                                     , scrollbarX
+                                    , paddingXY 10 10
                                     ]
                                     [ text chain.chain_seq ]
                                 ]
