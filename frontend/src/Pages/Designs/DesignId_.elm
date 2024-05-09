@@ -7,7 +7,9 @@ import Effect exposing (Effect, pushRoute)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font exposing (center)
+import Element.Font as Font
+import Html
+import Html.Attributes as HAtt
 import Element.Input exposing (button)
 import List.Extra
 import Page exposing (Page)
@@ -160,7 +162,7 @@ browseButton shared model direction =
                 , Border.rounded 3
                 , Border.width 2
                 , Border.color <| rgb255 220 220 220
-                , center
+                , Font.center
                 ]
                 (text <|
                     direction
@@ -264,28 +266,42 @@ designDetailsView proteinDesign =
             [ width fill
             , spacing 20
             ]
-            [ paragraph
+            [ column
                 Style.h2Font
-                [ text "Sequence"
+                [ text "Structure"
                 ]
-            , table []
-                { data = proteinDesign.chains
-                , columns =
-                    [ { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Chain ID" ]
-                      , width = fill
-                      , view =
-                            \chain ->
-                                text chain.chain_id
-                      }
-                    , { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Sequence" ]
-                      , width = fill
-                      , view =
-                            \chain ->
-                                text chain.chain_seq
-                      }
+            , el [ height <| px 400, width fill, padding 5, Border.width 1 ]
+                (Html.node "ngl-viewer"
+                    [ HAtt.id "viewer"
+                    , HAtt.style "width" "100%"
+                    , HAtt.style "height" "100%"
+                    , HAtt.attribute "pdb-string" proteinDesign.pdb
                     ]
-                }
+                    []
+                    |> html
+                )
             ]
+        , paragraph
+            Style.h2Font
+            [ text "Sequence"
+            ]
+        , table []
+            { data = proteinDesign.chains
+            , columns =
+                [ { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Chain ID" ]
+                  , width = fill
+                  , view =
+                        \chain ->
+                            text chain.chain_id
+                  }
+                , { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Sequence" ]
+                  , width = fill
+                  , view =
+                        \chain ->
+                            text chain.chain_seq
+                  }
+                ]
+            }
         , column
             [ width fill
             , spacing 20
