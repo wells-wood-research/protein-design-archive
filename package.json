@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "ngl": "^2.2.2",
     "webpack": "^5.91.0"
   }
 }
