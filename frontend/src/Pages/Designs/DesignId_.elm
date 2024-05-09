@@ -211,7 +211,7 @@ designDetailsView proteinDesign =
                     [ HAtt.id "viewer"
                     , HAtt.style "width" "100%"
                     , HAtt.style "height" "100%"
-                    , HAtt.attribute "pdb-string" proteinDesign.pdb_string
+                    , HAtt.attribute "pdb-string" proteinDesign.pdb
                     ]
                     []
                     |> html
