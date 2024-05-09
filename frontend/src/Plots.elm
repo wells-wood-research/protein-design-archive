@@ -125,7 +125,7 @@ timelinePlotData designs =
                             , maCustom "yFocus" [ vSignal "cy" ]
                             ]
                         , enUpdate
-                            [ maSize [ vSignal "pow(2 * radius, 2)" ]
+                            [ maSize [ vSignal "100" ]
                             , maStroke [ white ]
                             , maStrokeWidth [ vNum 1 ]
                             , maZIndex [ vNum 0 ]

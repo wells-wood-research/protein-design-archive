@@ -3,14 +3,15 @@ module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 import Components.Title
 import Date
 import Dict
-import Effect exposing (Effect, pushRoute)
+import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Element.Input exposing (button)
+import FeatherIcons
 import Html
 import Html.Attributes as HAtt
-import Element.Input exposing (button)
 import List.Extra
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, tagsToString)
@@ -155,17 +156,19 @@ browseButton shared model direction =
                 Just designId ->
                     "/designs/" ++ designId
         , label =
-            el
-                [ height <| px 1000
-                , width <| px 80
-                , Background.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Font.center
-                ]
-                (text <|
-                    direction
+            el [ centerX ]
+                (html <|
+                    FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                        FeatherIcons.withSize 50 <|
+                            case direction of
+                                "back" ->
+                                    FeatherIcons.arrowLeftCircle
+
+                                "next" ->
+                                    FeatherIcons.arrowRightCircle
+
+                                _ ->
+                                    FeatherIcons.home
                 )
         }
 
@@ -177,21 +180,23 @@ designDetailsView proteinDesign =
          , width fill
          , padding 20
          , spacing 30
+         , height <| px 1200
          ]
             ++ Style.bodyFont
         )
         [ wrappedRow
-            [ height fill
-            , width fill
+            [ width fill
             , spacing 10
             ]
             [ el
                 [ padding 2
                 , Border.width 2
                 , Border.color <| rgb255 220 220 220
+                , Border.rounded 3
+                , alignTop
                 ]
                 (image
-                    [ width <| px 250
+                    [ width <| px 300
                     ]
                     { src = proteinDesign.picture_path
                     , description = "Structure of " ++ proteinDesign.pdb
@@ -201,7 +206,7 @@ designDetailsView proteinDesign =
                 [ height fill
                 , width fill
                 , spacing 10
-                , Font.alignLeft
+                , Font.justify
                 ]
                 [ paragraph
                     []
@@ -270,7 +275,7 @@ designDetailsView proteinDesign =
                 Style.h2Font
                 [ text "Structure"
                 ]
-            , el [ height <| px 400, width fill, padding 5, Border.width 1 ]
+            , el [ height <| px 400, width <| px 800, padding 5, Border.width 1, Border.rounded 3 ]
                 (Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
                     , HAtt.style "width" "100%"
@@ -289,7 +294,7 @@ designDetailsView proteinDesign =
             { data = proteinDesign.chains
             , columns =
                 [ { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Chain ID" ]
-                  , width = fill
+                  , width = px 150
                   , view =
                         \chain ->
                             text chain.chain_id
@@ -298,7 +303,15 @@ designDetailsView proteinDesign =
                   , width = fill
                   , view =
                         \chain ->
-                            text chain.chain_seq
+                            paragraph
+                                Style.monospacedFont
+                                [ column
+                                    [ width (fill |> maximum 650)
+                                    , height fill
+                                    , scrollbarX
+                                    ]
+                                    [ text chain.chain_seq ]
+                                ]
                   }
                 ]
             }
