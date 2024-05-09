@@ -3,10 +3,13 @@ module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 import Components.Title
 import Date
 import Dict
-import Effect exposing (Effect)
+import Effect exposing (Effect, pushRoute)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font
+import Element.Font as Font exposing (center)
+import Element.Input exposing (button)
+import List.Extra
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, tagsToString)
 import Route exposing (Route)
@@ -74,34 +77,95 @@ view : Shared.Model -> Model -> View Msg
 view shared model =
     { title = "Design Details"
     , attributes = [ width fill ]
-    , element = details <| Dict.get model.designId shared.designs
+    , element =
+        details shared model
     }
 
 
-details : Maybe ProteinDesign -> Element msg
-details mDesign =
-    column
-        [ width fill ]
-        [ el
-            (Style.h1Font
-                ++ [ centerX
-                   , padding 20
-                   ]
-            )
-          <|
-            text "Design Details"
-        , case mDesign of
-            Nothing ->
-                paragraph
-                    (Style.bodyFont
-                        ++ [ Font.center ]
-                    )
-                    [ text "This design does not exist."
-                    ]
+getNextDesign : Shared.Model -> Model -> String -> Maybe String
+getNextDesign shared model direction =
+    let
+        list =
+            Dict.keys shared.designs
 
-            Just design ->
-                designDetailsView design
+        currentIndex =
+            List.Extra.elemIndex model.designId list
+    in
+    case currentIndex of
+        Just index ->
+            case direction of
+                "next" ->
+                    List.Extra.getAt (index + 1) list
+
+                "back" ->
+                    List.Extra.getAt (index - 1) list
+
+                _ ->
+                    List.Extra.getAt index list
+
+        _ ->
+            Nothing
+
+
+details : Shared.Model -> Model -> Element msg
+details shared model =
+    let
+        mDesign =
+            Dict.get model.designId shared.designs
+    in
+    row []
+        [ browseButton shared model "back"
+        , column
+            [ width fill ]
+            [ el
+                (Style.h1Font
+                    ++ [ centerX
+                       , padding 20
+                       ]
+                )
+              <|
+                text "Design Details"
+            , case mDesign of
+                Nothing ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ Font.center ]
+                        )
+                        [ text "This design does not exist."
+                        ]
+
+                Just design ->
+                    designDetailsView design
+            ]
+        , browseButton shared model "next"
         ]
+
+
+browseButton : Shared.Model -> Model -> String -> Element msg
+browseButton shared model direction =
+    link
+        []
+        { url =
+            case getNextDesign shared model direction of
+                Nothing ->
+                    "/"
+
+                Just designId ->
+                    "/designs/" ++ designId
+        , label =
+            el
+                [ height <| px 1000
+                , width <| px 80
+                , Background.color <| rgb255 220 220 220
+                , Border.rounded 3
+                , Border.width 2
+                , Border.color <| rgb255 220 220 220
+                , center
+                ]
+                (text <|
+                    direction
+                )
+        }
 
 
 designDetailsView : ProteinDesign -> Element msg
@@ -123,13 +187,13 @@ designDetailsView proteinDesign =
                 [ padding 2
                 , Border.width 2
                 , Border.color <| rgb255 220 220 220
-
-                ] (image
-                [ width <| px 250
                 ]
-                { src = proteinDesign.picture_path
-                , description = "Structure of " ++ proteinDesign.pdb
-                }
+                (image
+                    [ width <| px 250
+                    ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
                 )
             , column
                 [ height fill
