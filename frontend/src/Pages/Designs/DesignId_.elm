@@ -86,6 +86,42 @@ view shared model =
     }
 
 
+details : Shared.Model -> Model -> Element msg
+details shared model =
+    let
+        mDesign =
+            Dict.get model.designId shared.designs
+    in
+    row []
+        [ column
+            [ width fill ]
+            [ row [ width fill, spaceEvenly ]
+                [ browseButton shared model "back"
+                , el
+                    (Style.h1Font
+                        ++ [ centerX
+                           , padding 20
+                           ]
+                    )
+                  <|
+                    text "Design Details"
+                , browseButton shared model "next"
+                ]
+            , case mDesign of
+                Nothing ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ Font.center ]
+                        )
+                        [ text "This design does not exist."
+                        ]
+
+                Just design ->
+                    designDetailsView design
+            ]
+        ]
+
+
 getNextDesign : Shared.Model -> Model -> String -> Maybe String
 getNextDesign shared model direction =
     let
@@ -109,40 +145,6 @@ getNextDesign shared model direction =
 
         _ ->
             Nothing
-
-
-details : Shared.Model -> Model -> Element msg
-details shared model =
-    let
-        mDesign =
-            Dict.get model.designId shared.designs
-    in
-    row []
-        [ browseButton shared model "back"
-        , column
-            [ width fill ]
-            [ el
-                (Style.h1Font
-                    ++ [ centerX
-                       , padding 20
-                       ]
-                )
-              <|
-                text "Design Details"
-            , case mDesign of
-                Nothing ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ Font.center ]
-                        )
-                        [ text "This design does not exist."
-                        ]
-
-                Just design ->
-                    designDetailsView design
-            ]
-        , browseButton shared model "next"
-        ]
 
 
 browseButton : Shared.Model -> Model -> String -> Element msg
@@ -306,7 +308,7 @@ designDetailsView proteinDesign =
                 [ { header =
                         paragraph
                             [ Font.bold
-                            , paddingXY 0 10
+                            , paddingXY 5 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
@@ -328,7 +330,7 @@ designDetailsView proteinDesign =
                 , { header =
                         paragraph
                             [ Font.bold
-                            , paddingXY 0 10
+                            , paddingXY 10 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
