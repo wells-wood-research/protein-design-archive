@@ -7,6 +7,7 @@ import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Font exposing (center)
 import Element.Input as Input
 import Page exposing (Page)
 import Plots
@@ -201,10 +202,9 @@ homeView model designs =
         [ spacing 10, width fill ]
         [ --growthCurve
           Plots.timelinePlotView
-        , row [ spacing 5, width fill ]
+        , row [ width fill ]
             [ searchArea model
-            , dateStartField model
-            , dateEndField model
+            , dateSearchArea model
             ]
         , designs
             |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
@@ -235,12 +235,20 @@ searchArea model =
         }
 
 
+dateSearchArea : Model -> Element Msg
+dateSearchArea model =
+    row [ width <| fillPortion 4 ]
+        [ dateStartField model
+        , dateEndField model
+        ]
+
+
 dateStartField : Model -> Element Msg
 dateStartField model =
-    row [ width <| fillPortion 2 ]
-        [ paragraph [ width <| fillPortion 1, padding 3 ] [ text "from" ]
+    row [ width fill ]
+        [ paragraph [ width fill, center, padding 5 ] [ text "from" ]
         , Input.text
-            [ width <| fillPortion 9
+            [ width <| px 150
             , Background.color <|
                 case model.mStartDate of
                     Nothing ->
@@ -265,6 +273,7 @@ dateStartField model =
 
                             Err _ ->
                                 rgb255 255 215 213
+            , center
             ]
             { onChange =
                 \string ->
@@ -278,10 +287,10 @@ dateStartField model =
 
 dateEndField : Model -> Element Msg
 dateEndField model =
-    row [ width <| fillPortion 2 ]
-        [ paragraph [ width <| fillPortion 1, padding 3 ] [ text "to" ]
+    row [ width fill, spaceEvenly ]
+        [ paragraph [ width fill, center, padding 5 ] [ text "to" ]
         , Input.text
-            [ width <| fillPortion 9
+            [ width <| px 150
             , Background.color <|
                 case model.mEndDate of
                     Nothing ->
@@ -306,6 +315,7 @@ dateEndField model =
 
                             Err _ ->
                                 rgb255 255 215 213
+            , center
             ]
             { onChange =
                 \string ->

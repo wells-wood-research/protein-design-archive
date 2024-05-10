@@ -155,7 +155,7 @@ getNextDesign shared model direction =
                     LE.getAt index list
 
         _ ->
-            LE.getAt 5 list
+            Nothing
 
 
 browseButton : Shared.Model -> Model -> String -> Element msg
@@ -194,7 +194,7 @@ designDetailsView proteinDesign =
          , width fill
          , padding 20
          , spacing 30
-         , height <| px 1200
+         , height fill
          ]
             ++ Style.bodyFont
         )
@@ -208,17 +208,17 @@ designDetailsView proteinDesign =
                 , Border.color <| rgb255 220 220 220
                 , Border.rounded 3
                 , alignTop
+                , width <| fillPortion 3
                 ]
                 (image
-                    [ width <| px 300
-                    ]
+                    [ width fill ]
                     { src = proteinDesign.picture_path
                     , description = "Structure of " ++ proteinDesign.pdb
                     }
                 )
             , column
                 [ height fill
-                , width fill
+                , width <| fillPortion 7
                 , spacing 10
                 , Font.justify
                 ]
@@ -290,8 +290,8 @@ designDetailsView proteinDesign =
                 [ text "Structure"
                 ]
             , Keyed.el
-                [ height <| px 400
-                , width <| px 850
+                [ height fill
+                , width fill
                 , padding 5
                 , Border.width 2
                 , Border.rounded 3
@@ -300,8 +300,10 @@ designDetailsView proteinDesign =
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" "100%"
-                    , HAtt.style "height" "100%"
+                    , HAtt.style "width" "910px"
+                    , HAtt.style "height" "400px"
+                    , HAtt.style "align" "center"
+                    , HAtt.alt "3D structure"
                     , HAtt.attribute "pdb-string" proteinDesign.pdb
                     ]
                     []
@@ -324,7 +326,7 @@ designDetailsView proteinDesign =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Chain ID" ]
-                  , width = px 150
+                  , width = fillPortion 2
                   , view =
                         \chain ->
                             paragraph
@@ -346,7 +348,7 @@ designDetailsView proteinDesign =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Sequence" ]
-                  , width = fill
+                  , width = fillPortion 8
                   , view =
                         \chain ->
                             paragraph
