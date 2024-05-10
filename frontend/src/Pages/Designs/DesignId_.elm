@@ -13,7 +13,7 @@ import Element.Keyed as Keyed
 import FeatherIcons
 import Html
 import Html.Attributes as HAtt
-import List.Extra
+import List.Extra as LE
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, tagsToString)
 import Route exposing (Route)
@@ -129,22 +129,33 @@ getNextDesign shared model direction =
             Dict.keys shared.designs
 
         currentIndex =
-            List.Extra.elemIndex model.designId list
+            LE.elemIndex model.designId list
+
+        lastIndex =
+            (\i -> i - 1) <| List.length list
     in
     case currentIndex of
         Just index ->
             case direction of
                 "next" ->
-                    List.Extra.getAt (index + 1) list
+                    if index == lastIndex then
+                        LE.getAt 0 list
+
+                    else
+                        LE.getAt (index + 1) list
 
                 "back" ->
-                    List.Extra.getAt (index - 1) list
+                    if index == 0 then
+                        LE.last list
+
+                    else
+                        LE.getAt (index - 1) list
 
                 _ ->
-                    List.Extra.getAt index list
+                    LE.getAt index list
 
         _ ->
-            Nothing
+            LE.getAt 5 list
 
 
 browseButton : Shared.Model -> Model -> String -> Element msg
