@@ -273,7 +273,6 @@ dateStartField model =
 
                             Err _ ->
                                 rgb255 255 215 213
-            , center
             ]
             { onChange =
                 \string ->
@@ -315,7 +314,6 @@ dateEndField model =
 
                             Err _ ->
                                 rgb255 255 215 213
-            , center
             ]
             { onChange =
                 \string ->
