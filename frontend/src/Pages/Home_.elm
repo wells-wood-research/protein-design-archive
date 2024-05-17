@@ -167,7 +167,16 @@ update shared msg model =
                                 { model | mEndDate = ifEmptyOrNot string }
 
                 CheckForData _ ->
-                    ( { model | loading = False }, Effect.none )
+                    ( { model | loading = False }
+                    , loadedDesigns
+                        |> Dict.values
+                        |> List.filterMap
+                            (DesignFilter.meetsAllFilters
+                                (Dict.values model.designFilters)
+                            )
+                        |> Plots.timelinePlotData
+                        |> Effect.renderVegaPlot
+                    )
 
                 ViewportReset ->
                     ( model, Effect.none )

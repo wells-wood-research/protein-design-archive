@@ -7,16 +7,10 @@ app = Flask(__name__)
 CORS(app, origins=["http://localhost:1234"])
 
 
-@app.route("/")
-def serve_application():
-    return "<p><b>Hello</b>, World!</p>"
-
-
 @app.get("/all-design-stubs")
 def get_all_design_stubs():
     """Gets all the design stub data for the front page."""
     # query the database using pymongo
-    designs = list(DESIGNS.find())
-    for design in designs:
-        del design["_id"]
+    projection = {"_id": 0}
+    designs = list(DESIGNS.find({}, projection=projection))
     return designs
