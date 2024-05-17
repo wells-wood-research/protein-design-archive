@@ -2,16 +2,25 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Components.Title
 import Date
-import DesignFilter exposing (DesignFilter(..), dateToPosition, defaultEndDate, defaultKeys, defaultStartDate, getFirstAndLastDate, isValidIsoDate, removeHyphenFromIsoDate)
+import DesignFilter
+    exposing
+        ( DesignFilter(..)
+        , defaultEndDate
+        , defaultKeys
+        , defaultStartDate
+        , removeHyphenFromIsoDate
+        )
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font exposing (center)
 import Element.Input as Input
+import Http
 import Page exposing (Page)
 import Plots
 import ProteinDesign exposing (ProteinDesign)
+import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Shared.Msg exposing (Msg(..))
@@ -22,7 +31,7 @@ import View exposing (View)
 page : Shared.Model -> Route () -> Page Model Msg
 page shared _ =
     Page.new
-        { init = init shared
+        { init = init
         , update = update shared
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view
@@ -34,40 +43,24 @@ page shared _ =
 
 
 type alias Model =
-    { waitingForData : Bool
+    { loading : Bool
     , designFilters : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
     }
 
 
-init : Shared.Model -> () -> ( Model, Effect Msg )
-init shared _ =
-    if Dict.isEmpty shared.designs then
-        ( { waitingForData = True
-          , designFilters = Dict.empty
-          , mStartDate = Nothing
-          , mEndDate = Nothing
-          }
-        , Effect.batch
-            [ Effect.resetViewport NoOp
-            ]
-        )
-
-    else
-        ( { waitingForData = False
-          , designFilters = Dict.empty
-          , mStartDate = Just ""
-          , mEndDate = Just ""
-          }
-        , Effect.batch
-            [ Effect.resetViewport NoOp
-            , shared.designs
-                |> Dict.values
-                |> Plots.timelinePlotData
-                |> Effect.renderVegaPlot
-            ]
-        )
+init : () -> ( Model, Effect Msg )
+init _ =
+    ( { loading = True
+      , designFilters = Dict.empty
+      , mStartDate = Nothing
+      , mEndDate = Nothing
+      }
+    , Effect.batch
+        [ Effect.resetViewport ViewportReset
+        ]
+    )
 
 
 
@@ -79,76 +72,105 @@ type Msg
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
     | CheckForData Time.Posix
-    | NoOp
+    | ViewportReset
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
 update shared msg model =
-    case msg of
-        UpdateFilters key newFilter ->
-            let
-                newDesignFilters =
-                    Dict.insert key newFilter model.designFilters
-            in
-            ( { model | designFilters = newDesignFilters }
-            , shared.designs
-                |> Dict.values
-                |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values newDesignFilters))
-                |> Plots.timelinePlotData
-                |> Effect.renderVegaPlot
-            )
+    case shared.designs of
+        RemoteData.NotAsked ->
+            case msg of
+                CheckForData _ ->
+                    ( model, Effect.none )
 
-        UpdateStartDateTextField string ->
-            let
-                phrase =
-                    removeHyphenFromIsoDate string
-            in
-            case Date.fromIsoString phrase of
-                Err _ ->
-                    update
-                        shared
-                        (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
-                        { model | mStartDate = ifEmptyOrNot string }
+                ViewportReset ->
+                    ( model, Effect.none )
 
-                Ok date ->
-                    update
-                        shared
-                        (UpdateFilters defaultKeys.dateStartKey (DateStart date))
-                        { model | mStartDate = ifEmptyOrNot string }
+                _ ->
+                    Debug.todo "We should have error state here..."
 
-        UpdateEndDateTextField string ->
-            let
-                phrase =
-                    removeHyphenFromIsoDate string
-            in
-            case Date.fromIsoString phrase of
-                Err _ ->
-                    update
-                        shared
-                        (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
-                        { model | mEndDate = ifEmptyOrNot string }
+        RemoteData.Loading ->
+            case msg of
+                CheckForData _ ->
+                    ( model, Effect.none )
 
-                Ok date ->
-                    update
-                        shared
-                        (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
-                        { model | mEndDate = ifEmptyOrNot string }
+                ViewportReset ->
+                    ( model, Effect.none )
 
-        CheckForData _ ->
-            if Dict.isEmpty shared.designs then
-                ( model, Effect.none )
+                _ ->
+                    Debug.todo "We should have error state here..."
 
-            else
-                ( { model | waitingForData = False }
-                , shared.designs
-                    |> Dict.values
-                    |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
-                    |> Plots.timelinePlotData
-                    |> Effect.renderVegaPlot
-                )
+        RemoteData.Failure _ ->
+            case msg of
+                CheckForData _ ->
+                    let
+                        _ =
+                            Debug.log "We should fix this to have error reporting." ()
+                    in
+                    ( { model | loading = False }, Effect.none )
 
-        NoOp ->
-            ( model, Effect.none )
+                ViewportReset ->
+                    ( model, Effect.none )
+
+                _ ->
+                    Debug.todo "We should have error state here..."
+
+        RemoteData.Success loadedDesigns ->
+            case msg of
+                UpdateFilters key newFilter ->
+                    let
+                        newDesignFilters =
+                            Dict.insert key newFilter model.designFilters
+                    in
+                    ( { model | designFilters = newDesignFilters }
+                    , loadedDesigns
+                        |> Dict.values
+                        |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values newDesignFilters))
+                        |> Plots.timelinePlotData
+                        |> Effect.renderVegaPlot
+                    )
+
+                UpdateStartDateTextField string ->
+                    let
+                        phrase =
+                            removeHyphenFromIsoDate string
+                    in
+                    case Date.fromIsoString phrase of
+                        Err _ ->
+                            update
+                                shared
+                                (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
+                                { model | mStartDate = ifEmptyOrNot string }
+
+                        Ok date ->
+                            update
+                                shared
+                                (UpdateFilters defaultKeys.dateStartKey (DateStart date))
+                                { model | mStartDate = ifEmptyOrNot string }
+
+                UpdateEndDateTextField string ->
+                    let
+                        phrase =
+                            removeHyphenFromIsoDate string
+                    in
+                    case Date.fromIsoString phrase of
+                        Err _ ->
+                            update
+                                shared
+                                (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
+                                { model | mEndDate = ifEmptyOrNot string }
+
+                        Ok date ->
+                            update
+                                shared
+                                (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
+                                { model | mEndDate = ifEmptyOrNot string }
+
+                CheckForData _ ->
+                    ( { model | loading = False }, Effect.none )
+
+                ViewportReset ->
+                    ( model, Effect.none )
 
 
 ifEmptyOrNot : String -> Maybe String
@@ -166,7 +188,7 @@ ifEmptyOrNot string =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    if model.waitingForData then
+    if model.loading then
         Time.every 200 CheckForData
 
     else
@@ -182,7 +204,7 @@ view shared model =
     { title = "Protein Design Archive"
     , attributes = [ padding 10, width fill ]
     , element =
-        Dict.values shared.designs
+        shared.designs
             |> homeView model
     }
 
@@ -196,20 +218,33 @@ growthCurve =
         }
 
 
-homeView : Model -> List ProteinDesign -> Element Msg
-homeView model designs =
-    column
-        [ spacing 10, width fill ]
-        [ --growthCurve
-          Plots.timelinePlotView
-        , row [ width fill ]
-            [ searchArea model
-            , dateSearchArea model
-            ]
-        , designs
-            |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
-            |> designList
-        ]
+homeView : Model -> RemoteData Http.Error (Dict String ProteinDesign) -> Element Msg
+homeView model remoteData =
+    case remoteData of
+        RemoteData.NotAsked ->
+            text "Not asked for data..."
+
+        RemoteData.Loading ->
+            text "Requested data..."
+
+        RemoteData.Failure _ ->
+            text "Failed to load data, probably couldn't connect to server."
+
+        RemoteData.Success designs ->
+            column
+                [ spacing 10, width fill ]
+                [ --growthCurve
+                  Plots.timelinePlotView
+                , row [ width fill ]
+                    [ searchArea model
+                    , dateSearchArea model
+                    ]
+                , designs
+                    |> Dict.values
+                    |> List.filterMap
+                        (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
+                    |> designList
+                ]
 
 
 designList : List ProteinDesign -> Element msg

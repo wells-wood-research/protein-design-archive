@@ -18,6 +18,7 @@ import Effect exposing (Effect)
 import Http
 import Json.Decode
 import ProteinDesign
+import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared.Model
 import Shared.Msg as Msg exposing (Msg(..))
@@ -46,7 +47,7 @@ type alias Model =
 
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init _ _ =
-    ( { designs = Dict.empty, errors = [] }
+    ( { designs = NotAsked, errors = [] }
     , Effect.sendCmd getData
     )
 
@@ -62,8 +63,10 @@ type alias Msg =
 getData : Cmd Msg
 getData =
     Http.get
-        { url = "/data.json"
-        , expect = Http.expectJson DesignsDataReceived (Json.Decode.list ProteinDesign.rawDesignDecoder)
+        { url = "http://localhost:5000/all-design-stubs"
+        , expect =
+            Http.expectJson DesignsDataReceived
+                (Json.Decode.list ProteinDesign.rawDesignDecoder)
         }
 
 
@@ -77,12 +80,19 @@ update _ msg model =
                         |> List.map (\d -> ( d.pdb, d ))
                         |> Dict.fromList
             in
-            ( { model | designs = designs }
+            ( { model | designs = Success designs }
             , Effect.none
             )
 
-        DesignsDataReceived (Err _) ->
-            ( { model | errors = DesignRequestFailed :: model.errors }
+        DesignsDataReceived (Err e) ->
+            let
+                _ =
+                    Debug.log "error" e
+            in
+            ( { model
+                | designs = Failure e
+                , errors = DesignRequestFailed :: model.errors
+              }
             , Effect.none
             )
 

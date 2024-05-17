@@ -5,17 +5,16 @@ import Date
 import Dict
 import Effect exposing (Effect)
 import Element exposing (..)
-import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Element.Input exposing (button)
 import Element.Keyed as Keyed
 import FeatherIcons
 import Html
 import Html.Attributes as HAtt
 import List.Extra as LE
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, tagsToString)
+import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString)
+import RemoteData
 import Route exposing (Route)
 import Shared
 import Style
@@ -25,7 +24,7 @@ import View exposing (View)
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
 page shared route =
     Page.new
-        { init = init route.params.designId
+        { init = init shared route.params.designId
         , update = update
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view
@@ -37,12 +36,18 @@ page shared route =
 
 
 type alias Model =
-    { designId : String }
+    { designId : String
+    , mDesign : Maybe ProteinDesign
+    }
 
 
-init : String -> () -> ( Model, Effect Msg )
-init designId _ =
-    ( { designId = designId }
+init : Shared.Model -> String -> () -> ( Model, Effect Msg )
+init shared designId _ =
+    ( { designId = designId
+      , mDesign =
+            RemoteData.toMaybe shared.designs
+                |> Maybe.andThen (Dict.get designId)
+      }
     , Effect.resetViewport NoOp
     )
 
@@ -87,17 +92,17 @@ view shared model =
 
 
 details : Shared.Model -> Model -> Element msg
-details shared model =
+details _ model =
     let
         mDesign =
-            Dict.get model.designId shared.designs
+            model.mDesign
     in
     row []
         [ column
             [ width fill ]
             [ row [ width fill, spaceEvenly ]
-                [ browseButton shared model "back"
-                , el
+                --[ browseButton shared model "back"
+                [ el
                     (Style.h1Font
                         ++ [ centerX
                            , padding 20
@@ -105,7 +110,8 @@ details shared model =
                     )
                   <|
                     text "Design Details"
-                , browseButton shared model "next"
+
+                --, browseButton shared model "next"
                 ]
             , case mDesign of
                 Nothing ->
@@ -122,69 +128,70 @@ details shared model =
         ]
 
 
-getNextDesign : Shared.Model -> Model -> String -> Maybe String
-getNextDesign shared model direction =
-    let
-        list =
-            Dict.keys shared.designs
 
-        currentIndex =
-            LE.elemIndex model.designId list
-
-        lastIndex =
-            (\i -> i - 1) <| List.length list
-    in
-    case currentIndex of
-        Just index ->
-            case direction of
-                "next" ->
-                    if index == lastIndex then
-                        LE.getAt 0 list
-
-                    else
-                        LE.getAt (index + 1) list
-
-                "back" ->
-                    if index == 0 then
-                        LE.last list
-
-                    else
-                        LE.getAt (index - 1) list
-
-                _ ->
-                    LE.getAt index list
-
-        _ ->
-            Nothing
-
-
-browseButton : Shared.Model -> Model -> String -> Element msg
-browseButton shared model direction =
-    link
-        []
-        { url =
-            case getNextDesign shared model direction of
-                Nothing ->
-                    "/"
-
-                Just designId ->
-                    "/designs/" ++ designId
-        , label =
-            el [ centerX ]
-                (html <|
-                    FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                        FeatherIcons.withSize 50 <|
-                            case direction of
-                                "back" ->
-                                    FeatherIcons.arrowLeftCircle
-
-                                "next" ->
-                                    FeatherIcons.arrowRightCircle
-
-                                _ ->
-                                    FeatherIcons.home
-                )
-        }
+-- getNextDesign : Shared.Model -> Model -> String -> Maybe String
+-- getNextDesign shared model direction =
+--     let
+--         list =
+--             Dict.keys shared.designs
+--
+--         currentIndex =
+--             LE.elemIndex model.designId list
+--
+--         lastIndex =
+--             (\i -> i - 1) <| List.length list
+--     in
+--     case currentIndex of
+--         Just index ->
+--             case direction of
+--                 "next" ->
+--                     if index == lastIndex then
+--                         LE.getAt 0 list
+--
+--                     else
+--                         LE.getAt (index + 1) list
+--
+--                 "back" ->
+--                     if index == 0 then
+--                         LE.last list
+--
+--                     else
+--                         LE.getAt (index - 1) list
+--
+--                 _ ->
+--                     LE.getAt index list
+--
+--         _ ->
+--             Nothing
+--
+--
+-- browseButton : Shared.Model -> Model -> String -> Element msg
+-- browseButton shared model direction =
+--     link
+--         []
+--         { url =
+--             case getNextDesign shared model direction of
+--                 Nothing ->
+--                     "/"
+--
+--                 Just designId ->
+--                     "/designs/" ++ designId
+--         , label =
+--             el [ centerX ]
+--                 (html <|
+--                     FeatherIcons.toHtml [ HAtt.align "center" ] <|
+--                         FeatherIcons.withSize 50 <|
+--                             case direction of
+--                                 "back" ->
+--                                     FeatherIcons.arrowLeftCircle
+--
+--                                 "next" ->
+--                                     FeatherIcons.arrowRightCircle
+--
+--                                 _ ->
+--                                     FeatherIcons.home
+--                 )
+--         }
 
 
 designDetailsView : ProteinDesign -> Element msg

@@ -1,8 +1,10 @@
 from flask import Flask
+from flask_cors import CORS
 
-from backend.db import CLIENT, PDA_DB, DESIGNS
+from backend.db import CLIENT, DESIGNS, PDA_DB
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:1234"])
 
 
 @app.route("/")
@@ -18,18 +20,3 @@ def get_all_design_stubs():
     for design in designs:
         del design["_id"]
     return designs
-
-
-def setup_test_database():
-    """Temporary test function for setting up the database."""
-    test_designs = [
-        {"pdb_code": "1al1", "description": "design that is for 1al1"},
-        {"pdb_code": "1al2", "description": "design that is for 1al2"},
-        {"pdb_code": "1al3", "description": "design that is for 1al3"},
-        {"pdb_code": "1xx5", "description": "design that is for 1xx5"},
-        {"pdb_code": "4al7", "description": "design that is for 4al7"},
-    ]
-    _ = DESIGNS.insert_many(test_designs)
-    return
-
-

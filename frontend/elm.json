@@ -20,6 +20,7 @@
             "feathericons/elm-feather": "1.5.0",
             "gicentre/elm-vega": "5.7.1",
             "justinmimbs/date": "4.1.0",
+            "krisajenkins/remotedata": "6.0.1",
             "mdgriffith/elm-ui": "1.1.8",
             "miniBill/elm-codec": "2.1.0"
         },

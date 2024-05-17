@@ -5,7 +5,9 @@ module Shared.Model exposing (Model)
 import AppError exposing (AppError)
 import Dict exposing (Dict)
 import Element exposing (..)
+import Http
 import ProteinDesign exposing (ProteinDesign)
+import RemoteData exposing (RemoteData)
 
 
 {-| Normally, this value would live in "Shared.elm"
@@ -16,6 +18,6 @@ own file, so they can be imported by `Effect.elm`
 
 -}
 type alias Model =
-    { designs : Dict String ProteinDesign
+    { designs : RemoteData Http.Error (Dict String ProteinDesign)
     , errors : List AppError
     }

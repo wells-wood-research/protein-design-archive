@@ -171,7 +171,8 @@ view shared model =
     { title = "Design Review"
     , attributes = [ width fill ]
     , element =
-        details model (Dict.get model.designId shared.designs)
+        --details model (Dict.get model.designId shared.designs)
+        Debug.todo "reimplement"
     }
 
 
