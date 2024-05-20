@@ -13,7 +13,7 @@ import Html
 import Html.Attributes as HAtt
 import List.Extra as LE
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString)
+import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designToCitation)
 import RemoteData
 import Route exposing (Route)
 import Shared
@@ -264,7 +264,7 @@ designDetailsView proteinDesign =
                 , paragraph
                     []
                     [ text "Publication citation: "
-                    , el [ Font.italic ] (text <| proteinDesign.citation)
+                    , el [ Font.italic ] (text <| designToCitation proteinDesign)
                     ]
                 , paragraph
                     []
