@@ -19,11 +19,11 @@ type alias ProteinDesign =
     , keyword : List String
     , tags : List String -- List Tag
     , release_date : Date
-    , citation : String
     , publication_title : String
     , publication_journal_abbrev : String
     , publication_journal_volume : String
-    , publication_page_range : String
+    , publication_page_first : String
+    , publication_page_last : String
     , publication_id_astm : String
     , publication_id_issn : String
     , publication_id_csd : String
@@ -116,9 +116,33 @@ type alias Xtal =
     }
 
 
-rawDesignDecoder : Decoder RawDesignData
+rawDesignDecoder : Decoder ProteinDesign
 rawDesignDecoder =
-    Decode.succeed RawDesignData
+    Decode.succeed (
+        (\pdb -> pdb)
+        (\picture_path -> picture_path)
+        (\chains -> chains)
+        (\authors -> authors)
+        (\classification -> stringToClassification classification)
+        (\keyword -> keyword)
+        (\tags -> tags)
+        (\release_date -> (Date.fromIsoString release_date |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)))
+        (\publication_title -> if String.endsWith "." publication_title then String.dropRight 1 publication_title else publication_title)
+        (\publication_journal_abbrev -> publication_journal_abbrev)
+        (\publication_journal_volume -> publication_journal_volume)
+        (\publication_id_astm -> publication_id_astm)
+        (\publication_id_issn -> publication_id_issn)
+        (\publication_id_csd -> publication_id_csd)
+        (\publication_id_doi -> publication_id_doi)
+        (\publication_id_pubmed -> publication_id_pubmed)
+        (\publication_country -> publication_country)
+        (\abstract -> abstract)
+        (\related_pdb -> related_pdb)
+        (\crystal_structure -> crystal_structure)
+        (\exptl_method -> exptl_method)
+        (\formula_weight -> formula_weight)
+        (\synthesis_comment -> synthesis_comment)
+        )
         |> required "pdb" string
         |> required "picture_path" string
         |> required "chains" (list chainDecoder)
@@ -293,6 +317,23 @@ searchableText proteinDesign =
         |> String.join "\n"
         |> String.toLower
 
+designToPageRange : ProteinDesign -> String
+designToPageRange proteinDesign =
+    if String.isEmpty proteinDesign.publication_page_first || String.isEmpty proteinDesign.publication_page_last then "" else proteinDesign.publication_page_first ++ "-" ++ proteinDesign.publication_page_last
+
+designToCitation : ProteinDesign -> String
+designToCitation proteinDesign =
+    String.join ", " <|
+            [ proteinDesign.title
+            , proteinDesign.publication_journal_abbrev
+            , proteinDesign.publication_journal_volume
+            , (designToPageRange proteinDesign)
+            , proteinDesign.publication_id_astm
+            , proteinDesign.publication_id_issn
+            , proteinDesign.publication_id_csd
+            , proteinDesign.publication_id_doi
+            , proteinDesign.publication_id_pubmed
+            ]
 
 chainToString : Chain -> String
 chainToString chain =
