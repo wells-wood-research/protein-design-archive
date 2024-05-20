@@ -39,35 +39,6 @@ type alias ProteinDesign =
     }
 
 
-type alias RawDesignData =
-    { pdb : String
-    , picture_path : String
-    , chains : List Chain
-    , authors : List Author
-    , classification : String
-    , keyword : List String
-    , tags : List String
-    , release_date : String
-    , publication_title : String
-    , publication_journal_abbrev : String
-    , publication_journal_volume : String
-    , publication_page_first : String
-    , publication_page_last : String
-    , publication_id_astm : String
-    , publication_id_issn : String
-    , publication_id_csd : String
-    , publication_id_doi : String
-    , publication_id_pubmed : String
-    , publication_country : String
-    , abstract : String
-    , related_pdb : String
-    , crystal_structure : Xtal
-    , exptl_method : List String
-    , formula_weight : Float
-    , synthesis_comment : String
-    }
-
-
 type Classification
     = Minimal
     | Rational
@@ -118,40 +89,16 @@ type alias Xtal =
 
 rawDesignDecoder : Decoder ProteinDesign
 rawDesignDecoder =
-    Decode.succeed (
-        (\pdb -> pdb)
-        (\picture_path -> picture_path)
-        (\chains -> chains)
-        (\authors -> authors)
-        (\classification -> stringToClassification classification)
-        (\keyword -> keyword)
-        (\tags -> tags)
-        (\release_date -> (Date.fromIsoString release_date |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)))
-        (\publication_title -> if String.endsWith "." publication_title then String.dropRight 1 publication_title else publication_title)
-        (\publication_journal_abbrev -> publication_journal_abbrev)
-        (\publication_journal_volume -> publication_journal_volume)
-        (\publication_id_astm -> publication_id_astm)
-        (\publication_id_issn -> publication_id_issn)
-        (\publication_id_csd -> publication_id_csd)
-        (\publication_id_doi -> publication_id_doi)
-        (\publication_id_pubmed -> publication_id_pubmed)
-        (\publication_country -> publication_country)
-        (\abstract -> abstract)
-        (\related_pdb -> related_pdb)
-        (\crystal_structure -> crystal_structure)
-        (\exptl_method -> exptl_method)
-        (\formula_weight -> formula_weight)
-        (\synthesis_comment -> synthesis_comment)
-        )
+    Decode.succeed ProteinDesign
         |> required "pdb" string
         |> required "picture_path" string
         |> required "chains" (list chainDecoder)
         |> required "authors" (list authorDecoder)
-        |> required "classification" string
+        |> required "classification" classificationDecoder
         |> required "keyword" (list string)
         |> required "tags" (list string)
-        |> required "release_date" string
-        |> required "publication_title" string
+        |> required "release_date" dateDecoder
+        |> required "publication_title" titleDecoder
         |> required "publication_journal_abbrev" string
         |> required "publication_journal_volume" string
         |> required "publication_page_first" string
@@ -169,6 +116,25 @@ rawDesignDecoder =
         |> required "formula_weight" float
         |> required "synthesis_comment" string
 
+classificationDecoder : Decoder Classification
+classificationDecoder =
+    Decode.map stringToClassification string
+
+dateDecoder : Decoder Date
+dateDecoder =
+    string
+        |> Decode.andThen (\dateString ->
+            case Date.fromIsoString dateString of
+                Ok date ->
+                    Decode.succeed date
+
+                Err _ ->
+                    Decode.succeed (Date.fromCalendarDate 1900 Jan 1)
+        )
+
+titleDecoder : Decoder String
+titleDecoder =
+    Decode.map (\titleString -> if String.endsWith "." titleString then String.dropRight 1 titleString else titleString) string
 
 authorDecoder : Decoder Author
 authorDecoder =
@@ -195,111 +161,6 @@ xtalDecoder =
         |> required "angle_g" string
 
 
-toProteinDesign : RawDesignData -> Maybe ProteinDesign
-toProteinDesign rawData =
-    let
-        pdb =
-            rawData.pdb
-
-        picture_path =
-            rawData.picture_path
-
-        chains =
-            rawData.chains
-
-        authors =
-            rawData.authors
-
-        classification =
-            stringToClassification rawData.classification
-
-        keyword =
-            rawData.keyword
-
-        tags =
-            rawData.tags
-
-        --List.map stringToTag rawData.tags
-        release_date =
-            Date.fromIsoString rawData.release_date
-                |> Result.withDefault (Date.fromCalendarDate 1900 Jan 1)
-
-        title =
-            if String.endsWith "." rawData.publication_title then
-                String.dropRight 1 rawData.publication_title
-
-            else
-                rawData.publication_title
-
-        citation =
-            [ title
-            , rawData.publication_journal_abbrev
-            , rawData.publication_journal_volume
-            , publication_page_range
-            , rawData.publication_id_astm
-            , rawData.publication_id_issn
-            , rawData.publication_id_csd
-            , rawData.publication_id_doi
-            , rawData.publication_id_pubmed
-            ]
-                |> String.join ", "
-
-        publication_title =
-            rawData.publication_title
-
-        publication_journal_abbrev =
-            rawData.publication_journal_abbrev
-
-        publication_journal_volume =
-            rawData.publication_journal_volume
-
-        publication_page_range =
-            if String.isEmpty rawData.publication_page_first || String.isEmpty rawData.publication_page_last then
-                ""
-
-            else
-                rawData.publication_page_first ++ "-" ++ rawData.publication_page_last
-
-        publication_id_astm =
-            rawData.publication_id_astm
-
-        publication_id_issn =
-            rawData.publication_id_issn
-
-        publication_id_csd =
-            rawData.publication_id_csd
-
-        publication_id_doi =
-            rawData.publication_id_doi
-
-        publication_id_pubmed =
-            rawData.publication_id_pubmed
-
-        publication_country =
-            rawData.publication_country
-
-        abstract =
-            rawData.abstract
-
-        related_pdb =
-            rawData.related_pdb
-
-        crystal_structure =
-            rawData.crystal_structure
-
-        exptl_method =
-            rawData.exptl_method
-
-        formula_weight =
-            rawData.formula_weight
-
-        synthesis_comment =
-            rawData.synthesis_comment
-    in
-    ProteinDesign pdb picture_path chains authors classification keyword tags release_date citation publication_title publication_journal_abbrev publication_journal_volume publication_page_range publication_id_astm publication_id_issn publication_id_csd publication_id_doi publication_id_pubmed publication_country abstract related_pdb crystal_structure exptl_method formula_weight synthesis_comment
-        |> Just
-
-
 searchableText : ProteinDesign -> String
 searchableText proteinDesign =
     [ proteinDesign.pdb
@@ -309,7 +170,7 @@ searchableText proteinDesign =
     , String.join " " proteinDesign.keyword
     , String.join " " proteinDesign.tags -- tagsToString proteinDesign.tags
     , Date.toIsoString proteinDesign.release_date
-    , proteinDesign.citation
+    , (designToCitation proteinDesign)
     , proteinDesign.abstract
     , proteinDesign.related_pdb
     , xtalToString proteinDesign.crystal_structure
@@ -324,7 +185,7 @@ designToPageRange proteinDesign =
 designToCitation : ProteinDesign -> String
 designToCitation proteinDesign =
     String.join ", " <|
-            [ proteinDesign.title
+            [ proteinDesign.publication_title
             , proteinDesign.publication_journal_abbrev
             , proteinDesign.publication_journal_volume
             , (designToPageRange proteinDesign)
