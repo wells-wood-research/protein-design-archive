@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+import json
 
 from backend.db import CLIENT, DESIGNS, PDA_DB
 
@@ -24,4 +25,7 @@ def get_all_design_stubs():
 @app.get("/design-details/<designId>")
 def get_design_details(designId):
     """Gets complete data for the one design that this details page is for."""
-    return 'This is a details page for design:<br><h1>{}</h1>'.format(designId)
+    projection = {"_id": 0}
+    desIdUp = designId.upper()
+    design = list(DESIGNS.find({"pdb": desIdUp}, projection))
+    return design
