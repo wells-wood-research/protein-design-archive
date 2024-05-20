@@ -63,7 +63,7 @@ type alias Msg =
 getData : Cmd Msg
 getData =
     Http.get
-        { url = "http://localhost:5000/all-design-stubs"
+        { url = "http://localhost:5000/all-designs"
         , expect =
             Http.expectJson DesignsDataReceived
                 (Json.Decode.list ProteinDesign.rawDesignDecoder)
