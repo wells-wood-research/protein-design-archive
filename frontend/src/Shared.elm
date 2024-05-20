@@ -76,7 +76,7 @@ update _ msg model =
         DesignsDataReceived (Ok rawDesigns) ->
             let
                 designs =
-                    List.filterMap ProteinDesign.toProteinDesign rawDesigns
+                    rawDesigns
                         |> List.map (\d -> ( d.pdb, d ))
                         |> Dict.fromList
             in

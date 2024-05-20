@@ -1,7 +1,7 @@
 module Shared.Msg exposing (Msg(..))
 
 import Http
-import ProteinDesign exposing (RawDesignData)
+import ProteinDesign exposing (ProteinDesign)
 
 
 {-| Normally, this value would live in "Shared.elm"
@@ -12,4 +12,4 @@ own file, so they can be imported by `Effect.elm`
 
 -}
 type Msg
-    = DesignsDataReceived (Result Http.Error (List RawDesignData))
+    = DesignsDataReceived (Result Http.Error (List ProteinDesign))

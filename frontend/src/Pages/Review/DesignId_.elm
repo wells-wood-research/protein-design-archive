@@ -12,7 +12,14 @@ import Element.Font as Font
 import Element.Input as Input
 import Html.Attributes exposing (align)
 import Page exposing (Page)
-import ProteinDesign exposing (Classification, ProteinDesign, authorsToString, classificationToString, stringToClassification, tagsToString)
+import ProteinDesign exposing
+    ( Classification
+    , ProteinDesign 
+    , authorsToString
+    , classificationToString
+    , stringToClassification
+    , tagsToString
+    , designToCitation)
 import Route exposing (Route)
 import Shared
 import Style
@@ -266,7 +273,7 @@ designDetailsView proteinDesign =
                 , paragraph
                     []
                     [ text "Publication citation: "
-                    , el [ Font.italic ] (text <| proteinDesign.citation)
+                    , el [ Font.italic ] (text <| designToCitation proteinDesign)
                     ]
                 , paragraph
                     []
