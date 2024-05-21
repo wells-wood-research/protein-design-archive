@@ -132,7 +132,7 @@ subscriptions _ =
 
 view : Model -> View Msg
 view model =
-    { title = "Design Details of " ++ model.designId
+    { title = "Design Details"
     , attributes = [ width fill ]
     , element = details model
     }

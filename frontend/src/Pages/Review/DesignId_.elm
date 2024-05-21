@@ -1,5 +1,6 @@
 module Pages.Review.DesignId_ exposing (Model, Msg, page)
 
+import AppError exposing (AppError(..))
 import Components.Title
 import Date
 import DesignFilter exposing (defaultKeys, keyToLabel)
@@ -10,16 +11,23 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
-import Html.Attributes exposing (align)
+import Element.Keyed as Keyed
+import FeatherIcons
+import Html
+import Html.Attributes as HAtt exposing (align)
+import Http
 import Page exposing (Page)
-import ProteinDesign exposing
-    ( Classification
-    , ProteinDesign 
-    , authorsToString
-    , classificationToString
-    , stringToClassification
-    , tagsToString
-    , designToCitation)
+import ProteinDesign
+    exposing
+        ( Classification
+        , ProteinDesign
+        , authorsToString
+        , classificationToString
+        , designToCitation
+        , stringToClassification
+        , tagsToString
+        )
+import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
@@ -27,17 +35,13 @@ import Vega exposing (background)
 import View exposing (View)
 
 
-
--- Add "Auth.User ->" at the front later
-
-
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page shared route =
+page _ route =
     Page.new
-        { init = init route.params.designId
+        { init = \_ -> init route.params.designId
         , update = update
         , subscriptions = subscriptions
-        , view = view shared >> Components.Title.view
+        , view = view >> Components.Title.view
         }
 
 
@@ -47,6 +51,8 @@ page shared route =
 
 type alias Model =
     { designId : String
+    , design : RemoteData Http.Error ProteinDesign
+    , errors : List AppError
     , reviewer : String
     , classificationCheckboxDict : Dict String Bool
     , classification : Dict String Bool
@@ -56,9 +62,11 @@ type alias Model =
     }
 
 
-init : String -> () -> ( Model, Effect Msg )
-init designId _ =
+init : String -> ( Model, Effect Msg )
+init designId =
     ( { designId = designId
+      , design = Loading
+      , errors = []
       , reviewer = "Marta Chronowska (default)"
       , classificationCheckboxDict = classificationCheckboxDict
       , classification = Dict.empty
@@ -66,10 +74,17 @@ init designId _ =
       , voteRemove = False
       , comment = Nothing
       }
-    , Effect.batch
-        [ Effect.resetViewport NoOp
-        ]
+    , Effect.sendCmd (getData ("http://localhost:5000/design-details/" ++ designId))
     )
+
+
+getData : String -> Cmd Msg
+getData url =
+    Http.get
+        { url = url
+        , expect =
+            Http.expectJson DesignsDataReceived ProteinDesign.rawDesignDecoder
+        }
 
 
 classificationCheckboxDict : Dict String Bool
@@ -98,7 +113,8 @@ voteCheckboxDict =
 
 
 type Msg
-    = NoOp
+    = SendDesignsHttpRequest
+    | DesignsDataReceived (Result Http.Error ProteinDesign)
     | UpdateDesignClassification String Bool
     | UpdateClassificationCheckbox String Bool
     | ClearClassificationCheckbox String
@@ -110,54 +126,95 @@ type Msg
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
-    case msg of
-        NoOp ->
-            ( model
-            , Effect.none
-            )
+    case model.design of
+        RemoteData.NotAsked ->
+            case msg of
+                SendDesignsHttpRequest ->
+                    ( { model | design = Loading }
+                    , Effect.sendCmd (getData ("http://localhost:5000/design-details/" ++ model.designId))
+                    )
 
-        UpdateDesignClassification key newFilter ->
-            ( { model | classification = Dict.insert key newFilter model.classification }
-            , Effect.none
-            )
+                _ ->
+                    ( model, Effect.none )
 
-        UpdateClassificationCheckbox key checkboxStatus ->
-            { model | classificationCheckboxDict = Dict.insert key checkboxStatus model.classificationCheckboxDict }
-                |> (if checkboxStatus then
-                        update (UpdateDesignClassification key checkboxStatus)
+        RemoteData.Loading ->
+            case msg of
+                SendDesignsHttpRequest ->
+                    ( model, Effect.none )
 
-                    else
-                        update (ClearClassificationCheckbox key)
-                   )
+                DesignsDataReceived (Ok design) ->
+                    ( { model | design = Success design }
+                    , Effect.none
+                    )
 
-        ClearClassificationCheckbox key ->
-            ( { model | classificationCheckboxDict = Dict.remove key model.classificationCheckboxDict, classification = Dict.remove key model.classification }
-            , Effect.none
-            )
+                DesignsDataReceived (Err e) ->
+                    ( { model
+                        | design = Failure e
+                        , errors = DesignRequestFailed :: model.errors
+                      }
+                    , Effect.none
+                    )
 
-        UpdateDesignVote ->
-            ( { model | voteRemove = True }
-            , Effect.none
-            )
+                _ ->
+                    ( model, Effect.none )
 
-        UpdateVoteCheckbox key checkboxStatus ->
-            { model | voteCheckboxDict = Dict.insert key checkboxStatus model.voteCheckboxDict }
-                |> (if checkboxStatus then
-                        update UpdateDesignVote
+        RemoteData.Failure e ->
+            case msg of
+                _ ->
+                    ( { model
+                        | design = Failure e
+                        , errors = DesignRequestFailed :: model.errors
+                      }
+                    , Effect.none
+                    )
 
-                    else
-                        update (ClearVoteCheckbox key)
-                   )
+        RemoteData.Success _ ->
+            case msg of
+                UpdateDesignClassification key newFilter ->
+                    ( { model | classification = Dict.insert key newFilter model.classification }
+                    , Effect.none
+                    )
 
-        ClearVoteCheckbox key ->
-            ( { model | voteCheckboxDict = Dict.remove key model.voteCheckboxDict, voteRemove = False }
-            , Effect.none
-            )
+                UpdateClassificationCheckbox key checkboxStatus ->
+                    { model | classificationCheckboxDict = Dict.insert key checkboxStatus model.classificationCheckboxDict }
+                        |> (if checkboxStatus then
+                                update (UpdateDesignClassification key checkboxStatus)
 
-        UpdateComment comment ->
-            ( { model | comment = Just comment }
-            , Effect.none
-            )
+                            else
+                                update (ClearClassificationCheckbox key)
+                           )
+
+                ClearClassificationCheckbox key ->
+                    ( { model | classificationCheckboxDict = Dict.remove key model.classificationCheckboxDict, classification = Dict.remove key model.classification }
+                    , Effect.none
+                    )
+
+                UpdateDesignVote ->
+                    ( { model | voteRemove = True }
+                    , Effect.none
+                    )
+
+                UpdateVoteCheckbox key checkboxStatus ->
+                    { model | voteCheckboxDict = Dict.insert key checkboxStatus model.voteCheckboxDict }
+                        |> (if checkboxStatus then
+                                update UpdateDesignVote
+
+                            else
+                                update (ClearVoteCheckbox key)
+                           )
+
+                ClearVoteCheckbox key ->
+                    ( { model | voteCheckboxDict = Dict.remove key model.voteCheckboxDict, voteRemove = False }
+                    , Effect.none
+                    )
+
+                UpdateComment comment ->
+                    ( { model | comment = Just comment }
+                    , Effect.none
+                    )
+
+                _ ->
+                    ( model, Effect.none )
 
 
 
@@ -173,39 +230,65 @@ subscriptions _ =
 -- VIEW
 
 
-view : Shared.Model -> Model -> View Msg
-view shared model =
+view : Model -> View Msg
+view model =
     { title = "Design Review"
     , attributes = [ width fill ]
-    , element =
-        --details model (Dict.get model.designId shared.designs)
-        Debug.todo "reimplement"
+    , element = details model
     }
 
 
-details : Model -> Maybe ProteinDesign -> Element Msg
-details model mDesign =
-    column
-        [ width fill ]
-        [ el
-            (Style.h1Font
-                ++ [ centerX
-                   , padding 20
-                   ]
-            )
-          <|
-            text "Design Review"
-        , case mDesign of
-            Nothing ->
-                paragraph
-                    (Style.bodyFont
-                        ++ [ Font.center ]
-                    )
-                    [ text "This design doesn't need review."
-                    ]
+details : Model -> Element Msg
+details model =
+    let
+        mDesign =
+            model.design
+    in
+    column []
+        [ column
+            [ width fill ]
+            [ case mDesign of
+                NotAsked ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ text "Error querying the database. Try reloading the page."
+                        ]
 
-            Just design ->
-                designDetailsView design
+                Loading ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ text "Loading the design..."
+                        ]
+
+                Failure e ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ case e of
+                            Http.BadUrl _ ->
+                                text "Error loading design: invalid URL."
+
+                            Http.Timeout ->
+                                text "Error loading design: it took too long to get a response."
+
+                            Http.NetworkError ->
+                                text "Error loading design: please connect to the Internet."
+
+                            Http.BadStatus i ->
+                                text ("Error loading design: status code " ++ String.fromInt i)
+
+                            Http.BadBody s ->
+                                text ("Error decoding JSON: " ++ s)
+                        ]
+
+                Success d ->
+                    designDetailsView d
+            ]
         , reviewArea model
         ]
 
@@ -217,26 +300,34 @@ designDetailsView proteinDesign =
          , width fill
          , padding 20
          , spacing 30
-
-         --, Background.color <| rgb255 174 209 246
+         , height fill
          ]
             ++ Style.bodyFont
         )
-        [ wrappedRow
-            [ height fill
-            , width fill
+        [ designDetailsHeader proteinDesign
+        , wrappedRow
+            [ width fill
             , spacing 10
             ]
-            [ image
-                [ width <| px 250 ]
-                { src = proteinDesign.picture_path
-                , description = "Structure of " ++ proteinDesign.pdb
-                }
+            [ el
+                [ padding 2
+                , Border.width 2
+                , Border.color <| rgb255 220 220 220
+                , Border.rounded 3
+                , alignTop
+                , width <| fillPortion 3
+                ]
+                (image
+                    [ width fill ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
+                )
             , column
                 [ height fill
-                , width fill
+                , width <| fillPortion 7
                 , spacing 10
-                , Font.alignLeft
+                , Font.justify
                 ]
                 [ paragraph
                     []
@@ -301,28 +392,86 @@ designDetailsView proteinDesign =
             [ width fill
             , spacing 20
             ]
-            [ paragraph
+            [ column
                 Style.h2Font
-                [ text "Sequence"
+                [ text "Structure"
                 ]
-            , table []
-                { data = proteinDesign.chains
-                , columns =
-                    [ { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Chain ID" ]
-                      , width = fill
-                      , view =
-                            \chain ->
-                                text chain.chain_id
-                      }
-                    , { header = paragraph [ Font.bold, paddingXY 0 10 ] [ text "Sequence" ]
-                      , width = fill
-                      , view =
-                            \chain ->
-                                text chain.chain_seq
-                      }
+            , Keyed.el
+                [ width <| px 900
+                , height <| px 400
+                , padding 5
+                , centerX
+                , Border.width 2
+                , Border.rounded 3
+                , Border.color <| rgb255 220 220 220
+                ]
+                ( proteinDesign.pdb
+                , Html.node "ngl-viewer"
+                    [ HAtt.id "viewer"
+                    , HAtt.style "width" "890px"
+                    , HAtt.style "height" "400px"
+                    , HAtt.style "align" "center"
+                    , HAtt.alt "3D structure"
+                    , HAtt.attribute "pdb-string" proteinDesign.pdb
                     ]
-                }
+                    []
+                    |> html
+                )
             ]
+        , paragraph
+            Style.h2Font
+            [ text "Sequence"
+            ]
+        , table
+            [ padding 2 ]
+            { data = proteinDesign.chains
+            , columns =
+                [ { header =
+                        paragraph
+                            [ Font.bold
+                            , paddingXY 5 10
+                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                            , Border.color <| rgb255 220 220 220
+                            ]
+                            [ text "Chain ID" ]
+                  , width = fillPortion 2
+                  , view =
+                        \chain ->
+                            paragraph
+                                Style.monospacedFont
+                                [ column
+                                    [ width (fill |> maximum 150)
+                                    , height fill
+                                    , scrollbarX
+                                    , paddingXY 5 10
+                                    ]
+                                    [ text chain.chain_id ]
+                                ]
+                  }
+                , { header =
+                        paragraph
+                            [ Font.bold
+                            , paddingXY 10 10
+                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                            , Border.color <| rgb255 220 220 220
+                            ]
+                            [ text "Sequence" ]
+                  , width = fillPortion 8
+                  , view =
+                        \chain ->
+                            paragraph
+                                Style.monospacedFont
+                                [ column
+                                    [ width (fill |> maximum 700)
+                                    , height fill
+                                    , scrollbarX
+                                    , paddingXY 10 10
+                                    ]
+                                    [ text chain.chain_seq ]
+                                ]
+                  }
+                ]
+            }
         , column
             [ width fill
             , spacing 20
@@ -337,6 +486,38 @@ designDetailsView proteinDesign =
                     |> text
                 ]
             ]
+        ]
+
+
+designDetailsHeader : ProteinDesign -> Element msg
+designDetailsHeader { previousDesign, nextDesign } =
+    row
+        [ width fill
+        , spaceEvenly
+        ]
+        [ link
+            []
+            { url = "/review/" ++ previousDesign
+            , label =
+                el [ centerX ]
+                    (html <|
+                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.arrowLeftCircle
+                    )
+            }
+        , el Style.h2Font (text "Design Details")
+        , link
+            []
+            { url = "/review/" ++ nextDesign
+            , label =
+                el [ centerX ]
+                    (html <|
+                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.arrowRightCircle
+                    )
+            }
         ]
 
 
