@@ -1,8 +1,9 @@
 module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 
+import AppError exposing (AppError(..))
 import Components.Title
 import Date
-import Dict
+import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Border as Border
@@ -11,20 +12,24 @@ import Element.Keyed as Keyed
 import FeatherIcons
 import Html
 import Html.Attributes as HAtt
+import Http
+import Json.Decode
 import List.Extra as LE
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designToCitation)
-import RemoteData
+import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
+import Task
+import Time
 import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
 page shared route =
     Page.new
-        { init = init shared route.params.designId
+        { init = \_ -> init route.params.designId
         , update = update
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view
@@ -35,21 +40,37 @@ page shared route =
 -- INIT
 
 
+type alias Flags =
+    {}
+
+
 type alias Model =
     { designId : String
-    , mDesign : Maybe ProteinDesign
+    , design : RemoteData Http.Error ProteinDesign
+    , errors : List AppError
     }
 
 
-init : Shared.Model -> String -> () -> ( Model, Effect Msg )
-init shared designId _ =
+init : String -> ( Model, Effect Msg )
+init designId =
     ( { designId = designId
-      , mDesign =
-            RemoteData.toMaybe shared.designs
-                |> Maybe.andThen (Dict.get designId)
+      , design = NotAsked
+      , errors = []
       }
-    , Effect.resetViewport NoOp
+    , Effect.sendCmd <|
+        (Task.succeed SendDesignsHttpRequest
+            |> Task.perform identity
+        )
     )
+
+
+getData : String -> Cmd Msg
+getData designId =
+    Http.get
+        { url = "http://localhost:5000//design-details/" ++ designId
+        , expect =
+            Http.expectJson DesignsDataReceived ProteinDesign.rawDesignDecoder
+        }
 
 
 
@@ -57,16 +78,53 @@ init shared designId _ =
 
 
 type Msg
-    = NoOp
+    = SendDesignsHttpRequest
+    | DesignsDataReceived (Result Http.Error ProteinDesign)
+
+
+
+--    | CheckForData Time.Posix
+--    | ViewportReset
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
-    case msg of
-        NoOp ->
-            ( model
-            , Effect.none
-            )
+    case model.design of
+        RemoteData.NotAsked ->
+            case msg of
+                SendDesignsHttpRequest ->
+                    ( { model | design = Loading }, Effect.sendCmd (getData model.designId) )
+
+                _ ->
+                    ( model, Effect.none )
+
+        RemoteData.Loading ->
+            case msg of
+                SendDesignsHttpRequest ->
+                    ( model, Effect.none )
+
+                DesignsDataReceived (Ok d) ->
+                    ( { model | design = Success d }
+                    , Effect.none
+                    )
+
+                DesignsDataReceived (Err e) ->
+                    ( { model
+                        | design = Failure e
+                        , errors = DesignRequestFailed :: model.errors
+                      }
+                    , Effect.none
+                    )
+
+        RemoteData.Failure _ ->
+            case msg of
+                _ ->
+                    ( model, Effect.none )
+
+        RemoteData.Success loadedDesigns ->
+            case msg of
+                _ ->
+                    ( model, Effect.none )
 
 
 
@@ -84,7 +142,7 @@ subscriptions _ =
 
 view : Shared.Model -> Model -> View Msg
 view shared model =
-    { title = "Design Details"
+    { title = "Design Details" ++ model.designId
     , attributes = [ width fill ]
     , element =
         details shared model
@@ -95,7 +153,7 @@ details : Shared.Model -> Model -> Element msg
 details _ model =
     let
         mDesign =
-            model.mDesign
+            model.design
     in
     row []
         [ column
@@ -114,16 +172,46 @@ details _ model =
                 --, browseButton shared model "next"
                 ]
             , case mDesign of
-                Nothing ->
+                NotAsked ->
                     paragraph
                         (Style.bodyFont
-                            ++ [ Font.center ]
+                            ++ [ Font.center, Font.justify ]
                         )
-                        [ text "This design does not exist."
+                        [ text "Error querying the database. Try reloading the page."
                         ]
 
-                Just design ->
-                    designDetailsView design
+                Loading ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ Font.center, Font.justify ]
+                        )
+                        [ text "Loading the design..."
+                        ]
+
+                Failure e ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ Font.center, Font.justify ]
+                        )
+                        [ case e of
+                            Http.BadUrl s ->
+                                text "Error loading design: invalid URL."
+
+                            Http.Timeout ->
+                                text "Error loading design: it took too long to get a response."
+
+                            Http.NetworkError ->
+                                text "Error loading design: please connect to the Internet."
+
+                            Http.BadStatus i ->
+                                text ("Error loading design: status code " ++ String.fromInt i)
+
+                            Http.BadBody s ->
+                                text ("Error decoding JSON: " ++ s)
+                        ]
+
+                Success d ->
+                    designDetailsView d
             ]
         ]
 

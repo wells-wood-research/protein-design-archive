@@ -27,5 +27,5 @@ def get_design_details(designId):
     """Gets complete data for the one design that this details page is for."""
     projection = {"_id": 0}
     desIdUp = designId.upper()
-    design = list(DESIGNS.find({"pdb": desIdUp}, projection, limit=1))
+    design = list(DESIGNS.find({"pdb": desIdUp}, projection))
     return design
