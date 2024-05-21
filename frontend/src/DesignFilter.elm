@@ -3,7 +3,7 @@ module DesignFilter exposing (..)
 import Date exposing (Date, Unit(..))
 import Dict exposing (Dict)
 import List exposing (filter)
-import ProteinDesign exposing (Classification(..), ProteinDesign, ProteinDesignStub, Tag(..), classificationToString, searchableText)
+import ProteinDesign exposing (Classification(..), ProteinDesign, ProteinDesignStub, Tag(..), classificationToString, designSearchableText, stubSearchableText)
 import Time exposing (Month(..))
 
 
@@ -321,7 +321,7 @@ designMeetsOneFilter design filter =
     case filter of
         ContainsText searchString ->
             design
-                |> searchableText
+                |> designSearchableText
                 |> String.contains (String.toLower searchString)
 
         DateStart startDate ->
@@ -361,6 +361,11 @@ stubMeetsOneFilter design filter =
 
             else
                 False
+
+        ContainsText searchString ->
+            design
+                |> stubSearchableText
+                |> String.contains (String.toLower searchString)
 
         _ ->
             True

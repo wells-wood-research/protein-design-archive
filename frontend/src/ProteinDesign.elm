@@ -195,8 +195,8 @@ xtalDecoder =
         |> required "angle_g" string
 
 
-searchableText : ProteinDesign -> String
-searchableText proteinDesign =
+designSearchableText : ProteinDesign -> String
+designSearchableText proteinDesign =
     [ proteinDesign.pdb
     , String.join " " <| List.map chainToString proteinDesign.chains
     , authorsToString proteinDesign.authors
@@ -208,6 +208,16 @@ searchableText proteinDesign =
     , proteinDesign.abstract
     , proteinDesign.related_pdb
     , xtalToString proteinDesign.crystal_structure
+    ]
+        |> String.join "\n"
+        |> String.toLower
+
+
+stubSearchableText : ProteinDesignStub -> String
+stubSearchableText proteinDesign =
+    [ proteinDesign.pdb
+    , authorsToString proteinDesign.authors
+    , Date.toIsoString proteinDesign.release_date
     ]
         |> String.join "\n"
         |> String.toLower
