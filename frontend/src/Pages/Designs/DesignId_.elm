@@ -32,16 +32,12 @@ page shared route =
         { init = \_ -> init route.params.designId
         , update = update
         , subscriptions = subscriptions
-        , view = view shared >> Components.Title.view
+        , view = view >> Components.Title.view
         }
 
 
 
 -- INIT
-
-
-type alias Flags =
-    {}
 
 
 type alias Model =
@@ -69,7 +65,7 @@ getData designId =
     Http.get
         { url = "http://localhost:5000//design-details/" ++ designId
         , expect =
-            Http.expectJson DesignsDataReceived ProteinDesign.rawDesignDecoder
+            Http.expectJson DesignsDataReceived (Json.Decode.list ProteinDesign.rawDesignDecoder)
         }
 
 
@@ -79,7 +75,7 @@ getData designId =
 
 type Msg
     = SendDesignsHttpRequest
-    | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | DesignsDataReceived (Result Http.Error (List ProteinDesign))
 
 
 
@@ -104,9 +100,16 @@ update msg model =
                     ( model, Effect.none )
 
                 DesignsDataReceived (Ok d) ->
-                    ( { model | design = Success d }
-                    , Effect.none
-                    )
+                    case d of
+                        [] ->
+                            ( { model | design = Failure (Http.BadBody "This design doesn't exist.") }
+                            , Effect.none
+                            )
+
+                        firstDesign :: _ ->
+                            ( { model | design = Success firstDesign }
+                            , Effect.none
+                            )
 
                 DesignsDataReceived (Err e) ->
                     ( { model
@@ -121,7 +124,7 @@ update msg model =
                 _ ->
                     ( model, Effect.none )
 
-        RemoteData.Success loadedDesigns ->
+        RemoteData.Success _ ->
             case msg of
                 _ ->
                     ( model, Effect.none )
@@ -140,17 +143,16 @@ subscriptions _ =
 -- VIEW
 
 
-view : Shared.Model -> Model -> View Msg
-view shared model =
+view : Model -> View Msg
+view model =
     { title = "Design Details" ++ model.designId
     , attributes = [ width fill ]
-    , element =
-        details shared model
+    , element = details model
     }
 
 
-details : Shared.Model -> Model -> Element msg
-details _ model =
+details : Model -> Element msg
+details model =
     let
         mDesign =
             model.design
