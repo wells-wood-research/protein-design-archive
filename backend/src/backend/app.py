@@ -49,7 +49,7 @@ def get_surrounding_pdb_codes(designId) -> t.Tuple[t.Optional[str], t.Optional[s
     """Gets complete data for the one design that this details page is for,
     as well as the previous and next design on the list"""
     projection = {"_id": 0, "pdb": 1}
-    design_pdbs = sorted([d["pdb"] for d in list(DESIGNS.find({}, projection))])
+    design_pdbs = sorted(list(set([d["pdb"] for d in list(DESIGNS.find({}, projection))])))
 
     previous_design: t.Optional[str] = None
     next_design: t.Optional[str] = None
