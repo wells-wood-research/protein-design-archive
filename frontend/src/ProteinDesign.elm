@@ -41,6 +41,14 @@ type alias ProteinDesign =
     }
 
 
+type alias ProteinDesignStub =
+    { pdb : String
+    , picture_path : String
+    , authors : List Author
+    , release_date : Date
+    }
+
+
 type Classification
     = Minimal
     | Rational
@@ -119,6 +127,15 @@ rawDesignDecoder =
         |> required "synthesis_comment" string
         |> optional "previous_design" string "/"
         |> optional "next_design" string "/"
+
+
+rawDesignStubDecoder : Decoder ProteinDesignStub
+rawDesignStubDecoder =
+    Decode.succeed ProteinDesignStub
+        |> required "pdb" string
+        |> required "picture_path" string
+        |> required "authors" (list authorDecoder)
+        |> required "release_date" dateDecoder
 
 
 classificationDecoder : Decoder Classification
@@ -418,7 +435,7 @@ tagToString tag =
 
 {-| A simple view that shows basic data about a design. Used for lists etc.
 -}
-designCard : ProteinDesign -> Element msg
+designCard : ProteinDesignStub -> Element msg
 designCard design =
     link
         [ width <| px 460

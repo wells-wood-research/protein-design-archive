@@ -3,7 +3,7 @@ module DesignFilter exposing (..)
 import Date exposing (Date, Unit(..))
 import Dict exposing (Dict)
 import List exposing (filter)
-import ProteinDesign exposing (Classification(..), ProteinDesign, Tag(..), classificationToString, searchableText, tagToString)
+import ProteinDesign exposing (Classification(..), ProteinDesign, ProteinDesignStub, Tag(..), classificationToString, searchableText)
 import Time exposing (Month(..))
 
 
@@ -292,9 +292,9 @@ dateToPosition { firstDate, lastDate, date, height, radius } =
         |> (+) 3
 
 
-meetsAllFilters : List DesignFilter -> ProteinDesign -> Maybe ProteinDesign
-meetsAllFilters filters design =
-    List.all (\f -> meetsOneFilter design f) filters
+designMeetsAllFilters : List DesignFilter -> ProteinDesign -> Maybe ProteinDesign
+designMeetsAllFilters filters design =
+    List.all (\f -> designMeetsOneFilter design f) filters
         |> (\allFiltersMet ->
                 if allFiltersMet then
                     Just design
@@ -304,8 +304,20 @@ meetsAllFilters filters design =
            )
 
 
-meetsOneFilter : ProteinDesign -> DesignFilter -> Bool
-meetsOneFilter design filter =
+stubMeetsAllFilters : List DesignFilter -> ProteinDesignStub -> Maybe ProteinDesignStub
+stubMeetsAllFilters filters design =
+    List.all (\f -> stubMeetsOneFilter design f) filters
+        |> (\allFiltersMet ->
+                if allFiltersMet then
+                    Just design
+
+                else
+                    Nothing
+           )
+
+
+designMeetsOneFilter : ProteinDesign -> DesignFilter -> Bool
+designMeetsOneFilter design filter =
     case filter of
         ContainsText searchString ->
             design
@@ -330,6 +342,27 @@ meetsOneFilter design filter =
             classification == design.classification
 
         Vote _ ->
+            True
+
+
+stubMeetsOneFilter : ProteinDesignStub -> DesignFilter -> Bool
+stubMeetsOneFilter design filter =
+    case filter of
+        DateStart startDate ->
+            if Date.compare startDate design.release_date == LT then
+                True
+
+            else
+                False
+
+        DateEnd endDate ->
+            if Date.compare endDate design.release_date == GT then
+                True
+
+            else
+                False
+
+        _ ->
             True
 
 

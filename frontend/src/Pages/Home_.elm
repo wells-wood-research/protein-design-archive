@@ -1,5 +1,6 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
+import AppError exposing (AppError(..))
 import Components.Title
 import Date
 import DesignFilter
@@ -17,13 +18,15 @@ import Element.Background as Background
 import Element.Font exposing (center)
 import Element.Input as Input
 import Http
+import Json.Decode
 import Page exposing (Page)
 import Plots
-import ProteinDesign exposing (ProteinDesign)
+import ProteinDesign exposing (ProteinDesignStub)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Shared.Msg exposing (Msg(..))
+import Task
 import Time
 import View exposing (View)
 
@@ -43,7 +46,8 @@ page shared _ =
 
 
 type alias Model =
-    { loading : Bool
+    { designStubs : RemoteData Http.Error (Dict String ProteinDesignStub)
+    , errors : List AppError
     , designFilters : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
@@ -52,15 +56,26 @@ type alias Model =
 
 init : () -> ( Model, Effect Msg )
 init _ =
-    ( { loading = True
+    ( { designStubs = Loading
+      , errors = []
       , designFilters = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
       }
     , Effect.batch
         [ Effect.resetViewport ViewportReset
+        , Effect.sendCmd (getData "http://localhost:5000/all-design-stubs")
         ]
     )
+
+
+getData : String -> Cmd Msg
+getData url =
+    Http.get
+        { url = url
+        , expect =
+            Http.expectJson DesignsDataReceived (Json.Decode.list ProteinDesign.rawDesignStubDecoder)
+        }
 
 
 
@@ -72,50 +87,61 @@ type Msg
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
     | CheckForData Time.Posix
+    | SendDesignsHttpRequest
+    | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
     | ViewportReset
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
 update shared msg model =
-    case shared.designs of
+    case model.designStubs of
         RemoteData.NotAsked ->
             case msg of
-                CheckForData _ ->
-                    ( model, Effect.none )
-
-                ViewportReset ->
-                    ( model, Effect.none )
+                SendDesignsHttpRequest ->
+                    ( { model | designStubs = Loading }, Effect.sendCmd (getData "http://localhost:5000/all-design-stubs/") )
 
                 _ ->
-                    Debug.todo "We should have error state here..."
+                    ( model, Effect.none )
 
         RemoteData.Loading ->
             case msg of
-                CheckForData _ ->
-                    ( model, Effect.none )
-
-                ViewportReset ->
-                    ( model, Effect.none )
-
-                _ ->
-                    Debug.todo "We should have error state here..."
-
-        RemoteData.Failure _ ->
-            case msg of
-                CheckForData _ ->
+                DesignsDataReceived (Ok rawDesignStubs) ->
                     let
-                        _ =
-                            Debug.log "We should fix this to have error reporting." ()
+                        designs =
+                            rawDesignStubs
+                                |> List.map (\d -> ( d.pdb, d ))
+                                |> Dict.fromList
                     in
-                    ( { model | loading = False }, Effect.none )
+                    ( { model | designStubs = Success designs }
+                    , designs
+                        |> Dict.values
+                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                        |> Plots.timelinePlotStubs
+                        |> Effect.renderVegaPlot
+                    )
 
-                ViewportReset ->
-                    ( model, Effect.none )
+                DesignsDataReceived (Err e) ->
+                    ( { model
+                        | designStubs = Failure e
+                        , errors = DesignRequestFailed :: model.errors
+                      }
+                    , Effect.none
+                    )
 
                 _ ->
-                    Debug.todo "We should have error state here..."
+                    ( model, Effect.none )
 
-        RemoteData.Success loadedDesigns ->
+        RemoteData.Failure e ->
+            case msg of
+                _ ->
+                    ( { model
+                        | designStubs = Failure e
+                        , errors = DesignRequestFailed :: model.errors
+                      }
+                    , Effect.none
+                    )
+
+        RemoteData.Success loadedDesignStubs ->
             case msg of
                 UpdateFilters key newFilter ->
                     let
@@ -123,10 +149,10 @@ update shared msg model =
                             Dict.insert key newFilter model.designFilters
                     in
                     ( { model | designFilters = newDesignFilters }
-                    , loadedDesigns
+                    , loadedDesignStubs
                         |> Dict.values
-                        |> List.filterMap (DesignFilter.meetsAllFilters (Dict.values newDesignFilters))
-                        |> Plots.timelinePlotData
+                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values newDesignFilters))
+                        |> Plots.timelinePlotStubs
                         |> Effect.renderVegaPlot
                     )
 
@@ -167,18 +193,18 @@ update shared msg model =
                                 { model | mEndDate = ifEmptyOrNot string }
 
                 CheckForData _ ->
-                    ( { model | loading = False }
-                    , loadedDesigns
+                    ( model
+                    , loadedDesignStubs
                         |> Dict.values
                         |> List.filterMap
-                            (DesignFilter.meetsAllFilters
+                            (DesignFilter.stubMeetsAllFilters
                                 (Dict.values model.designFilters)
                             )
-                        |> Plots.timelinePlotData
+                        |> Plots.timelinePlotStubs
                         |> Effect.renderVegaPlot
                     )
 
-                ViewportReset ->
+                _ ->
                     ( model, Effect.none )
 
 
@@ -196,12 +222,8 @@ ifEmptyOrNot string =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-    if model.loading then
-        Time.every 200 CheckForData
-
-    else
-        Sub.none
+subscriptions _ =
+    Sub.none
 
 
 
@@ -212,9 +234,7 @@ view : Shared.Model -> Model -> View Msg
 view shared model =
     { title = "Protein Design Archive"
     , attributes = [ padding 10, width fill ]
-    , element =
-        shared.designs
-            |> homeView model
+    , element = homeView model
     }
 
 
@@ -227,9 +247,9 @@ growthCurve =
         }
 
 
-homeView : Model -> RemoteData Http.Error (Dict String ProteinDesign) -> Element Msg
-homeView model remoteData =
-    case remoteData of
+homeView : Model -> Element Msg
+homeView model =
+    case model.designStubs of
         RemoteData.NotAsked ->
             text "Not asked for data..."
 
@@ -239,7 +259,7 @@ homeView model remoteData =
         RemoteData.Failure _ ->
             text "Failed to load data, probably couldn't connect to server."
 
-        RemoteData.Success designs ->
+        RemoteData.Success designStubs ->
             column
                 [ spacing 10, width fill ]
                 [ --growthCurve
@@ -248,15 +268,15 @@ homeView model remoteData =
                     [ searchArea model
                     , dateSearchArea model
                     ]
-                , designs
+                , designStubs
                     |> Dict.values
                     |> List.filterMap
-                        (DesignFilter.meetsAllFilters (Dict.values model.designFilters))
+                        (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
                     |> designList
                 ]
 
 
-designList : List ProteinDesign -> Element msg
+designList : List ProteinDesignStub -> Element msg
 designList designs =
     wrappedRow
         [ spacing 5

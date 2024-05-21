@@ -48,14 +48,14 @@ init designId =
       , design = Loading
       , errors = []
       }
-    , Effect.sendCmd (getData "http://localhost:5000/design-details/" designId)
+    , Effect.sendCmd (getData ("http://localhost:5000/design-details/" ++ designId))
     )
 
 
-getData : String -> String -> Cmd Msg
-getData url designId =
+getData : String -> Cmd Msg
+getData url =
     Http.get
-        { url = url ++ designId
+        { url = url
         , expect =
             Http.expectJson DesignsDataReceived ProteinDesign.rawDesignDecoder
         }
@@ -77,7 +77,7 @@ update msg model =
             case msg of
                 SendDesignsHttpRequest ->
                     ( { model | design = Loading }
-                    , Effect.sendCmd (getData "http://localhost:5000/design-details/" model.designId)
+                    , Effect.sendCmd (getData ("http://localhost:5000/design-details/" ++ model.designId))
                     )
 
                 _ ->
@@ -101,10 +101,15 @@ update msg model =
                     , Effect.none
                     )
 
-        RemoteData.Failure _ ->
+        RemoteData.Failure e ->
             case msg of
                 _ ->
-                    ( model, Effect.none )
+                    ( { model
+                        | design = Failure e
+                        , errors = DesignRequestFailed :: model.errors
+                      }
+                    , Effect.none
+                    )
 
         RemoteData.Success _ ->
             case msg of
