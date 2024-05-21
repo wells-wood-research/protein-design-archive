@@ -32,12 +32,12 @@ import View exposing (View)
 
 
 page : Shared.Model -> Route () -> Page Model Msg
-page shared _ =
+page _ _ =
     Page.new
         { init = init
-        , update = update shared
+        , update = update
         , subscriptions = subscriptions
-        , view = view shared >> Components.Title.view
+        , view = view >> Components.Title.view
         }
 
 
@@ -92,8 +92,8 @@ type Msg
     | ViewportReset
 
 
-update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
-update shared msg model =
+update : Msg -> Model -> ( Model, Effect Msg )
+update msg model =
     case model.designStubs of
         RemoteData.NotAsked ->
             case msg of
@@ -164,13 +164,11 @@ update shared msg model =
                     case Date.fromIsoString phrase of
                         Err _ ->
                             update
-                                shared
                                 (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
                                 { model | mStartDate = ifEmptyOrNot string }
 
                         Ok date ->
                             update
-                                shared
                                 (UpdateFilters defaultKeys.dateStartKey (DateStart date))
                                 { model | mStartDate = ifEmptyOrNot string }
 
@@ -182,13 +180,11 @@ update shared msg model =
                     case Date.fromIsoString phrase of
                         Err _ ->
                             update
-                                shared
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
                                 { model | mEndDate = ifEmptyOrNot string }
 
                         Ok date ->
                             update
-                                shared
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
 
@@ -230,8 +226,8 @@ subscriptions _ =
 -- VIEW
 
 
-view : Shared.Model -> Model -> View Msg
-view shared model =
+view : Model -> View Msg
+view model =
     { title = "Protein Design Archive"
     , attributes = [ padding 10, width fill ]
     , element = homeView model
