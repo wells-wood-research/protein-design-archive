@@ -14,7 +14,6 @@ import Html
 import Html.Attributes as HAtt
 import Http
 import Json.Decode
-import List.Extra as LE
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designToCitation)
 import RemoteData exposing (RemoteData(..))
@@ -22,12 +21,11 @@ import Route exposing (Route)
 import Shared
 import Style
 import Task
-import Time
 import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page shared route =
+page _ route =
     Page.new
         { init = \_ -> init route.params.designId
         , update = update
@@ -43,6 +41,7 @@ page shared route =
 type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
+    , prevCurrNext : RemoteData Http.Error (List ProteinDesign)
     , errors : List AppError
     }
 
@@ -51,6 +50,7 @@ init : String -> ( Model, Effect Msg )
 init designId =
     ( { designId = designId
       , design = NotAsked
+      , prevCurrNext = NotAsked
       , errors = []
       }
     , Effect.sendCmd <|
@@ -60,10 +60,10 @@ init designId =
     )
 
 
-getData : String -> Cmd Msg
-getData designId =
+getData : String -> String -> Cmd Msg
+getData url designId =
     Http.get
-        { url = "http://localhost:5000//design-details/" ++ designId
+        { url = url ++ designId
         , expect =
             Http.expectJson DesignsDataReceived (Json.Decode.list ProteinDesign.rawDesignDecoder)
         }
@@ -78,18 +78,13 @@ type Msg
     | DesignsDataReceived (Result Http.Error (List ProteinDesign))
 
 
-
---    | CheckForData Time.Posix
---    | ViewportReset
-
-
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
-    case model.design of
+    case model.prevCurrNext of
         RemoteData.NotAsked ->
             case msg of
                 SendDesignsHttpRequest ->
-                    ( { model | design = Loading }, Effect.sendCmd (getData model.designId) )
+                    ( { model | design = Loading, prevCurrNext = Loading }, Effect.sendCmd (getData "http://localhost:5000/three-designs/" model.designId) )
 
                 _ ->
                     ( model, Effect.none )
@@ -102,14 +97,19 @@ update msg model =
                 DesignsDataReceived (Ok d) ->
                     case d of
                         [] ->
-                            ( { model | design = Failure (Http.BadBody "This design doesn't exist.") }
+                            ( { model | design = Failure (Http.BadBody "This design doesn't exist."), prevCurrNext = Failure (Http.BadBody "This design doesn't exist.") }
                             , Effect.none
                             )
 
-                        firstDesign :: _ ->
-                            ( { model | design = Success firstDesign }
-                            , Effect.none
-                            )
+                        designs ->
+                            case List.head designs of
+                                Just currentDesign ->
+                                    ( { model | design = Success currentDesign, prevCurrNext = Success designs }
+                                    , Effect.none
+                                    )
+
+                                _ ->
+                                    ( model, Effect.none )
 
                 DesignsDataReceived (Err e) ->
                     ( { model
@@ -145,7 +145,7 @@ subscriptions _ =
 
 view : Model -> View Msg
 view model =
-    { title = "Design Details" ++ model.designId
+    { title = "Design Details of " ++ model.designId
     , attributes = [ width fill ]
     , element = details model
     }
@@ -161,8 +161,8 @@ details model =
         [ column
             [ width fill ]
             [ row [ width fill, spaceEvenly ]
-                --[ browseButton shared model "back"
-                [ el
+                [ browseButton model "back"
+                , el
                     (Style.h1Font
                         ++ [ centerX
                            , padding 20
@@ -170,8 +170,7 @@ details model =
                     )
                   <|
                     text "Design Details"
-
-                --, browseButton shared model "next"
+                , browseButton model "next"
                 ]
             , case mDesign of
                 NotAsked ->
@@ -218,70 +217,27 @@ details model =
         ]
 
 
+browseButton : Model -> String -> Element msg
+browseButton model direction =
+    link
+        []
+        { url = "/"
+        , label =
+            el [ centerX ]
+                (html <|
+                    FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                        FeatherIcons.withSize 50 <|
+                            case direction of
+                                "back" ->
+                                    FeatherIcons.arrowLeftCircle
 
--- getNextDesign : Shared.Model -> Model -> String -> Maybe String
--- getNextDesign shared model direction =
---     let
---         list =
---             Dict.keys shared.designs
---
---         currentIndex =
---             LE.elemIndex model.designId list
---
---         lastIndex =
---             (\i -> i - 1) <| List.length list
---     in
---     case currentIndex of
---         Just index ->
---             case direction of
---                 "next" ->
---                     if index == lastIndex then
---                         LE.getAt 0 list
---
---                     else
---                         LE.getAt (index + 1) list
---
---                 "back" ->
---                     if index == 0 then
---                         LE.last list
---
---                     else
---                         LE.getAt (index - 1) list
---
---                 _ ->
---                     LE.getAt index list
---
---         _ ->
---             Nothing
---
---
--- browseButton : Shared.Model -> Model -> String -> Element msg
--- browseButton shared model direction =
---     link
---         []
---         { url =
---             case getNextDesign shared model direction of
---                 Nothing ->
---                     "/"
---
---                 Just designId ->
---                     "/designs/" ++ designId
---         , label =
---             el [ centerX ]
---                 (html <|
---                     FeatherIcons.toHtml [ HAtt.align "center" ] <|
---                         FeatherIcons.withSize 50 <|
---                             case direction of
---                                 "back" ->
---                                     FeatherIcons.arrowLeftCircle
---
---                                 "next" ->
---                                     FeatherIcons.arrowRightCircle
---
---                                 _ ->
---                                     FeatherIcons.home
---                 )
---         }
+                                "next" ->
+                                    FeatherIcons.arrowRightCircle
+
+                                _ ->
+                                    FeatherIcons.home
+                )
+        }
 
 
 designDetailsView : ProteinDesign -> Element msg
