@@ -3,7 +3,6 @@ module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 import AppError exposing (AppError(..))
 import Components.Title
 import Date
-import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Border as Border
@@ -13,14 +12,12 @@ import FeatherIcons
 import Html
 import Html.Attributes as HAtt
 import Http
-import Json.Decode
 import Page exposing (Page)
 import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designToCitation)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
-import Task
 import View exposing (View)
 
 
@@ -41,7 +38,6 @@ page _ route =
 type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
-    , prevCurrNext : RemoteData Http.Error (List ProteinDesign)
     , errors : List AppError
     }
 
@@ -49,14 +45,10 @@ type alias Model =
 init : String -> ( Model, Effect Msg )
 init designId =
     ( { designId = designId
-      , design = NotAsked
-      , prevCurrNext = NotAsked
+      , design = Loading
       , errors = []
       }
-    , Effect.sendCmd <|
-        (Task.succeed SendDesignsHttpRequest
-            |> Task.perform identity
-        )
+    , Effect.sendCmd (getData "http://localhost:5000/design-details/" designId)
     )
 
 
@@ -65,7 +57,7 @@ getData url designId =
     Http.get
         { url = url ++ designId
         , expect =
-            Http.expectJson DesignsDataReceived (Json.Decode.list ProteinDesign.rawDesignDecoder)
+            Http.expectJson DesignsDataReceived ProteinDesign.rawDesignDecoder
         }
 
 
@@ -75,16 +67,18 @@ getData url designId =
 
 type Msg
     = SendDesignsHttpRequest
-    | DesignsDataReceived (Result Http.Error (List ProteinDesign))
+    | DesignsDataReceived (Result Http.Error ProteinDesign)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
-    case model.prevCurrNext of
+    case model.design of
         RemoteData.NotAsked ->
             case msg of
                 SendDesignsHttpRequest ->
-                    ( { model | design = Loading, prevCurrNext = Loading }, Effect.sendCmd (getData "http://localhost:5000/three-designs/" model.designId) )
+                    ( { model | design = Loading }
+                    , Effect.sendCmd (getData "http://localhost:5000/design-details/" model.designId)
+                    )
 
                 _ ->
                     ( model, Effect.none )
@@ -94,22 +88,10 @@ update msg model =
                 SendDesignsHttpRequest ->
                     ( model, Effect.none )
 
-                DesignsDataReceived (Ok d) ->
-                    case d of
-                        [] ->
-                            ( { model | design = Failure (Http.BadBody "This design doesn't exist."), prevCurrNext = Failure (Http.BadBody "This design doesn't exist.") }
-                            , Effect.none
-                            )
-
-                        designs ->
-                            case List.head designs of
-                                Just currentDesign ->
-                                    ( { model | design = Success currentDesign, prevCurrNext = Success designs }
-                                    , Effect.none
-                                    )
-
-                                _ ->
-                                    ( model, Effect.none )
+                DesignsDataReceived (Ok design) ->
+                    ( { model | design = Success design }
+                    , Effect.none
+                    )
 
                 DesignsDataReceived (Err e) ->
                     ( { model
@@ -160,23 +142,11 @@ details model =
     row []
         [ column
             [ width fill ]
-            [ row [ width fill, spaceEvenly ]
-                [ browseButton model "back"
-                , el
-                    (Style.h1Font
-                        ++ [ centerX
-                           , padding 20
-                           ]
-                    )
-                  <|
-                    text "Design Details"
-                , browseButton model "next"
-                ]
-            , case mDesign of
+            [ case mDesign of
                 NotAsked ->
                     paragraph
                         (Style.bodyFont
-                            ++ [ Font.center, Font.justify ]
+                            ++ [ width fill, Font.center, Font.justify ]
                         )
                         [ text "Error querying the database. Try reloading the page."
                         ]
@@ -184,7 +154,7 @@ details model =
                 Loading ->
                     paragraph
                         (Style.bodyFont
-                            ++ [ Font.center, Font.justify ]
+                            ++ [ width fill, Font.center, Font.justify ]
                         )
                         [ text "Loading the design..."
                         ]
@@ -192,10 +162,10 @@ details model =
                 Failure e ->
                     paragraph
                         (Style.bodyFont
-                            ++ [ Font.center, Font.justify ]
+                            ++ [ width fill, Font.center, Font.justify ]
                         )
                         [ case e of
-                            Http.BadUrl s ->
+                            Http.BadUrl _ ->
                                 text "Error loading design: invalid URL."
 
                             Http.Timeout ->
@@ -217,29 +187,6 @@ details model =
         ]
 
 
-browseButton : Model -> String -> Element msg
-browseButton model direction =
-    link
-        []
-        { url = "/"
-        , label =
-            el [ centerX ]
-                (html <|
-                    FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                        FeatherIcons.withSize 50 <|
-                            case direction of
-                                "back" ->
-                                    FeatherIcons.arrowLeftCircle
-
-                                "next" ->
-                                    FeatherIcons.arrowRightCircle
-
-                                _ ->
-                                    FeatherIcons.home
-                )
-        }
-
-
 designDetailsView : ProteinDesign -> Element msg
 designDetailsView proteinDesign =
     column
@@ -251,7 +198,8 @@ designDetailsView proteinDesign =
          ]
             ++ Style.bodyFont
         )
-        [ wrappedRow
+        [ designDetailsHeader proteinDesign
+        , wrappedRow
             [ width fill
             , spacing 10
             ]
@@ -343,9 +291,10 @@ designDetailsView proteinDesign =
                 [ text "Structure"
                 ]
             , Keyed.el
-                [ height fill
-                , width fill
+                [ width <| px 900
+                , height <| px 400
                 , padding 5
+                , centerX
                 , Border.width 2
                 , Border.rounded 3
                 , Border.color <| rgb255 220 220 220
@@ -353,7 +302,7 @@ designDetailsView proteinDesign =
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" "910px"
+                    , HAtt.style "width" "890px"
                     , HAtt.style "height" "400px"
                     , HAtt.style "align" "center"
                     , HAtt.alt "3D structure"
@@ -431,4 +380,36 @@ designDetailsView proteinDesign =
                     |> text
                 ]
             ]
+        ]
+
+
+designDetailsHeader : ProteinDesign -> Element msg
+designDetailsHeader { previousDesign, nextDesign } =
+    row
+        [ width fill
+        , spaceEvenly
+        ]
+        [ link
+            []
+            { url = "/designs/" ++ previousDesign
+            , label =
+                el [ centerX ]
+                    (html <|
+                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.arrowLeftCircle
+                    )
+            }
+        , el Style.h2Font (text "Design Details")
+        , link
+            []
+            { url = "/designs/" ++ nextDesign
+            , label =
+                el [ centerX ]
+                    (html <|
+                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.arrowRightCircle
+                    )
+            }
         ]

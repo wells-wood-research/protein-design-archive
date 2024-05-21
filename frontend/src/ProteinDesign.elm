@@ -36,6 +36,8 @@ type alias ProteinDesign =
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
+    , previousDesign : String
+    , nextDesign : String
     }
 
 
@@ -115,26 +117,41 @@ rawDesignDecoder =
         |> required "exptl_method" (list string)
         |> required "formula_weight" float
         |> required "synthesis_comment" string
+        |> optional "previous_design" string "/"
+        |> optional "next_design" string "/"
+
 
 classificationDecoder : Decoder Classification
 classificationDecoder =
     Decode.map stringToClassification string
 
+
 dateDecoder : Decoder Date
 dateDecoder =
     string
-        |> Decode.andThen (\dateString ->
-            case Date.fromIsoString dateString of
-                Ok date ->
-                    Decode.succeed date
+        |> Decode.andThen
+            (\dateString ->
+                case Date.fromIsoString dateString of
+                    Ok date ->
+                        Decode.succeed date
 
-                Err _ ->
-                    Decode.succeed (Date.fromCalendarDate 1900 Jan 1)
-        )
+                    Err _ ->
+                        Decode.succeed (Date.fromCalendarDate 1900 Jan 1)
+            )
+
 
 titleDecoder : Decoder String
 titleDecoder =
-    Decode.map (\titleString -> if String.endsWith "." titleString then String.dropRight 1 titleString else titleString) string
+    Decode.map
+        (\titleString ->
+            if String.endsWith "." titleString then
+                String.dropRight 1 titleString
+
+            else
+                titleString
+        )
+        string
+
 
 authorDecoder : Decoder Author
 authorDecoder =
@@ -170,7 +187,7 @@ searchableText proteinDesign =
     , String.join " " proteinDesign.keyword
     , String.join " " proteinDesign.tags -- tagsToString proteinDesign.tags
     , Date.toIsoString proteinDesign.release_date
-    , (designToCitation proteinDesign)
+    , designToCitation proteinDesign
     , proteinDesign.abstract
     , proteinDesign.related_pdb
     , xtalToString proteinDesign.crystal_structure
@@ -178,23 +195,30 @@ searchableText proteinDesign =
         |> String.join "\n"
         |> String.toLower
 
+
 designToPageRange : ProteinDesign -> String
 designToPageRange proteinDesign =
-    if String.isEmpty proteinDesign.publication_page_first || String.isEmpty proteinDesign.publication_page_last then "" else proteinDesign.publication_page_first ++ "-" ++ proteinDesign.publication_page_last
+    if String.isEmpty proteinDesign.publication_page_first || String.isEmpty proteinDesign.publication_page_last then
+        ""
+
+    else
+        proteinDesign.publication_page_first ++ "-" ++ proteinDesign.publication_page_last
+
 
 designToCitation : ProteinDesign -> String
 designToCitation proteinDesign =
     String.join ", " <|
-            [ proteinDesign.publication_title
-            , proteinDesign.publication_journal_abbrev
-            , proteinDesign.publication_journal_volume
-            , (designToPageRange proteinDesign)
-            , proteinDesign.publication_id_astm
-            , proteinDesign.publication_id_issn
-            , proteinDesign.publication_id_csd
-            , proteinDesign.publication_id_doi
-            , proteinDesign.publication_id_pubmed
-            ]
+        [ proteinDesign.publication_title
+        , proteinDesign.publication_journal_abbrev
+        , proteinDesign.publication_journal_volume
+        , designToPageRange proteinDesign
+        , proteinDesign.publication_id_astm
+        , proteinDesign.publication_id_issn
+        , proteinDesign.publication_id_csd
+        , proteinDesign.publication_id_doi
+        , proteinDesign.publication_id_pubmed
+        ]
+
 
 chainToString : Chain -> String
 chainToString chain =
