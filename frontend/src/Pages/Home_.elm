@@ -26,8 +26,8 @@ import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Shared.Msg exposing (Msg(..))
-import Task
 import Time
+import Urls
 import View exposing (View)
 
 
@@ -64,7 +64,7 @@ init _ =
       }
     , Effect.batch
         [ Effect.resetViewport ViewportReset
-        , Effect.sendCmd (getData "http://localhost:5000/all-design-stubs")
+        , Effect.sendCmd (getData Urls.allDesignStubs)
         ]
     )
 
@@ -98,7 +98,7 @@ update msg model =
         RemoteData.NotAsked ->
             case msg of
                 SendDesignsHttpRequest ->
-                    ( { model | designStubs = Loading }, Effect.sendCmd (getData "http://localhost:5000/all-design-stubs/") )
+                    ( { model | designStubs = Loading }, Effect.sendCmd (getData Urls.allDesignStubs) )
 
                 _ ->
                     ( model, Effect.none )
