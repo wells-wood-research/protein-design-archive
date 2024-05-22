@@ -53,10 +53,10 @@
           "src": "https://cdn.jsdelivr.net/npm/vega-embed@6"
         },
         {
-          "src": "/ngl.js"
+          "src": "/pda/ngl.js"
         },
         {
-          "src": "/ngl-web-component.js"
+          "src": "/pda/ngl-web-component.js"
         }
       ]
     },
