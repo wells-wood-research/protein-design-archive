@@ -1,38 +1,22 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Backend for Protein Design Archive"
 authors = [
-    { name = "ChrisWellsWood", email = "cwwoodesq@gmail.com" }
+    { name = "ChrisWellsWood", email = "cwwoodesq@gmail.com" },
+    { name = "Marta Chronowska", email = "mchrnwsk@gmail.com" }
 ]
-dependencies = [
-    "pymongo>=4.6.3",
-    "flask>=3.0.3",
-]
-readme = "README.md"
-requires-python = ">= 3.8"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-managed = true
-dev-dependencies = [
-    "ipython>=8.23.0",
-    "jupyter>=1.0.0",
-    "requests>=2.31.0",
-    "python-lsp-server>=1.11.0",
-    "rope>=1.13.0",
-    "pyflakes>=3.2.0",
-    "mccabe>=0.7.0",
-    "pylsp-mypy>=0.6.8",
-    "python-lsp-black>=2.0.0",
-    "python-lsp-isort>=0.1",
+dependencies = [
+    "click==8.1.7",
+    "Flask==3.0.3",
+    "Flask-Cors==3.0.9",
+    "pymongo==4.7.2",
 ]
 
-[tool.hatch.metadata]
-allow-direct-references = true
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/backend"]
+readme = "README.md"
+requires-python = ">= 3.8"

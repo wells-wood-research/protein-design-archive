@@ -1,0 +1,4 @@
+click==8.1.7
+Flask==3.0.3
+Flask-Cors==3.0.9
+pymongo==4.7.2

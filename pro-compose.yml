@@ -1,0 +1,18 @@
+version: '2'
+services:
+  pda-frontend:
+    build:
+      context: ./frontend/
+    depends_on:
+      - pda-backend
+  pda-backend:
+    build:
+      context: ./backend/
+    environment:
+      - MODULE_NAME=backend.app
+      - GUNICORN_WORKERS=2
+    depends_on:
+      - pda-mongo
+    restart: always
+  pda-mongo:
+    image: "mongo:7.0.9"
