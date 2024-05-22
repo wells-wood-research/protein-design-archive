@@ -31,6 +31,7 @@ import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
+import Urls
 import Vega exposing (background)
 import View exposing (View)
 
@@ -74,7 +75,7 @@ init designId =
       , voteRemove = False
       , comment = Nothing
       }
-    , Effect.sendCmd (getData ("http://localhost:5000/design-details/" ++ designId))
+    , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
     )
 
 
@@ -131,7 +132,7 @@ update msg model =
             case msg of
                 SendDesignsHttpRequest ->
                     ( { model | design = Loading }
-                    , Effect.sendCmd (getData ("http://localhost:5000/design-details/" ++ model.designId))
+                    , Effect.sendCmd (getData <| Urls.designDetailsFromId model.designId)
                     )
 
                 _ ->

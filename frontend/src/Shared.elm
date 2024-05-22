@@ -15,9 +15,7 @@ module Shared exposing
 import AppError exposing (AppError(..))
 import Dict
 import Effect exposing (Effect)
-import Http
 import Json.Decode
-import ProteinDesign
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared.Model
@@ -48,7 +46,7 @@ type alias Model =
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init _ _ =
     ( { designs = NotAsked, errors = [] }
-    , Effect.sendCmd getData
+    , Effect.none
     )
 
 
@@ -58,16 +56,6 @@ init _ _ =
 
 type alias Msg =
     Msg.Msg
-
-
-getData : Cmd Msg
-getData =
-    Http.get
-        { url = "http://localhost:5000/all-designs"
-        , expect =
-            Http.expectJson DesignsDataReceived
-                (Json.Decode.list ProteinDesign.rawDesignDecoder)
-        }
 
 
 update : Route () -> Msg -> Model -> ( Model, Effect Msg )
