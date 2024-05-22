@@ -189,16 +189,7 @@ update msg model =
                                 { model | mEndDate = ifEmptyOrNot string }
 
                 CheckForData _ ->
-                    ( model
-                    , loadedDesignStubs
-                        |> Dict.values
-                        |> List.filterMap
-                            (DesignFilter.stubMeetsAllFilters
-                                (Dict.values model.designFilters)
-                            )
-                        |> Plots.timelinePlotStubs
-                        |> Effect.renderVegaPlot
-                    )
+                    ( model, Effect.none )
 
                 _ ->
                     ( model, Effect.none )

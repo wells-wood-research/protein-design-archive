@@ -27,6 +27,8 @@ def get_all_design_stubs():
         "pdb": 1,
         "picture_path": 1,
         "authors": 1,
+        "keyword": 1,
+        "tags": 1,
         "release_date": 1,
     }
     designs = list(DESIGNS.find({}, projection=projection))

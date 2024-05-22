@@ -45,6 +45,8 @@ type alias ProteinDesignStub =
     { pdb : String
     , picture_path : String
     , authors : List Author
+    , keyword : List String
+    , tags : List String
     , release_date : Date
     }
 
@@ -135,6 +137,8 @@ rawDesignStubDecoder =
         |> required "pdb" string
         |> required "picture_path" string
         |> required "authors" (list authorDecoder)
+        |> required "keyword" (list string)
+        |> required "tags" (list string)
         |> required "release_date" dateDecoder
 
 
@@ -217,6 +221,8 @@ stubSearchableText : ProteinDesignStub -> String
 stubSearchableText proteinDesign =
     [ proteinDesign.pdb
     , authorsToString proteinDesign.authors
+    , String.join " " proteinDesign.keyword
+    , String.join " " proteinDesign.tags
     , Date.toIsoString proteinDesign.release_date
     ]
         |> String.join "\n"
