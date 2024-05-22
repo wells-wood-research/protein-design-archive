@@ -3,9 +3,9 @@ module Urls exposing (..)
 
 allDesignStubs : String
 allDesignStubs =
-    "http://localhost:5000/all-design-stubs"
+    "https://pragmaticproteindesign.bio.ed.ac.uk/pda/all-design-stubs"
 
 
 designDetailsFromId : String -> String
 designDetailsFromId designId =
-    "http://localhost:5000/design-details/" ++ designId
+    "https://pragmaticproteindesign.bio.ed.ac.uk/pda/design-details/" ++ designId
