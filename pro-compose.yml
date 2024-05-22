@@ -2,12 +2,12 @@ version: '2'
 services:
   pda-frontend:
     build:
-      context: ./frontend/
+      context: ./prot-des-timeline/frontend/
     depends_on:
       - pda-backend
   pda-backend:
     build:
-      context: ./backend/
+      context: ./prot-des-timeline/backend/
     environment:
       - MODULE_NAME=backend.app
       - GUNICORN_WORKERS=2
