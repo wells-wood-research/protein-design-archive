@@ -397,7 +397,7 @@ designDetailsHeader { previousDesign, nextDesign } =
         ]
         [ link
             []
-            { url = "/designs/" ++ previousDesign
+            { url = "/pda/designs/" ++ previousDesign
             , label =
                 el [ centerX ]
                     (html <|
@@ -409,7 +409,7 @@ designDetailsHeader { previousDesign, nextDesign } =
         , el Style.h2Font (text "Design Details")
         , link
             []
-            { url = "/designs/" ++ nextDesign
+            { url = "/pda/designs/" ++ nextDesign
             , label =
                 el [ centerX ]
                     (html <|
