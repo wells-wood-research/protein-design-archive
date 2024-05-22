@@ -85,10 +85,6 @@ update _ msg model =
             )
 
         DesignsDataReceived (Err e) ->
-            let
-                _ =
-                    Debug.log "error" e
-            in
             ( { model
                 | designs = Failure e
                 , errors = DesignRequestFailed :: model.errors
