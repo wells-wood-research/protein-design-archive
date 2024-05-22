@@ -35,5 +35,5 @@ title =
     <|
         link [ centerX ]
             { label = paragraph [] [ text "Protein Design Archive" ]
-            , url = "/"
+            , url = "/pda/"
             }
