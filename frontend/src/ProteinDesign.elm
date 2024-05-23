@@ -14,28 +14,25 @@ type alias ProteinDesign =
     { pdb : String
     , picture_path : String
     , chains : List Chain
+    , pdb_string : String
     , authors : List Author
     , classification : Classification
-    , keyword : List String
+    , classification_suggested : List Classification
+    , classification_suggested_reason : List String
+    , subtitle : String
     , tags : List String -- List Tag
+    , keywords : List String
     , release_date : Date
-    , publication_title : String
-    , publication_journal_abbrev : String
-    , publication_journal_volume : String
-    , publication_page_first : String
-    , publication_page_last : String
-    , publication_id_astm : String
-    , publication_id_issn : String
-    , publication_id_csd : String
-    , publication_id_doi : String
-    , publication_id_pubmed : String
+    , publication : String
+    , publication_ref : Reference
     , publication_country : String
     , abstract : String
-    , related_pdb : String
+    , related_pdb : List String
     , crystal_structure : Xtal
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
+    , review : Bool
     , previousDesign : String
     , nextDesign : String
     }
@@ -45,8 +42,9 @@ type alias ProteinDesignStub =
     { pdb : String
     , picture_path : String
     , authors : List Author
-    , keyword : List String
+    , subtitle : String
     , tags : List String
+    , keywords : List String
     , release_date : Date
     }
 
@@ -55,8 +53,9 @@ type Classification
     = Minimal
     | Rational
     | Engineered
-    | CompPhys
-    | CompDL
+    | Computational
+    | Phys
+    | DeepLearning
     | Consensus
     | Other
 
@@ -105,28 +104,25 @@ rawDesignDecoder =
         |> required "pdb" string
         |> required "picture_path" string
         |> required "chains" (list chainDecoder)
+        |> required "pdb_string" string
         |> required "authors" (list authorDecoder)
         |> required "classification" classificationDecoder
-        |> required "keyword" (list string)
+        |> required "classification_suggested" (list classificationDecoder)
+        |> required "classification_suggested_reason" (list string)
+        |> required "subtitle" string
         |> required "tags" (list string)
+        |> required "keywords" (list string)
         |> required "release_date" dateDecoder
-        |> required "publication_title" titleDecoder
-        |> required "publication_journal_abbrev" string
-        |> required "publication_journal_volume" string
-        |> required "publication_page_first" string
-        |> required "publication_page_last" string
-        |> required "publication_id_astm" string
-        |> required "publication_id_issn" string
-        |> required "publication_id_csd" string
-        |> required "publication_id_doi" string
-        |> required "publication_id_pubmed" string
+        |> required "publication" string
+        |> required "publication_ref" referenceDecoder
         |> required "publication_country" string
         |> required "abstract" string
-        |> required "related_pdb" string
+        |> required "related_pdb" (list string)
         |> required "crystal_structure" xtalDecoder
         |> required "exptl_method" (list string)
         |> required "formula_weight" float
         |> required "synthesis_comment" string
+        |> required "review" bool
         |> optional "previous_design" string "/"
         |> optional "next_design" string "/"
 
@@ -137,14 +133,34 @@ rawDesignStubDecoder =
         |> required "pdb" string
         |> required "picture_path" string
         |> required "authors" (list authorDecoder)
-        |> required "keyword" (list string)
+        |> required "subtitle" string
         |> required "tags" (list string)
+        |> required "keywords" (list string)
         |> required "release_date" dateDecoder
 
 
 classificationDecoder : Decoder Classification
 classificationDecoder =
     Decode.map stringToClassification string
+
+
+referenceDecoder : Decoder Reference
+referenceDecoder =
+    Decode.succeed Reference
+        |> required "DOI" string
+        |> required "PubMed" string
+        |> required "CSD" string
+        |> required "ISSN" string
+        |> required "ASTM" string
+
+
+type alias Reference =
+    { doi : String
+    , pubmed : String
+    , csd : String
+    , issn : String
+    , astm : String
+    }
 
 
 dateDecoder : Decoder Date
@@ -159,19 +175,6 @@ dateDecoder =
                     Err _ ->
                         Decode.succeed (Date.fromCalendarDate 1900 Jan 1)
             )
-
-
-titleDecoder : Decoder String
-titleDecoder =
-    Decode.map
-        (\titleString ->
-            if String.endsWith "." titleString then
-                String.dropRight 1 titleString
-
-            else
-                titleString
-        )
-        string
 
 
 authorDecoder : Decoder Author
@@ -205,12 +208,14 @@ designSearchableText proteinDesign =
     , String.join " " <| List.map chainToString proteinDesign.chains
     , authorsToString proteinDesign.authors
     , classificationToString proteinDesign.classification
-    , String.join " " proteinDesign.keyword
-    , String.join " " proteinDesign.tags -- tagsToString proteinDesign.tags
+    , proteinDesign.subtitle
+    , String.join " " proteinDesign.tags
+    , String.join " " proteinDesign.keywords
     , Date.toIsoString proteinDesign.release_date
-    , designToCitation proteinDesign
+    , proteinDesign.publication
+    , proteinDesign.publication
     , proteinDesign.abstract
-    , proteinDesign.related_pdb
+    , String.join " " proteinDesign.related_pdb
     , xtalToString proteinDesign.crystal_structure
     ]
         |> String.join "\n"
@@ -221,35 +226,23 @@ stubSearchableText : ProteinDesignStub -> String
 stubSearchableText proteinDesign =
     [ proteinDesign.pdb
     , authorsToString proteinDesign.authors
-    , String.join " " proteinDesign.keyword
+    , proteinDesign.subtitle
     , String.join " " proteinDesign.tags
+    , String.join " " proteinDesign.keywords
     , Date.toIsoString proteinDesign.release_date
     ]
         |> String.join "\n"
         |> String.toLower
 
 
-designToPageRange : ProteinDesign -> String
-designToPageRange proteinDesign =
-    if String.isEmpty proteinDesign.publication_page_first || String.isEmpty proteinDesign.publication_page_last then
-        ""
-
-    else
-        proteinDesign.publication_page_first ++ "-" ++ proteinDesign.publication_page_last
-
-
-designToCitation : ProteinDesign -> String
-designToCitation proteinDesign =
-    String.join ", " <|
-        [ proteinDesign.publication_title
-        , proteinDesign.publication_journal_abbrev
-        , proteinDesign.publication_journal_volume
-        , designToPageRange proteinDesign
-        , proteinDesign.publication_id_astm
-        , proteinDesign.publication_id_issn
-        , proteinDesign.publication_id_csd
-        , proteinDesign.publication_id_doi
-        , proteinDesign.publication_id_pubmed
+refToString : Reference -> String
+refToString reference =
+    String.join " " <|
+        [ reference.doi
+        , reference.pubmed
+        , reference.csd
+        , reference.issn
+        , reference.astm
         ]
 
 
@@ -285,11 +278,14 @@ stringToClassification string =
         "engineered" ->
             Engineered
 
-        "computational physics-based" ->
-            CompPhys
+        "computational" ->
+            Computational
 
-        "computational, Deep Learning" ->
-            CompDL
+        "physics-based" ->
+            Phys
+
+        "deep learning-based" ->
+            DeepLearning
 
         "consensus" ->
             Consensus
@@ -310,11 +306,14 @@ classificationToString classification =
         Engineered ->
             "engineered"
 
-        CompPhys ->
-            "computational physics-based"
+        Computational ->
+            "computational"
 
-        CompDL ->
-            "computational, Deep Learning"
+        Phys ->
+            "physics-based"
+
+        DeepLearning ->
+            "deep learning-based"
 
         Consensus ->
             "consensus"
@@ -335,10 +334,13 @@ classificationToColour classification =
         Engineered ->
             "#0000ff"
 
-        CompPhys ->
+        Computational ->
+            "#000000"
+
+        Phys ->
             "#800080"
 
-        CompDL ->
+        DeepLearning ->
             "008000"
 
         Consensus ->

@@ -23,7 +23,6 @@ import ProteinDesign
         , ProteinDesign
         , authorsToString
         , classificationToString
-        , designToCitation
         , stringToClassification
         , tagsToString
         )
@@ -94,8 +93,8 @@ classificationCheckboxDict =
         [ ( defaultKeys.classificationMinimalKey, False )
         , ( defaultKeys.classificationRationalKey, False )
         , ( defaultKeys.classificationEngineeredKey, False )
-        , ( defaultKeys.classificationCompPhysKey, False )
-        , ( defaultKeys.classificationCompDLKey, False )
+        , ( defaultKeys.classificationPhysKey, False )
+        , ( defaultKeys.classificationDeepLearningKey, False )
         , ( defaultKeys.classificationConsensusKey, False )
         , ( defaultKeys.classificationOtherKey, False )
         ]
@@ -365,7 +364,7 @@ designDetailsView proteinDesign =
                 , paragraph
                     []
                     [ text "Publication citation: "
-                    , el [ Font.italic ] (text <| designToCitation proteinDesign)
+                    , el [ Font.italic ] (text <| proteinDesign.publication)
                     ]
                 , paragraph
                     []
@@ -375,9 +374,9 @@ designDetailsView proteinDesign =
                         , Font.underline
                         ]
                         { url =
-                            "https://portal.issn.org/resource/ISSN/" ++ proteinDesign.publication_id_issn
+                            "https://doi.org/" ++ proteinDesign.publication_ref.doi
                         , label =
-                            proteinDesign.publication_id_issn
+                            proteinDesign.publication_ref.doi
                                 |> text
                         }
                     ]
@@ -548,8 +547,8 @@ classificationArea model =
                 [ defaultKeys.classificationMinimalKey
                 , defaultKeys.classificationRationalKey
                 , defaultKeys.classificationEngineeredKey
-                , defaultKeys.classificationCompPhysKey
-                , defaultKeys.classificationCompDLKey
+                , defaultKeys.classificationPhysKey
+                , defaultKeys.classificationDeepLearningKey
                 , defaultKeys.classificationConsensusKey
                 , defaultKeys.classificationOtherKey
                 ]

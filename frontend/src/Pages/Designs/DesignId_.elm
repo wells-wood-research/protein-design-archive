@@ -13,7 +13,7 @@ import Html
 import Html.Attributes as HAtt
 import Http
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designToCitation)
+import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
@@ -264,7 +264,7 @@ designDetailsView proteinDesign =
                 , paragraph
                     []
                     [ text "Publication citation: "
-                    , el [ Font.italic ] (text <| designToCitation proteinDesign)
+                    , el [ Font.italic ] (text <| proteinDesign.publication)
                     ]
                 , paragraph
                     []
@@ -274,9 +274,9 @@ designDetailsView proteinDesign =
                         , Font.underline
                         ]
                         { url =
-                            "https://portal.issn.org/resource/ISSN/" ++ proteinDesign.publication_id_issn
+                            "https://doi.org/" ++ proteinDesign.publication_ref.doi
                         , label =
-                            proteinDesign.publication_id_issn
+                            proteinDesign.publication_ref.doi
                                 |> text
                         }
                     ]
