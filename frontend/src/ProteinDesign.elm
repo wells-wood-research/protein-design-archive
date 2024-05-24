@@ -108,6 +108,27 @@ type alias Xtal =
     }
 
 
+type alias DesignDetails =
+    { header : String
+    , property : String
+    }
+
+
+designDetailsFromProteinDesign : ProteinDesign -> List DesignDetails
+designDetailsFromProteinDesign proteinDesign =
+    [ { header = "PDB code", property = proteinDesign.pdb }
+    , { header = "Authors", property = authorsToString proteinDesign.authors }
+    , { header = "Classification", property = classificationToString proteinDesign.classification }
+    , { header = "Subtitle", property = proteinDesign.subtitle }
+    , { header = "Tags", property = String.join ", " proteinDesign.tags }
+    , { header = "Release date", property = Date.toIsoString proteinDesign.release_date }
+    , { header = "Publication", property = proteinDesign.publication }
+    , { header = "Related entries", property = String.join ", " proteinDesign.related_pdb }
+    , { header = "Formula weight", property = String.fromFloat proteinDesign.formula_weight ++ " Da" }
+    , { header = "Synthesis comment", property = proteinDesign.synthesis_comment }
+    ]
+
+
 rawDesignDecoder : Decoder ProteinDesign
 rawDesignDecoder =
     Decode.succeed ProteinDesign
