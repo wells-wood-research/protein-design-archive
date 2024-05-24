@@ -367,7 +367,7 @@ designDetailsView proteinDesign =
                                     , scrollbarX
                                     , paddingXY 10 10
                                     ]
-                                    [ text chain.chain_seq ]
+                                    [ text chain.chain_seq_unnat ]
                                 ]
                   }
                 ]

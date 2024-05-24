@@ -14,7 +14,6 @@ type alias ProteinDesign =
     { pdb : String
     , picture_path : String
     , chains : List Chain
-    , pdb_string : String
     , authors : List Author
     , classification : Classification
     , classification_suggested : List Classification
@@ -46,6 +45,7 @@ type alias ProteinDesignStub =
     , tags : List String
     , keywords : List String
     , release_date : Date
+    , publication : String
     }
 
 
@@ -82,9 +82,19 @@ type alias Author =
     }
 
 
+type alias Reference =
+    { doi : String
+    , pubmed : String
+    , csd : String
+    , issn : String
+    , astm : String
+    }
+
+
 type alias Chain =
     { chain_id : String
-    , chain_seq : String
+    , chain_seq_unnat : String
+    , chain_seq_nat : String
     }
 
 
@@ -104,7 +114,6 @@ rawDesignDecoder =
         |> required "pdb" string
         |> required "picture_path" string
         |> required "chains" (list chainDecoder)
-        |> required "pdb_string" string
         |> required "authors" (list authorDecoder)
         |> required "classification" classificationDecoder
         |> required "classification_suggested" (list classificationDecoder)
@@ -137,6 +146,7 @@ rawDesignStubDecoder =
         |> required "tags" (list string)
         |> required "keywords" (list string)
         |> required "release_date" dateDecoder
+        |> required "publication" string
 
 
 classificationDecoder : Decoder Classification
@@ -152,15 +162,6 @@ referenceDecoder =
         |> required "CSD" string
         |> required "ISSN" string
         |> required "ASTM" string
-
-
-type alias Reference =
-    { doi : String
-    , pubmed : String
-    , csd : String
-    , issn : String
-    , astm : String
-    }
 
 
 dateDecoder : Decoder Date
@@ -188,7 +189,8 @@ chainDecoder : Decoder Chain
 chainDecoder =
     Decode.succeed Chain
         |> required "chain_id" string
-        |> required "chain_seq" string
+        |> required "chain_seq_unnat" string
+        |> required "chain_seq_nat" string
 
 
 xtalDecoder : Decoder Xtal
@@ -208,12 +210,18 @@ designSearchableText proteinDesign =
     , String.join " " <| List.map chainToString proteinDesign.chains
     , authorsToString proteinDesign.authors
     , classificationToString proteinDesign.classification
+    , String.join " " <| List.map classificationToString proteinDesign.classification_suggested
     , proteinDesign.subtitle
     , String.join " " proteinDesign.tags
     , String.join " " proteinDesign.keywords
     , Date.toIsoString proteinDesign.release_date
     , proteinDesign.publication
-    , proteinDesign.publication
+    , proteinDesign.publication_ref.doi
+    , proteinDesign.publication_ref.pubmed
+    , proteinDesign.publication_ref.csd
+    , proteinDesign.publication_ref.issn
+    , proteinDesign.publication_ref.astm
+    , proteinDesign.publication_country
     , proteinDesign.abstract
     , String.join " " proteinDesign.related_pdb
     , xtalToString proteinDesign.crystal_structure
@@ -230,6 +238,7 @@ stubSearchableText proteinDesign =
     , String.join " " proteinDesign.tags
     , String.join " " proteinDesign.keywords
     , Date.toIsoString proteinDesign.release_date
+    , proteinDesign.publication
     ]
         |> String.join "\n"
         |> String.toLower
@@ -248,7 +257,7 @@ refToString reference =
 
 chainToString : Chain -> String
 chainToString chain =
-    chain.chain_id ++ " " ++ chain.chain_seq
+    chain.chain_id ++ " " ++ chain.chain_seq_unnat
 
 
 authorToString : Author -> String
