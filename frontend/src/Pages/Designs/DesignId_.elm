@@ -13,7 +13,7 @@ import Html
 import Html.Attributes as HAtt
 import Http
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString)
+import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designDetailsFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
@@ -244,48 +244,56 @@ designDetailsView proteinDesign =
                                 |> text
                         }
                     ]
-                , paragraph
-                    []
-                    [ "Release Date: "
-                        ++ Date.toIsoString proteinDesign.release_date
-                        |> text
-                    ]
-                , paragraph
-                    []
-                    [ "Design Classification: "
-                        ++ classificationToString proteinDesign.classification
-                        |> text
-                    ]
-                , paragraph
-                    []
-                    [ text "Structural Keywords: "
-                    , el [] (text <| String.join ", " proteinDesign.tags)
-                    ]
-                , paragraph
-                    []
-                    [ text "Publication citation: "
-                    , el [ Font.italic ] (text <| proteinDesign.publication)
-                    ]
-                , paragraph
-                    []
-                    [ text "Publication ISSN link: "
-                    , link
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
+                , table
+                    [ padding 2 ]
+                    { data = designDetailsFromProteinDesign proteinDesign
+                    , columns =
+                        [ { header =
+                                paragraph
+                                    [ Font.bold
+                                    , paddingXY 5 10
+                                    , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                                    , Border.color <| rgb255 220 220 220
+                                    ]
+                                    [ text "Category" ]
+                          , width = fillPortion 2
+                          , view =
+                                \category ->
+                                    paragraph
+                                        Style.monospacedFont
+                                        [ column
+                                            [ width (fill |> maximum 150)
+                                            , height fill
+                                            , scrollbarX
+                                            , paddingXY 5 10
+                                            ]
+                                            [ text category.header ]
+                                        ]
+                          }
+                        , { header =
+                                paragraph
+                                    [ Font.bold
+                                    , paddingXY 10 10
+                                    , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                                    , Border.color <| rgb255 220 220 220
+                                    ]
+                                    [ text "Info" ]
+                          , width = fillPortion 8
+                          , view =
+                                \detail ->
+                                    paragraph
+                                        Style.monospacedFont
+                                        [ column
+                                            [ width (fill |> maximum 700)
+                                            , height fill
+                                            , scrollbarX
+                                            , paddingXY 10 10
+                                            ]
+                                            [ text detail.property ]
+                                        ]
+                          }
                         ]
-                        { url =
-                            "https://doi.org/" ++ proteinDesign.publication_ref.doi
-                        , label =
-                            proteinDesign.publication_ref.doi
-                                |> text
-                        }
-                    ]
-                , paragraph
-                    []
-                    [ "Authors: "
-                        ++ authorsToString proteinDesign.authors
-                        |> text
-                    ]
+                    }
                 ]
             ]
         , column
@@ -390,7 +398,7 @@ designDetailsView proteinDesign =
 
 
 designDetailsHeader : ProteinDesign -> Element msg
-designDetailsHeader { previousDesign, nextDesign } =
+designDetailsHeader { pdb, previousDesign, nextDesign } =
     row
         [ width fill
         , spaceEvenly
@@ -406,7 +414,21 @@ designDetailsHeader { previousDesign, nextDesign } =
                                 FeatherIcons.arrowLeftCircle
                     )
             }
-        , el Style.h2Font (text "Design Details")
+        , paragraph
+            (Style.h2Font ++ [ Font.center ])
+            [ text "Design Details of "
+            , link
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url =
+                    "https://www.rcsb.org/structure/"
+                        ++ pdb
+                , label =
+                    pdb
+                        |> text
+                }
+            ]
         , link
             []
             { url = "/designs/" ++ nextDesign
