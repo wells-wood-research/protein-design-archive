@@ -4,13 +4,13 @@ An up-to-date, complete, online resource for the protein design community and be
 
 ## Data preparation
 
-1. Data collection
+### 1. Data collection
 
 Data has been scraped from the RCSB PDB database using the script in ```backend/scripts/data_collection.py```.
 
 It relies on having a list of PDB codes to scrape data for, cif files to scrape information from, and in-house rules for assigning suggested classification for the protein designs.
 
-2. Downloading PDB files for display with NGL viewer
+### 2. Downloading PDB files for display with NGL viewer
 
 Run the following commands:
 
