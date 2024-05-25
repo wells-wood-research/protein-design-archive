@@ -540,7 +540,8 @@ designCard design =
                 , column
                     [ padding 2, spacing 2, width (fill |> minimum 200), alignTop ]
                     [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
-                    , paragraph [ Font.color <| rgb255 130 130 130, Font.size 11 ] [ text (authorsToString design.authors) ]
+                    , paragraph [ Font.color <| rgb255 130 130 130, Font.size 11 ] [ text design.subtitle ]
+                    , paragraph [ Font.size 11 ] [ text (authorsToString design.authors) ]
                     ]
                 ]
         }
