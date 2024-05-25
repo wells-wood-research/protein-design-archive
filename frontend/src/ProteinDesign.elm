@@ -131,31 +131,109 @@ designDetailsFromProteinDesign proteinDesign =
                 }
       }
     , { header = "Subtitle"
-      , property = text <| proteinDesign.subtitle
+      , property =
+            if String.isEmpty proteinDesign.subtitle then
+                text "-"
+
+            else
+                text <| proteinDesign.subtitle
       }
     , { header = "Classification"
-      , property = text <| classificationToString proteinDesign.classification
+      , property =
+            if String.isEmpty <| classificationToString proteinDesign.classification then
+                text "-"
+
+            else
+                text <| classificationToString proteinDesign.classification
       }
     , { header = "Tags"
-      , property = text <| String.join ", " proteinDesign.tags
+      , property =
+            if List.isEmpty proteinDesign.tags then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.tags
       }
     , { header = "Release date"
-      , property = text <| Date.toIsoString proteinDesign.release_date
+      , property =
+            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
+                text "-"
+
+            else
+                text <| Date.toIsoString proteinDesign.release_date
       }
     , { header = "Publication"
-      , property = text <| proteinDesign.publication
+      , property =
+            if String.isEmpty proteinDesign.publication then
+                text "-"
+
+            else
+                text <| proteinDesign.publication
+      }
+    , { header = "Reference link"
+      , property =
+            link
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url =
+                    if String.isEmpty proteinDesign.publication_ref.doi then
+                        if String.isEmpty proteinDesign.publication_ref.pubmed then
+                            "https://www.rcsb.org/structure/"
+                                ++ proteinDesign.pdb
+
+                        else
+                            "https://pubmed.ncbi.nlm.nih.gov/"
+                                ++ proteinDesign.publication_ref.pubmed
+
+                    else
+                        "https://doi.org/"
+                            ++ proteinDesign.publication_ref.doi
+                , label =
+                    (if String.isEmpty proteinDesign.publication_ref.doi then
+                        if String.isEmpty proteinDesign.publication_ref.pubmed then
+                            "-"
+
+                        else
+                            proteinDesign.publication_ref.pubmed
+
+                     else
+                        proteinDesign.publication_ref.doi
+                    )
+                        |> text
+                }
       }
     , { header = "Authors"
-      , property = text <| authorsToString proteinDesign.authors
+      , property =
+            if List.isEmpty proteinDesign.authors then
+                text "-"
+
+            else
+                text <| authorsToString proteinDesign.authors
       }
     , { header = "Related entries"
-      , property = text <| String.join ", " proteinDesign.related_pdb
+      , property =
+            if List.isEmpty proteinDesign.related_pdb then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.related_pdb
       }
     , { header = "Formula weight"
-      , property = text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
+      , property =
+            if String.isEmpty <| String.fromFloat proteinDesign.formula_weight then
+                text "-"
+
+            else
+                text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
       }
     , { header = "Synthesis comment"
-      , property = text <| proteinDesign.synthesis_comment
+      , property =
+            if String.isEmpty proteinDesign.synthesis_comment then
+                text "-"
+
+            else
+                text <| proteinDesign.synthesis_comment
       }
     ]
 
@@ -276,6 +354,8 @@ designSearchableText proteinDesign =
     , proteinDesign.publication_country
     , proteinDesign.abstract
     , String.join " " proteinDesign.related_pdb
+    , String.join " " proteinDesign.exptl_method
+    , proteinDesign.synthesis_comment
     , xtalToString proteinDesign.crystal_structure
     ]
         |> String.join "\n"
@@ -540,7 +620,8 @@ designCard design =
                 , column
                     [ padding 2, spacing 2, width (fill |> minimum 200), alignTop ]
                     [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
-                    , paragraph [ Font.color <| rgb255 130 130 130, Font.size 11 ] [ text (authorsToString design.authors) ]
+                    , paragraph [ Font.color <| rgb255 130 130 130, Font.size 11 ] [ text design.subtitle ]
+                    , paragraph [ Font.size 11 ] [ text (authorsToString design.authors) ]
                     ]
                 ]
         }
