@@ -130,14 +130,11 @@ designDetailsFromProteinDesign proteinDesign =
                         |> text
                 }
       }
-    , { header = "Authors"
-      , property = text <| authorsToString proteinDesign.authors
+    , { header = "Subtitle"
+      , property = text <| proteinDesign.subtitle
       }
     , { header = "Classification"
       , property = text <| classificationToString proteinDesign.classification
-      }
-    , { header = "Subtitle"
-      , property = text <| proteinDesign.subtitle
       }
     , { header = "Tags"
       , property = text <| String.join ", " proteinDesign.tags
@@ -147,6 +144,9 @@ designDetailsFromProteinDesign proteinDesign =
       }
     , { header = "Publication"
       , property = text <| proteinDesign.publication
+      }
+    , { header = "Authors"
+      , property = text <| authorsToString proteinDesign.authors
       }
     , { header = "Related entries"
       , property = text <| String.join ", " proteinDesign.related_pdb

@@ -240,7 +240,7 @@ designDetailsView proteinDesign =
                                     , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                                     , Border.color <| rgb255 220 220 220
                                     ]
-                                    [ text "Category" ]
+                                    [ text "Key" ]
                           , width = fillPortion 2
                           , view =
                                 \category ->
@@ -262,7 +262,7 @@ designDetailsView proteinDesign =
                                     , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                                     , Border.color <| rgb255 220 220 220
                                     ]
-                                    [ text "Info" ]
+                                    [ text "Value" ]
                           , width = fillPortion 8
                           , view =
                                 \detail ->
