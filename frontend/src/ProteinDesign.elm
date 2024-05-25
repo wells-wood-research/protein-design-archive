@@ -108,24 +108,55 @@ type alias Xtal =
     }
 
 
-type alias DesignDetails =
+type alias DesignDetails msg =
     { header : String
-    , property : String
+    , property : Element msg
     }
 
 
-designDetailsFromProteinDesign : ProteinDesign -> List DesignDetails
+designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
 designDetailsFromProteinDesign proteinDesign =
-    [ { header = "PDB code", property = proteinDesign.pdb }
-    , { header = "Authors", property = authorsToString proteinDesign.authors }
-    , { header = "Classification", property = classificationToString proteinDesign.classification }
-    , { header = "Subtitle", property = proteinDesign.subtitle }
-    , { header = "Tags", property = String.join ", " proteinDesign.tags }
-    , { header = "Release date", property = Date.toIsoString proteinDesign.release_date }
-    , { header = "Publication", property = proteinDesign.publication }
-    , { header = "Related entries", property = String.join ", " proteinDesign.related_pdb }
-    , { header = "Formula weight", property = String.fromFloat proteinDesign.formula_weight ++ " Da" }
-    , { header = "Synthesis comment", property = proteinDesign.synthesis_comment }
+    [ { header = "PDB code"
+      , property =
+            link
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url =
+                    "https://www.rcsb.org/structure/"
+                        ++ proteinDesign.pdb
+                , label =
+                    proteinDesign.pdb
+                        |> text
+                }
+      }
+    , { header = "Authors"
+      , property = text <| authorsToString proteinDesign.authors
+      }
+    , { header = "Classification"
+      , property = text <| classificationToString proteinDesign.classification
+      }
+    , { header = "Subtitle"
+      , property = text <| proteinDesign.subtitle
+      }
+    , { header = "Tags"
+      , property = text <| String.join ", " proteinDesign.tags
+      }
+    , { header = "Release date"
+      , property = text <| Date.toIsoString proteinDesign.release_date
+      }
+    , { header = "Publication"
+      , property = text <| proteinDesign.publication
+      }
+    , { header = "Related entries"
+      , property = text <| String.join ", " proteinDesign.related_pdb
+      }
+    , { header = "Formula weight"
+      , property = text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
+      }
+    , { header = "Synthesis comment"
+      , property = text <| proteinDesign.synthesis_comment
+      }
     ]
 
 

@@ -229,22 +229,7 @@ designDetailsView proteinDesign =
                 , spacing 10
                 , Font.justify
                 ]
-                [ paragraph
-                    []
-                    [ text "PDB Code: "
-                    , link
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url =
-                            "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdb
-                        , label =
-                            proteinDesign.pdb
-                                |> text
-                        }
-                    ]
-                , table
+                [ table
                     [ padding 2 ]
                     { data = designDetailsFromProteinDesign proteinDesign
                     , columns =
@@ -289,7 +274,7 @@ designDetailsView proteinDesign =
                                             , scrollbarX
                                             , paddingXY 10 10
                                             ]
-                                            [ text detail.property ]
+                                            [ detail.property ]
                                         ]
                           }
                         ]
@@ -416,19 +401,7 @@ designDetailsHeader { pdb, previousDesign, nextDesign } =
             }
         , paragraph
             (Style.h2Font ++ [ Font.center ])
-            [ text "Design Details of "
-            , link
-                [ Font.color <| rgb255 104 176 171
-                , Font.underline
-                ]
-                { url =
-                    "https://www.rcsb.org/structure/"
-                        ++ pdb
-                , label =
-                    pdb
-                        |> text
-                }
-            ]
+            [ text "Design Details" ]
         , link
             []
             { url = "/designs/" ++ nextDesign
