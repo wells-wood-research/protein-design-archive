@@ -240,7 +240,7 @@ designDetailsView proteinDesign =
                                     , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                                     , Border.color <| rgb255 220 220 220
                                     ]
-                                    [ text "Key" ]
+                                    [ text "Attribute" ]
                           , width = fillPortion 2
                           , view =
                                 \category ->
