@@ -54,7 +54,8 @@ type alias Model =
     , designFilters : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
-    , viewport : Task.Task Browser.Dom.Error Browser.Dom.Viewport
+    , screenWidth : Maybe Float
+    , screenHeight : Maybe Float
     }
 
 
@@ -65,10 +66,12 @@ init _ =
       , designFilters = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
-      , viewport = Browser.Dom.getViewport
+      , screenWidth = Nothing
+      , screenHeight = Nothing
       }
     , Effect.batch
         [ Effect.resetViewport ViewportReset
+        , Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
         , Effect.sendCmd (getData Urls.allDesignStubs)
         ]
     )
@@ -94,6 +97,7 @@ type Msg
     | CheckForData Time.Posix
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
 
 
@@ -116,13 +120,16 @@ update msg model =
                             rawDesignStubs
                                 |> List.map (\d -> ( d.pdb, d ))
                                 |> Dict.fromList
+
+                        filteredDesignStubs =
+                            designs
+                                |> Dict.values
+
+                        width =
+                            getScreenWidthFloat model
                     in
                     ( { model | designStubs = Success designs }
-                    , designs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
-                        |> Plots.timelinePlotStubs
-                        |> Effect.renderVegaPlot
+                    , Effect.renderVegaPlot (Plots.timelinePlotStubs width filteredDesignStubs)
                     )
 
                 DesignsDataReceived (Err e) ->
@@ -132,6 +139,21 @@ update msg model =
                       }
                     , Effect.none
                     )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            let
+                                width =
+                                    viewport.viewport.width
+
+                                height =
+                                    viewport.viewport.height
+                            in
+                            ( { model | screenWidth = Just width, screenHeight = Just height }, Effect.none )
+
+                        Err _ ->
+                            ( model, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -152,13 +174,17 @@ update msg model =
                     let
                         newDesignFilters =
                             Dict.insert key newFilter model.designFilters
+
+                        filteredDesignStubs =
+                            loadedDesignStubs
+                                |> Dict.values
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values newDesignFilters))
+
+                        width =
+                            getScreenWidthFloat model
                     in
                     ( { model | designFilters = newDesignFilters }
-                    , loadedDesignStubs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values newDesignFilters))
-                        |> Plots.timelinePlotStubs
-                        |> Effect.renderVegaPlot
+                    , Effect.renderVegaPlot (Plots.timelinePlotStubs width filteredDesignStubs)
                     )
 
                 UpdateStartDateTextField string ->
@@ -225,18 +251,24 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     { title = "Protein Design Archive"
-    , attributes = [ padding 10, width fill ]
+    , attributes = [ padding 10, centerX ]
     , element = homeView model
     }
 
 
-growthCurve : Element Msg
-growthCurve =
-    image
-        [ width (fill |> maximum 780), centerX ]
-        { src = "/growth_curve.png"
-        , description = "Histogram showing increase in number of de novo protein designs published from 1990 to 2026"
-        }
+getScreenWidthInt : Model -> Int
+getScreenWidthInt model =
+    Maybe.withDefault 800 <| String.toInt <| String.fromFloat <| Maybe.withDefault 800.0 model.screenWidth
+
+
+getScreenWidthFloat : Model -> Float
+getScreenWidthFloat model =
+    Maybe.withDefault 800.0 model.screenWidth
+
+
+getScreenWidthString : Model -> String
+getScreenWidthString model =
+    (String.fromFloat <| Maybe.withDefault 800.0 model.screenWidth) ++ "px"
 
 
 homeView : Model -> Element Msg
@@ -255,7 +287,7 @@ homeView model =
             column
                 [ spacing 10, width fill ]
                 [ --growthCurve
-                  Plots.timelinePlotView
+                  Plots.timelinePlotView (px (getScreenWidthInt model)) (getScreenWidthString model)
                 , row [ width fill ]
                     [ searchArea model
                     , dateSearchArea model
