@@ -1,6 +1,8 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
+import Browser
+import Browser.Dom
 import Components.Title
 import Date
 import DesignFilter
@@ -26,6 +28,7 @@ import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Shared.Msg exposing (Msg(..))
+import Task
 import Time
 import Urls
 import View exposing (View)
@@ -51,6 +54,7 @@ type alias Model =
     , designFilters : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
+    , viewport : Task.Task Browser.Dom.Error Browser.Dom.Viewport
     }
 
 
@@ -61,6 +65,7 @@ init _ =
       , designFilters = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
+      , viewport = Browser.Dom.getViewport
       }
     , Effect.batch
         [ Effect.resetViewport ViewportReset
