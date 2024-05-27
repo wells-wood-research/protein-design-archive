@@ -3,7 +3,6 @@ module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 import AppError exposing (AppError(..))
 import Browser.Dom
 import Components.Title
-import Date
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Border as Border
@@ -433,7 +432,7 @@ designDetailsView model proteinDesign =
 
 
 designDetailsHeader : ProteinDesign -> Element msg
-designDetailsHeader { pdb, previousDesign, nextDesign } =
+designDetailsHeader { previousDesign, nextDesign } =
     row
         [ width fill
         , spaceEvenly

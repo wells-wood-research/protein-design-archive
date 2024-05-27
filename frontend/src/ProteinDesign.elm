@@ -139,7 +139,7 @@ designDetailsFromProteinDesign proteinDesign =
                 , Border.color <| rgb255 220 220 220
                 , Border.rounded 3
                 , alignTop
-                , width (fill |> maximum 400)
+                , width (fill |> maximum 350)
                 ]
                 (image
                     [ width fill ]
@@ -612,10 +612,10 @@ tagToString tag =
 
 {-| A simple view that shows basic data about a design. Used for lists etc.
 -}
-designCard : ProteinDesignStub -> Element msg
-designCard design =
+designCard : Element.Length -> ProteinDesignStub -> Element msg
+designCard widthDesignCard design =
     link
-        [ width <| px 460
+        [ width <| widthDesignCard
         , clip
         ]
         { url = "/designs/" ++ design.pdb
@@ -636,9 +636,13 @@ designCard design =
                         { src = design.picture_path, description = "Image of design " ++ design.pdb }
                     )
                 , column
-                    [ padding 2, spacing 2, width (fill |> minimum 200), alignTop ]
+                    [ padding 2
+                    , spacing 2
+                    , width fill
+                    , alignTop
+                    ]
                     [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
-                    , paragraph [ Font.color <| rgb255 130 130 130, Font.size 11 ] [ text design.subtitle ]
+                    , paragraph [ Font.size 11, Font.color <| rgb255 130 130 130 ] [ text design.subtitle ]
                     , paragraph [ Font.size 11 ] [ text (authorsToString design.authors) ]
                     ]
                 ]

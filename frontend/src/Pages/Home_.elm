@@ -277,6 +277,20 @@ homeView model =
             text "Failed to load data, probably couldn't connect to server."
 
         RemoteData.Success designStubs ->
+            let
+                designsToDisplay =
+                    designStubs
+                        |> Dict.values
+                        |> List.filterMap
+                            (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+
+                widthDesignCard =
+                    if model.widthF < 800 then
+                        Element.fill
+
+                    else
+                        Element.px 400
+            in
             column [ centerX ]
                 [ Plots.timelinePlotView (px model.widthI) model.widthS
                 , column
@@ -285,22 +299,17 @@ homeView model =
                         [ searchArea model
                         , dateSearchArea model
                         ]
-                    , designStubs
-                        |> Dict.values
-                        |> List.filterMap
-                            (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
-                        |> designList
+                    , designList widthDesignCard designsToDisplay
                     ]
                 ]
 
 
-designList : List ProteinDesignStub -> Element msg
-designList designs =
+designList : Length -> List ProteinDesignStub -> Element msg
+designList widthDesignCard designs =
     wrappedRow
-        [ spacing 5
-        , width fill
+        [ spaceEvenly
         ]
-        (List.map ProteinDesign.designCard designs)
+        (List.map (ProteinDesign.designCard widthDesignCard) designs)
 
 
 searchArea : Model -> Element Msg
@@ -328,9 +337,9 @@ dateSearchArea model =
 dateStartField : Model -> Element Msg
 dateStartField model =
     row [ width fill ]
-        [ paragraph [ width fill, center, padding 5 ] [ text "from" ]
+        [ paragraph [ center, padding 5 ] [ text "from" ]
         , Input.text
-            [ width <| px 150
+            [ width (fill |> minimum 150)
             , Background.color <|
                 case model.mStartDate of
                     Nothing ->
@@ -368,10 +377,10 @@ dateStartField model =
 
 dateEndField : Model -> Element Msg
 dateEndField model =
-    row [ width fill, spaceEvenly ]
-        [ paragraph [ width fill, center, padding 5 ] [ text "to" ]
+    row [ width fill ]
+        [ paragraph [ center, padding 5 ] [ text "to" ]
         , Input.text
-            [ width <| px 150
+            [ width (fill |> minimum 150)
             , Background.color <|
                 case model.mEndDate of
                     Nothing ->
