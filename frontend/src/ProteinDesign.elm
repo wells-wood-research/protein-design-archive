@@ -621,7 +621,7 @@ designCard widthDesignCard design =
         { url = "/designs/" ++ design.pdb
         , label =
             row
-                [ width fill
+                [ width <| widthDesignCard
                 , spacing 4
                 , padding 4
                 , mouseOver [ Background.color <| rgb255 235 235 235 ]
@@ -642,8 +642,8 @@ designCard widthDesignCard design =
                     , alignTop
                     ]
                     [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
-                    , paragraph [ Font.size 11, Font.color <| rgb255 130 130 130 ] [ text design.subtitle ]
-                    , paragraph [ Font.size 11 ] [ text (authorsToString design.authors) ]
+                    , paragraph [ Font.size 11, Font.color <| rgb255 130 130 130 ] [ wrappedRow [] [ text design.subtitle ] ]
+                    , paragraph [ Font.size 11 ] [ wrappedRow [] [ text (authorsToString design.authors) ] ]
                     ]
                 ]
         }

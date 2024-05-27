@@ -2,7 +2,6 @@ module Plots exposing (PlotData, timelinePlotDesigns, timelinePlotStubs, timelin
 
 import Date exposing (Unit(..))
 import Element exposing (..)
-import Element.Font as Font
 import Element.Keyed as Keyed
 import Html
 import Html.Attributes as HAtt

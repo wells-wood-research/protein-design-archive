@@ -2,6 +2,7 @@ module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
 import Browser.Dom
+import Browser.Events
 import Components.Title
 import Effect exposing (Effect)
 import Element exposing (..)
@@ -46,6 +47,7 @@ type alias Model =
     , widthS : String
     , widthSscaled : String
     , widthI : Int
+    , originalWidthIscaled : Int
     , widthIscaled : Int
     , widthF : Float
     }
@@ -60,6 +62,7 @@ init designId mScreenWidthF =
       , widthS = "800"
       , widthSscaled = "800"
       , widthI = 800
+      , originalWidthIscaled = 800
       , widthIscaled = 800
       , widthF = 800.0
       }
@@ -87,6 +90,7 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
 
@@ -122,18 +126,17 @@ update msg model =
                     , Effect.none
                     )
 
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            let
-                                width =
-                                    if viewport.viewport.width >= 1920 then
-                                        1920
-
-                                    else
-                                        viewport.viewport.width
-                            in
-                            ( { model | mWidthF = Just width }, Effect.resetViewport ViewportReset )
+                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
@@ -143,6 +146,7 @@ update msg model =
                         | widthS = getScreenWidthString model.mWidthF
                         , widthSscaled = getScreenWidthStringNgl model.mWidthF
                         , widthI = getScreenWidthInt model.mWidthF
+                        , originalWidthIscaled = getScreenWidthIntNgl model.mWidthF
                         , widthIscaled = getScreenWidthIntNgl model.mWidthF
                         , widthF = getScreenWidthFloat model.mWidthF
                       }
@@ -161,6 +165,46 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
+                ViewportReset ->
+                    let
+                        newOriginalWidthIscaled =
+                            case model.mWidthF of
+                                Just widthF ->
+                                    if toFloat model.originalWidthIscaled > widthF then
+                                        getScreenWidthInt model.mWidthF
+
+                                    else
+                                        getScreenWidthInt (Just <| toFloat model.originalWidthIscaled)
+
+                                _ ->
+                                    model.originalWidthIscaled
+                    in
+                    ( { model
+                        | widthS = getScreenWidthString model.mWidthF
+                        , widthSscaled = getScreenWidthStringNgl model.mWidthF
+                        , widthI = getScreenWidthInt model.mWidthF
+                        , originalWidthIscaled = newOriginalWidthIscaled
+                        , widthIscaled = getScreenWidthIntNgl model.mWidthF
+                        , widthF = getScreenWidthFloat model.mWidthF
+                      }
+                    , Effect.none
+                    )
+
                 _ ->
                     ( model, Effect.none )
 
@@ -169,9 +213,9 @@ update msg model =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Browser.Events.onResize (\width height -> WindowResizes width height)
 
 
 
@@ -331,12 +375,11 @@ designDetailsView model proteinDesign =
                 ]
             ]
         , column
-            [ width (fill |> maximum model.widthIscaled)
-            , spacing 20
+            [ spacing 20
             , centerX
             ]
             [ Keyed.el
-                [ width <| px model.widthIscaled
+                [ width <| px model.originalWidthIscaled
                 , height <| px 400
                 , Border.width 2
                 , Border.rounded 3
