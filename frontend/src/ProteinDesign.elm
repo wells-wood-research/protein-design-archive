@@ -5,6 +5,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Time exposing (Month(..))
@@ -129,6 +130,23 @@ designDetailsFromProteinDesign proteinDesign =
                     proteinDesign.pdb
                         |> text
                 }
+      }
+    , { header = "Subtitle"
+      , property =
+            el
+                [ padding 2
+                , Border.width 2
+                , Border.color <| rgb255 220 220 220
+                , Border.rounded 3
+                , alignTop
+                , width (fill |> maximum 400)
+                ]
+                (image
+                    [ width fill ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
+                )
       }
     , { header = "Subtitle"
       , property =

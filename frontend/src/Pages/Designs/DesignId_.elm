@@ -1,6 +1,7 @@
 module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
+import Browser.Dom
 import Components.Title
 import Date
 import Effect exposing (Effect)
@@ -9,23 +10,25 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Keyed as Keyed
 import FeatherIcons
+import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthIntNgl, getScreenWidthString, getScreenWidthStringNgl)
 import Html
 import Html.Attributes as HAtt
 import Http
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designDetailsFromProteinDesign)
+import ProteinDesign exposing (ProteinDesign, designDetailsFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
+import Task
 import Urls
 import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page _ route =
+page shared route =
     Page.new
-        { init = \_ -> init route.params.designId
+        { init = \_ -> init route.params.designId shared.mScreenWidth
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -40,16 +43,32 @@ type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
+    , mWidthF : Maybe Float
+    , widthS : String
+    , widthSscaled : String
+    , widthI : Int
+    , widthIscaled : Int
+    , widthF : Float
     }
 
 
-init : String -> ( Model, Effect Msg )
-init designId =
+init : String -> Maybe Float -> ( Model, Effect Msg )
+init designId mScreenWidthF =
     ( { designId = designId
       , design = Loading
       , errors = []
+      , mWidthF = mScreenWidthF
+      , widthS = "800"
+      , widthSscaled = "800"
+      , widthI = 800
+      , widthIscaled = 800
+      , widthF = 800.0
       }
-    , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+    , Effect.batch
+        [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.resetViewport ViewportReset
+        , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+        ]
     )
 
 
@@ -69,6 +88,8 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
+    | ViewportReset
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -98,6 +119,33 @@ update msg model =
                     ( { model
                         | design = Failure e
                         , errors = DesignRequestFailed :: model.errors
+                      }
+                    , Effect.none
+                    )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            let
+                                width =
+                                    if viewport.viewport.width >= 1920 then
+                                        1920
+
+                                    else
+                                        viewport.viewport.width
+                            in
+                            ( { model | mWidthF = Just width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
+                ViewportReset ->
+                    ( { model
+                        | widthS = getScreenWidthString model.mWidthF
+                        , widthSscaled = getScreenWidthStringNgl model.mWidthF
+                        , widthI = getScreenWidthInt model.mWidthF
+                        , widthIscaled = getScreenWidthIntNgl model.mWidthF
+                        , widthF = getScreenWidthFloat model.mWidthF
                       }
                     , Effect.none
                     )
@@ -134,7 +182,13 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     { title = "Design Details"
-    , attributes = [ width fill ]
+    , attributes =
+        [ centerX
+        , width
+            (fill
+                |> minimum model.widthI
+            )
+        ]
     , element = details model
     }
 
@@ -145,7 +199,7 @@ details model =
         mDesign =
             model.design
     in
-    row []
+    row [ centerX ]
         [ column
             [ width fill ]
             [ case mDesign of
@@ -188,17 +242,17 @@ details model =
                         ]
 
                 Success d ->
-                    designDetailsView d
+                    designDetailsView model d
             ]
         ]
 
 
-designDetailsView : ProteinDesign -> Element msg
-designDetailsView proteinDesign =
+designDetailsView : Model -> ProteinDesign -> Element msg
+designDetailsView model proteinDesign =
     column
         ([ centerX
-         , width fill
-         , padding 20
+         , width (fill |> maximum model.widthI)
+         , padding 30
          , spacing 30
          , height fill
          ]
@@ -208,24 +262,11 @@ designDetailsView proteinDesign =
         , wrappedRow
             [ width fill
             , spacing 10
+            , spaceEvenly
             ]
-            [ el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width <| fillPortion 3
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
-            , column
+            [ column
                 [ height fill
-                , width <| fillPortion 7
+                , width (fill |> maximum model.widthI)
                 , spacing 10
                 , Font.justify
                 ]
@@ -269,7 +310,7 @@ designDetailsView proteinDesign =
                                     paragraph
                                         Style.monospacedFont
                                         [ column
-                                            [ width (fill |> maximum 700)
+                                            [ width (fill |> maximum (model.widthI - 200))
                                             , height fill
                                             , scrollbarX
                                             , paddingXY 10 10
@@ -282,18 +323,22 @@ designDetailsView proteinDesign =
                 ]
             ]
         , column
-            [ width fill
+            [ width (fill |> maximum model.widthIscaled)
             , spacing 20
             ]
             [ column
                 Style.h2Font
                 [ text "Structure"
                 ]
-            , Keyed.el
-                [ width <| px 900
+            ]
+        , column
+            [ width (fill |> maximum model.widthIscaled)
+            , spacing 20
+            , centerX
+            ]
+            [ Keyed.el
+                [ width <| px model.widthIscaled
                 , height <| px 400
-                , padding 5
-                , centerX
                 , Border.width 2
                 , Border.rounded 3
                 , Border.color <| rgb255 220 220 220
@@ -301,7 +346,7 @@ designDetailsView proteinDesign =
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" "890px"
+                    , HAtt.style "width" model.widthSscaled
                     , HAtt.style "height" "400px"
                     , HAtt.style "align" "center"
                     , HAtt.alt "3D structure"
@@ -333,7 +378,11 @@ designDetailsView proteinDesign =
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum 150)
+                                    [ width
+                                        (fill
+                                            |> maximum 150
+                                            |> minimum 80
+                                        )
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 5 10
@@ -343,7 +392,8 @@ designDetailsView proteinDesign =
                   }
                 , { header =
                         paragraph
-                            [ Font.bold
+                            [ width fill
+                            , Font.bold
                             , paddingXY 10 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
@@ -355,7 +405,7 @@ designDetailsView proteinDesign =
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum 700)
+                                    [ width (fill |> maximum (model.widthI - 200))
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 10 10
