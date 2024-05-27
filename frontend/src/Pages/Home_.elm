@@ -1,7 +1,6 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
-import Browser
 import Browser.Dom
 import Components.Title
 import Date
@@ -19,6 +18,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Font exposing (center)
 import Element.Input as Input
+import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
 import Http
 import Json.Decode
 import Page exposing (Page)
@@ -35,9 +35,9 @@ import View exposing (View)
 
 
 page : Shared.Model -> Route () -> Page Model Msg
-page _ _ =
+page shared _ =
     Page.new
-        { init = init
+        { init = \() -> init shared.mScreenWidth
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -54,24 +54,28 @@ type alias Model =
     , designFilters : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
-    , screenWidth : Maybe Float
-    , screenHeight : Maybe Float
+    , mWidthF : Maybe Float
+    , widthS : String
+    , widthI : Int
+    , widthF : Float
     }
 
 
-init : () -> ( Model, Effect Msg )
-init _ =
+init : Maybe Float -> ( Model, Effect Msg )
+init mScreenWidthF =
     ( { designStubs = Loading
       , errors = []
       , designFilters = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
-      , screenWidth = Nothing
-      , screenHeight = Nothing
+      , mWidthF = mScreenWidthF
+      , widthS = "800"
+      , widthI = 800
+      , widthF = 800.0
       }
     , Effect.batch
-        [ Effect.resetViewport ViewportReset
-        , Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.resetViewport ViewportReset
         , Effect.sendCmd (getData Urls.allDesignStubs)
         ]
     )
@@ -124,12 +128,9 @@ update msg model =
                         filteredDesignStubs =
                             designs
                                 |> Dict.values
-
-                        width =
-                            getScreenWidthFloat model
                     in
                     ( { model | designStubs = Success designs }
-                    , Effect.renderVegaPlot (Plots.timelinePlotStubs width filteredDesignStubs)
+                    , Effect.renderVegaPlot (Plots.timelinePlotStubs model.widthF filteredDesignStubs)
                     )
 
                 DesignsDataReceived (Err e) ->
@@ -145,15 +146,25 @@ update msg model =
                         Ok viewport ->
                             let
                                 width =
-                                    viewport.viewport.width
+                                    if viewport.viewport.width >= 1920 then
+                                        1920
 
-                                height =
-                                    viewport.viewport.height
+                                    else
+                                        viewport.viewport.width
                             in
-                            ( { model | screenWidth = Just width, screenHeight = Just height }, Effect.none )
+                            ( { model | mWidthF = Just width }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
+
+                ViewportReset ->
+                    ( { model
+                        | widthS = getScreenWidthString model.mWidthF
+                        , widthI = getScreenWidthInt model.mWidthF
+                        , widthF = getScreenWidthFloat model.mWidthF
+                      }
+                    , Effect.none
+                    )
 
                 _ ->
                     ( model, Effect.none )
@@ -179,12 +190,9 @@ update msg model =
                             loadedDesignStubs
                                 |> Dict.values
                                 |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values newDesignFilters))
-
-                        width =
-                            getScreenWidthFloat model
                     in
                     ( { model | designFilters = newDesignFilters }
-                    , Effect.renderVegaPlot (Plots.timelinePlotStubs width filteredDesignStubs)
+                    , Effect.renderVegaPlot (Plots.timelinePlotStubs model.widthF filteredDesignStubs)
                     )
 
                 UpdateStartDateTextField string ->
@@ -251,24 +259,9 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     { title = "Protein Design Archive"
-    , attributes = [ padding 10, centerX ]
+    , attributes = [ centerX, width (fill |> minimum model.widthI) ]
     , element = homeView model
     }
-
-
-getScreenWidthInt : Model -> Int
-getScreenWidthInt model =
-    Maybe.withDefault 800 <| String.toInt <| String.fromFloat <| Maybe.withDefault 800.0 model.screenWidth
-
-
-getScreenWidthFloat : Model -> Float
-getScreenWidthFloat model =
-    Maybe.withDefault 800.0 model.screenWidth
-
-
-getScreenWidthString : Model -> String
-getScreenWidthString model =
-    (String.fromFloat <| Maybe.withDefault 800.0 model.screenWidth) ++ "px"
 
 
 homeView : Model -> Element Msg
@@ -284,19 +277,20 @@ homeView model =
             text "Failed to load data, probably couldn't connect to server."
 
         RemoteData.Success designStubs ->
-            column
-                [ spacing 10, width fill ]
-                [ --growthCurve
-                  Plots.timelinePlotView (px (getScreenWidthInt model)) (getScreenWidthString model)
-                , row [ width fill ]
-                    [ searchArea model
-                    , dateSearchArea model
+            column [ centerX ]
+                [ Plots.timelinePlotView (px model.widthI) model.widthS
+                , column
+                    [ padding 30, spacing 10, centerX, width (fill |> maximum model.widthI) ]
+                    [ row [ width fill ]
+                        [ searchArea model
+                        , dateSearchArea model
+                        ]
+                    , designStubs
+                        |> Dict.values
+                        |> List.filterMap
+                            (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                        |> designList
                     ]
-                , designStubs
-                    |> Dict.values
-                    |> List.filterMap
-                        (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
-                    |> designList
                 ]
 
 

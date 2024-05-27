@@ -27,7 +27,7 @@ timelinePlotId =
 timelinePlotView : Length -> String -> Element msg
 timelinePlotView widthL widthS =
     column
-        [ spacing 15, Element.width widthL ]
+        [ spacing 15, Element.width widthL, centerX ]
         [ Keyed.el [ centerX ]
             ( timelinePlotId
             , Html.div
@@ -153,7 +153,7 @@ timelinePlotDesigns widthF designs =
     { plotId = timelinePlotId
     , spec =
         toVega
-            [ Vega.width (0.9 * widthF), Vega.height (0.6 * widthF), ds, si [], sc [], ax [], mk [] ]
+            [ Vega.width (0.85 * widthF), Vega.height 300, ds, si [], sc [], ax [], mk [] ]
     }
 
 
@@ -260,5 +260,5 @@ timelinePlotStubs widthF designs =
     { plotId = timelinePlotId
     , spec =
         toVega
-            [ Vega.width (0.9 * widthF), Vega.height (0.6 * widthF), Vega.padding 0, ds, si [], sc [], ax [], mk [] ]
+            [ Vega.width (0.85 * widthF), Vega.height 300, Vega.padding 50, ds, si [], sc [], ax [], mk [] ]
     }
