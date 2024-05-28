@@ -51,7 +51,15 @@ type alias Model =
     , designFilters : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
+    , replotTime : Int
+    , renderPlotState : RenderPlotState
     }
+
+
+type RenderPlotState
+    = AwaitingRender Int
+    | Rendered
+    | WillRender
 
 
 init : () -> ( Model, Effect Msg )
@@ -61,6 +69,8 @@ init _ =
       , designFilters = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
+      , replotTime = 3
+      , renderPlotState = WillRender
       }
     , Effect.batch
         [ Effect.resetViewport ViewportReset
@@ -86,9 +96,9 @@ type Msg
     = UpdateFilters String DesignFilter
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
-    | CheckForData Time.Posix
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
+    | RenderWhenReady Time.Posix
     | ViewportReset
 
 
@@ -148,12 +158,11 @@ update msg model =
                         newDesignFilters =
                             Dict.insert key newFilter model.designFilters
                     in
-                    ( { model | designFilters = newDesignFilters }
-                    , loadedDesignStubs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values newDesignFilters))
-                        |> Plots.timelinePlotStubs
-                        |> Effect.renderVegaPlot
+                    ( { model
+                        | designFilters = newDesignFilters
+                        , renderPlotState = AwaitingRender model.replotTime
+                      }
+                    , Effect.none
                     )
 
                 UpdateStartDateTextField string ->
@@ -188,8 +197,24 @@ update msg model =
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
 
-                CheckForData _ ->
-                    ( model, Effect.none )
+                RenderWhenReady _ ->
+                    case model.renderPlotState of
+                        AwaitingRender 0 ->
+                            ( { model | renderPlotState = Rendered }
+                            , loadedDesignStubs
+                                |> Dict.values
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                                |> Plots.timelinePlotStubs
+                                |> Effect.renderVegaPlot
+                            )
+
+                        AwaitingRender remaining ->
+                            ( { model | renderPlotState = AwaitingRender (remaining - 1) }
+                            , Effect.none
+                            )
+
+                        _ ->
+                            ( model, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -209,8 +234,13 @@ ifEmptyOrNot string =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+subscriptions model =
+    case model.renderPlotState of
+        AwaitingRender _ ->
+            Time.every 100 RenderWhenReady
+
+        _ ->
+            Sub.none
 
 
 
