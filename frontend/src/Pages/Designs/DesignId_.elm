@@ -5,6 +5,7 @@ import Components.Title
 import Date
 import Effect exposing (Effect)
 import Element exposing (..)
+import Element.Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Keyed as Keyed
@@ -204,34 +205,105 @@ designDetailsView proteinDesign =
          ]
             ++ Style.bodyFont
         )
-        [ designDetailsHeader proteinDesign
-        , wrappedRow
-            [ width fill
-            , spacing 10
+        [ el
+            [ Element.inFront (designDetailsHeader proteinDesign)
             ]
-            [ el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width <| fillPortion 3
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
-            , column
-                [ height fill
-                , width <| fillPortion 7
-                , spacing 10
-                , Font.justify
-                ]
-                [ table
+            (column
+                []
+                [ column
+                    [ height fill
+                    , width fill
+                    , spacing 10
+                    , Font.justify
+                    ]
+                    [ table
+                        [ padding 2 ]
+                        { data = designDetailsFromProteinDesign proteinDesign
+                        , columns =
+                            [ { header =
+                                    paragraph
+                                        [ Font.bold
+                                        , paddingXY 5 10
+                                        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                                        , Border.color <| rgb255 220 220 220
+                                        ]
+                                        [ text "Attribute" ]
+                              , width = fillPortion 2
+                              , view =
+                                    \category ->
+                                        paragraph
+                                            Style.monospacedFont
+                                            [ column
+                                                [ width (fill |> maximum 150)
+                                                , height fill
+                                                , scrollbarX
+                                                , paddingXY 5 10
+                                                ]
+                                                [ text category.header ]
+                                            ]
+                              }
+                            , { header =
+                                    paragraph
+                                        [ Font.bold
+                                        , paddingXY 10 10
+                                        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                                        , Border.color <| rgb255 220 220 220
+                                        ]
+                                        [ text "Value" ]
+                              , width = fillPortion 8
+                              , view =
+                                    \detail ->
+                                        paragraph
+                                            Style.monospacedFont
+                                            [ column
+                                                [ width (fill |> maximum 700)
+                                                , height fill
+                                                , scrollbarX
+                                                , paddingXY 10 10
+                                                ]
+                                                [ detail.property ]
+                                            ]
+                              }
+                            ]
+                        }
+                    ]
+                , column
+                    [ width fill
+                    , spacing 20
+                    ]
+                    [ column
+                        Style.h2Font
+                        [ text "Structure"
+                        ]
+                    , Keyed.el
+                        [ width <| px 900
+                        , height <| px 400
+                        , padding 5
+                        , centerX
+                        , Border.width 2
+                        , Border.rounded 3
+                        , Border.color <| rgb255 220 220 220
+                        ]
+                        ( proteinDesign.pdb
+                        , Html.node "ngl-viewer"
+                            [ HAtt.id "viewer"
+                            , HAtt.style "width" "890px"
+                            , HAtt.style "height" "400px"
+                            , HAtt.style "align" "center"
+                            , HAtt.alt "3D structure"
+                            , HAtt.attribute "pdb-string" proteinDesign.pdb
+                            ]
+                            []
+                            |> html
+                        )
+                    ]
+                , paragraph
+                    Style.h2Font
+                    [ text "Sequence"
+                    ]
+                , table
                     [ padding 2 ]
-                    { data = designDetailsFromProteinDesign proteinDesign
+                    { data = proteinDesign.chains
                     , columns =
                         [ { header =
                                 paragraph
@@ -240,10 +312,10 @@ designDetailsView proteinDesign =
                                     , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                                     , Border.color <| rgb255 220 220 220
                                     ]
-                                    [ text "Attribute" ]
+                                    [ text "Chain ID" ]
                           , width = fillPortion 2
                           , view =
-                                \category ->
+                                \chain ->
                                     paragraph
                                         Style.monospacedFont
                                         [ column
@@ -252,7 +324,7 @@ designDetailsView proteinDesign =
                                             , scrollbarX
                                             , paddingXY 5 10
                                             ]
-                                            [ text category.header ]
+                                            [ text chain.chain_id ]
                                         ]
                           }
                         , { header =
@@ -262,10 +334,10 @@ designDetailsView proteinDesign =
                                     , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                                     , Border.color <| rgb255 220 220 220
                                     ]
-                                    [ text "Value" ]
+                                    [ text "Sequence" ]
                           , width = fillPortion 8
                           , view =
-                                \detail ->
+                                \chain ->
                                     paragraph
                                         Style.monospacedFont
                                         [ column
@@ -274,111 +346,27 @@ designDetailsView proteinDesign =
                                             , scrollbarX
                                             , paddingXY 10 10
                                             ]
-                                            [ detail.property ]
+                                            [ text chain.chain_seq_unnat ]
                                         ]
                           }
                         ]
                     }
-                ]
-            ]
-        , column
-            [ width fill
-            , spacing 20
-            ]
-            [ column
-                Style.h2Font
-                [ text "Structure"
-                ]
-            , Keyed.el
-                [ width <| px 900
-                , height <| px 400
-                , padding 5
-                , centerX
-                , Border.width 2
-                , Border.rounded 3
-                , Border.color <| rgb255 220 220 220
-                ]
-                ( proteinDesign.pdb
-                , Html.node "ngl-viewer"
-                    [ HAtt.id "viewer"
-                    , HAtt.style "width" "890px"
-                    , HAtt.style "height" "400px"
-                    , HAtt.style "align" "center"
-                    , HAtt.alt "3D structure"
-                    , HAtt.attribute "pdb-string" proteinDesign.pdb
+                , column
+                    [ width fill
+                    , spacing 20
                     ]
-                    []
-                    |> html
-                )
-            ]
-        , paragraph
-            Style.h2Font
-            [ text "Sequence"
-            ]
-        , table
-            [ padding 2 ]
-            { data = proteinDesign.chains
-            , columns =
-                [ { header =
-                        paragraph
-                            [ Font.bold
-                            , paddingXY 5 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Chain ID" ]
-                  , width = fillPortion 2
-                  , view =
-                        \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (fill |> maximum 150)
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 5 10
-                                    ]
-                                    [ text chain.chain_id ]
-                                ]
-                  }
-                , { header =
-                        paragraph
-                            [ Font.bold
-                            , paddingXY 10 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Sequence" ]
-                  , width = fillPortion 8
-                  , view =
-                        \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (fill |> maximum 700)
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 10 10
-                                    ]
-                                    [ text chain.chain_seq_unnat ]
-                                ]
-                  }
+                    [ paragraph
+                        Style.h2Font
+                        [ text "Description"
+                        ]
+                    , paragraph
+                        [ Font.justify ]
+                        [ proteinDesign.abstract
+                            |> text
+                        ]
+                    ]
                 ]
-            }
-        , column
-            [ width fill
-            , spacing 20
-            ]
-            [ paragraph
-                Style.h2Font
-                [ text "Description"
-                ]
-            , paragraph
-                [ Font.justify ]
-                [ proteinDesign.abstract
-                    |> text
-                ]
-            ]
+            )
         ]
 
 
@@ -386,7 +374,14 @@ designDetailsHeader : ProteinDesign -> Element msg
 designDetailsHeader { pdb, previousDesign, nextDesign } =
     row
         [ width fill
+        , paddingXY 0 20
+        , centerX
         , spaceEvenly
+        , Element.Background.color <| rgb255 255 255 255
+        , Element.htmlAttribute (HAtt.style "position" "fixed")
+        , Element.htmlAttribute (HAtt.style "top" "0")
+        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+        , Border.color <| rgb255 220 220 220
         ]
         [ link
             []
