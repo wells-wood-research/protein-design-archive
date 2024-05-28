@@ -14,8 +14,8 @@ It relies on having a list of PDB codes to scrape data for, cif files to scrape 
 
 Run the following commands:
 
-```chmod +x batch_download.sh```
+```chmod +x download_pdbs.sh```
 
-```bash batch_download.sh -f pdb_codes.csv -o frontend/static/pdb_files -a```
+```bash download_pdbs.sh -f pdb_codes.csv -o frontend/static/pdb_files -a```
 
 Make sure to specify the output path correctly and adjusting the ```frontend/static/ngl-web-component.js``` file to point to the correct online path of the pdb files' directory.
