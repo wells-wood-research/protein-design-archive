@@ -5,8 +5,10 @@ import Components.Title
 import Date
 import Effect exposing (Effect)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Element.Input as Input
 import Element.Keyed as Keyed
 import FeatherIcons
 import Html
@@ -40,6 +42,7 @@ type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
+    , displayUnnat : Bool
     }
 
 
@@ -48,6 +51,7 @@ init designId =
     ( { designId = designId
       , design = Loading
       , errors = []
+      , displayUnnat = True
       }
     , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
     )
@@ -69,6 +73,7 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | ToggleSequence Bool
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -102,6 +107,9 @@ update msg model =
                     , Effect.none
                     )
 
+                ToggleSequence checkboxStatus ->
+                    ( { model | displayUnnat = checkboxStatus }, Effect.none )
+
         RemoteData.Failure e ->
             case msg of
                 _ ->
@@ -114,6 +122,9 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
+                ToggleSequence checkboxStatus ->
+                    ( { model | displayUnnat = checkboxStatus }, Effect.none )
+
                 _ ->
                     ( model, Effect.none )
 
@@ -139,7 +150,7 @@ view model =
     }
 
 
-details : Model -> Element msg
+details : Model -> Element Msg
 details model =
     let
         mDesign =
@@ -193,7 +204,7 @@ details model =
         ]
 
 
-designDetailsView : ProteinDesign -> Element msg
+designDetailsView : ProteinDesign -> Element Msg
 designDetailsView proteinDesign =
     column
         ([ centerX
@@ -315,6 +326,7 @@ designDetailsView proteinDesign =
             Style.h2Font
             [ text "Sequence"
             ]
+        , toggleButton
         , table
             [ padding 2 ]
             { data = proteinDesign.chains
@@ -403,7 +415,7 @@ designDetailsHeader { pdb, previousDesign, nextDesign } =
             (Style.h2Font ++ [ Font.center ])
             [ text "Design Details" ]
         , link
-            []
+            [ mouseOver [] ]
             { url = "/designs/" ++ nextDesign
             , label =
                 el [ centerX ]
@@ -414,3 +426,13 @@ designDetailsHeader { pdb, previousDesign, nextDesign } =
                     )
             }
         ]
+
+
+toggleButton : Element Msg
+toggleButton =
+    Input.checkbox [ paddingXY 3 10, alignTop ]
+        { onChange = \checkboxStatus -> ToggleSequence checkboxStatus
+        , icon = Input.defaultCheckbox
+        , checked = True
+        , label = Input.labelLeft [] (paragraph Style.bodyFont <| [ text <| "Display unnatural residues." ])
+        }
