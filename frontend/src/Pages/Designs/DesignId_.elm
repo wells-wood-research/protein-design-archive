@@ -381,9 +381,10 @@ designDetailsView model proteinDesign =
             [ Keyed.el
                 [ width <| px model.originalWidthIscaled
                 , height <| px 400
-                , Border.width 2
-                , Border.rounded 3
-                , Border.color <| rgb255 220 220 220
+
+                --, Border.width 2
+                --, Border.rounded 3
+                --, Border.color <| rgb255 220 220 220
                 ]
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
