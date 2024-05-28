@@ -118,7 +118,7 @@ designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
 designDetailsFromProteinDesign proteinDesign =
     [ { header = "PDB code"
       , property =
-            link
+            newTabLink
                 [ Font.color <| rgb255 104 176 171
                 , Font.underline
                 ]
@@ -172,7 +172,7 @@ designDetailsFromProteinDesign proteinDesign =
       }
     , { header = "Reference link"
       , property =
-            link
+            newTabLink
                 [ Font.color <| rgb255 104 176 171
                 , Font.underline
                 ]
