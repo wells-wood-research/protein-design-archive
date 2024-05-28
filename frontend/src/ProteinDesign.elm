@@ -19,7 +19,7 @@ type alias ProteinDesign =
     , classification_suggested : List Classification
     , classification_suggested_reason : List String
     , subtitle : String
-    , tags : List String -- List Tag
+    , tags : List String
     , keywords : List String
     , release_date : Date
     , publication : String
