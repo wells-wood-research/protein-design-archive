@@ -39,6 +39,7 @@ type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
+    , mWidthF : Maybe Float
     , reviewer : String
     , classificationCheckboxDict : Dict String Bool
     , classification : Dict String Bool
@@ -53,6 +54,7 @@ init designId =
     ( { designId = designId
       , design = Loading
       , errors = []
+      , mWidthF = Just 800.0
       , reviewer = "Marta Chronowska (default)"
       , classificationCheckboxDict = classificationCheckboxDict
       , classification = Dict.empty
@@ -228,7 +230,7 @@ details : Model -> Element Msg
 details model =
     column
         [ width fill ]
-        [ Details.details model.design
+        [ Details.details model.mWidthF model.design
         , reviewArea model
         ]
 

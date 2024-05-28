@@ -232,16 +232,12 @@ view model =
                 |> minimum model.widthI
             )
         ]
-    , element = details model
+    , element = details model.mWidthF model.design
     }
 
 
-details : Model -> Element msg
-details model =
-    let
-        mDesign =
-            model.design
-    in
+details : Maybe Float -> RemoteData Http.Error ProteinDesign -> Element msg
+details mWidthF mDesign =
     row []
         [ column
             [ width fill ]
@@ -254,47 +250,47 @@ details model =
                         [ text "Error querying the database. Try reloading the page."
                         ]
 
-            Loading ->
-                paragraph
-                    (Style.bodyFont
-                        ++ [ width fill, Font.center, Font.justify ]
-                    )
-                    [ text "Loading the design..."
-                    ]
+                Loading ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ text "Loading the design..."
+                        ]
 
-            Failure e ->
-                paragraph
-                    (Style.bodyFont
-                        ++ [ width fill, Font.center, Font.justify ]
-                    )
-                    [ case e of
-                        Http.BadUrl _ ->
-                            text "Error loading design: invalid URL."
+                Failure e ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ case e of
+                            Http.BadUrl _ ->
+                                text "Error loading design: invalid URL."
 
-                        Http.Timeout ->
-                            text "Error loading design: it took too long to get a response."
+                            Http.Timeout ->
+                                text "Error loading design: it took too long to get a response."
 
-                        Http.NetworkError ->
-                            text "Error loading design: please connect to the Internet."
+                            Http.NetworkError ->
+                                text "Error loading design: please connect to the Internet."
 
-                        Http.BadStatus i ->
-                            text ("Error loading design: status code " ++ String.fromInt i)
+                            Http.BadStatus i ->
+                                text ("Error loading design: status code " ++ String.fromInt i)
 
-                        Http.BadBody s ->
-                            text ("Error decoding JSON: " ++ s)
-                    ]
+                            Http.BadBody s ->
+                                text ("Error decoding JSON: " ++ s)
+                        ]
 
-                Success d ->
-                    designDetailsView model d
+                Success design ->
+                    designDetailsView mWidthF design
             ]
         ]
 
 
-designDetailsView : Model -> ProteinDesign -> Element msg
-designDetailsView model proteinDesign =
+designDetailsView : Maybe Float -> ProteinDesign -> Element msg
+designDetailsView mWidthF proteinDesign =
     column
         ([ centerX
-         , width (fill |> maximum model.widthI)
+         , width (fill |> maximum (getScreenWidthInt mWidthF))
          , padding 30
          , spacing 30
          , height fill
@@ -309,7 +305,7 @@ designDetailsView model proteinDesign =
             ]
             [ column
                 [ height fill
-                , width (fill |> maximum model.widthI)
+                , width (fill |> maximum (getScreenWidthInt mWidthF))
                 , spacing 10
                 , Font.justify
                 ]
@@ -353,7 +349,7 @@ designDetailsView model proteinDesign =
                                     paragraph
                                         Style.monospacedFont
                                         [ column
-                                            [ width (fill |> maximum (model.widthI - 200))
+                                            [ width (fill |> maximum (getScreenWidthInt mWidthF - 200))
                                             , height fill
                                             , scrollbarX
                                             , paddingXY 10 10
@@ -366,7 +362,7 @@ designDetailsView model proteinDesign =
                 ]
             ]
         , column
-            [ width (fill |> maximum model.widthIscaled)
+            [ width (fill |> maximum (getScreenWidthIntNgl mWidthF))
             , spacing 20
             ]
             [ column
@@ -379,7 +375,7 @@ designDetailsView model proteinDesign =
             , centerX
             ]
             [ Keyed.el
-                [ width <| px model.originalWidthIscaled
+                [ width <| px (getScreenWidthIntNgl mWidthF)
                 , height <| px 400
 
                 --, Border.width 2
@@ -389,7 +385,7 @@ designDetailsView model proteinDesign =
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" model.widthSscaled
+                    , HAtt.style "width" (getScreenWidthStringNgl mWidthF)
                     , HAtt.style "height" "400px"
                     , HAtt.style "align" "center"
                     , HAtt.alt "3D structure"
@@ -448,7 +444,7 @@ designDetailsView model proteinDesign =
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum (model.widthI - 200))
+                                    [ width (fill |> maximum (getScreenWidthInt mWidthF - 200))
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 10 10
