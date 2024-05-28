@@ -2,36 +2,22 @@ module Pages.Review.DesignId_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
 import Components.Title
-import Date
 import DesignFilter exposing (defaultKeys, keyToLabel)
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
-import Element.Keyed as Keyed
-import FeatherIcons
-import Html
-import Html.Attributes as HAtt exposing (align)
 import Http
 import Page exposing (Page)
-import ProteinDesign
-    exposing
-        ( Classification
-        , ProteinDesign
-        , authorsToString
-        , classificationToString
-        , stringToClassification
-        , tagsToString
-        )
+import Pages.Designs.DesignId_ as Details exposing (Model, Msg, page)
+import ProteinDesign exposing (ProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
 import Urls
-import Vega exposing (background)
 import View exposing (View)
 
 
@@ -240,284 +226,10 @@ view model =
 
 details : Model -> Element Msg
 details model =
-    let
-        mDesign =
-            model.design
-    in
-    column []
-        [ column
-            [ width fill ]
-            [ case mDesign of
-                NotAsked ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
-                        )
-                        [ text "Error querying the database. Try reloading the page."
-                        ]
-
-                Loading ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
-                        )
-                        [ text "Loading the design..."
-                        ]
-
-                Failure e ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
-                        )
-                        [ case e of
-                            Http.BadUrl _ ->
-                                text "Error loading design: invalid URL."
-
-                            Http.Timeout ->
-                                text "Error loading design: it took too long to get a response."
-
-                            Http.NetworkError ->
-                                text "Error loading design: please connect to the Internet."
-
-                            Http.BadStatus i ->
-                                text ("Error loading design: status code " ++ String.fromInt i)
-
-                            Http.BadBody s ->
-                                text ("Error decoding JSON: " ++ s)
-                        ]
-
-                Success d ->
-                    designDetailsView d
-            ]
-        , reviewArea model
-        ]
-
-
-designDetailsView : ProteinDesign -> Element msg
-designDetailsView proteinDesign =
     column
-        ([ centerX
-         , width fill
-         , padding 20
-         , spacing 30
-         , height fill
-         ]
-            ++ Style.bodyFont
-        )
-        [ designDetailsHeader proteinDesign
-        , wrappedRow
-            [ width fill
-            , spacing 10
-            ]
-            [ el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width <| fillPortion 3
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
-            , column
-                [ height fill
-                , width <| fillPortion 7
-                , spacing 10
-                , Font.justify
-                ]
-                [ paragraph
-                    []
-                    [ text "PDB Code: "
-                    , link
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url =
-                            "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdb
-                        , label =
-                            proteinDesign.pdb
-                                |> text
-                        }
-                    ]
-                , paragraph
-                    []
-                    [ "Release Date: "
-                        ++ Date.toIsoString proteinDesign.release_date
-                        |> text
-                    ]
-                , paragraph
-                    []
-                    [ "Design Classification: "
-                        ++ classificationToString proteinDesign.classification
-                        |> text
-                    ]
-                , paragraph
-                    []
-                    [ text "Structural Keywords: "
-                    , el [] (text <| String.join ", " proteinDesign.tags)
-                    ]
-                , paragraph
-                    []
-                    [ text "Publication citation: "
-                    , el [ Font.italic ] (text <| proteinDesign.publication)
-                    ]
-                , paragraph
-                    []
-                    [ text "Publication ISSN link: "
-                    , link
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url =
-                            "https://doi.org/" ++ proteinDesign.publication_ref.doi
-                        , label =
-                            proteinDesign.publication_ref.doi
-                                |> text
-                        }
-                    ]
-                , paragraph
-                    []
-                    [ "Authors: "
-                        ++ authorsToString proteinDesign.authors
-                        |> text
-                    ]
-                ]
-            ]
-        , column
-            [ width fill
-            , spacing 20
-            ]
-            [ column
-                Style.h2Font
-                [ text "Structure"
-                ]
-            , Keyed.el
-                [ width <| px 900
-                , height <| px 400
-                , padding 5
-                , centerX
-                , Border.width 2
-                , Border.rounded 3
-                , Border.color <| rgb255 220 220 220
-                ]
-                ( proteinDesign.pdb
-                , Html.node "ngl-viewer"
-                    [ HAtt.id "viewer"
-                    , HAtt.style "width" "890px"
-                    , HAtt.style "height" "400px"
-                    , HAtt.style "align" "center"
-                    , HAtt.alt "3D structure"
-                    , HAtt.attribute "pdb-string" proteinDesign.pdb
-                    ]
-                    []
-                    |> html
-                )
-            ]
-        , paragraph
-            Style.h2Font
-            [ text "Sequence"
-            ]
-        , table
-            [ padding 2 ]
-            { data = proteinDesign.chains
-            , columns =
-                [ { header =
-                        paragraph
-                            [ Font.bold
-                            , paddingXY 5 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Chain ID" ]
-                  , width = fillPortion 2
-                  , view =
-                        \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (fill |> maximum 150)
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 5 10
-                                    ]
-                                    [ text chain.chain_id ]
-                                ]
-                  }
-                , { header =
-                        paragraph
-                            [ Font.bold
-                            , paddingXY 10 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Sequence" ]
-                  , width = fillPortion 8
-                  , view =
-                        \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (fill |> maximum 700)
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 10 10
-                                    ]
-                                    [ text chain.chain_seq_unnat ]
-                                ]
-                  }
-                ]
-            }
-        , column
-            [ width fill
-            , spacing 20
-            ]
-            [ paragraph
-                Style.h2Font
-                [ text "Description"
-                ]
-            , paragraph
-                [ Font.justify ]
-                [ proteinDesign.abstract
-                    |> text
-                ]
-            ]
-        ]
-
-
-designDetailsHeader : ProteinDesign -> Element msg
-designDetailsHeader { previousDesign, nextDesign } =
-    row
-        [ width fill
-        , spaceEvenly
-        ]
-        [ link
-            []
-            { url = "/review/" ++ previousDesign
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowLeftCircle
-                    )
-            }
-        , el Style.h2Font (text "Design Details")
-        , link
-            []
-            { url = "/review/" ++ nextDesign
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowRightCircle
-                    )
-            }
+        [ width fill ]
+        [ Details.details model.design
+        , reviewArea model
         ]
 
 

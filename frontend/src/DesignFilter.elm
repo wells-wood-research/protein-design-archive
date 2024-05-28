@@ -372,6 +372,5 @@ stubMeetsOneFilter design filter =
 
 
 
--- to fix Debug.todo
 --DesignTag tag ->
 --    List.member tag design.tags

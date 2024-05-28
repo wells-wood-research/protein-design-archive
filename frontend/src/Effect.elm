@@ -28,7 +28,7 @@ import Browser.Dom as Dom
 import Browser.Navigation
 import Dict exposing (Dict)
 import Plots exposing (PlotData)
-import Route exposing (Route)
+import Route
 import Route.Path
 import Shared.Model
 import Shared.Msg

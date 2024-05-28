@@ -1,8 +1,7 @@
-module Pages.Designs.DesignId_ exposing (Model, Msg, page)
+module Pages.Designs.DesignId_ exposing (Model, Msg, designDetailsView, details, page)
 
 import AppError exposing (AppError(..))
 import Components.Title
-import Date
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Border as Border
@@ -13,7 +12,7 @@ import Html
 import Html.Attributes as HAtt
 import Http
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designDetailsFromProteinDesign)
+import ProteinDesign exposing (ProteinDesign, designDetailsFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
@@ -135,61 +134,55 @@ view : Model -> View Msg
 view model =
     { title = "Design Details"
     , attributes = [ width fill ]
-    , element = details model
+    , element = details model.design
     }
 
 
-details : Model -> Element msg
-details model =
-    let
-        mDesign =
-            model.design
-    in
-    row []
-        [ column
-            [ width fill ]
-            [ case mDesign of
-                NotAsked ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
-                        )
-                        [ text "Error querying the database. Try reloading the page."
-                        ]
+details : RemoteData Http.Error ProteinDesign -> Element msg
+details mDesign =
+    column
+        [ width fill ]
+        [ case mDesign of
+            NotAsked ->
+                paragraph
+                    (Style.bodyFont
+                        ++ [ width fill, Font.center, Font.justify ]
+                    )
+                    [ text "Error querying the database. Try reloading the page."
+                    ]
 
-                Loading ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
-                        )
-                        [ text "Loading the design..."
-                        ]
+            Loading ->
+                paragraph
+                    (Style.bodyFont
+                        ++ [ width fill, Font.center, Font.justify ]
+                    )
+                    [ text "Loading the design..."
+                    ]
 
-                Failure e ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
-                        )
-                        [ case e of
-                            Http.BadUrl _ ->
-                                text "Error loading design: invalid URL."
+            Failure e ->
+                paragraph
+                    (Style.bodyFont
+                        ++ [ width fill, Font.center, Font.justify ]
+                    )
+                    [ case e of
+                        Http.BadUrl _ ->
+                            text "Error loading design: invalid URL."
 
-                            Http.Timeout ->
-                                text "Error loading design: it took too long to get a response."
+                        Http.Timeout ->
+                            text "Error loading design: it took too long to get a response."
 
-                            Http.NetworkError ->
-                                text "Error loading design: please connect to the Internet."
+                        Http.NetworkError ->
+                            text "Error loading design: please connect to the Internet."
 
-                            Http.BadStatus i ->
-                                text ("Error loading design: status code " ++ String.fromInt i)
+                        Http.BadStatus i ->
+                            text ("Error loading design: status code " ++ String.fromInt i)
 
-                            Http.BadBody s ->
-                                text ("Error decoding JSON: " ++ s)
-                        ]
+                        Http.BadBody s ->
+                            text ("Error decoding JSON: " ++ s)
+                    ]
 
-                Success d ->
-                    designDetailsView d
-            ]
+            Success d ->
+                designDetailsView d
         ]
 
 
