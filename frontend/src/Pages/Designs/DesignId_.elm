@@ -2,7 +2,6 @@ module Pages.Designs.DesignId_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
 import Components.Title
-import Date
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Border as Border
@@ -13,7 +12,7 @@ import Html
 import Html.Attributes as HAtt
 import Http
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designDetailsFromProteinDesign)
+import ProteinDesign exposing (ProteinDesign, designDetailsFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared

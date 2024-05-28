@@ -2,7 +2,6 @@ module Plots exposing (PlotData, timelinePlotDesigns, timelinePlotStubs, timelin
 
 import Date exposing (Unit(..))
 import Element exposing (..)
-import Element.Font as Font
 import Element.Keyed as Keyed
 import Html
 import Html.Attributes as HAtt
@@ -36,8 +35,6 @@ timelinePlotView =
                 , HAtt.style "width" "100%"
                 ]
                 [ Html.div
-                    -- [ HAtt.style "height" "200px"
-                    -- , HAtt.style "width" "100%"
                     [ HAtt.style "border-radius" "5px"
                     , HAtt.style "background-color" "#d3d3d3"
                     ]
