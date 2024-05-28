@@ -5,6 +5,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Time exposing (Month(..))
@@ -129,6 +130,23 @@ designDetailsFromProteinDesign proteinDesign =
                     proteinDesign.pdb
                         |> text
                 }
+      }
+    , { header = "Subtitle"
+      , property =
+            el
+                [ padding 2
+                , Border.width 2
+                , Border.color <| rgb255 220 220 220
+                , Border.rounded 3
+                , alignTop
+                , width (fill |> maximum 350)
+                ]
+                (image
+                    [ width fill ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
+                )
       }
     , { header = "Subtitle"
       , property =
@@ -594,16 +612,16 @@ tagToString tag =
 
 {-| A simple view that shows basic data about a design. Used for lists etc.
 -}
-designCard : ProteinDesignStub -> Element msg
-designCard design =
+designCard : Element.Length -> ProteinDesignStub -> Element msg
+designCard widthDesignCard design =
     link
-        [ width <| px 460
+        [ width <| widthDesignCard
         , clip
         ]
         { url = "/designs/" ++ design.pdb
         , label =
             row
-                [ width fill
+                [ width <| widthDesignCard
                 , spacing 4
                 , padding 4
                 , mouseOver [ Background.color <| rgb255 235 235 235 ]
@@ -618,10 +636,14 @@ designCard design =
                         { src = design.picture_path, description = "Image of design " ++ design.pdb }
                     )
                 , column
-                    [ padding 2, spacing 2, width (fill |> minimum 200), alignTop ]
+                    [ padding 2
+                    , spacing 2
+                    , width fill
+                    , alignTop
+                    ]
                     [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
-                    , paragraph [ Font.color <| rgb255 130 130 130, Font.size 11 ] [ text design.subtitle ]
-                    , paragraph [ Font.size 11 ] [ text (authorsToString design.authors) ]
+                    , paragraph [ Font.size 11, Font.color <| rgb255 130 130 130 ] [ wrappedRow [] [ text design.subtitle ] ]
+                    , paragraph [ Font.size 11 ] [ wrappedRow [] [ text (authorsToString design.authors) ] ]
                     ]
                 ]
         }

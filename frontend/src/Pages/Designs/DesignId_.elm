@@ -1,6 +1,8 @@
 module Pages.Designs.DesignId_ exposing (Model, Msg, designDetailsView, details, page)
 
 import AppError exposing (AppError(..))
+import Browser.Dom
+import Browser.Events
 import Components.Title
 import Effect exposing (Effect)
 import Element exposing (..)
@@ -8,6 +10,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Keyed as Keyed
 import FeatherIcons
+import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthIntNgl, getScreenWidthString, getScreenWidthStringNgl)
 import Html
 import Html.Attributes as HAtt
 import Http
@@ -17,14 +20,15 @@ import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
+import Task
 import Urls
 import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page _ route =
+page shared route =
     Page.new
-        { init = \_ -> init route.params.designId
+        { init = \_ -> init route.params.designId shared.mScreenWidth
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -39,16 +43,34 @@ type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
+    , mWidthF : Maybe Float
+    , widthS : String
+    , widthSscaled : String
+    , widthI : Int
+    , originalWidthIscaled : Int
+    , widthIscaled : Int
+    , widthF : Float
     }
 
 
-init : String -> ( Model, Effect Msg )
-init designId =
+init : String -> Maybe Float -> ( Model, Effect Msg )
+init designId mScreenWidthF =
     ( { designId = designId
       , design = Loading
       , errors = []
+      , mWidthF = mScreenWidthF
+      , widthS = "800"
+      , widthSscaled = "800"
+      , widthI = 800
+      , originalWidthIscaled = 800
+      , widthIscaled = 800
+      , widthF = 800.0
       }
-    , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+    , Effect.batch
+        [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.resetViewport ViewportReset
+        , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+        ]
     )
 
 
@@ -68,6 +90,9 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | WindowResizes Int Int
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
+    | ViewportReset
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -101,6 +126,33 @@ update msg model =
                     , Effect.none
                     )
 
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
+                ViewportReset ->
+                    ( { model
+                        | widthS = getScreenWidthString model.mWidthF
+                        , widthSscaled = getScreenWidthStringNgl model.mWidthF
+                        , widthI = getScreenWidthInt model.mWidthF
+                        , originalWidthIscaled = getScreenWidthIntNgl model.mWidthF
+                        , widthIscaled = getScreenWidthIntNgl model.mWidthF
+                        , widthF = getScreenWidthFloat model.mWidthF
+                      }
+                    , Effect.none
+                    )
+
         RemoteData.Failure e ->
             case msg of
                 _ ->
@@ -113,6 +165,46 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
+                ViewportReset ->
+                    let
+                        newOriginalWidthIscaled =
+                            case model.mWidthF of
+                                Just widthF ->
+                                    if toFloat model.originalWidthIscaled > widthF then
+                                        getScreenWidthInt model.mWidthF
+
+                                    else
+                                        getScreenWidthInt (Just <| toFloat model.originalWidthIscaled)
+
+                                _ ->
+                                    model.originalWidthIscaled
+                    in
+                    ( { model
+                        | widthS = getScreenWidthString model.mWidthF
+                        , widthSscaled = getScreenWidthStringNgl model.mWidthF
+                        , widthI = getScreenWidthInt model.mWidthF
+                        , originalWidthIscaled = newOriginalWidthIscaled
+                        , widthIscaled = getScreenWidthIntNgl model.mWidthF
+                        , widthF = getScreenWidthFloat model.mWidthF
+                      }
+                    , Effect.none
+                    )
+
                 _ ->
                     ( model, Effect.none )
 
@@ -121,9 +213,9 @@ update msg model =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Browser.Events.onResize (\width height -> WindowResizes width height)
 
 
 
@@ -133,23 +225,34 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     { title = "Design Details"
-    , attributes = [ width fill ]
-    , element = details model.design
+    , attributes =
+        [ centerX
+        , width
+            (fill
+                |> minimum model.widthI
+            )
+        ]
+    , element = details model
     }
 
 
-details : RemoteData Http.Error ProteinDesign -> Element msg
-details mDesign =
-    column
-        [ width fill ]
-        [ case mDesign of
-            NotAsked ->
-                paragraph
-                    (Style.bodyFont
-                        ++ [ width fill, Font.center, Font.justify ]
-                    )
-                    [ text "Error querying the database. Try reloading the page."
-                    ]
+details : Model -> Element msg
+details model =
+    let
+        mDesign =
+            model.design
+    in
+    row []
+        [ column
+            [ width fill ]
+            [ case mDesign of
+                NotAsked ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ text "Error querying the database. Try reloading the page."
+                        ]
 
             Loading ->
                 paragraph
@@ -181,17 +284,18 @@ details mDesign =
                             text ("Error decoding JSON: " ++ s)
                     ]
 
-            Success d ->
-                designDetailsView d
+                Success d ->
+                    designDetailsView model d
+            ]
         ]
 
 
-designDetailsView : ProteinDesign -> Element msg
-designDetailsView proteinDesign =
+designDetailsView : Model -> ProteinDesign -> Element msg
+designDetailsView model proteinDesign =
     column
         ([ centerX
-         , width fill
-         , padding 20
+         , width (fill |> maximum model.widthI)
+         , padding 30
          , spacing 30
          , height fill
          ]
@@ -201,24 +305,11 @@ designDetailsView proteinDesign =
         , wrappedRow
             [ width fill
             , spacing 10
+            , spaceEvenly
             ]
-            [ el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width <| fillPortion 3
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
-            , column
+            [ column
                 [ height fill
-                , width <| fillPortion 7
+                , width (fill |> maximum model.widthI)
                 , spacing 10
                 , Font.justify
                 ]
@@ -262,7 +353,7 @@ designDetailsView proteinDesign =
                                     paragraph
                                         Style.monospacedFont
                                         [ column
-                                            [ width (fill |> maximum 700)
+                                            [ width (fill |> maximum (model.widthI - 200))
                                             , height fill
                                             , scrollbarX
                                             , paddingXY 10 10
@@ -275,26 +366,30 @@ designDetailsView proteinDesign =
                 ]
             ]
         , column
-            [ width fill
+            [ width (fill |> maximum model.widthIscaled)
             , spacing 20
             ]
             [ column
                 Style.h2Font
                 [ text "Structure"
                 ]
-            , Keyed.el
-                [ width <| px 900
+            ]
+        , column
+            [ spacing 20
+            , centerX
+            ]
+            [ Keyed.el
+                [ width <| px model.originalWidthIscaled
                 , height <| px 400
-                , padding 5
-                , centerX
-                , Border.width 2
-                , Border.rounded 3
-                , Border.color <| rgb255 220 220 220
+
+                --, Border.width 2
+                --, Border.rounded 3
+                --, Border.color <| rgb255 220 220 220
                 ]
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" "890px"
+                    , HAtt.style "width" model.widthSscaled
                     , HAtt.style "height" "400px"
                     , HAtt.style "align" "center"
                     , HAtt.alt "3D structure"
@@ -326,7 +421,11 @@ designDetailsView proteinDesign =
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum 150)
+                                    [ width
+                                        (fill
+                                            |> maximum 150
+                                            |> minimum 80
+                                        )
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 5 10
@@ -336,7 +435,8 @@ designDetailsView proteinDesign =
                   }
                 , { header =
                         paragraph
-                            [ Font.bold
+                            [ width fill
+                            , Font.bold
                             , paddingXY 10 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
@@ -348,7 +448,7 @@ designDetailsView proteinDesign =
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum 700)
+                                    [ width (fill |> maximum (model.widthI - 200))
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 10 10
@@ -376,7 +476,7 @@ designDetailsView proteinDesign =
 
 
 designDetailsHeader : ProteinDesign -> Element msg
-designDetailsHeader { pdb, previousDesign, nextDesign } =
+designDetailsHeader { previousDesign, nextDesign } =
     row
         [ width fill
         , spaceEvenly

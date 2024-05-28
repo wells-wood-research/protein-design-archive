@@ -23,19 +23,19 @@ timelinePlotId =
     "timeline-plot"
 
 
-timelinePlotView : Element msg
-timelinePlotView =
+timelinePlotView : Length -> String -> Element msg
+timelinePlotView widthL widthS =
     column
-        [ spacing 15, Element.width fill ]
+        [ spacing 15, Element.width widthL, centerX ]
         [ Keyed.el [ centerX ]
             ( timelinePlotId
             , Html.div
                 [ HAtt.id timelinePlotId
-                , HAtt.style "width" "100%"
-                , HAtt.style "width" "100%"
+                , HAtt.style "width" widthS
                 ]
                 [ Html.div
                     [ HAtt.style "border-radius" "5px"
+                    , HAtt.style "width" widthS
                     , HAtt.style "background-color" "#d3d3d3"
                     ]
                     []
@@ -49,8 +49,8 @@ timelinePlotView =
 ---- VEGA SPECS ----
 
 
-timelinePlotDesigns : List ProteinDesign -> PlotData
-timelinePlotDesigns designs =
+timelinePlotDesigns : Float -> List ProteinDesign -> PlotData
+timelinePlotDesigns widthF designs =
     let
         ds =
             let
@@ -152,12 +152,12 @@ timelinePlotDesigns designs =
     { plotId = timelinePlotId
     , spec =
         toVega
-            [ Vega.width 800, Vega.height 300, Vega.padding 30, ds, si [], sc [], ax [], mk [] ]
+            [ Vega.width (0.85 * widthF), Vega.height 300, ds, si [], sc [], ax [], mk [] ]
     }
 
 
-timelinePlotStubs : List ProteinDesignStub -> PlotData
-timelinePlotStubs designs =
+timelinePlotStubs : Float -> List ProteinDesignStub -> PlotData
+timelinePlotStubs widthF designs =
     let
         ds =
             let
@@ -259,5 +259,5 @@ timelinePlotStubs designs =
     { plotId = timelinePlotId
     , spec =
         toVega
-            [ Vega.width 800, Vega.height 300, Vega.padding 30, ds, si [], sc [], ax [], mk [] ]
+            [ Vega.width (0.85 * widthF), Vega.height 300, Vega.padding 50, ds, si [], sc [], ax [], mk [] ]
     }
