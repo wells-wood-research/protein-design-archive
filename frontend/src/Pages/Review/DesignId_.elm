@@ -11,7 +11,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Http
 import Page exposing (Page)
-import Pages.Designs.DesignId_ as Details exposing (Model, Msg, page)
+import Pages.Designs.DesignId_ as Details
 import ProteinDesign exposing (ProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
