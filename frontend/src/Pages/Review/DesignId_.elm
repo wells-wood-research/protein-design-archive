@@ -16,12 +16,14 @@ import Get exposing (..)
 import Http
 import Page exposing (Page)
 import Pages.Designs.DesignId_ as Details
+import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
 import Task
+import Time
 import Urls
 import View exposing (View)
 
@@ -44,13 +46,15 @@ type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
-    , mScreenWidthF : Maybe Float
     , reviewer : String
     , classificationCheckboxDict : Dict String Bool
     , classification : Dict String Bool
     , voteCheckboxDict : Dict String Bool
     , voteRemove : Bool
     , comment : Maybe String
+    , mScreenWidthF : Maybe Float
+    , replotTime : Int
+    , renderPlotState : RenderPlotState
     }
 
 
@@ -59,16 +63,19 @@ init mSharedScreenWidthF designId =
     ( { designId = designId
       , design = Loading
       , errors = []
-      , mScreenWidthF = mSharedScreenWidthF
       , reviewer = "Marta Chronowska (default)"
       , classificationCheckboxDict = classificationCheckboxDict
       , classification = Dict.empty
       , voteCheckboxDict = voteCheckboxDict
       , voteRemove = False
       , comment = Nothing
+      , replotTime = 3
+      , renderPlotState = WillRender
+      , mScreenWidthF = mSharedScreenWidthF
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.resetViewport ViewportReset
         , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
         ]
     )
@@ -118,6 +125,7 @@ type Msg
     | UpdateVoteCheckbox String Bool
     | ClearVoteCheckbox String
     | UpdateComment String
+    | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
@@ -168,9 +176,6 @@ update msg model =
                             toFloat width
                     in
                     ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
-
-                ViewportReset ->
-                    ( model, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -230,12 +235,27 @@ update msg model =
                     , Effect.none
                     )
 
+                RenderWhenReady _ ->
+                    case model.renderPlotState of
+                        AwaitingRender 0 ->
+                            ( { model | renderPlotState = Rendered }
+                            , Effect.resetViewport ViewportReset
+                            )
+
+                        AwaitingRender remaining ->
+                            ( { model | renderPlotState = AwaitingRender (remaining - 1) }
+                            , Effect.none
+                            )
+
+                        _ ->
+                            ( model, Effect.none )
+
                 WindowResizes width _ ->
                     let
                         widthF =
                             toFloat width
                     in
-                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, renderPlotState = AwaitingRender model.replotTime }, Effect.none )
 
                 ViewportResult result ->
                     case result of

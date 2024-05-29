@@ -21,11 +21,10 @@ import Element.Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
 import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
-import Html.Attributes as HAtt
 import Http
 import Json.Decode
 import Page exposing (Page)
-import Plots
+import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesignStub)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
@@ -62,12 +61,6 @@ type alias Model =
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
     }
-
-
-type RenderPlotState
-    = AwaitingRender Int
-    | Rendered
-    | WillRender
 
 
 init : Maybe Float -> ( Model, Effect Msg )
@@ -121,21 +114,6 @@ update msg model =
             case msg of
                 SendDesignsHttpRequest ->
                     ( { model | designStubs = Loading }, Effect.sendCmd (getData Urls.allDesignStubs) )
-
-                WindowResizes width _ ->
-                    let
-                        widthF =
-                            toFloat width
-                    in
-                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
-
-                ViewportResult result ->
-                    case result of
-                        Ok viewport ->
-                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
-
-                        Err _ ->
-                            ( model, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -313,7 +291,10 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     { title = "Protein Design Archive"
-    , attributes = [ centerX, width (fill |> minimum (getScreenWidthInt model.mScreenWidthF)) ]
+    , attributes =
+        [ centerX
+        , width (fill |> minimum (getScreenWidthInt model.mScreenWidthF))
+        ]
     , element = homeView model
     }
 

@@ -15,12 +15,14 @@ import Html
 import Html.Attributes as HAtt
 import Http
 import Page exposing (Page)
+import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesign, designDetailsFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
 import Task
+import Time
 import Urls
 import View exposing (View)
 
@@ -44,6 +46,8 @@ type alias Model =
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
     , mScreenWidthF : Maybe Float
+    , replotTime : Int
+    , renderPlotState : RenderPlotState
     }
 
 
@@ -52,10 +56,13 @@ init mSharedScreenWidthF designId =
     ( { designId = designId
       , design = Loading
       , errors = []
+      , replotTime = 3
+      , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.resetViewport ViewportReset
         , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
         ]
     )
@@ -77,6 +84,7 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
@@ -128,7 +136,7 @@ update msg model =
                     in
                     ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
 
-                ViewportReset ->
+                _ ->
                     ( model, Effect.none )
 
         RemoteData.Failure e ->
@@ -143,12 +151,27 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
+                RenderWhenReady _ ->
+                    case model.renderPlotState of
+                        AwaitingRender 0 ->
+                            ( { model | renderPlotState = Rendered }
+                            , Effect.resetViewport ViewportReset
+                            )
+
+                        AwaitingRender remaining ->
+                            ( { model | renderPlotState = AwaitingRender (remaining - 1) }
+                            , Effect.none
+                            )
+
+                        _ ->
+                            ( model, Effect.none )
+
                 WindowResizes width _ ->
                     let
                         widthF =
                             toFloat width
                     in
-                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, renderPlotState = AwaitingRender model.replotTime }, Effect.none )
 
                 ViewportResult result ->
                     case result of

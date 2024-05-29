@@ -1,4 +1,4 @@
-module Plots exposing (PlotData, timelinePlotDesigns, timelinePlotStubs, timelinePlotView)
+module Plots exposing (PlotData, RenderPlotState(..), timelinePlotDesigns, timelinePlotStubs, timelinePlotView)
 
 import Date exposing (Unit(..))
 import Element exposing (..)
@@ -12,6 +12,12 @@ import Vega exposing (..)
 
 type alias PlotData =
     { plotId : String, spec : Spec }
+
+
+type RenderPlotState
+    = AwaitingRender Int
+    | Rendered
+    | WillRender
 
 
 
