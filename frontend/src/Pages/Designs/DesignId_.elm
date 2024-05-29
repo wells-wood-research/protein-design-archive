@@ -48,11 +48,11 @@ type alias Model =
 
 
 init : Maybe Float -> String -> ( Model, Effect Msg )
-init mScreenWidthF designId =
+init mSharedScreenWidthF designId =
     ( { designId = designId
       , design = Loading
       , errors = []
-      , mScreenWidthF = mScreenWidthF
+      , mScreenWidthF = mSharedScreenWidthF
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -293,7 +293,7 @@ designDetailsBody : Maybe Float -> ProteinDesign -> Element msg
 designDetailsBody mScreenWidthF proteinDesign =
     column
         ([ centerX
-         , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+         , width fill
          , padding 30
          , spacing 30
          , height fill

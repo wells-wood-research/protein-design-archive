@@ -265,7 +265,13 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     { title = "Design Review"
-    , attributes = [ width fill ]
+    , attributes =
+        [ centerX
+        , width
+            (fill
+                |> minimum (getScreenWidthInt model.mScreenWidthF)
+            )
+        ]
     , element = details model
     }
 
@@ -327,7 +333,7 @@ details model =
                                 text ("Error decoding JSON: " ++ s)
                         ]
 
-                Success design ->
+                Success proteinDesign ->
                     if screenWidth > 800.0 then
                         column
                             ([ centerX
@@ -338,19 +344,26 @@ details model =
                              ]
                                 ++ Style.bodyFont
                             )
-                            [ Details.designDetailsHeader "Design Review" "/review/" design
+                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
                             , row
-                                [ width fill ]
-                                [ column [] [ Details.designDetailsBody (Just halfWidth) design ]
+                                []
+                                [ Details.designDetailsBody (Just halfWidth) proteinDesign
                                 , reviewArea halfWidth model
                                 ]
                             ]
 
                     else
                         column
-                            [ width fill ]
-                            [ Details.designDetailsHeader "Design Review" "/review/" design
-                            , Details.designDetailsBody (Just screenWidth) design
+                            ([ centerX
+                             , width (fill |> maximum (getScreenWidthInt (Just screenWidth)))
+                             , padding 30
+                             , spacing 30
+                             , height fill
+                             ]
+                                ++ Style.bodyFont
+                            )
+                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
+                            , Details.designDetailsBody (Just screenWidth) proteinDesign
                             , reviewArea screenWidth model
                             ]
             ]
@@ -361,7 +374,7 @@ reviewArea : Float -> Model -> Element Msg
 reviewArea elementWidthF model =
     column
         [ centerX
-        , width (fill |> maximum (getScreenWidthInt <| Just elementWidthF))
+        , width fill
         , height fill
         , padding 30
         , spacing 30
