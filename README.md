@@ -18,4 +18,4 @@ Run the following commands:
 
 ```bash download_pdbs.sh -f pdb_codes.csv -o frontend/static/pdb_files -a```
 
-Make sure to specify the output path correctly and adjusting the ```frontend/static/ngl-web-component.js``` file to point to the correct online path of the pdb files' directory.
+Make sure to specify the output path correctly and adjust the ```frontend/static/ngl-web-component.js``` file to point to the correct online path of the pdb files' directory.
