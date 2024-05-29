@@ -34,6 +34,16 @@ h2Font =
     ]
 
 
+h3Font : List (Attribute msg)
+h3Font =
+    [ Font.family
+        [ Font.typeface "Lato"
+        , Font.sansSerif
+        ]
+    , Font.size 20
+    ]
+
+
 bodyFont : List (Attribute msg)
 bodyFont =
     [ Font.family

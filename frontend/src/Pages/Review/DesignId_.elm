@@ -1,14 +1,18 @@
 module Pages.Review.DesignId_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
+import Browser.Dom
+import Browser.Events
 import Components.Title
 import DesignFilter exposing (defaultKeys, keyToLabel)
 import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
+import Get exposing (..)
 import Http
 import Page exposing (Page)
 import Pages.Designs.DesignId_ as Details
@@ -17,14 +21,15 @@ import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
+import Task
 import Urls
 import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page _ route =
+page { mScreenWidthF } route =
     Page.new
-        { init = \_ -> init route.params.designId
+        { init = \_ -> init mScreenWidthF route.params.designId
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -39,7 +44,7 @@ type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
-    , mWidthF : Maybe Float
+    , mScreenWidthF : Maybe Float
     , reviewer : String
     , classificationCheckboxDict : Dict String Bool
     , classification : Dict String Bool
@@ -49,12 +54,12 @@ type alias Model =
     }
 
 
-init : String -> ( Model, Effect Msg )
-init designId =
+init : Maybe Float -> String -> ( Model, Effect Msg )
+init mSharedScreenWidthF designId =
     ( { designId = designId
       , design = Loading
       , errors = []
-      , mWidthF = Just 800.0
+      , mScreenWidthF = mSharedScreenWidthF
       , reviewer = "Marta Chronowska (default)"
       , classificationCheckboxDict = classificationCheckboxDict
       , classification = Dict.empty
@@ -62,7 +67,10 @@ init designId =
       , voteRemove = False
       , comment = Nothing
       }
-    , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+    , Effect.batch
+        [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+        ]
     )
 
 
@@ -110,6 +118,9 @@ type Msg
     | UpdateVoteCheckbox String Bool
     | ClearVoteCheckbox String
     | UpdateComment String
+    | WindowResizes Int Int
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
+    | ViewportReset
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -142,6 +153,24 @@ update msg model =
                       }
                     , Effect.none
                     )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.none )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+                ViewportReset ->
+                    ( model, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -201,6 +230,21 @@ update msg model =
                     , Effect.none
                     )
 
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
                 _ ->
                     ( model, Effect.none )
 
@@ -211,7 +255,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Browser.Events.onResize (\width height -> WindowResizes width height)
 
 
 
@@ -228,35 +272,119 @@ view model =
 
 details : Model -> Element Msg
 details model =
-    column
-        [ width fill ]
-        [ Details.details model.mWidthF model.design
-        , reviewArea model
+    let
+        mScreenWidthF =
+            model.mScreenWidthF
+
+        mDesign =
+            model.design
+
+        screenWidth =
+            Maybe.withDefault 800.0 mScreenWidthF
+
+        halfWidth =
+            screenWidth / 2
+    in
+    row []
+        [ column
+            [ width fill ]
+            [ case mDesign of
+                NotAsked ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ text "Error querying the database. Try reloading the page."
+                        ]
+
+                Loading ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ text "Loading the design..."
+                        ]
+
+                Failure e ->
+                    paragraph
+                        (Style.bodyFont
+                            ++ [ width fill, Font.center, Font.justify ]
+                        )
+                        [ case e of
+                            Http.BadUrl _ ->
+                                text "Error loading design: invalid URL."
+
+                            Http.Timeout ->
+                                text "Error loading design: it took too long to get a response."
+
+                            Http.NetworkError ->
+                                text "Error loading design: please connect to the Internet."
+
+                            Http.BadStatus i ->
+                                text ("Error loading design: status code " ++ String.fromInt i)
+
+                            Http.BadBody s ->
+                                text ("Error decoding JSON: " ++ s)
+                        ]
+
+                Success design ->
+                    if screenWidth > 800.0 then
+                        column
+                            ([ centerX
+                             , width (fill |> maximum (getScreenWidthInt (Just screenWidth)))
+                             , padding 30
+                             , spacing 30
+                             , height fill
+                             ]
+                                ++ Style.bodyFont
+                            )
+                            [ Details.designDetailsHeader "Design Review" "/review/" design
+                            , row
+                                [ width fill ]
+                                [ column [] [ Details.designDetailsBody (Just halfWidth) design ]
+                                , reviewArea halfWidth model
+                                ]
+                            ]
+
+                    else
+                        column
+                            [ width fill ]
+                            [ Details.designDetailsHeader "Design Review" "/review/" design
+                            , Details.designDetailsBody (Just screenWidth) design
+                            , reviewArea screenWidth model
+                            ]
+            ]
         ]
 
 
-reviewArea : Model -> Element Msg
-reviewArea model =
+reviewArea : Float -> Model -> Element Msg
+reviewArea elementWidthF model =
     column
         [ centerX
-        , width fill
-        , padding 20
+        , width (fill |> maximum (getScreenWidthInt <| Just elementWidthF))
+        , height fill
+        , padding 30
         , spacing 30
         , Background.color <| rgb255 255 176 156
         ]
         [ classificationArea model
         , votingArea model
-        , commentArea model
+        , commentArea elementWidthF model
         ]
 
 
 classificationArea : Model -> Element Msg
 classificationArea model =
-    column []
+    column [ spacing 10, width fill ]
         [ paragraph
-            Style.h2Font
+            (Style.h3Font
+                ++ [ padding 10
+                   , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+                   , Border.color <| rgb255 220 220 220
+                   ]
+            )
             [ text "Classification" ]
-        , row [] <|
+        , column [] <|
             List.map (\label -> classificationCheckbox ( model, label ))
                 [ defaultKeys.classificationMinimalKey
                 , defaultKeys.classificationRationalKey
@@ -271,9 +399,14 @@ classificationArea model =
 
 votingArea : Model -> Element Msg
 votingArea model =
-    column []
+    column [ spacing 10 ]
         [ paragraph
-            Style.h2Font
+            (Style.h3Font
+                ++ [ padding 10
+                   , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+                   , Border.color <| rgb255 220 220 220
+                   ]
+            )
             [ text "Vote to remove" ]
         , row [] <|
             List.map (\label -> voteCheckbox ( model, label )) [ defaultKeys.voteRemove ]
@@ -295,10 +428,10 @@ classificationCheckbox ( model, dictKey ) =
         , label =
             case Dict.get dictKey model.classificationCheckboxDict of
                 Just True ->
-                    Input.labelRight [ centerY, width fill ] (paragraph (Font.bold :: Style.bodyFont) <| [ text <| keyToLabel dictKey ])
+                    Input.labelRight [ centerY, width fill ] (wrappedRow (Font.bold :: Style.monospacedFont) <| [ text <| keyToLabel dictKey ])
 
                 _ ->
-                    Input.labelRight [ centerY, width fill ] (paragraph Style.bodyFont <| [ text <| keyToLabel dictKey ])
+                    Input.labelRight [ centerY, width fill ] (wrappedRow Style.monospacedFont <| [ text <| keyToLabel dictKey ])
         }
 
 
@@ -317,25 +450,39 @@ voteCheckbox ( model, dictKey ) =
         , label =
             case Dict.get dictKey model.voteCheckboxDict of
                 Just True ->
-                    Input.labelRight [ centerY, width fill ] (paragraph (Font.bold :: Style.bodyFont) <| [ text <| "Yes, I vote to REMOVE this design." ])
+                    Input.labelRight [ centerY, width fill ] (paragraph (Font.bold :: Style.monospacedFont) <| [ text <| "Yes, I vote to REMOVE this design." ])
 
                 _ ->
-                    Input.labelRight [ centerY, width fill ] (paragraph Style.bodyFont <| [ text <| "Yes, I vote to REMOVE this design." ])
+                    Input.labelRight [ centerY, width fill ] (paragraph Style.monospacedFont <| [ text <| "Yes, I vote to REMOVE this design." ])
         }
 
 
-commentArea : Model -> Element Msg
-commentArea model =
+commentArea : Float -> Model -> Element Msg
+commentArea elementWidthF model =
     column
-        ([ spacing 10, width fill ]
-            ++ Style.h2Font
-        )
-        [ text "Comments"
+        [ spacing 10
+        , width
+            (fill
+                |> (Just elementWidthF |> getScreenWidthInt |> maximum)
+            )
+        ]
+        [ paragraph
+            ([ padding
+                10
+             , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+             , Border.color <|
+                rgb255 220
+                    220
+                    220
+             ]
+                ++ Style.h3Font
+            )
+            [ text "Comments" ]
         , Input.multiline
             Style.bodyFont
             { onChange = \string -> UpdateComment string
             , text = Maybe.withDefault "" model.comment
-            , placeholder = Just <| Input.placeholder [] (text "Enter your comments here")
+            , placeholder = Just <| Input.placeholder Style.monospacedFont (text "Enter your comments here")
             , label = Input.labelHidden "Design Review Comment Box"
             , spellcheck = True
             }

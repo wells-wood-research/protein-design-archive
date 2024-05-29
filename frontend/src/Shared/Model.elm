@@ -20,5 +20,5 @@ own file, so they can be imported by `Effect.elm`
 type alias Model =
     { designs : RemoteData Http.Error (Dict String ProteinDesign)
     , errors : List AppError
-    , mScreenWidth : Maybe Float
+    , mScreenWidthF : Maybe Float
     }

@@ -41,5 +41,5 @@ def get_all_design_stubs():
 def get_design_details(designId: str) -> t.Any:
     """Gets complete data for the one design that this details page is for."""
     projection = {"_id": 0}
-    design = DESIGNS.find_one({"pdb": designId}, projection)
+    design = DESIGNS.find_one({"pdb": designId.lower()}, projection)
     return design

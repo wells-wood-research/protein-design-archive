@@ -41,7 +41,7 @@ import View exposing (View)
 page : Shared.Model -> Route () -> Page Model Msg
 page shared _ =
     Page.new
-        { init = \() -> init shared.mScreenWidth
+        { init = \() -> init shared.mScreenWidthF
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -60,10 +60,7 @@ type alias Model =
     , mEndDate : Maybe String
     , replotTime : Int
     , renderPlotState : RenderPlotState
-    , mWidthF : Maybe Float
-    , widthS : String
-    , widthI : Int
-    , widthF : Float
+    , mScreenWidthF : Maybe Float
     }
 
 
@@ -74,7 +71,7 @@ type RenderPlotState
 
 
 init : Maybe Float -> ( Model, Effect Msg )
-init mScreenWidthF =
+init mSharedScreenWidthF =
     ( { designStubs = Loading
       , errors = []
       , designFilters = Dict.empty
@@ -82,10 +79,7 @@ init mScreenWidthF =
       , mEndDate = Nothing
       , replotTime = 3
       , renderPlotState = WillRender
-      , mWidthF = mScreenWidthF
-      , widthS = "800"
-      , widthI = 800
-      , widthF = 800.0
+      , mScreenWidthF = mSharedScreenWidthF
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -133,24 +127,15 @@ update msg model =
                         widthF =
                             toFloat width
                     in
-                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
-
-                ViewportReset ->
-                    ( { model
-                        | widthS = getScreenWidthString model.mWidthF
-                        , widthI = getScreenWidthInt model.mWidthF
-                        , widthF = getScreenWidthFloat model.mWidthF
-                      }
-                    , Effect.none
-                    )
 
                 _ ->
                     ( model, Effect.none )
@@ -167,9 +152,12 @@ update msg model =
                         filteredDesignStubs =
                             designs
                                 |> Dict.values
+
+                        plotWidth =
+                            getScreenWidthFloat model.mScreenWidthF
                     in
                     ( { model | designStubs = Success designs }
-                    , Effect.renderVegaPlot (Plots.timelinePlotStubs model.widthF filteredDesignStubs)
+                    , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
                     )
 
                 DesignsDataReceived (Err e) ->
@@ -185,24 +173,15 @@ update msg model =
                         widthF =
                             toFloat width
                     in
-                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
-
-                ViewportReset ->
-                    ( { model
-                        | widthS = getScreenWidthString model.mWidthF
-                        , widthI = getScreenWidthInt model.mWidthF
-                        , widthF = getScreenWidthFloat model.mWidthF
-                      }
-                    , Effect.none
-                    )
 
                 _ ->
                     ( model, Effect.none )
@@ -264,11 +243,14 @@ update msg model =
                             loadedDesignStubs
                                 |> Dict.values
                                 |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+
+                        plotWidth =
+                            getScreenWidthFloat model.mScreenWidthF
                     in
                     case model.renderPlotState of
                         AwaitingRender 0 ->
                             ( { model | renderPlotState = Rendered }
-                            , Effect.renderVegaPlot (Plots.timelinePlotStubs model.widthF filteredDesignStubs)
+                            , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
                             )
 
                         AwaitingRender remaining ->
@@ -284,25 +266,18 @@ update msg model =
                         widthF =
                             toFloat width
                     in
-                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
 
                 ViewportReset ->
-                    ( { model
-                        | widthS = getScreenWidthString model.mWidthF
-                        , widthI = getScreenWidthInt model.mWidthF
-                        , widthF = getScreenWidthFloat model.mWidthF
-                        , renderPlotState = AwaitingRender model.replotTime
-                      }
-                    , Effect.none
-                    )
+                    ( { model | renderPlotState = AwaitingRender model.replotTime }, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -338,7 +313,7 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     { title = "Protein Design Archive"
-    , attributes = [ centerX, width (fill |> minimum model.widthI) ]
+    , attributes = [ centerX, width (fill |> minimum (getScreenWidthInt model.mScreenWidthF)) ]
     , element = homeView model
     }
 
@@ -363,17 +338,23 @@ homeView model =
                         |> List.filterMap
                             (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
 
+                screenWidth =
+                    getScreenWidthInt model.mScreenWidthF
+
+                screenWidthS =
+                    getScreenWidthString model.mScreenWidthF
+
                 widthDesignCard =
-                    if model.widthI < 800 then
-                        Element.fill |> maximum (model.widthI - 10)
+                    if screenWidth < 800 then
+                        Element.fill |> maximum (screenWidth - 10)
 
                     else
                         Element.px 390
             in
             column [ centerX ]
-                [ Plots.timelinePlotView (px model.widthI) model.widthS
+                [ Plots.timelinePlotView (px screenWidth) screenWidthS
                 , column
-                    [ paddingXY 20 0, spacing 10, width (fill |> maximum model.widthI) ]
+                    [ paddingXY 20 0, spacing 10, width (fill |> maximum screenWidth) ]
                     [ searchArea model
                     , dateSearchArea model
                     , designList widthDesignCard designsToDisplay
@@ -412,15 +393,9 @@ searchArea model =
         ]
 
 
-
--- calendar
--- chevronsRight
--- fastForward
-
-
 dateSearchArea : Model -> Element Msg
 dateSearchArea model =
-    case model.mWidthF of
+    case model.mScreenWidthF of
         Just widthF ->
             if widthF <= 900 then
                 column (Style.monospacedFont ++ [ centerX, spacing 10, width fill ])

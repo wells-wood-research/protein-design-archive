@@ -1,4 +1,4 @@
-module Pages.Designs.DesignId_ exposing (Model, Msg, designDetailsView, details, page)
+module Pages.Designs.DesignId_ exposing (Model, Msg, designDetailsBody, designDetailsHeader, designDetailsView, details, page)
 
 import AppError exposing (AppError(..))
 import Browser.Dom
@@ -10,7 +10,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Keyed as Keyed
 import FeatherIcons
-import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthIntNgl, getScreenWidthString, getScreenWidthStringNgl)
+import Get exposing (..)
 import Html
 import Html.Attributes as HAtt
 import Http
@@ -26,9 +26,9 @@ import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page shared route =
+page { mScreenWidthF } route =
     Page.new
-        { init = \_ -> init route.params.designId shared.mScreenWidth
+        { init = \_ -> init mScreenWidthF route.params.designId
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -43,32 +43,19 @@ type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
-    , mWidthF : Maybe Float
-    , widthS : String
-    , widthSscaled : String
-    , widthI : Int
-    , originalWidthIscaled : Int
-    , widthIscaled : Int
-    , widthF : Float
+    , mScreenWidthF : Maybe Float
     }
 
 
-init : String -> Maybe Float -> ( Model, Effect Msg )
-init designId mScreenWidthF =
+init : Maybe Float -> String -> ( Model, Effect Msg )
+init mScreenWidthF designId =
     ( { designId = designId
       , design = Loading
       , errors = []
-      , mWidthF = mScreenWidthF
-      , widthS = "800"
-      , widthSscaled = "800"
-      , widthI = 800
-      , originalWidthIscaled = 800
-      , widthIscaled = 800
-      , widthF = 800.0
+      , mScreenWidthF = mScreenWidthF
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
-        , Effect.resetViewport ViewportReset
         , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
         ]
     )
@@ -126,32 +113,23 @@ update msg model =
                     , Effect.none
                     )
 
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.none )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
                 WindowResizes width _ ->
                     let
                         widthF =
                             toFloat width
                     in
-                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
-
-                ViewportResult result ->
-                    case result of
-                        Ok viewport ->
-                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
-
-                        Err _ ->
-                            ( model, Effect.none )
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
 
                 ViewportReset ->
-                    ( { model
-                        | widthS = getScreenWidthString model.mWidthF
-                        , widthSscaled = getScreenWidthStringNgl model.mWidthF
-                        , widthI = getScreenWidthInt model.mWidthF
-                        , originalWidthIscaled = getScreenWidthIntNgl model.mWidthF
-                        , widthIscaled = getScreenWidthIntNgl model.mWidthF
-                        , widthF = getScreenWidthFloat model.mWidthF
-                      }
-                    , Effect.none
-                    )
+                    ( model, Effect.none )
 
         RemoteData.Failure e ->
             case msg of
@@ -170,40 +148,15 @@ update msg model =
                         widthF =
                             toFloat width
                     in
-                    ( { model | mWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
-
-                ViewportReset ->
-                    let
-                        newOriginalWidthIscaled =
-                            case model.mWidthF of
-                                Just widthF ->
-                                    if toFloat model.originalWidthIscaled > widthF then
-                                        getScreenWidthInt model.mWidthF
-
-                                    else
-                                        getScreenWidthInt (Just <| toFloat model.originalWidthIscaled)
-
-                                _ ->
-                                    model.originalWidthIscaled
-                    in
-                    ( { model
-                        | widthS = getScreenWidthString model.mWidthF
-                        , widthSscaled = getScreenWidthStringNgl model.mWidthF
-                        , widthI = getScreenWidthInt model.mWidthF
-                        , originalWidthIscaled = newOriginalWidthIscaled
-                        , widthIscaled = getScreenWidthIntNgl model.mWidthF
-                        , widthF = getScreenWidthFloat model.mWidthF
-                      }
-                    , Effect.none
-                    )
 
                 _ ->
                     ( model, Effect.none )
@@ -229,15 +182,15 @@ view model =
         [ centerX
         , width
             (fill
-                |> minimum model.widthI
+                |> minimum (getScreenWidthInt model.mScreenWidthF)
             )
         ]
-    , element = details model.mWidthF model.design
+    , element = details model.mScreenWidthF model.design
     }
 
 
 details : Maybe Float -> RemoteData Http.Error ProteinDesign -> Element msg
-details mWidthF mDesign =
+details mScreenWidthF mDesign =
     row []
         [ column
             [ width fill ]
@@ -281,88 +234,131 @@ details mWidthF mDesign =
                         ]
 
                 Success design ->
-                    designDetailsView mWidthF design
+                    designDetailsView mScreenWidthF design
             ]
         ]
 
 
 designDetailsView : Maybe Float -> ProteinDesign -> Element msg
-designDetailsView mWidthF proteinDesign =
+designDetailsView mScreenWidthF proteinDesign =
     column
         ([ centerX
-         , width (fill |> maximum (getScreenWidthInt mWidthF))
+         , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
          , padding 30
          , spacing 30
          , height fill
          ]
             ++ Style.bodyFont
         )
-        [ designDetailsHeader proteinDesign
-        , wrappedRow
-            [ width fill
+        [ designDetailsHeader "Design Details" "/designs/" proteinDesign
+        , designDetailsBody mScreenWidthF proteinDesign
+        ]
+
+
+designDetailsHeader : String -> String -> ProteinDesign -> Element msg
+designDetailsHeader title path { previousDesign, nextDesign } =
+    row
+        [ width fill
+        , spaceEvenly
+        ]
+        [ link
+            []
+            { url = path ++ previousDesign
+            , label =
+                el [ centerX ]
+                    (html <|
+                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.arrowLeftCircle
+                    )
+            }
+        , paragraph
+            (Style.h2Font ++ [ Font.center ])
+            [ text title ]
+        , link
+            []
+            { url = path ++ nextDesign
+            , label =
+                el [ centerX ]
+                    (html <|
+                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.arrowRightCircle
+                    )
+            }
+        ]
+
+
+designDetailsBody : Maybe Float -> ProteinDesign -> Element msg
+designDetailsBody mScreenWidthF proteinDesign =
+    column
+        ([ centerX
+         , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+         , padding 30
+         , spacing 30
+         , height fill
+         ]
+            ++ Style.bodyFont
+        )
+        [ column
+            [ height fill
+            , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
             , spacing 10
-            , spaceEvenly
+            , Font.justify
             ]
-            [ column
-                [ height fill
-                , width (fill |> maximum (getScreenWidthInt mWidthF))
-                , spacing 10
-                , Font.justify
-                ]
-                [ table
-                    [ padding 2 ]
-                    { data = designDetailsFromProteinDesign proteinDesign
-                    , columns =
-                        [ { header =
+            [ table
+                [ padding 2 ]
+                { data = designDetailsFromProteinDesign proteinDesign
+                , columns =
+                    [ { header =
+                            paragraph
+                                [ Font.bold
+                                , paddingXY 5 10
+                                , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                                , Border.color <| rgb255 220 220 220
+                                ]
+                                [ text "Attribute" ]
+                      , width = fillPortion 2
+                      , view =
+                            \category ->
                                 paragraph
-                                    [ Font.bold
-                                    , paddingXY 5 10
-                                    , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                                    , Border.color <| rgb255 220 220 220
-                                    ]
-                                    [ text "Attribute" ]
-                          , width = fillPortion 2
-                          , view =
-                                \category ->
-                                    paragraph
-                                        Style.monospacedFont
-                                        [ column
-                                            [ width (fill |> maximum 150)
-                                            , height fill
-                                            , scrollbarX
-                                            , paddingXY 5 10
-                                            ]
-                                            [ text category.header ]
+                                    Style.monospacedFont
+                                    [ column
+                                        [ width (fill |> maximum 150)
+                                        , height fill
+                                        , scrollbarX
+                                        , paddingXY 5 10
                                         ]
-                          }
-                        , { header =
+                                        [ text category.header ]
+                                    ]
+                      }
+                    , { header =
+                            paragraph
+                                [ Font.bold
+                                , paddingXY 10 10
+                                , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                                , Border.color <| rgb255 220 220 220
+                                ]
+                                [ text "Value" ]
+                      , width = fillPortion 8
+                      , view =
+                            \detail ->
                                 paragraph
-                                    [ Font.bold
-                                    , paddingXY 10 10
-                                    , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                                    , Border.color <| rgb255 220 220 220
-                                    ]
-                                    [ text "Value" ]
-                          , width = fillPortion 8
-                          , view =
-                                \detail ->
-                                    paragraph
-                                        Style.monospacedFont
-                                        [ column
-                                            [ width (fill |> maximum (getScreenWidthInt mWidthF - 200))
-                                            , height fill
-                                            , scrollbarX
-                                            , paddingXY 10 10
-                                            ]
-                                            [ detail.property ]
+                                    Style.monospacedFont
+                                    [ column
+                                        [ width (fill |> maximum (getScreenWidthInt mScreenWidthF - 200))
+                                        , height fill
+                                        , scrollbarX
+                                        , paddingXY 10 10
                                         ]
-                          }
-                        ]
-                    }
-                ]
+                                        [ detail.property ]
+                                    ]
+                      }
+                    ]
+                }
             ]
         , column
-            [ width (fill |> maximum (getScreenWidthIntNgl mWidthF))
+            [ width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
             , spacing 20
             ]
             [ column
@@ -375,7 +371,7 @@ designDetailsView mWidthF proteinDesign =
             , centerX
             ]
             [ Keyed.el
-                [ width <| px (getScreenWidthIntNgl mWidthF)
+                [ width <| px (getScreenWidthIntNgl mScreenWidthF)
                 , height <| px 400
 
                 --, Border.width 2
@@ -385,7 +381,7 @@ designDetailsView mWidthF proteinDesign =
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" (getScreenWidthStringNgl mWidthF)
+                    , HAtt.style "width" (getScreenWidthStringNgl mScreenWidthF)
                     , HAtt.style "height" "400px"
                     , HAtt.style "align" "center"
                     , HAtt.alt "3D structure"
@@ -444,7 +440,7 @@ designDetailsView mWidthF proteinDesign =
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum (getScreenWidthInt mWidthF - 200))
+                                    [ width (fill |> maximum (getScreenWidthInt mScreenWidthF - 200))
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 10 10
@@ -468,38 +464,4 @@ designDetailsView mWidthF proteinDesign =
                     |> text
                 ]
             ]
-        ]
-
-
-designDetailsHeader : ProteinDesign -> Element msg
-designDetailsHeader { previousDesign, nextDesign } =
-    row
-        [ width fill
-        , spaceEvenly
-        ]
-        [ link
-            []
-            { url = "/designs/" ++ previousDesign
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowLeftCircle
-                    )
-            }
-        , paragraph
-            (Style.h2Font ++ [ Font.center ])
-            [ text "Design Details" ]
-        , link
-            []
-            { url = "/designs/" ++ nextDesign
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowRightCircle
-                    )
-            }
         ]
