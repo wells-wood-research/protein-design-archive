@@ -1,8 +1,9 @@
 module Pages.Review.DesignId_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
+import Browser.Dom
+import Browser.Events
 import Components.Title
-import Date
 import DesignFilter exposing (defaultKeys, keyToLabel)
 import Dict exposing (Dict)
 import Effect exposing (Effect)
@@ -11,35 +12,26 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
-import Element.Keyed as Keyed
-import FeatherIcons
-import Html
-import Html.Attributes as HAtt exposing (align)
+import Get exposing (..)
 import Http
 import Page exposing (Page)
-import ProteinDesign
-    exposing
-        ( Classification
-        , ProteinDesign
-        , authorsToString
-        , classificationToString
-        , designToCitation
-        , stringToClassification
-        , tagsToString
-        )
+import Pages.Designs.DesignId_ as Details
+import Plots exposing (RenderPlotState(..))
+import ProteinDesign exposing (ProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
+import Task
+import Time
 import Urls
-import Vega exposing (background)
 import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page _ route =
+page { mScreenWidthF } route =
     Page.new
-        { init = \_ -> init route.params.designId
+        { init = \_ -> init mScreenWidthF route.params.designId
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -60,11 +52,14 @@ type alias Model =
     , voteCheckboxDict : Dict String Bool
     , voteRemove : Bool
     , comment : Maybe String
+    , mScreenWidthF : Maybe Float
+    , replotTime : Int
+    , renderPlotState : RenderPlotState
     }
 
 
-init : String -> ( Model, Effect Msg )
-init designId =
+init : Maybe Float -> String -> ( Model, Effect Msg )
+init mSharedScreenWidthF designId =
     ( { designId = designId
       , design = Loading
       , errors = []
@@ -74,8 +69,15 @@ init designId =
       , voteCheckboxDict = voteCheckboxDict
       , voteRemove = False
       , comment = Nothing
+      , replotTime = 3
+      , renderPlotState = WillRender
+      , mScreenWidthF = mSharedScreenWidthF
       }
-    , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+    , Effect.batch
+        [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.resetViewport ViewportReset
+        , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+        ]
     )
 
 
@@ -94,8 +96,8 @@ classificationCheckboxDict =
         [ ( defaultKeys.classificationMinimalKey, False )
         , ( defaultKeys.classificationRationalKey, False )
         , ( defaultKeys.classificationEngineeredKey, False )
-        , ( defaultKeys.classificationCompPhysKey, False )
-        , ( defaultKeys.classificationCompDLKey, False )
+        , ( defaultKeys.classificationPhysKey, False )
+        , ( defaultKeys.classificationDeepLearningKey, False )
         , ( defaultKeys.classificationConsensusKey, False )
         , ( defaultKeys.classificationOtherKey, False )
         ]
@@ -123,6 +125,10 @@ type Msg
     | UpdateVoteCheckbox String Bool
     | ClearVoteCheckbox String
     | UpdateComment String
+    | RenderWhenReady Time.Posix
+    | WindowResizes Int Int
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
+    | ViewportReset
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -155,6 +161,21 @@ update msg model =
                       }
                     , Effect.none
                     )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.none )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
 
                 _ ->
                     ( model, Effect.none )
@@ -214,6 +235,36 @@ update msg model =
                     , Effect.none
                     )
 
+                RenderWhenReady _ ->
+                    case model.renderPlotState of
+                        AwaitingRender 0 ->
+                            ( { model | renderPlotState = Rendered }
+                            , Effect.resetViewport ViewportReset
+                            )
+
+                        AwaitingRender remaining ->
+                            ( { model | renderPlotState = AwaitingRender (remaining - 1) }
+                            , Effect.none
+                            )
+
+                        _ ->
+                            ( model, Effect.none )
+
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mScreenWidthF = Just widthF, renderPlotState = AwaitingRender model.replotTime }, Effect.none )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
                 _ ->
                     ( model, Effect.none )
 
@@ -224,7 +275,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Browser.Events.onResize (\width height -> WindowResizes width height)
 
 
 
@@ -234,7 +285,13 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     { title = "Design Review"
-    , attributes = [ width fill ]
+    , attributes =
+        [ centerX
+        , width
+            (fill
+                |> minimum (getScreenWidthInt model.mScreenWidthF)
+            )
+        ]
     , element = details model
     }
 
@@ -242,10 +299,19 @@ view model =
 details : Model -> Element Msg
 details model =
     let
+        mScreenWidthF =
+            model.mScreenWidthF
+
         mDesign =
             model.design
+
+        screenWidth =
+            Maybe.withDefault 800.0 mScreenWidthF
+
+        halfWidth =
+            screenWidth / 2
     in
-    column []
+    row []
         [ column
             [ width fill ]
             [ case mDesign of
@@ -287,269 +353,77 @@ details model =
                                 text ("Error decoding JSON: " ++ s)
                         ]
 
-                Success d ->
-                    designDetailsView d
-            ]
-        , reviewArea model
-        ]
-
-
-designDetailsView : ProteinDesign -> Element msg
-designDetailsView proteinDesign =
-    column
-        ([ centerX
-         , width fill
-         , padding 20
-         , spacing 30
-         , height fill
-         ]
-            ++ Style.bodyFont
-        )
-        [ designDetailsHeader proteinDesign
-        , wrappedRow
-            [ width fill
-            , spacing 10
-            ]
-            [ el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width <| fillPortion 3
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
-            , column
-                [ height fill
-                , width <| fillPortion 7
-                , spacing 10
-                , Font.justify
-                ]
-                [ paragraph
-                    []
-                    [ text "PDB Code: "
-                    , link
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url =
-                            "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdb
-                        , label =
-                            proteinDesign.pdb
-                                |> text
-                        }
-                    ]
-                , paragraph
-                    []
-                    [ "Release Date: "
-                        ++ Date.toIsoString proteinDesign.release_date
-                        |> text
-                    ]
-                , paragraph
-                    []
-                    [ "Design Classification: "
-                        ++ classificationToString proteinDesign.classification
-                        |> text
-                    ]
-                , paragraph
-                    []
-                    [ text "Structural Keywords: "
-                    , el [] (text <| String.join ", " proteinDesign.tags)
-                    ]
-                , paragraph
-                    []
-                    [ text "Publication citation: "
-                    , el [ Font.italic ] (text <| designToCitation proteinDesign)
-                    ]
-                , paragraph
-                    []
-                    [ text "Publication ISSN link: "
-                    , link
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url =
-                            "https://portal.issn.org/resource/ISSN/" ++ proteinDesign.publication_id_issn
-                        , label =
-                            proteinDesign.publication_id_issn
-                                |> text
-                        }
-                    ]
-                , paragraph
-                    []
-                    [ "Authors: "
-                        ++ authorsToString proteinDesign.authors
-                        |> text
-                    ]
-                ]
-            ]
-        , column
-            [ width fill
-            , spacing 20
-            ]
-            [ column
-                Style.h2Font
-                [ text "Structure"
-                ]
-            , Keyed.el
-                [ width <| px 900
-                , height <| px 400
-                , padding 5
-                , centerX
-                , Border.width 2
-                , Border.rounded 3
-                , Border.color <| rgb255 220 220 220
-                ]
-                ( proteinDesign.pdb
-                , Html.node "ngl-viewer"
-                    [ HAtt.id "viewer"
-                    , HAtt.style "width" "890px"
-                    , HAtt.style "height" "400px"
-                    , HAtt.style "align" "center"
-                    , HAtt.alt "3D structure"
-                    , HAtt.attribute "pdb-string" proteinDesign.pdb
-                    ]
-                    []
-                    |> html
-                )
-            ]
-        , paragraph
-            Style.h2Font
-            [ text "Sequence"
-            ]
-        , table
-            [ padding 2 ]
-            { data = proteinDesign.chains
-            , columns =
-                [ { header =
-                        paragraph
-                            [ Font.bold
-                            , paddingXY 5 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Chain ID" ]
-                  , width = fillPortion 2
-                  , view =
-                        \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (fill |> maximum 150)
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 5 10
-                                    ]
-                                    [ text chain.chain_id ]
+                Success proteinDesign ->
+                    if screenWidth > 800.0 then
+                        column
+                            ([ centerX
+                             , width (fill |> maximum (getScreenWidthInt (Just screenWidth)))
+                             , padding 30
+                             , spacing 30
+                             , height fill
+                             ]
+                                ++ Style.bodyFont
+                            )
+                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
+                            , row
+                                []
+                                [ Details.designDetailsBody (Just halfWidth) proteinDesign
+                                , reviewArea halfWidth model
                                 ]
-                  }
-                , { header =
-                        paragraph
-                            [ Font.bold
-                            , paddingXY 10 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
                             ]
-                            [ text "Sequence" ]
-                  , width = fillPortion 8
-                  , view =
-                        \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (fill |> maximum 700)
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 10 10
-                                    ]
-                                    [ text chain.chain_seq ]
-                                ]
-                  }
-                ]
-            }
-        , column
-            [ width fill
-            , spacing 20
-            ]
-            [ paragraph
-                Style.h2Font
-                [ text "Description"
-                ]
-            , paragraph
-                [ Font.justify ]
-                [ proteinDesign.abstract
-                    |> text
-                ]
+
+                    else
+                        column
+                            ([ centerX
+                             , width (fill |> maximum (getScreenWidthInt (Just screenWidth)))
+                             , padding 30
+                             , spacing 30
+                             , height fill
+                             ]
+                                ++ Style.bodyFont
+                            )
+                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
+                            , Details.designDetailsBody (Just screenWidth) proteinDesign
+                            , reviewArea screenWidth model
+                            ]
             ]
         ]
 
 
-designDetailsHeader : ProteinDesign -> Element msg
-designDetailsHeader { previousDesign, nextDesign } =
-    row
-        [ width fill
-        , spaceEvenly
-        ]
-        [ link
-            []
-            { url = "/review/" ++ previousDesign
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowLeftCircle
-                    )
-            }
-        , el Style.h2Font (text "Design Details")
-        , link
-            []
-            { url = "/review/" ++ nextDesign
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowRightCircle
-                    )
-            }
-        ]
-
-
-reviewArea : Model -> Element Msg
-reviewArea model =
+reviewArea : Float -> Model -> Element Msg
+reviewArea elementWidthF model =
     column
         [ centerX
         , width fill
-        , padding 20
+        , height fill
+        , padding 30
         , spacing 30
         , Background.color <| rgb255 255 176 156
         ]
         [ classificationArea model
         , votingArea model
-        , commentArea model
+        , commentArea elementWidthF model
         ]
 
 
 classificationArea : Model -> Element Msg
 classificationArea model =
-    column []
+    column [ spacing 10, width fill ]
         [ paragraph
-            Style.h2Font
+            (Style.h3Font
+                ++ [ padding 10
+                   , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+                   , Border.color <| rgb255 220 220 220
+                   ]
+            )
             [ text "Classification" ]
-        , row [] <|
+        , column [] <|
             List.map (\label -> classificationCheckbox ( model, label ))
                 [ defaultKeys.classificationMinimalKey
                 , defaultKeys.classificationRationalKey
                 , defaultKeys.classificationEngineeredKey
-                , defaultKeys.classificationCompPhysKey
-                , defaultKeys.classificationCompDLKey
+                , defaultKeys.classificationPhysKey
+                , defaultKeys.classificationDeepLearningKey
                 , defaultKeys.classificationConsensusKey
                 , defaultKeys.classificationOtherKey
                 ]
@@ -558,9 +432,14 @@ classificationArea model =
 
 votingArea : Model -> Element Msg
 votingArea model =
-    column []
+    column [ spacing 10 ]
         [ paragraph
-            Style.h2Font
+            (Style.h3Font
+                ++ [ padding 10
+                   , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+                   , Border.color <| rgb255 220 220 220
+                   ]
+            )
             [ text "Vote to remove" ]
         , row [] <|
             List.map (\label -> voteCheckbox ( model, label )) [ defaultKeys.voteRemove ]
@@ -582,10 +461,10 @@ classificationCheckbox ( model, dictKey ) =
         , label =
             case Dict.get dictKey model.classificationCheckboxDict of
                 Just True ->
-                    Input.labelRight [ centerY, width fill ] (paragraph (Font.bold :: Style.bodyFont) <| [ text <| keyToLabel dictKey ])
+                    Input.labelRight [ centerY, width fill ] (wrappedRow (Font.bold :: Style.monospacedFont) <| [ text <| keyToLabel dictKey ])
 
                 _ ->
-                    Input.labelRight [ centerY, width fill ] (paragraph Style.bodyFont <| [ text <| keyToLabel dictKey ])
+                    Input.labelRight [ centerY, width fill ] (wrappedRow Style.monospacedFont <| [ text <| keyToLabel dictKey ])
         }
 
 
@@ -604,25 +483,39 @@ voteCheckbox ( model, dictKey ) =
         , label =
             case Dict.get dictKey model.voteCheckboxDict of
                 Just True ->
-                    Input.labelRight [ centerY, width fill ] (paragraph (Font.bold :: Style.bodyFont) <| [ text <| "Yes, I vote to REMOVE this design." ])
+                    Input.labelRight [ centerY, width fill ] (paragraph (Font.bold :: Style.monospacedFont) <| [ text <| "Yes, I vote to REMOVE this design." ])
 
                 _ ->
-                    Input.labelRight [ centerY, width fill ] (paragraph Style.bodyFont <| [ text <| "Yes, I vote to REMOVE this design." ])
+                    Input.labelRight [ centerY, width fill ] (paragraph Style.monospacedFont <| [ text <| "Yes, I vote to REMOVE this design." ])
         }
 
 
-commentArea : Model -> Element Msg
-commentArea model =
+commentArea : Float -> Model -> Element Msg
+commentArea elementWidthF model =
     column
-        ([ spacing 10, width fill ]
-            ++ Style.h2Font
-        )
-        [ text "Comments"
+        [ spacing 10
+        , width
+            (fill
+                |> (Just elementWidthF |> getScreenWidthInt |> maximum)
+            )
+        ]
+        [ paragraph
+            ([ padding
+                10
+             , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+             , Border.color <|
+                rgb255 220
+                    220
+                    220
+             ]
+                ++ Style.h3Font
+            )
+            [ text "Comments" ]
         , Input.multiline
             Style.bodyFont
             { onChange = \string -> UpdateComment string
             , text = Maybe.withDefault "" model.comment
-            , placeholder = Just <| Input.placeholder [] (text "Enter your comments here")
+            , placeholder = Just <| Input.placeholder Style.monospacedFont (text "Enter your comments here")
             , label = Input.labelHidden "Design Review Comment Box"
             , spellcheck = True
             }

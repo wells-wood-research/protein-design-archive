@@ -13,6 +13,7 @@ module Shared exposing
 -}
 
 import AppError exposing (AppError(..))
+import Browser.Dom
 import Dict
 import Effect exposing (Effect)
 import Json.Decode
@@ -20,6 +21,7 @@ import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared.Model
 import Shared.Msg as Msg exposing (Msg(..))
+import Task
 
 
 
@@ -45,8 +47,8 @@ type alias Model =
 
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init _ _ =
-    ( { designs = NotAsked, errors = [] }
-    , Effect.none
+    ( { designs = NotAsked, errors = [], mScreenWidthF = Nothing }
+    , Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
     )
 
 
@@ -79,6 +81,24 @@ update _ msg model =
               }
             , Effect.none
             )
+
+        ViewportResult result ->
+            case result of
+                Ok viewport ->
+                    ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.none )
+
+                Err _ ->
+                    ( model, Effect.none )
+
+        WindowResizes width _ ->
+            let
+                widthF =
+                    toFloat width
+            in
+            ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+        ViewportReset ->
+            ( model, Effect.none )
 
 
 

@@ -1,6 +1,8 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
+import Browser.Dom
+import Browser.Events
 import Components.Title
 import Date
 import DesignFilter
@@ -17,24 +19,28 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Font exposing (center)
 import Element.Input as Input
+import FeatherIcons
+import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
 import Http
 import Json.Decode
 import Page exposing (Page)
-import Plots
+import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesignStub)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Shared.Msg exposing (Msg(..))
+import Style
+import Task
 import Time
 import Urls
 import View exposing (View)
 
 
 page : Shared.Model -> Route () -> Page Model Msg
-page _ _ =
+page shared _ =
     Page.new
-        { init = init
+        { init = \() -> init shared.mScreenWidthF
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -51,19 +57,26 @@ type alias Model =
     , designFilters : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
+    , replotTime : Int
+    , renderPlotState : RenderPlotState
+    , mScreenWidthF : Maybe Float
     }
 
 
-init : () -> ( Model, Effect Msg )
-init _ =
+init : Maybe Float -> ( Model, Effect Msg )
+init mSharedScreenWidthF =
     ( { designStubs = Loading
       , errors = []
       , designFilters = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
+      , replotTime = 3
+      , renderPlotState = WillRender
+      , mScreenWidthF = mSharedScreenWidthF
       }
     , Effect.batch
-        [ Effect.resetViewport ViewportReset
+        [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.resetViewport ViewportReset
         , Effect.sendCmd (getData Urls.allDesignStubs)
         ]
     )
@@ -86,9 +99,11 @@ type Msg
     = UpdateFilters String DesignFilter
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
-    | CheckForData Time.Posix
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
+    | RenderWhenReady Time.Posix
+    | WindowResizes Int Int
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
 
 
@@ -111,13 +126,16 @@ update msg model =
                             rawDesignStubs
                                 |> List.map (\d -> ( d.pdb, d ))
                                 |> Dict.fromList
+
+                        filteredDesignStubs =
+                            designs
+                                |> Dict.values
+
+                        plotWidth =
+                            getScreenWidthFloat model.mScreenWidthF
                     in
                     ( { model | designStubs = Success designs }
-                    , designs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
-                        |> Plots.timelinePlotStubs
-                        |> Effect.renderVegaPlot
+                    , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
                     )
 
                 DesignsDataReceived (Err e) ->
@@ -128,18 +146,28 @@ update msg model =
                     , Effect.none
                     )
 
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
                 _ ->
                     ( model, Effect.none )
 
         RemoteData.Failure e ->
             case msg of
                 _ ->
-                    ( { model
-                        | designStubs = Failure e
-                        , errors = DesignRequestFailed :: model.errors
-                      }
-                    , Effect.none
-                    )
+                    ( { model | designStubs = Failure e, errors = DesignRequestFailed :: model.errors }, Effect.none )
 
         RemoteData.Success loadedDesignStubs ->
             case msg of
@@ -148,12 +176,11 @@ update msg model =
                         newDesignFilters =
                             Dict.insert key newFilter model.designFilters
                     in
-                    ( { model | designFilters = newDesignFilters }
-                    , loadedDesignStubs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values newDesignFilters))
-                        |> Plots.timelinePlotStubs
-                        |> Effect.renderVegaPlot
+                    ( { model
+                        | designFilters = newDesignFilters
+                        , renderPlotState = AwaitingRender model.replotTime
+                      }
+                    , Effect.none
                     )
 
                 UpdateStartDateTextField string ->
@@ -188,8 +215,47 @@ update msg model =
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
 
-                CheckForData _ ->
-                    ( model, Effect.none )
+                RenderWhenReady _ ->
+                    let
+                        filteredDesignStubs =
+                            loadedDesignStubs
+                                |> Dict.values
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+
+                        plotWidth =
+                            getScreenWidthFloat model.mScreenWidthF
+                    in
+                    case model.renderPlotState of
+                        AwaitingRender 0 ->
+                            ( { model | renderPlotState = Rendered }
+                            , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
+                            )
+
+                        AwaitingRender remaining ->
+                            ( { model | renderPlotState = AwaitingRender (remaining - 1) }
+                            , Effect.none
+                            )
+
+                        _ ->
+                            ( model, Effect.none )
+
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
+                ViewportReset ->
+                    ( { model | renderPlotState = AwaitingRender model.replotTime }, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -209,8 +275,13 @@ ifEmptyOrNot string =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+subscriptions model =
+    case model.renderPlotState of
+        AwaitingRender _ ->
+            Time.every 100 RenderWhenReady
+
+        _ ->
+            Browser.Events.onResize (\width height -> WindowResizes width height)
 
 
 
@@ -220,18 +291,12 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     { title = "Protein Design Archive"
-    , attributes = [ padding 10, width fill ]
+    , attributes =
+        [ centerX
+        , width (fill |> minimum (getScreenWidthInt model.mScreenWidthF))
+        ]
     , element = homeView model
     }
-
-
-growthCurve : Element Msg
-growthCurve =
-    image
-        [ width (fill |> maximum 780), centerX ]
-        { src = "/growth_curve.png"
-        , description = "Histogram showing increase in number of de novo protein designs published from 1990 to 2026"
-        }
 
 
 homeView : Model -> Element Msg
@@ -247,130 +312,195 @@ homeView model =
             text "Failed to load data, probably couldn't connect to server."
 
         RemoteData.Success designStubs ->
-            column
-                [ spacing 10, width fill ]
-                [ --growthCurve
-                  Plots.timelinePlotView
-                , row [ width fill ]
+            let
+                designsToDisplay =
+                    designStubs
+                        |> Dict.values
+                        |> List.filterMap
+                            (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+
+                screenWidth =
+                    getScreenWidthInt model.mScreenWidthF
+
+                screenWidthS =
+                    getScreenWidthString model.mScreenWidthF
+
+                widthDesignCard =
+                    if screenWidth < 800 then
+                        Element.fill |> maximum (screenWidth - 10)
+
+                    else
+                        Element.px 390
+            in
+            column [ centerX ]
+                [ Plots.timelinePlotView (px screenWidth) screenWidthS
+                , column
+                    [ paddingXY 20 0, spacing 10, width (fill |> maximum screenWidth) ]
                     [ searchArea model
                     , dateSearchArea model
+                    , designList widthDesignCard designsToDisplay
                     ]
-                , designStubs
-                    |> Dict.values
-                    |> List.filterMap
-                        (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
-                    |> designList
                 ]
 
 
-designList : List ProteinDesignStub -> Element msg
-designList designs =
+designList : Length -> List ProteinDesignStub -> Element msg
+designList widthDesignCard designs =
     wrappedRow
-        [ spacing 5
-        , width fill
+        [ spaceEvenly
+        , centerX
         ]
-        (List.map ProteinDesign.designCard designs)
+        (List.map (ProteinDesign.designCard widthDesignCard) designs)
 
 
 searchArea : Model -> Element Msg
 searchArea model =
-    Input.text
-        [ width <| fillPortion 6 ]
-        { onChange = \string -> UpdateFilters defaultKeys.searchTextKey (ContainsText string)
-        , text =
-            Dict.get defaultKeys.searchTextKey model.designFilters
-                |> Maybe.map DesignFilter.toString
-                |> Maybe.withDefault ""
-        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
-        , label = Input.labelHidden "Filter Designs Search Box"
-        }
+    row [ width fill, spaceEvenly ]
+        [ el [ centerX, paddingXY 10 0 ]
+            (html <|
+                FeatherIcons.toHtml [] <|
+                    FeatherIcons.withSize 24 <|
+                        FeatherIcons.search
+            )
+        , Input.text
+            (Style.monospacedFont ++ [ width fill, centerX ])
+            { onChange = \string -> UpdateFilters defaultKeys.searchTextKey (ContainsText string)
+            , text =
+                Dict.get defaultKeys.searchTextKey model.designFilters
+                    |> Maybe.map DesignFilter.toString
+                    |> Maybe.withDefault ""
+            , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
+            , label = Input.labelHidden "Filter Designs Search Box"
+            }
+        ]
 
 
 dateSearchArea : Model -> Element Msg
 dateSearchArea model =
-    row [ width <| fillPortion 4 ]
-        [ dateStartField model
-        , dateEndField model
-        ]
+    case model.mScreenWidthF of
+        Just widthF ->
+            if widthF <= 900 then
+                column (Style.monospacedFont ++ [ centerX, spacing 10, width fill ])
+                    [ row []
+                        [ el [ centerX, paddingXY 10 0 ]
+                            (html <|
+                                FeatherIcons.toHtml [] <|
+                                    FeatherIcons.withSize 24 <|
+                                        FeatherIcons.calendar
+                            )
+                        , text "Type to show designs released "
+                        ]
+                    , dateStartField model
+                    , dateEndField model
+                    ]
+
+            else
+                row (Style.monospacedFont ++ [ alignLeft, spaceEvenly ])
+                    [ el [ centerX, paddingXY 10 0 ]
+                        (html <|
+                            FeatherIcons.toHtml [] <|
+                                FeatherIcons.withSize 24 <|
+                                    FeatherIcons.calendar
+                        )
+                    , text "Type to show designs released "
+                    , dateStartField model
+                    , dateEndField model
+                    ]
+
+        _ ->
+            row (Style.monospacedFont ++ [ alignLeft ])
+                [ el [ centerX, paddingXY 10 0 ]
+                    (html <|
+                        FeatherIcons.toHtml [] <|
+                            FeatherIcons.withSize 24 <|
+                                FeatherIcons.calendar
+                    )
+                , text "Type to show designs released "
+                , dateStartField model
+                , dateEndField model
+                ]
 
 
 dateStartField : Model -> Element Msg
 dateStartField model =
-    row [ width fill ]
-        [ paragraph [ width fill, center, padding 5 ] [ text "from" ]
-        , Input.text
-            [ width <| px 150
-            , Background.color <|
-                case model.mStartDate of
-                    Nothing ->
-                        rgb255 255 255 255
+    row [ alignLeft, width fill ]
+        [ text "after "
+        , el [ paddingXY 5 0 ]
+            (Input.text
+                [ width <| px 150
+                , Background.color <|
+                    case model.mStartDate of
+                        Nothing ->
+                            rgb255 255 255 255
 
-                    Just "" ->
-                        rgb255 255 255 255
+                        Just "" ->
+                            rgb255 255 255 255
 
-                    Just string ->
-                        case Date.fromIsoString <| string of
-                            Ok startDate ->
-                                case Date.fromIsoString <| Maybe.withDefault "" model.mEndDate of
-                                    Ok endDate ->
-                                        if Date.compare endDate startDate == GT then
+                        Just string ->
+                            case Date.fromIsoString <| string of
+                                Ok startDate ->
+                                    case Date.fromIsoString <| Maybe.withDefault "" model.mEndDate of
+                                        Ok endDate ->
+                                            if Date.compare endDate startDate == GT then
+                                                rgb255 223 255 214
+
+                                            else
+                                                rgb255 255 215 213
+
+                                        Err _ ->
                                             rgb255 223 255 214
 
-                                        else
-                                            rgb255 255 215 213
-
-                                    Err _ ->
-                                        rgb255 223 255 214
-
-                            Err _ ->
-                                rgb255 255 215 213
-            ]
-            { onChange =
-                \string ->
-                    UpdateStartDateTextField string
-            , text = Maybe.withDefault "" model.mStartDate
-            , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
-            , label = Input.labelHidden "Filter Designs by Date - start"
-            }
+                                Err _ ->
+                                    rgb255 255 215 213
+                ]
+                { onChange =
+                    \string ->
+                        UpdateStartDateTextField string
+                , text = Maybe.withDefault "" model.mStartDate
+                , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
+                , label = Input.labelHidden "Filter Designs by Date - start"
+                }
+            )
         ]
 
 
 dateEndField : Model -> Element Msg
 dateEndField model =
-    row [ width fill, spaceEvenly ]
-        [ paragraph [ width fill, center, padding 5 ] [ text "to" ]
-        , Input.text
-            [ width <| px 150
-            , Background.color <|
-                case model.mEndDate of
-                    Nothing ->
-                        rgb255 255 255 255
+    row [ alignLeft, width fill ]
+        [ text "before"
+        , el [ paddingXY 5 0 ]
+            (Input.text
+                [ width <| px 150
+                , Background.color <|
+                    case model.mEndDate of
+                        Nothing ->
+                            rgb255 255 255 255
 
-                    Just "" ->
-                        rgb255 255 255 255
+                        Just "" ->
+                            rgb255 255 255 255
 
-                    Just string ->
-                        case Date.fromIsoString <| string of
-                            Ok endDate ->
-                                case Date.fromIsoString <| Maybe.withDefault "" model.mStartDate of
-                                    Ok startDate ->
-                                        if Date.compare endDate startDate == GT then
+                        Just string ->
+                            case Date.fromIsoString <| string of
+                                Ok endDate ->
+                                    case Date.fromIsoString <| Maybe.withDefault "" model.mStartDate of
+                                        Ok startDate ->
+                                            if Date.compare endDate startDate == GT then
+                                                rgb255 223 255 214
+
+                                            else
+                                                rgb255 255 215 213
+
+                                        Err _ ->
                                             rgb255 223 255 214
 
-                                        else
-                                            rgb255 255 215 213
-
-                                    Err _ ->
-                                        rgb255 223 255 214
-
-                            Err _ ->
-                                rgb255 255 215 213
-            ]
-            { onChange =
-                \string ->
-                    UpdateEndDateTextField string
-            , text = Maybe.withDefault "" model.mEndDate
-            , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
-            , label = Input.labelHidden "Filter Designs by Date - end"
-            }
+                                Err _ ->
+                                    rgb255 255 215 213
+                ]
+                { onChange =
+                    \string ->
+                        UpdateEndDateTextField string
+                , text = Maybe.withDefault "" model.mEndDate
+                , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
+                , label = Input.labelHidden "Filter Designs by Date - end"
+                }
+            )
         ]
