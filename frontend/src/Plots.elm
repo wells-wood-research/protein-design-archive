@@ -76,7 +76,7 @@ timelinePlotDesigns designs =
                                 |> vStrs
                             )
                         << dataColumn "href"
-                            (List.map (\d -> "designs/" ++ d.pdb) designs
+                            (List.map (\d -> "/pda/designs/" ++ d.pdb) designs
                                 |> vStrs
                             )
             in

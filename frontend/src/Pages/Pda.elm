@@ -1,4 +1,4 @@
-module Pages.Home_ exposing (Model, Msg, page)
+module Pages.Pda exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
 import Components.Title

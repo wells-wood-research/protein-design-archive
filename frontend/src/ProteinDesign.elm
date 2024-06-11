@@ -457,7 +457,7 @@ designCard design =
         [ width <| px 460
         , clip
         ]
-        { url = "/designs/" ++ design.pdb
+        { url = "/pda/designs/" ++ design.pdb
         , label =
             row
                 [ width fill
