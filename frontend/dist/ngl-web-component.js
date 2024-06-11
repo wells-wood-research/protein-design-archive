@@ -11,7 +11,7 @@ class NGLViewer extends HTMLElement {
 
     var stage = new NGL.Stage(this.id, { backgroundColor: "white" });
     var stringBlob = new Blob([pdbString], { type: "text/plain" });
-    stage.loadFile("/pdb_files/" + pdbString.toUpperCase() + ".pdb1.gz").then(function (comp) {
+    stage.loadFile("/pda/pdb_files/" + pdbString.toUpperCase() + ".pdb1.gz").then(function (comp) {
       comp.addRepresentation("cartoon");
       comp.autoView();
     });
