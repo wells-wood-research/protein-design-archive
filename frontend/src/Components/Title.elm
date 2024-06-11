@@ -10,12 +10,14 @@ import View exposing (View)
 view : View msg -> View msg
 view props =
     { title = props.title
-    , attributes = [ Background.color (Element.rgb255 250 250 250) ]
+    , attributes =
+        [ Background.color <|
+            Element.rgb255 250 250 250
+        ]
+            ++ props.attributes
     , element =
         column
-            [ centerX
-            , width (fill |> maximum 960)
-            ]
+            props.attributes
             [ title
             , el props.attributes props.element
             ]

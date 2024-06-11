@@ -26,8 +26,8 @@ defaultKeys :
     , classificationMinimalKey : String
     , classificationRationalKey : String
     , classificationEngineeredKey : String
-    , classificationCompPhysKey : String
-    , classificationCompDLKey : String
+    , classificationPhysKey : String
+    , classificationDeepLearningKey : String
     , classificationConsensusKey : String
     , classificationOtherKey : String
     , keywordSyntheticKey : String
@@ -53,8 +53,8 @@ defaultKeys =
     , classificationMinimalKey = "design-classification-minimal"
     , classificationRationalKey = "design-classification-rational"
     , classificationEngineeredKey = "design-classification-engineered"
-    , classificationCompPhysKey = "design-classification-comp-phys"
-    , classificationCompDLKey = "design-classification-comp-dl"
+    , classificationPhysKey = "design-classification-comp-phys"
+    , classificationDeepLearningKey = "design-classification-comp-dl"
     , classificationConsensusKey = "design-classification-consensus"
     , classificationOtherKey = "design-classification-other"
     , keywordSyntheticKey = "design-keyword-synthetic"
@@ -81,8 +81,8 @@ checkboxDict =
         [ ( defaultKeys.classificationMinimalKey, False )
         , ( defaultKeys.classificationRationalKey, False )
         , ( defaultKeys.classificationEngineeredKey, False )
-        , ( defaultKeys.classificationCompPhysKey, False )
-        , ( defaultKeys.classificationCompDLKey, False )
+        , ( defaultKeys.classificationPhysKey, False )
+        , ( defaultKeys.classificationDeepLearningKey, False )
         , ( defaultKeys.classificationConsensusKey, False )
         , ( defaultKeys.classificationOtherKey, False )
         , ( defaultKeys.keywordSyntheticKey, False )
@@ -144,10 +144,10 @@ toDesignFilter key =
             DesignClass Engineered
 
         "design-classification-comp-phys" ->
-            DesignClass CompPhys
+            DesignClass Phys
 
         "design-classification-comp-dl" ->
-            DesignClass CompDL
+            DesignClass DeepLearning
 
         "design-classification-consensus" ->
             DesignClass Consensus
@@ -372,6 +372,5 @@ stubMeetsOneFilter design filter =
 
 
 
--- to fix Debug.todo
 --DesignTag tag ->
 --    List.member tag design.tags

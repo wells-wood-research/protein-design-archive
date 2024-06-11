@@ -1,31 +1,36 @@
-module Pages.Pda.Designs.DesignId_ exposing (Model, Msg, page)
+module Pages.Pda.Designs.DesignId_ exposing (Model, Msg, designDetailsBody, designDetailsHeader, designDetailsView, details, page)
 
 import AppError exposing (AppError(..))
+import Browser.Dom
+import Browser.Events
 import Components.Title
-import Date
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
 import Element.Keyed as Keyed
 import FeatherIcons
+import Get exposing (..)
 import Html
 import Html.Attributes as HAtt
 import Http
 import Page exposing (Page)
-import ProteinDesign exposing (ProteinDesign, authorsToString, classificationToString, designToCitation)
+import Plots exposing (RenderPlotState(..))
+import ProteinDesign exposing (ProteinDesign, designDetailsFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
 import Style
+import Task
+import Time
 import Urls
 import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page _ route =
+page { mScreenWidthF } route =
     Page.new
-        { init = \_ -> init route.params.designId
+        { init = \_ -> init mScreenWidthF route.params.designId
         , update = update
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
@@ -40,16 +45,26 @@ type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
+    , mScreenWidthF : Maybe Float
+    , replotTime : Int
+    , renderPlotState : RenderPlotState
     }
 
 
-init : String -> ( Model, Effect Msg )
-init designId =
+init : Maybe Float -> String -> ( Model, Effect Msg )
+init mSharedScreenWidthF designId =
     ( { designId = designId
       , design = Loading
       , errors = []
+      , replotTime = 3
+      , renderPlotState = WillRender
+      , mScreenWidthF = mSharedScreenWidthF
       }
-    , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+    , Effect.batch
+        [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
+        , Effect.resetViewport ViewportReset
+        , Effect.sendCmd (getData <| Urls.designDetailsFromId designId)
+        ]
     )
 
 
@@ -69,6 +84,10 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | RenderWhenReady Time.Posix
+    | WindowResizes Int Int
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
+    | ViewportReset
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -102,6 +121,24 @@ update msg model =
                     , Effect.none
                     )
 
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.none )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+
+                _ ->
+                    ( model, Effect.none )
+
         RemoteData.Failure e ->
             case msg of
                 _ ->
@@ -114,6 +151,36 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
+                RenderWhenReady _ ->
+                    case model.renderPlotState of
+                        AwaitingRender 0 ->
+                            ( { model | renderPlotState = Rendered }
+                            , Effect.resetViewport ViewportReset
+                            )
+
+                        AwaitingRender remaining ->
+                            ( { model | renderPlotState = AwaitingRender (remaining - 1) }
+                            , Effect.none
+                            )
+
+                        _ ->
+                            ( model, Effect.none )
+
+                WindowResizes width _ ->
+                    let
+                        widthF =
+                            toFloat width
+                    in
+                    ( { model | mScreenWidthF = Just widthF, renderPlotState = AwaitingRender model.replotTime }, Effect.none )
+
+                ViewportResult result ->
+                    case result of
+                        Ok viewport ->
+                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+
+                        Err _ ->
+                            ( model, Effect.none )
+
                 _ ->
                     ( model, Effect.none )
 
@@ -122,9 +189,9 @@ update msg model =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Browser.Events.onResize (\width height -> WindowResizes width height)
 
 
 
@@ -134,17 +201,19 @@ subscriptions _ =
 view : Model -> View Msg
 view model =
     { title = "Design Details"
-    , attributes = [ width fill ]
-    , element = details model
+    , attributes =
+        [ centerX
+        , width
+            (fill
+                |> minimum (getScreenWidthInt model.mScreenWidthF)
+            )
+        ]
+    , element = details model.mScreenWidthF model.design
     }
 
 
-details : Model -> Element msg
-details model =
-    let
-        mDesign =
-            model.design
-    in
+details : Maybe Float -> RemoteData Http.Error ProteinDesign -> Element msg
+details mScreenWidthF mDesign =
     row []
         [ column
             [ width fill ]
@@ -187,128 +256,155 @@ details model =
                                 text ("Error decoding JSON: " ++ s)
                         ]
 
-                Success d ->
-                    designDetailsView d
+                Success design ->
+                    designDetailsView mScreenWidthF design
             ]
         ]
 
 
-designDetailsView : ProteinDesign -> Element msg
-designDetailsView proteinDesign =
+designDetailsView : Maybe Float -> ProteinDesign -> Element msg
+designDetailsView mScreenWidthF proteinDesign =
     column
         ([ centerX
-         , width fill
-         , padding 20
+         , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+         , padding 30
          , spacing 30
          , height fill
          ]
             ++ Style.bodyFont
         )
-        [ designDetailsHeader proteinDesign
-        , wrappedRow
-            [ width fill
+        [ designDetailsHeader "Design Details" "/pda/designs/" proteinDesign
+        , designDetailsBody mScreenWidthF proteinDesign
+        ]
+
+
+designDetailsHeader : String -> String -> ProteinDesign -> Element msg
+designDetailsHeader title path { previousDesign, nextDesign } =
+    row
+        [ width fill
+        , spaceEvenly
+        ]
+        [ link
+            []
+            { url = path ++ previousDesign
+            , label =
+                el [ centerX ]
+                    (html <|
+                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.arrowLeftCircle
+                    )
+            }
+        , paragraph
+            (Style.h2Font ++ [ Font.center ])
+            [ text title ]
+        , link
+            []
+            { url = path ++ nextDesign
+            , label =
+                el [ centerX ]
+                    (html <|
+                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.arrowRightCircle
+                    )
+            }
+        ]
+
+
+designDetailsBody : Maybe Float -> ProteinDesign -> Element msg
+designDetailsBody mScreenWidthF proteinDesign =
+    column
+        ([ centerX
+         , width fill
+         , padding 30
+         , spacing 30
+         , height fill
+         ]
+            ++ Style.bodyFont
+        )
+        [ column
+            [ height fill
+            , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
             , spacing 10
+            , Font.justify
             ]
-            [ el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width <| fillPortion 3
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
-            , column
-                [ height fill
-                , width <| fillPortion 7
-                , spacing 10
-                , Font.justify
-                ]
-                [ paragraph
-                    []
-                    [ text "PDB Code: "
-                    , link
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url =
-                            "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdb
-                        , label =
-                            proteinDesign.pdb
-                                |> text
-                        }
+            [ table
+                [ padding 2 ]
+                { data = designDetailsFromProteinDesign proteinDesign
+                , columns =
+                    [ { header =
+                            paragraph
+                                [ Font.bold
+                                , paddingXY 5 10
+                                , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                                , Border.color <| rgb255 220 220 220
+                                ]
+                                [ text "Attribute" ]
+                      , width = fillPortion 2
+                      , view =
+                            \category ->
+                                paragraph
+                                    Style.monospacedFont
+                                    [ column
+                                        [ width (fill |> maximum 150)
+                                        , height fill
+                                        , scrollbarX
+                                        , paddingXY 5 10
+                                        ]
+                                        [ text category.header ]
+                                    ]
+                      }
+                    , { header =
+                            paragraph
+                                [ Font.bold
+                                , paddingXY 10 10
+                                , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                                , Border.color <| rgb255 220 220 220
+                                ]
+                                [ text "Value" ]
+                      , width = fillPortion 8
+                      , view =
+                            \detail ->
+                                paragraph
+                                    Style.monospacedFont
+                                    [ column
+                                        [ width (fill |> maximum (getScreenWidthInt mScreenWidthF - 200))
+                                        , height fill
+                                        , scrollbarX
+                                        , paddingXY 10 10
+                                        ]
+                                        [ detail.property ]
+                                    ]
+                      }
                     ]
-                , paragraph
-                    []
-                    [ "Release Date: "
-                        ++ Date.toIsoString proteinDesign.release_date
-                        |> text
-                    ]
-                , paragraph
-                    []
-                    [ "Design Classification: "
-                        ++ classificationToString proteinDesign.classification
-                        |> text
-                    ]
-                , paragraph
-                    []
-                    [ text "Structural Keywords: "
-                    , el [] (text <| String.join ", " proteinDesign.tags)
-                    ]
-                , paragraph
-                    []
-                    [ text "Publication citation: "
-                    , el [ Font.italic ] (text <| designToCitation proteinDesign)
-                    ]
-                , paragraph
-                    []
-                    [ text "Publication ISSN link: "
-                    , link
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url =
-                            "https://portal.issn.org/resource/ISSN/" ++ proteinDesign.publication_id_issn
-                        , label =
-                            proteinDesign.publication_id_issn
-                                |> text
-                        }
-                    ]
-                , paragraph
-                    []
-                    [ "Authors: "
-                        ++ authorsToString proteinDesign.authors
-                        |> text
-                    ]
-                ]
+                }
             ]
         , column
-            [ width fill
+            [ width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
             , spacing 20
             ]
             [ column
                 Style.h2Font
                 [ text "Structure"
                 ]
-            , Keyed.el
-                [ width <| px 900
+            ]
+        , column
+            [ spacing 20
+            , centerX
+            ]
+            [ Keyed.el
+                [ width <| px (getScreenWidthIntNgl mScreenWidthF)
                 , height <| px 400
-                , padding 5
-                , centerX
-                , Border.width 2
-                , Border.rounded 3
-                , Border.color <| rgb255 220 220 220
+
+                --, Border.width 2
+                --, Border.rounded 3
+                --, Border.color <| rgb255 220 220 220
                 ]
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" "890px"
+                    , HAtt.style "width" (getScreenWidthStringNgl mScreenWidthF)
                     , HAtt.style "height" "400px"
                     , HAtt.style "align" "center"
                     , HAtt.alt "3D structure"
@@ -340,7 +436,11 @@ designDetailsView proteinDesign =
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum 150)
+                                    [ width
+                                        (fill
+                                            |> maximum 150
+                                            |> minimum 80
+                                        )
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 5 10
@@ -350,7 +450,8 @@ designDetailsView proteinDesign =
                   }
                 , { header =
                         paragraph
-                            [ Font.bold
+                            [ width fill
+                            , Font.bold
                             , paddingXY 10 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
@@ -362,12 +463,12 @@ designDetailsView proteinDesign =
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum 700)
+                                    [ width (fill |> maximum (getScreenWidthInt mScreenWidthF - 200))
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 10 10
                                     ]
-                                    [ text chain.chain_seq ]
+                                    [ text chain.chain_seq_unnat ]
                                 ]
                   }
                 ]
@@ -386,36 +487,4 @@ designDetailsView proteinDesign =
                     |> text
                 ]
             ]
-        ]
-
-
-designDetailsHeader : ProteinDesign -> Element msg
-designDetailsHeader { previousDesign, nextDesign } =
-    row
-        [ width fill
-        , spaceEvenly
-        ]
-        [ link
-            []
-            { url = "/pda/designs/" ++ previousDesign
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowLeftCircle
-                    )
-            }
-        , el Style.h2Font (text "Design Details")
-        , link
-            []
-            { url = "/pda/designs/" ++ nextDesign
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowRightCircle
-                    )
-            }
         ]

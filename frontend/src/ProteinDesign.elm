@@ -5,6 +5,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Time exposing (Month(..))
@@ -16,26 +17,22 @@ type alias ProteinDesign =
     , chains : List Chain
     , authors : List Author
     , classification : Classification
-    , keyword : List String
-    , tags : List String -- List Tag
+    , classification_suggested : List Classification
+    , classification_suggested_reason : List String
+    , subtitle : String
+    , tags : List String
+    , keywords : List String
     , release_date : Date
-    , publication_title : String
-    , publication_journal_abbrev : String
-    , publication_journal_volume : String
-    , publication_page_first : String
-    , publication_page_last : String
-    , publication_id_astm : String
-    , publication_id_issn : String
-    , publication_id_csd : String
-    , publication_id_doi : String
-    , publication_id_pubmed : String
+    , publication : String
+    , publication_ref : Reference
     , publication_country : String
     , abstract : String
-    , related_pdb : String
+    , related_pdb : List String
     , crystal_structure : Xtal
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
+    , review : Bool
     , previousDesign : String
     , nextDesign : String
     }
@@ -45,9 +42,11 @@ type alias ProteinDesignStub =
     { pdb : String
     , picture_path : String
     , authors : List Author
-    , keyword : List String
+    , subtitle : String
     , tags : List String
+    , keywords : List String
     , release_date : Date
+    , publication : String
     }
 
 
@@ -55,8 +54,9 @@ type Classification
     = Minimal
     | Rational
     | Engineered
-    | CompPhys
-    | CompDL
+    | Computational
+    | Phys
+    | DeepLearning
     | Consensus
     | Other
 
@@ -83,9 +83,19 @@ type alias Author =
     }
 
 
+type alias Reference =
+    { doi : String
+    , pubmed : String
+    , csd : String
+    , issn : String
+    , astm : String
+    }
+
+
 type alias Chain =
     { chain_id : String
-    , chain_seq : String
+    , chain_seq_unnat : String
+    , chain_seq_nat : String
     }
 
 
@@ -99,6 +109,153 @@ type alias Xtal =
     }
 
 
+type alias DesignDetails msg =
+    { header : String
+    , property : Element msg
+    }
+
+
+designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
+designDetailsFromProteinDesign proteinDesign =
+    [ { header = "PDB code"
+      , property =
+            newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url =
+                    "https://www.rcsb.org/structure/"
+                        ++ proteinDesign.pdb
+                , label =
+                    proteinDesign.pdb
+                        |> text
+                }
+      }
+    , { header = "Subtitle"
+      , property =
+            el
+                [ padding 2
+                , Border.width 2
+                , Border.color <| rgb255 220 220 220
+                , Border.rounded 3
+                , alignTop
+                , width (fill |> maximum 350)
+                ]
+                (image
+                    [ width fill ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
+                )
+      }
+    , { header = "Subtitle"
+      , property =
+            if String.isEmpty proteinDesign.subtitle then
+                text "-"
+
+            else
+                text <| proteinDesign.subtitle
+      }
+    , { header = "Classification"
+      , property =
+            if String.isEmpty <| classificationToString proteinDesign.classification then
+                text "-"
+
+            else
+                text <| classificationToString proteinDesign.classification
+      }
+    , { header = "Tags"
+      , property =
+            if List.isEmpty proteinDesign.tags then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.tags
+      }
+    , { header = "Release date"
+      , property =
+            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
+                text "-"
+
+            else
+                text <| Date.toIsoString proteinDesign.release_date
+      }
+    , { header = "Publication"
+      , property =
+            if String.isEmpty proteinDesign.publication then
+                text "-"
+
+            else
+                text <| proteinDesign.publication
+      }
+    , { header = "Reference link"
+      , property =
+            newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url =
+                    if String.isEmpty proteinDesign.publication_ref.doi then
+                        if String.isEmpty proteinDesign.publication_ref.pubmed then
+                            "https://www.rcsb.org/structure/"
+                                ++ proteinDesign.pdb
+
+                        else
+                            "https://pubmed.ncbi.nlm.nih.gov/"
+                                ++ proteinDesign.publication_ref.pubmed
+
+                    else
+                        "https://doi.org/"
+                            ++ proteinDesign.publication_ref.doi
+                , label =
+                    (if String.isEmpty proteinDesign.publication_ref.doi then
+                        if String.isEmpty proteinDesign.publication_ref.pubmed then
+                            "-"
+
+                        else
+                            proteinDesign.publication_ref.pubmed
+
+                     else
+                        proteinDesign.publication_ref.doi
+                    )
+                        |> text
+                }
+      }
+    , { header = "Authors"
+      , property =
+            if List.isEmpty proteinDesign.authors then
+                text "-"
+
+            else
+                text <| authorsToString proteinDesign.authors
+      }
+    , { header = "Related entries"
+      , property =
+            if List.isEmpty proteinDesign.related_pdb then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.related_pdb
+      }
+    , { header = "Formula weight"
+      , property =
+            if String.isEmpty <| String.fromFloat proteinDesign.formula_weight then
+                text "-"
+
+            else
+                text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
+      }
+    , { header = "Synthesis comment"
+      , property =
+            if String.isEmpty proteinDesign.synthesis_comment then
+                text "-"
+
+            else
+                text <| proteinDesign.synthesis_comment
+      }
+    ]
+
+
 rawDesignDecoder : Decoder ProteinDesign
 rawDesignDecoder =
     Decode.succeed ProteinDesign
@@ -107,26 +264,22 @@ rawDesignDecoder =
         |> required "chains" (list chainDecoder)
         |> required "authors" (list authorDecoder)
         |> required "classification" classificationDecoder
-        |> required "keyword" (list string)
+        |> required "classification_suggested" (list classificationDecoder)
+        |> required "classification_suggested_reason" (list string)
+        |> required "subtitle" string
         |> required "tags" (list string)
+        |> required "keywords" (list string)
         |> required "release_date" dateDecoder
-        |> required "publication_title" titleDecoder
-        |> required "publication_journal_abbrev" string
-        |> required "publication_journal_volume" string
-        |> required "publication_page_first" string
-        |> required "publication_page_last" string
-        |> required "publication_id_astm" string
-        |> required "publication_id_issn" string
-        |> required "publication_id_csd" string
-        |> required "publication_id_doi" string
-        |> required "publication_id_pubmed" string
+        |> required "publication" string
+        |> required "publication_ref" referenceDecoder
         |> required "publication_country" string
         |> required "abstract" string
-        |> required "related_pdb" string
+        |> required "related_pdb" (list string)
         |> required "crystal_structure" xtalDecoder
         |> required "exptl_method" (list string)
         |> required "formula_weight" float
         |> required "synthesis_comment" string
+        |> required "review" bool
         |> optional "previous_design" string "/"
         |> optional "next_design" string "/"
 
@@ -137,14 +290,26 @@ rawDesignStubDecoder =
         |> required "pdb" string
         |> required "picture_path" string
         |> required "authors" (list authorDecoder)
-        |> required "keyword" (list string)
+        |> required "subtitle" string
         |> required "tags" (list string)
+        |> required "keywords" (list string)
         |> required "release_date" dateDecoder
+        |> required "publication" string
 
 
 classificationDecoder : Decoder Classification
 classificationDecoder =
     Decode.map stringToClassification string
+
+
+referenceDecoder : Decoder Reference
+referenceDecoder =
+    Decode.succeed Reference
+        |> required "DOI" string
+        |> required "PubMed" string
+        |> required "CSD" string
+        |> required "ISSN" string
+        |> required "ASTM" string
 
 
 dateDecoder : Decoder Date
@@ -161,19 +326,6 @@ dateDecoder =
             )
 
 
-titleDecoder : Decoder String
-titleDecoder =
-    Decode.map
-        (\titleString ->
-            if String.endsWith "." titleString then
-                String.dropRight 1 titleString
-
-            else
-                titleString
-        )
-        string
-
-
 authorDecoder : Decoder Author
 authorDecoder =
     Decode.succeed Author
@@ -185,7 +337,8 @@ chainDecoder : Decoder Chain
 chainDecoder =
     Decode.succeed Chain
         |> required "chain_id" string
-        |> required "chain_seq" string
+        |> required "chain_seq_unnat" string
+        |> required "chain_seq_nat" string
 
 
 xtalDecoder : Decoder Xtal
@@ -205,12 +358,22 @@ designSearchableText proteinDesign =
     , String.join " " <| List.map chainToString proteinDesign.chains
     , authorsToString proteinDesign.authors
     , classificationToString proteinDesign.classification
-    , String.join " " proteinDesign.keyword
-    , String.join " " proteinDesign.tags -- tagsToString proteinDesign.tags
+    , String.join " " <| List.map classificationToString proteinDesign.classification_suggested
+    , proteinDesign.subtitle
+    , String.join " " proteinDesign.tags
+    , String.join " " proteinDesign.keywords
     , Date.toIsoString proteinDesign.release_date
-    , designToCitation proteinDesign
+    , proteinDesign.publication
+    , proteinDesign.publication_ref.doi
+    , proteinDesign.publication_ref.pubmed
+    , proteinDesign.publication_ref.csd
+    , proteinDesign.publication_ref.issn
+    , proteinDesign.publication_ref.astm
+    , proteinDesign.publication_country
     , proteinDesign.abstract
-    , proteinDesign.related_pdb
+    , String.join " " proteinDesign.related_pdb
+    , String.join " " proteinDesign.exptl_method
+    , proteinDesign.synthesis_comment
     , xtalToString proteinDesign.crystal_structure
     ]
         |> String.join "\n"
@@ -221,41 +384,30 @@ stubSearchableText : ProteinDesignStub -> String
 stubSearchableText proteinDesign =
     [ proteinDesign.pdb
     , authorsToString proteinDesign.authors
-    , String.join " " proteinDesign.keyword
+    , proteinDesign.subtitle
     , String.join " " proteinDesign.tags
+    , String.join " " proteinDesign.keywords
     , Date.toIsoString proteinDesign.release_date
+    , proteinDesign.publication
     ]
         |> String.join "\n"
         |> String.toLower
 
 
-designToPageRange : ProteinDesign -> String
-designToPageRange proteinDesign =
-    if String.isEmpty proteinDesign.publication_page_first || String.isEmpty proteinDesign.publication_page_last then
-        ""
-
-    else
-        proteinDesign.publication_page_first ++ "-" ++ proteinDesign.publication_page_last
-
-
-designToCitation : ProteinDesign -> String
-designToCitation proteinDesign =
-    String.join ", " <|
-        [ proteinDesign.publication_title
-        , proteinDesign.publication_journal_abbrev
-        , proteinDesign.publication_journal_volume
-        , designToPageRange proteinDesign
-        , proteinDesign.publication_id_astm
-        , proteinDesign.publication_id_issn
-        , proteinDesign.publication_id_csd
-        , proteinDesign.publication_id_doi
-        , proteinDesign.publication_id_pubmed
+refToString : Reference -> String
+refToString reference =
+    String.join " " <|
+        [ reference.doi
+        , reference.pubmed
+        , reference.csd
+        , reference.issn
+        , reference.astm
         ]
 
 
 chainToString : Chain -> String
 chainToString chain =
-    chain.chain_id ++ " " ++ chain.chain_seq
+    chain.chain_id ++ " " ++ chain.chain_seq_unnat
 
 
 authorToString : Author -> String
@@ -285,11 +437,14 @@ stringToClassification string =
         "engineered" ->
             Engineered
 
-        "computational physics-based" ->
-            CompPhys
+        "computational" ->
+            Computational
 
-        "computational, Deep Learning" ->
-            CompDL
+        "physics-based" ->
+            Phys
+
+        "deep learning-based" ->
+            DeepLearning
 
         "consensus" ->
             Consensus
@@ -310,11 +465,14 @@ classificationToString classification =
         Engineered ->
             "engineered"
 
-        CompPhys ->
-            "computational physics-based"
+        Computational ->
+            "computational"
 
-        CompDL ->
-            "computational, Deep Learning"
+        Phys ->
+            "physics-based"
+
+        DeepLearning ->
+            "deep learning-based"
 
         Consensus ->
             "consensus"
@@ -335,10 +493,13 @@ classificationToColour classification =
         Engineered ->
             "#0000ff"
 
-        CompPhys ->
+        Computational ->
+            "#000000"
+
+        Phys ->
             "#800080"
 
-        CompDL ->
+        DeepLearning ->
             "008000"
 
         Consensus ->
@@ -451,16 +612,16 @@ tagToString tag =
 
 {-| A simple view that shows basic data about a design. Used for lists etc.
 -}
-designCard : ProteinDesignStub -> Element msg
-designCard design =
+designCard : Element.Length -> ProteinDesignStub -> Element msg
+designCard widthDesignCard design =
     link
-        [ width <| px 460
+        [ width <| widthDesignCard
         , clip
         ]
         { url = "/pda/designs/" ++ design.pdb
         , label =
             row
-                [ width fill
+                [ width <| widthDesignCard
                 , spacing 4
                 , padding 4
                 , mouseOver [ Background.color <| rgb255 235 235 235 ]
@@ -475,9 +636,14 @@ designCard design =
                         { src = design.picture_path, description = "Image of design " ++ design.pdb }
                     )
                 , column
-                    [ padding 2, spacing 2, width (fill |> minimum 200), alignTop ]
+                    [ padding 2
+                    , spacing 2
+                    , width fill
+                    , alignTop
+                    ]
                     [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
-                    , paragraph [ Font.color <| rgb255 130 130 130, Font.size 11 ] [ text (authorsToString design.authors) ]
+                    , paragraph [ Font.size 11, Font.color <| rgb255 130 130 130 ] [ wrappedRow [] [ text design.subtitle ] ]
+                    , paragraph [ Font.size 11 ] [ wrappedRow [] [ text (authorsToString design.authors) ] ]
                     ]
                 ]
         }

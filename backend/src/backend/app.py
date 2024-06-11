@@ -27,9 +27,11 @@ def get_all_design_stubs():
         "pdb": 1,
         "picture_path": 1,
         "authors": 1,
-        "keyword": 1,
+        "subtitle": 1,
         "tags": 1,
+        "keywords": 1,
         "release_date": 1,
+        "publication": 1
     }
     designs = list(DESIGNS.find({}, projection=projection))
     return designs
@@ -39,11 +41,7 @@ def get_all_design_stubs():
 def get_design_details(designId: str) -> t.Any:
     """Gets complete data for the one design that this details page is for."""
     projection = {"_id": 0}
-    design = DESIGNS.find_one({"pdb": designId.upper()}, projection)
-    if design:
-        (previous_design, next_design) = get_surrounding_pdb_codes(designId)
-        design["previous_design"] = previous_design
-        design["next_design"] = next_design
+    design = DESIGNS.find_one({"pdb": designId.lower()}, projection)
     return design
 
 
