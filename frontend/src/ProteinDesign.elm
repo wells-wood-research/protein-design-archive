@@ -190,36 +190,40 @@ designDetailsFromProteinDesign proteinDesign =
       }
     , { header = "Reference link"
       , property =
-            newTabLink
-                [ Font.color <| rgb255 104 176 171
-                , Font.underline
-                ]
-                { url =
-                    if String.isEmpty proteinDesign.publication_ref.doi then
-                        if String.isEmpty proteinDesign.publication_ref.pubmed then
-                            "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdb
+            if String.isEmpty proteinDesign.publication_ref.doi && String.isEmpty proteinDesign.publication_ref.pubmed then
+                text "No reference"
+
+            else
+                newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url =
+                        if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                "https://www.rcsb.org/structure/"
+                                    ++ proteinDesign.pdb
+
+                            else
+                                "https://pubmed.ncbi.nlm.nih.gov/"
+                                    ++ proteinDesign.publication_ref.pubmed
 
                         else
-                            "https://pubmed.ncbi.nlm.nih.gov/"
-                                ++ proteinDesign.publication_ref.pubmed
+                            "https://doi.org/"
+                                ++ proteinDesign.publication_ref.doi
+                    , label =
+                        (if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                "-"
 
-                    else
-                        "https://doi.org/"
-                            ++ proteinDesign.publication_ref.doi
-                , label =
-                    (if String.isEmpty proteinDesign.publication_ref.doi then
-                        if String.isEmpty proteinDesign.publication_ref.pubmed then
-                            "-"
+                            else
+                                proteinDesign.publication_ref.pubmed
 
-                        else
-                            proteinDesign.publication_ref.pubmed
-
-                     else
-                        proteinDesign.publication_ref.doi
-                    )
-                        |> text
-                }
+                         else
+                            proteinDesign.publication_ref.doi
+                        )
+                            |> text
+                    }
       }
     , { header = "Authors"
       , property =
