@@ -131,7 +131,7 @@ designDetailsFromProteinDesign proteinDesign =
                         |> text
                 }
       }
-    , { header = "Subtitle"
+    , { header = "Biological assembly"
       , property =
             el
                 [ padding 2
