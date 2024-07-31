@@ -8,6 +8,7 @@ import Element.Font as Font
 import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
+import Style
 import Time exposing (Month(..))
 
 
@@ -645,7 +646,7 @@ designCard widthDesignCard design =
                     , width fill
                     , alignTop
                     ]
-                    [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
+                    [ paragraph (Style.monospacedFont ++ [ Font.size 16 ]) [ text <| String.toUpper <| design.pdb ]
                     , paragraph [ Font.size 11, Font.color <| rgb255 130 130 130 ] [ wrappedRow [] [ text design.subtitle ] ]
                     , paragraph [ Font.size 11 ] [ wrappedRow [] [ text (authorsToString design.authors) ] ]
                     ]
