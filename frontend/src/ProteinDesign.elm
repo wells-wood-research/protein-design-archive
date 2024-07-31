@@ -191,7 +191,7 @@ designDetailsFromProteinDesign proteinDesign =
     , { header = "Reference link"
       , property =
             if String.isEmpty proteinDesign.publication_ref.doi && String.isEmpty proteinDesign.publication_ref.pubmed then
-                text "No reference"
+                text "-"
 
             else
                 newTabLink
