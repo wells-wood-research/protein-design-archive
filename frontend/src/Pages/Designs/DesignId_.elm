@@ -6,6 +6,7 @@ import Browser.Events
 import Components.Title
 import Effect exposing (Effect)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
@@ -17,6 +18,7 @@ import Get exposing (..)
 import Html
 import Html.Attributes as HAtt
 import Http
+import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesign, designDetailsFromProteinDesign)
@@ -93,6 +95,7 @@ type Msg
     | DesignsDataReceived (Result Http.Error ProteinDesign)
     | CsvRequested
     | JsonRequested
+    | AddToDownloadList
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
@@ -118,7 +121,11 @@ update msg model =
                     ( model, Effect.none )
 
                 DesignsDataReceived (Ok design) ->
-                    ( { model | design = Success design, csv = Just model.designId }
+                    ( { model
+                        | design = Success design
+                        , csv = Just model.designId
+                        , json = Just model.designId
+                      }
                     , Effect.none
                     )
 
@@ -179,6 +186,9 @@ update msg model =
                         Nothing ->
                             Debug.todo "Display error"
                     )
+
+                AddToDownloadList ->
+                    ( model, Effect.none )
 
                 RenderWhenReady _ ->
                     case model.renderPlotState of
@@ -297,25 +307,81 @@ designDetailsView mScreenWidthF proteinDesign =
         ([ centerX
          , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
          , padding 30
-         , spacing 30
          , height fill
          ]
             ++ Style.bodyFont
         )
-        [ downloadButton
-        , designDetailsHeader "Design Details" "/designs/" proteinDesign
+        [ designDetailsHeader "Design Details" "/designs/" proteinDesign
+        , downloadArea mScreenWidthF
         , designDetailsBody mScreenWidthF proteinDesign
         ]
 
 
-downloadButton : Element Msg
-downloadButton =
+downloadButton : Length -> List (Attribute msg) -> Maybe msg -> Element msg -> Element msg
+downloadButton widthButton buttonAttributes onPressCmd textLabel =
     Input.button
-        [ padding 5
-        ]
-        { label = text "Download" --sidebarButton FeatherIcons.search
-        , onPress = CsvRequested |> Just
+        (buttonAttributes
+            ++ [ padding 10
+               , width widthButton
+               , centerX
+               , Font.center
+               , Element.mouseOver
+                    [ Background.color <| rgb255 220 220 220
+                    ]
+               ]
+        )
+        { onPress = onPressCmd
+        , label = textLabel
         }
+
+
+downloadArea : Maybe Float -> Element Msg
+downloadArea mScreenWidthF =
+    let
+        screenWidth =
+            getScreenWidthInt mScreenWidthF
+
+        widthButton =
+            if screenWidth < 600 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 200
+
+        buttonAttributes =
+            if screenWidth < 600 then
+                [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
+                , Border.color <| rgb255 220 220 220
+                ]
+
+            else
+                [ centerX
+                , Font.center
+                ]
+    in
+    if screenWidth < 600 then
+        column
+            [ width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+            , Font.bold
+            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+            , Border.color <| rgb255 220 220 220
+            ]
+            [ downloadButton widthButton buttonAttributes (Just CsvRequested) (text "Download CSV")
+            , downloadButton widthButton buttonAttributes (Just JsonRequested) (text "Download JSON")
+            , downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
+            ]
+
+    else
+        row
+            [ width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+            , Font.bold
+            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+            , Border.color <| rgb255 220 220 220
+            ]
+            [ downloadButton widthButton buttonAttributes (Just CsvRequested) (text "Download CSV")
+            , downloadButton widthButton buttonAttributes (Just JsonRequested) (text "Download JSON")
+            , downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
+            ]
 
 
 designDetailsHeader : String -> String -> ProteinDesign -> Element msg
@@ -323,6 +389,7 @@ designDetailsHeader title path { previousDesign, nextDesign } =
     row
         [ width fill
         , spaceEvenly
+        , paddingXY 0 30
         ]
         [ link
             []
