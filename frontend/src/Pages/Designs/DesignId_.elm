@@ -358,30 +358,24 @@ downloadArea mScreenWidthF =
                 [ centerX
                 , Font.center
                 ]
-    in
-    if screenWidth < 600 then
-        column
-            [ width (fill |> maximum (getScreenWidthInt mScreenWidthF))
-            , Font.bold
-            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-            , Border.color <| rgb255 220 220 220
-            ]
-            [ downloadButton widthButton buttonAttributes (Just CsvRequested) (text "Download CSV")
-            , downloadButton widthButton buttonAttributes (Just JsonRequested) (text "Download JSON")
-            , downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
-            ]
 
-    else
-        row
-            [ width (fill |> maximum (getScreenWidthInt mScreenWidthF))
-            , Font.bold
-            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-            , Border.color <| rgb255 220 220 220
-            ]
-            [ downloadButton widthButton buttonAttributes (Just CsvRequested) (text "Download CSV")
-            , downloadButton widthButton buttonAttributes (Just JsonRequested) (text "Download JSON")
-            , downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
-            ]
+        elementType =
+            if screenWidth < 600 then
+                column
+
+            else
+                row
+    in
+    elementType
+        [ width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+        , Font.bold
+        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+        , Border.color <| rgb255 220 220 220
+        ]
+        [ downloadButton widthButton buttonAttributes (Just CsvRequested) (text "Download CSV")
+        , downloadButton widthButton buttonAttributes (Just JsonRequested) (text "Download JSON")
+        , downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
+        ]
 
 
 designDetailsHeader : String -> String -> ProteinDesign -> Element msg
