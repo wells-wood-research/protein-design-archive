@@ -21,7 +21,7 @@ import Http
 import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (ProteinDesign, designDetailsFromProteinDesign)
+import ProteinDesign exposing (ProteinDesign, csvStringFromProteinDesign, designDetailsFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
@@ -123,7 +123,7 @@ update msg model =
                 DesignsDataReceived (Ok design) ->
                     ( { model
                         | design = Success design
-                        , csv = Just model.designId
+                        , csv = Just <| csvStringFromProteinDesign [ design ]
                         , json = Just model.designId
                       }
                     , Effect.none
@@ -431,7 +431,9 @@ designDetailsBody mScreenWidthF proteinDesign =
             , Font.justify
             ]
             [ table
-                [ padding 2 ]
+                [ padding 2
+                , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+                ]
                 { data = designDetailsFromProteinDesign proteinDesign
                 , columns =
                     [ { header =
@@ -520,7 +522,9 @@ designDetailsBody mScreenWidthF proteinDesign =
             [ text "Sequence"
             ]
         , table
-            [ padding 2 ]
+            [ padding 2
+            , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+            ]
             { data = proteinDesign.chains
             , columns =
                 [ { header =
@@ -583,7 +587,9 @@ designDetailsBody mScreenWidthF proteinDesign =
                 [ text "Description"
                 ]
             , paragraph
-                [ Font.justify ]
+                [ Font.justify
+                , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+                ]
                 [ proteinDesign.abstract
                     |> text
                 ]

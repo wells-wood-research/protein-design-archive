@@ -1,6 +1,7 @@
 module ProteinDesign exposing (..)
 
-import Date exposing (Date, Unit(..))
+import Csv.Encode as CsvEncode
+import Date exposing (Date, Unit(..), fromIsoString)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -8,6 +9,7 @@ import Element.Font as Font
 import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
+import String exposing (fromFloat)
 import Time exposing (Month(..))
 
 
@@ -113,6 +115,39 @@ type alias DesignDetails msg =
     { header : String
     , property : Element msg
     }
+
+
+csvListFromProteinDesign : ProteinDesign -> List ( String, String )
+csvListFromProteinDesign proteinDesign =
+    [ ( "pdb_code", proteinDesign.pdb )
+    , ( "release_date", Date.toIsoString proteinDesign.release_date )
+    , ( "classification", classificationToString proteinDesign.classification )
+    , ( "chains", String.join ";" (List.map chainToString proteinDesign.chains) )
+    , ( "formula_weight", fromFloat proteinDesign.formula_weight )
+    , ( "crystal_structure (a;b;c;alpha;beta;gamma)", xtalToString proteinDesign.crystal_structure )
+    , ( "exptl_method", String.join ";" proteinDesign.exptl_method )
+    , ( "synthesis_comment", proteinDesign.synthesis_comment )
+    , ( "authors", authorsToString proteinDesign.authors )
+    , ( "publication", proteinDesign.publication )
+    , ( "publication_ref", refToString proteinDesign.publication_ref )
+    , ( "publication_country", proteinDesign.publication_country )
+    , ( "subtitle", proteinDesign.subtitle )
+    , ( "tags", String.join ";" proteinDesign.tags )
+    , ( "keywords", String.join ";" proteinDesign.keywords )
+    , ( "abstract", proteinDesign.abstract )
+    , ( "related_pdb", String.join ";" proteinDesign.related_pdb )
+    ]
+
+
+csvStringFromProteinDesign : List ProteinDesign -> String
+csvStringFromProteinDesign proteinDesigns =
+    proteinDesigns
+        |> CsvEncode.encode
+            { encoder =
+                CsvEncode.withFieldNames
+                    csvListFromProteinDesign
+            , fieldSeparator = ','
+            }
 
 
 designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
@@ -407,7 +442,7 @@ refToString reference =
 
 chainToString : Chain -> String
 chainToString chain =
-    chain.chain_id ++ " " ++ chain.chain_seq_unnat
+    "id:[" ++ chain.chain_id ++ "]sequence:" ++ chain.chain_seq_unnat
 
 
 authorToString : Author -> String
@@ -417,12 +452,12 @@ authorToString author =
 
 authorsToString : List Author -> String
 authorsToString authors =
-    String.join ", " <| List.map authorToString authors
+    String.join ";" <| List.map authorToString authors
 
 
 xtalToString : Xtal -> String
 xtalToString xtal =
-    String.join ", " [ xtal.length_a, xtal.length_b, xtal.length_c, xtal.angle_a, xtal.angle_b, xtal.angle_g ]
+    String.join ";" [ xtal.length_a, xtal.length_b, xtal.length_c, xtal.angle_a, xtal.angle_b, xtal.angle_g ]
 
 
 stringToClassification : String -> Classification
