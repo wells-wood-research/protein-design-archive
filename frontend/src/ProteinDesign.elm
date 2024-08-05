@@ -125,12 +125,12 @@ csvListFromProteinDesign proteinDesign =
     , ( "classification", classificationToString proteinDesign.classification )
     , ( "chains", String.join ";" (List.map chainToString proteinDesign.chains) )
     , ( "formula_weight", fromFloat proteinDesign.formula_weight )
-    , ( "crystal_structure (a;b;c;alpha;beta;gamma)", xtalToString proteinDesign.crystal_structure )
+    , ( "crystal_structure(a;b;c;alpha;beta;gamma)", xtalToString proteinDesign.crystal_structure )
     , ( "exptl_method", String.join ";" proteinDesign.exptl_method )
     , ( "synthesis_comment", proteinDesign.synthesis_comment )
     , ( "authors", authorsToString proteinDesign.authors )
     , ( "publication", proteinDesign.publication )
-    , ( "publication_ref", refToString proteinDesign.publication_ref )
+    , ( "publication_ref(doi;pubmed;csd;issn;astm)", refToString proteinDesign.publication_ref )
     , ( "publication_country", proteinDesign.publication_country )
     , ( "subtitle", proteinDesign.subtitle )
     , ( "tags", String.join ";" proteinDesign.tags )
@@ -166,7 +166,7 @@ jsonValueFromProteinDesign proteinDesign =
                 , ( "synthesis_comment", JsonEncode.string <| proteinDesign.synthesis_comment )
                 , ( "authors", JsonEncode.list authorEncoder proteinDesign.authors )
                 , ( "publication", JsonEncode.string <| proteinDesign.publication )
-                , ( "publication_ref", JsonEncode.string <| refToString proteinDesign.publication_ref )
+                , ( "publication_ref", referenceEncoder proteinDesign.publication_ref )
                 , ( "publication_country", JsonEncode.string <| proteinDesign.publication_country )
                 , ( "subtitle", JsonEncode.string <| proteinDesign.subtitle )
                 , ( "tags", JsonEncode.string <| String.join ";" proteinDesign.tags )
@@ -175,34 +175,6 @@ jsonValueFromProteinDesign proteinDesign =
                 , ( "related_pdb", JsonEncode.string <| String.join ";" proteinDesign.related_pdb )
                 ]
           )
-        ]
-
-
-chainEncoder : Chain -> JsonEncode.Value
-chainEncoder chain =
-    JsonEncode.object
-        [ ( "id", JsonEncode.string chain.chain_id )
-        , ( "sequence", JsonEncode.string chain.chain_seq_unnat )
-        ]
-
-
-xtalEncoder : Xtal -> JsonEncode.Value
-xtalEncoder xtal =
-    JsonEncode.object
-        [ ( "length_a", JsonEncode.string xtal.length_a )
-        , ( "length_b", JsonEncode.string xtal.length_b )
-        , ( "length_c", JsonEncode.string xtal.length_c )
-        , ( "angle_alpha", JsonEncode.string xtal.angle_a )
-        , ( "angle_beta", JsonEncode.string xtal.angle_b )
-        , ( "angle_gamma", JsonEncode.string xtal.angle_g )
-        ]
-
-
-authorEncoder : Author -> JsonEncode.Value
-authorEncoder author =
-    JsonEncode.object
-        [ ( "forename", JsonEncode.string author.forename )
-        , ( "surname", JsonEncode.string author.surname )
         ]
 
 
@@ -446,6 +418,45 @@ xtalDecoder =
         |> required "angle_a" Decode.string
         |> required "angle_b" Decode.string
         |> required "angle_g" Decode.string
+
+
+chainEncoder : Chain -> JsonEncode.Value
+chainEncoder chain =
+    JsonEncode.object
+        [ ( "id", JsonEncode.string chain.chain_id )
+        , ( "sequence", JsonEncode.string chain.chain_seq_unnat )
+        ]
+
+
+xtalEncoder : Xtal -> JsonEncode.Value
+xtalEncoder xtal =
+    JsonEncode.object
+        [ ( "length_a", JsonEncode.string xtal.length_a )
+        , ( "length_b", JsonEncode.string xtal.length_b )
+        , ( "length_c", JsonEncode.string xtal.length_c )
+        , ( "angle_alpha", JsonEncode.string xtal.angle_a )
+        , ( "angle_beta", JsonEncode.string xtal.angle_b )
+        , ( "angle_gamma", JsonEncode.string xtal.angle_g )
+        ]
+
+
+authorEncoder : Author -> JsonEncode.Value
+authorEncoder author =
+    JsonEncode.object
+        [ ( "forename", JsonEncode.string author.forename )
+        , ( "surname", JsonEncode.string author.surname )
+        ]
+
+
+referenceEncoder : Reference -> JsonEncode.Value
+referenceEncoder reference =
+    JsonEncode.object
+        [ ( "doi", JsonEncode.string reference.doi )
+        , ( "pubmed", JsonEncode.string reference.pubmed )
+        , ( "csd", JsonEncode.string reference.csd )
+        , ( "issn", JsonEncode.string reference.issn )
+        , ( "astm", JsonEncode.string reference.astm )
+        ]
 
 
 designSearchableText : ProteinDesign -> String
