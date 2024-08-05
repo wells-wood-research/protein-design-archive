@@ -17,7 +17,8 @@ import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Font exposing (center)
+import Element.Border as Border
+import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
 import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
@@ -28,6 +29,7 @@ import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesignStub)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Set
 import Shared
 import Shared.Msg exposing (Msg(..))
 import Style
@@ -97,6 +99,7 @@ getData url =
 
 type Msg
     = UpdateFilters String DesignFilter
+    | AddNewAndCondition
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
     | SendDesignsHttpRequest
@@ -182,6 +185,9 @@ update msg model =
                       }
                     , Effect.none
                     )
+
+                AddNewAndCondition ->
+                    ( model, Effect.none )
 
                 UpdateStartDateTextField string ->
                     let
@@ -354,24 +360,86 @@ designList widthDesignCard designs =
 
 searchArea : Model -> Element Msg
 searchArea model =
-    row [ width fill, spaceEvenly ]
-        [ el [ centerX, paddingXY 10 0 ]
-            (html <|
-                FeatherIcons.toHtml [] <|
-                    FeatherIcons.withSize 24 <|
-                        FeatherIcons.search
-            )
-        , Input.text
-            (Style.monospacedFont ++ [ width fill, centerX ])
-            { onChange = \string -> UpdateFilters defaultKeys.searchTextKey (ContainsText string)
-            , text =
-                Dict.get defaultKeys.searchTextKey model.designFilters
-                    |> Maybe.map DesignFilter.toString
-                    |> Maybe.withDefault ""
-            , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
-            , label = Input.labelHidden "Filter Designs Search Box"
-            }
+    column
+        [ width <|
+            Element.px (getScreenWidthInt model.mScreenWidthF - 50)
         ]
+        [ row [ width fill ] [ searchIcon, searchInputAnd model, newConditionButton (Just <| AddNewAndCondition) (text "AND") ]
+        , row [ width fill ] [ searchInputOr model, newConditionButton (Just <| AddNewAndCondition) (text "OR") ]
+        , row [ width fill ] [ searchInputNot model, newConditionButton (Just <| AddNewAndCondition) (text "NOT") ]
+        ]
+
+
+searchIcon : Element Msg
+searchIcon =
+    el [ centerX, paddingXY 10 0 ]
+        (html <|
+            FeatherIcons.toHtml [] <|
+                FeatherIcons.withSize 24 <|
+                    FeatherIcons.search
+        )
+
+
+searchInputAnd : Model -> Element Msg
+searchInputAnd model =
+    Input.text
+        (Style.monospacedFont ++ [ width fill, centerX ])
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextAndKey (ContainsAndText [ string ])
+        , text =
+            Dict.get defaultKeys.searchTextAndKey model.designFilters
+                |> Maybe.map DesignFilter.toString
+                |> Maybe.withDefault ""
+        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
+        , label = Input.labelHidden "Filter Designs Search Box"
+        }
+
+
+searchInputOr : Model -> Element Msg
+searchInputOr model =
+    Input.text
+        (Style.monospacedFont ++ [ width fill, centerX ])
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextAndKey (ContainsOrText [ string ])
+        , text =
+            Dict.get defaultKeys.searchTextAndKey model.designFilters
+                |> Maybe.map DesignFilter.toString
+                |> Maybe.withDefault ""
+        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
+        , label = Input.labelHidden "Filter Designs Search Box"
+        }
+
+
+searchInputNot : Model -> Element Msg
+searchInputNot model =
+    Input.text
+        (Style.monospacedFont ++ [ width fill, centerX ])
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextAndKey (ContainsNotText [ string ])
+        , text =
+            Dict.get defaultKeys.searchTextAndKey model.designFilters
+                |> Maybe.map DesignFilter.toString
+                |> Maybe.withDefault ""
+        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
+        , label = Input.labelHidden "Filter Designs Search Box"
+        }
+
+
+newConditionButton : Maybe msg -> Element msg -> Element msg
+newConditionButton onPressCmd textLabel =
+    Input.button
+        [ width <| Element.px 50
+        , Font.size 12
+        , Font.bold
+        , Font.center
+        , centerX
+        , padding 13
+        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 2 }
+        , Border.color <| rgb255 220 220 220
+        , Element.mouseOver
+            [ Background.color <| rgb255 220 220 220
+            ]
+        ]
+        { onPress = onPressCmd
+        , label = textLabel
+        }
 
 
 dateSearchArea : Model -> Element Msg

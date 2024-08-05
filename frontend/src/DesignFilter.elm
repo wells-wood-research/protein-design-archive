@@ -8,7 +8,9 @@ import Time exposing (Month(..))
 
 
 type DesignFilter
-    = ContainsText String
+    = ContainsAndText (List String)
+    | ContainsOrText (List String)
+    | ContainsNotText (List String)
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
@@ -22,7 +24,9 @@ type DesignFilter
 defaultKeys :
     { dateStartKey : String
     , dateEndKey : String
-    , searchTextKey : String
+    , searchTextAndKey : String
+    , searchTextOrKey : String
+    , searchTextNotKey : String
     , classificationMinimalKey : String
     , classificationRationalKey : String
     , classificationEngineeredKey : String
@@ -49,7 +53,9 @@ defaultKeys :
 defaultKeys =
     { dateStartKey = "deposition-date-start"
     , dateEndKey = "deposition-date-end"
-    , searchTextKey = "search-text-string"
+    , searchTextAndKey = "search-text-string-and"
+    , searchTextOrKey = "search-text-string-or"
+    , searchTextNotKey = "search-text-string-not"
     , classificationMinimalKey = "design-classification-minimal"
     , classificationRationalKey = "design-classification-rational"
     , classificationEngineeredKey = "design-classification-engineered"
@@ -106,8 +112,14 @@ checkboxDict =
 toString : DesignFilter -> String
 toString filter =
     case filter of
-        ContainsText string ->
-            string
+        ContainsAndText stringList ->
+            String.join " & " stringList
+
+        ContainsOrText stringList ->
+            String.join " || " stringList
+
+        ContainsNotText stringList ->
+            String.join " ! " stringList
 
         DateStart startDate ->
             Date.toIsoString startDate
@@ -202,7 +214,7 @@ toDesignFilter key =
             DesignTag UnknownFunction
 --}
         _ ->
-            ContainsText ""
+            ContainsAndText []
 
 
 keyToLabel : String -> String
@@ -319,10 +331,14 @@ stubMeetsAllFilters filters design =
 designMeetsOneFilter : ProteinDesign -> DesignFilter -> Bool
 designMeetsOneFilter design filter =
     case filter of
-        ContainsText searchString ->
-            design
-                |> designSearchableText
-                |> String.contains (String.toLower searchString)
+        ContainsAndText searchStringList ->
+            List.all (\searchString -> String.contains (String.toLower searchString) (designSearchableText design)) searchStringList
+
+        ContainsOrText searchStringList ->
+            List.any (\searchString -> String.contains (String.toLower searchString) (designSearchableText design)) searchStringList
+
+        ContainsNotText searchStringList ->
+            not <| List.any (\searchString -> String.contains (String.toLower searchString) (designSearchableText design)) searchStringList
 
         DateStart startDate ->
             if Date.compare startDate design.release_date == LT then
@@ -348,6 +364,15 @@ designMeetsOneFilter design filter =
 stubMeetsOneFilter : ProteinDesignStub -> DesignFilter -> Bool
 stubMeetsOneFilter design filter =
     case filter of
+        ContainsAndText searchStringList ->
+            List.all (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) searchStringList
+
+        ContainsOrText searchStringList ->
+            List.any (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) searchStringList
+
+        ContainsNotText searchStringList ->
+            not <| List.any (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) searchStringList
+
         DateStart startDate ->
             if Date.compare startDate design.release_date == LT then
                 True
@@ -361,11 +386,6 @@ stubMeetsOneFilter design filter =
 
             else
                 False
-
-        ContainsText searchString ->
-            design
-                |> stubSearchableText
-                |> String.contains (String.toLower searchString)
 
         _ ->
             True
