@@ -9,6 +9,7 @@ import Element.Font as Font
 import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
+import Json.Encode as JsonEncode exposing (..)
 import String exposing (fromFloat)
 import Time exposing (Month(..))
 
@@ -148,6 +149,66 @@ csvStringFromProteinDesign proteinDesigns =
                     csvListFromProteinDesign
             , fieldSeparator = ','
             }
+
+
+jsonValueFromProteinDesign : ProteinDesign -> JsonEncode.Value
+jsonValueFromProteinDesign proteinDesign =
+    JsonEncode.object
+        [ ( proteinDesign.pdb
+          , JsonEncode.object <|
+                [ ( "pdb", JsonEncode.string <| proteinDesign.pdb )
+                , ( "release_date", JsonEncode.string <| Date.toIsoString proteinDesign.release_date )
+                , ( "classification", JsonEncode.string <| classificationToString proteinDesign.classification )
+                , ( "chains", JsonEncode.list chainEncoder proteinDesign.chains )
+                , ( "formula_weight", JsonEncode.string <| fromFloat proteinDesign.formula_weight )
+                , ( "exptl_method", JsonEncode.string <| String.join ";" proteinDesign.exptl_method )
+                , ( "crystal_structure", xtalEncoder proteinDesign.crystal_structure )
+                , ( "synthesis_comment", JsonEncode.string <| proteinDesign.synthesis_comment )
+                , ( "authors", JsonEncode.list authorEncoder proteinDesign.authors )
+                , ( "publication", JsonEncode.string <| proteinDesign.publication )
+                , ( "publication_ref", JsonEncode.string <| refToString proteinDesign.publication_ref )
+                , ( "publication_country", JsonEncode.string <| proteinDesign.publication_country )
+                , ( "subtitle", JsonEncode.string <| proteinDesign.subtitle )
+                , ( "tags", JsonEncode.string <| String.join ";" proteinDesign.tags )
+                , ( "keywords", JsonEncode.string <| String.join ";" proteinDesign.keywords )
+                , ( "abstract", JsonEncode.string <| proteinDesign.abstract )
+                , ( "related_pdb", JsonEncode.string <| String.join ";" proteinDesign.related_pdb )
+                ]
+          )
+        ]
+
+
+chainEncoder : Chain -> JsonEncode.Value
+chainEncoder chain =
+    JsonEncode.object
+        [ ( "id", JsonEncode.string chain.chain_id )
+        , ( "sequence", JsonEncode.string chain.chain_seq_unnat )
+        ]
+
+
+xtalEncoder : Xtal -> JsonEncode.Value
+xtalEncoder xtal =
+    JsonEncode.object
+        [ ( "length_a", JsonEncode.string xtal.length_a )
+        , ( "length_b", JsonEncode.string xtal.length_b )
+        , ( "length_c", JsonEncode.string xtal.length_c )
+        , ( "angle_alpha", JsonEncode.string xtal.angle_a )
+        , ( "angle_beta", JsonEncode.string xtal.angle_b )
+        , ( "angle_gamma", JsonEncode.string xtal.angle_g )
+        ]
+
+
+authorEncoder : Author -> JsonEncode.Value
+authorEncoder author =
+    JsonEncode.object
+        [ ( "forename", JsonEncode.string author.forename )
+        , ( "surname", JsonEncode.string author.surname )
+        ]
+
+
+jsonStringFromProteinDesign : ProteinDesign -> String
+jsonStringFromProteinDesign proteinDesign =
+    JsonEncode.encode 4 (jsonValueFromProteinDesign proteinDesign)
 
 
 designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
@@ -294,62 +355,62 @@ designDetailsFromProteinDesign proteinDesign =
 rawDesignDecoder : Decoder ProteinDesign
 rawDesignDecoder =
     Decode.succeed ProteinDesign
-        |> required "pdb" string
-        |> required "picture_path" string
-        |> required "chains" (list chainDecoder)
-        |> required "authors" (list authorDecoder)
+        |> required "pdb" Decode.string
+        |> required "picture_path" Decode.string
+        |> required "chains" (Decode.list chainDecoder)
+        |> required "authors" (Decode.list authorDecoder)
         |> required "classification" classificationDecoder
-        |> required "classification_suggested" (list classificationDecoder)
-        |> required "classification_suggested_reason" (list string)
-        |> required "subtitle" string
-        |> required "tags" (list string)
-        |> required "keywords" (list string)
+        |> required "classification_suggested" (Decode.list classificationDecoder)
+        |> required "classification_suggested_reason" (Decode.list Decode.string)
+        |> required "subtitle" Decode.string
+        |> required "tags" (Decode.list Decode.string)
+        |> required "keywords" (Decode.list Decode.string)
         |> required "release_date" dateDecoder
-        |> required "publication" string
+        |> required "publication" Decode.string
         |> required "publication_ref" referenceDecoder
-        |> required "publication_country" string
-        |> required "abstract" string
-        |> required "related_pdb" (list string)
+        |> required "publication_country" Decode.string
+        |> required "abstract" Decode.string
+        |> required "related_pdb" (Decode.list Decode.string)
         |> required "crystal_structure" xtalDecoder
-        |> required "exptl_method" (list string)
-        |> required "formula_weight" float
-        |> required "synthesis_comment" string
-        |> required "review" bool
-        |> optional "previous_design" string "/"
-        |> optional "next_design" string "/"
+        |> required "exptl_method" (Decode.list Decode.string)
+        |> required "formula_weight" Decode.float
+        |> required "synthesis_comment" Decode.string
+        |> required "review" Decode.bool
+        |> optional "previous_design" Decode.string "/"
+        |> optional "next_design" Decode.string "/"
 
 
 rawDesignStubDecoder : Decoder ProteinDesignStub
 rawDesignStubDecoder =
     Decode.succeed ProteinDesignStub
-        |> required "pdb" string
-        |> required "picture_path" string
-        |> required "authors" (list authorDecoder)
-        |> required "subtitle" string
-        |> required "tags" (list string)
-        |> required "keywords" (list string)
+        |> required "pdb" Decode.string
+        |> required "picture_path" Decode.string
+        |> required "authors" (Decode.list authorDecoder)
+        |> required "subtitle" Decode.string
+        |> required "tags" (Decode.list Decode.string)
+        |> required "keywords" (Decode.list Decode.string)
         |> required "release_date" dateDecoder
-        |> required "publication" string
+        |> required "publication" Decode.string
 
 
 classificationDecoder : Decoder Classification
 classificationDecoder =
-    Decode.map stringToClassification string
+    Decode.map stringToClassification Decode.string
 
 
 referenceDecoder : Decoder Reference
 referenceDecoder =
     Decode.succeed Reference
-        |> required "DOI" string
-        |> required "PubMed" string
-        |> required "CSD" string
-        |> required "ISSN" string
-        |> required "ASTM" string
+        |> required "DOI" Decode.string
+        |> required "PubMed" Decode.string
+        |> required "CSD" Decode.string
+        |> required "ISSN" Decode.string
+        |> required "ASTM" Decode.string
 
 
 dateDecoder : Decoder Date
 dateDecoder =
-    string
+    Decode.string
         |> Decode.andThen
             (\dateString ->
                 case Date.fromIsoString dateString of
@@ -364,27 +425,27 @@ dateDecoder =
 authorDecoder : Decoder Author
 authorDecoder =
     Decode.succeed Author
-        |> required "forename" string
-        |> required "surname" string
+        |> required "forename" Decode.string
+        |> required "surname" Decode.string
 
 
 chainDecoder : Decoder Chain
 chainDecoder =
     Decode.succeed Chain
-        |> required "chain_id" string
-        |> required "chain_seq_unnat" string
-        |> required "chain_seq_nat" string
+        |> required "chain_id" Decode.string
+        |> required "chain_seq_unnat" Decode.string
+        |> required "chain_seq_nat" Decode.string
 
 
 xtalDecoder : Decoder Xtal
 xtalDecoder =
     Decode.succeed Xtal
-        |> required "length_a" string
-        |> required "length_b" string
-        |> required "length_c" string
-        |> required "angle_a" string
-        |> required "angle_b" string
-        |> required "angle_g" string
+        |> required "length_a" Decode.string
+        |> required "length_b" Decode.string
+        |> required "length_c" Decode.string
+        |> required "angle_a" Decode.string
+        |> required "angle_b" Decode.string
+        |> required "angle_g" Decode.string
 
 
 designSearchableText : ProteinDesign -> String

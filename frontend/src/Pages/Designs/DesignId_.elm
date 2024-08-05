@@ -18,10 +18,11 @@ import Get exposing (..)
 import Html
 import Html.Attributes as HAtt
 import Http
+import Json.Encode as JsonEncode exposing (Value)
 import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (ProteinDesign, csvStringFromProteinDesign, designDetailsFromProteinDesign)
+import ProteinDesign exposing (ProteinDesign, csvStringFromProteinDesign, designDetailsFromProteinDesign, jsonStringFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Shared
@@ -124,7 +125,7 @@ update msg model =
                     ( { model
                         | design = Success design
                         , csv = Just <| csvStringFromProteinDesign [ design ]
-                        , json = Just model.designId
+                        , json = Just <| jsonStringFromProteinDesign design
                       }
                     , Effect.none
                     )
