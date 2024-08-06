@@ -1,6 +1,7 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
+import Boon exposing (Expression)
 import Browser.Dom
 import Browser.Events
 import Components.Title
@@ -29,7 +30,6 @@ import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesignStub)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
-import Set
 import Shared
 import Shared.Msg exposing (Msg(..))
 import Style
@@ -62,6 +62,7 @@ type alias Model =
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
+    , parsedSearchString : Dict String (List (List String))
     }
 
 
@@ -75,6 +76,7 @@ init mSharedScreenWidthF =
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
+      , parsedSearchString = Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -99,7 +101,7 @@ getData url =
 
 type Msg
     = UpdateFilters String DesignFilter
-    | AddNewAndCondition
+    | UpdateSearchFilters (List (Effect Msg))
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
     | SendDesignsHttpRequest
@@ -182,12 +184,13 @@ update msg model =
                     ( { model
                         | designFilters = newDesignFilters
                         , renderPlotState = AwaitingRender model.replotTime
+                        , parsedSearchString = parseFilterToConditions (Dict.get defaultKeys.searchTextKey newDesignFilters)
                       }
                     , Effect.none
                     )
 
-                AddNewAndCondition ->
-                    ( model, Effect.none )
+                UpdateSearchFilters listMsg ->
+                    ( model, Effect.batch listMsg )
 
                 UpdateStartDateTextField string ->
                     let
@@ -341,7 +344,7 @@ homeView model =
             column [ centerX ]
                 [ Plots.timelinePlotView (px screenWidth) screenWidthS
                 , column
-                    [ paddingXY 20 0, spacing 10, width (fill |> maximum screenWidth) ]
+                    [ paddingXY 20 0, spacing 15, width (fill |> maximum screenWidth) ]
                     [ searchArea model
                     , dateSearchArea model
                     , designList widthDesignCard designsToDisplay
@@ -349,30 +352,32 @@ homeView model =
                 ]
 
 
-designList : Length -> List ProteinDesignStub -> Element msg
-designList widthDesignCard designs =
-    wrappedRow
-        [ spaceEvenly
-        , centerX
-        ]
-        (List.map (ProteinDesign.designCard widthDesignCard) designs)
-
-
 searchArea : Model -> Element Msg
 searchArea model =
-    column
+    row
         [ width <|
             Element.px (getScreenWidthInt model.mScreenWidthF - 50)
         ]
-        [ row [ width fill ] [ searchIcon, searchInputAnd model, newConditionButton (Just <| AddNewAndCondition) (text "AND") ]
-        , row [ width fill ] [ searchInputOr model, newConditionButton (Just <| AddNewAndCondition) (text "OR") ]
-        , row [ width fill ] [ searchInputNot model, newConditionButton (Just <| AddNewAndCondition) (text "NOT") ]
+        [ searchIcon
+        , column
+            [ width fill
+            , spacing 10
+            ]
+            [ searchInput model
+            , paragraph
+                (Style.monospacedFont
+                    ++ [ Font.size 12
+                       , spacing 5
+                       ]
+                )
+                [ text "Tip: separate AND conditions by &&, connect OR conditions by ||, and add &&!! in front of NOT conditions. Example: Woolfson && coiled-coil || coiled coil &&!! 4-helix" ]
+            ]
         ]
 
 
 searchIcon : Element Msg
 searchIcon =
-    el [ centerX, paddingXY 10 0 ]
+    el [ centerX, alignTop, padding 10 ]
         (html <|
             FeatherIcons.toHtml [] <|
                 FeatherIcons.withSize 24 <|
@@ -380,13 +385,18 @@ searchIcon =
         )
 
 
-searchInputAnd : Model -> Element Msg
-searchInputAnd model =
+searchInput : Model -> Element Msg
+searchInput model =
     Input.text
-        (Style.monospacedFont ++ [ width fill, centerX ])
-        { onChange = \string -> UpdateFilters defaultKeys.searchTextAndKey (ContainsAndText [ string ])
+        [ width <| fillPortion 6 ]
+        { onChange =
+            \string ->
+                UpdateSearchFilters
+                    [ Effect.sendMsg (UpdateFilters defaultKeys.searchTextKey (ContainsText string))
+                    , Effect.sendMsg (UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed (parseStringToConditions string)))
+                    ]
         , text =
-            Dict.get defaultKeys.searchTextAndKey model.designFilters
+            Dict.get defaultKeys.searchTextKey model.designFilters
                 |> Maybe.map DesignFilter.toString
                 |> Maybe.withDefault ""
         , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
@@ -394,52 +404,66 @@ searchInputAnd model =
         }
 
 
-searchInputOr : Model -> Element Msg
-searchInputOr model =
-    Input.text
-        (Style.monospacedFont ++ [ width fill, centerX ])
-        { onChange = \string -> UpdateFilters defaultKeys.searchTextAndKey (ContainsOrText [ string ])
-        , text =
-            Dict.get defaultKeys.searchTextAndKey model.designFilters
-                |> Maybe.map DesignFilter.toString
-                |> Maybe.withDefault ""
-        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
-        , label = Input.labelHidden "Filter Designs Search Box"
-        }
+parseFilterToConditions : Maybe DesignFilter -> Dict String (List (List String))
+parseFilterToConditions filter =
+    case filter of
+        Just (DesignFilter.ContainsText searchString) ->
+            parseStringToConditions searchString
+
+        _ ->
+            Dict.empty
 
 
-searchInputNot : Model -> Element Msg
-searchInputNot model =
-    Input.text
-        (Style.monospacedFont ++ [ width fill, centerX ])
-        { onChange = \string -> UpdateFilters defaultKeys.searchTextAndKey (ContainsNotText [ string ])
-        , text =
-            Dict.get defaultKeys.searchTextAndKey model.designFilters
-                |> Maybe.map DesignFilter.toString
-                |> Maybe.withDefault ""
-        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
-        , label = Input.labelHidden "Filter Designs Search Box"
-        }
+parseStringToConditions : String -> Dict String (List (List String))
+parseStringToConditions searchString =
+    let
+        conditionsList =
+            List.map String.trim <| String.split "&&" searchString
 
+        updateDict condition dict =
+            if String.contains "!!" condition then
+                let
+                    splitConditions =
+                        List.map String.trim <| String.split "!!" condition
 
-newConditionButton : Maybe msg -> Element msg -> Element msg
-newConditionButton onPressCmd textLabel =
-    Input.button
-        [ width <| Element.px 50
-        , Font.size 12
-        , Font.bold
-        , Font.center
-        , centerX
-        , padding 13
-        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 2 }
-        , Border.color <| rgb255 220 220 220
-        , Element.mouseOver
-            [ Background.color <| rgb255 220 220 220
-            ]
-        ]
-        { onPress = onPressCmd
-        , label = textLabel
-        }
+                    updatedList =
+                        case Dict.get "!!" dict of
+                            Just list ->
+                                list ++ [ splitConditions ]
+
+                            Nothing ->
+                                [ splitConditions ]
+                in
+                Dict.insert "!!" updatedList dict
+
+            else if String.contains "||" condition then
+                let
+                    splitConditions =
+                        List.map String.trim <| String.split "||" condition
+
+                    updatedList =
+                        case Dict.get "||" dict of
+                            Just list ->
+                                list ++ [ splitConditions ]
+
+                            Nothing ->
+                                [ splitConditions ]
+                in
+                Dict.insert "||" updatedList dict
+
+            else
+                let
+                    updatedList =
+                        case Dict.get "&&" dict of
+                            Just list ->
+                                list ++ [ [ condition ] ]
+
+                            Nothing ->
+                                [ [ condition ] ]
+                in
+                Dict.insert "&&" updatedList dict
+    in
+    List.foldl updateDict (Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]) conditionsList
 
 
 dateSearchArea : Model -> Element Msg
@@ -572,3 +596,12 @@ dateEndField model =
                 }
             )
         ]
+
+
+designList : Length -> List ProteinDesignStub -> Element msg
+designList widthDesignCard designs =
+    wrappedRow
+        [ spaceEvenly
+        , centerX
+        ]
+        (List.map (ProteinDesign.designCard widthDesignCard) designs)

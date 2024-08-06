@@ -2,15 +2,15 @@ module DesignFilter exposing (..)
 
 import Date exposing (Date, Unit(..))
 import Dict exposing (Dict)
+import Json.Decode exposing (string)
 import List exposing (filter)
 import ProteinDesign exposing (Classification(..), ProteinDesign, ProteinDesignStub, Tag(..), classificationToString, designSearchableText, stubSearchableText)
 import Time exposing (Month(..))
 
 
 type DesignFilter
-    = ContainsAndText (List String)
-    | ContainsOrText (List String)
-    | ContainsNotText (List String)
+    = ContainsText String
+    | ContainsTextParsed (Dict String (List (List String)))
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
@@ -24,9 +24,8 @@ type DesignFilter
 defaultKeys :
     { dateStartKey : String
     , dateEndKey : String
-    , searchTextAndKey : String
-    , searchTextOrKey : String
-    , searchTextNotKey : String
+    , searchTextKey : String
+    , searchTextParsedKey : String
     , classificationMinimalKey : String
     , classificationRationalKey : String
     , classificationEngineeredKey : String
@@ -53,9 +52,8 @@ defaultKeys :
 defaultKeys =
     { dateStartKey = "deposition-date-start"
     , dateEndKey = "deposition-date-end"
-    , searchTextAndKey = "search-text-string-and"
-    , searchTextOrKey = "search-text-string-or"
-    , searchTextNotKey = "search-text-string-not"
+    , searchTextKey = "search-text-string"
+    , searchTextParsedKey = "search-text-parsed"
     , classificationMinimalKey = "design-classification-minimal"
     , classificationRationalKey = "design-classification-rational"
     , classificationEngineeredKey = "design-classification-engineered"
@@ -112,14 +110,11 @@ checkboxDict =
 toString : DesignFilter -> String
 toString filter =
     case filter of
-        ContainsAndText stringList ->
-            String.join " & " stringList
+        ContainsText string ->
+            string
 
-        ContainsOrText stringList ->
-            String.join " || " stringList
-
-        ContainsNotText stringList ->
-            String.join " ! " stringList
+        ContainsTextParsed _ ->
+            "complicated_search_string"
 
         DateStart startDate ->
             Date.toIsoString startDate
@@ -136,11 +131,6 @@ toString filter =
 
             else
                 "remove"
-
-
-
---DesignTag tag ->
---    tagToString tag
 
 
 toDesignFilter : String -> DesignFilter
@@ -173,48 +163,8 @@ toDesignFilter key =
         "vote-remove" ->
             Vote False
 
-        {---
-        "design-keyword-synthetic" ->
-            DesignTag Synthetic
-
-        "design-keyword-de-novo" ->
-            DesignTag DeNovo
-
-        "design-keyword-novel" ->
-            DesignTag Novel
-
-        "design-keyword-designed" ->
-            DesignTag Designed
-
-        "design-keyword-protein-binding" ->
-            DesignTag ProteinBinding
-
-        "design-keyword-metal-binding" ->
-            DesignTag MetalBinding
-
-        "design-keyword-transcription" ->
-            DesignTag Transcription
-
-        "design-keyword-growth" ->
-            DesignTag Growth
-
-        "design-keyword-structural" ->
-            DesignTag Structural
-
-        "design-keyword-alpha-helical-bundle" ->
-            DesignTag AlphaHelicalBundle
-
-        "design-keyword-beta-beta-alpha" ->
-            DesignTag BetaBetaAlpha
-
-        "design-keyword-coiled-coil" ->
-            DesignTag CoiledCoil
-
-        "design-keyword-unknown" ->
-            DesignTag UnknownFunction
---}
         _ ->
-            ContainsAndText []
+            ContainsText ""
 
 
 keyToLabel : String -> String
@@ -331,14 +281,39 @@ stubMeetsAllFilters filters design =
 designMeetsOneFilter : ProteinDesign -> DesignFilter -> Bool
 designMeetsOneFilter design filter =
     case filter of
-        ContainsAndText searchStringList ->
-            List.all (\searchString -> String.contains (String.toLower searchString) (designSearchableText design)) searchStringList
+        ContainsTextParsed searchDict ->
+            let
+                andConditions =
+                    []
 
-        ContainsOrText searchStringList ->
-            List.any (\searchString -> String.contains (String.toLower searchString) (designSearchableText design)) searchStringList
+                notConditions =
+                    []
 
-        ContainsNotText searchStringList ->
-            not <| List.any (\searchString -> String.contains (String.toLower searchString) (designSearchableText design)) searchStringList
+                orConditions =
+                    Maybe.withDefault [] (Dict.get "||" searchDict)
+
+                searchStringAndList =
+                    Maybe.map (\andCondition -> andConditions ++ [ andCondition ]) (Dict.get "&&" searchDict)
+
+                searchStringNotList =
+                    Maybe.map (\notCondition -> notConditions ++ [ notCondition ]) (Dict.get "!!" searchDict)
+            in
+            if
+                List.all (\searchString -> String.contains (String.toLower searchString) (designSearchableText design))
+                    andConditions
+                    && (not <| List.any (\searchString -> String.contains (String.toLower searchString) (designSearchableText design)) notConditions)
+                    && List.all
+                        (\eachOrSet ->
+                            List.any
+                                (\searchString -> String.contains (String.toLower searchString) (designSearchableText design))
+                                eachOrSet
+                        )
+                        orConditions
+            then
+                True
+
+            else
+                False
 
         DateStart startDate ->
             if Date.compare startDate design.release_date == LT then
@@ -360,21 +335,42 @@ designMeetsOneFilter design filter =
         Vote _ ->
             True
 
+        _ ->
+            True
+
 
 stubMeetsOneFilter : ProteinDesignStub -> DesignFilter -> Bool
 stubMeetsOneFilter design filter =
     case filter of
-        ContainsAndText searchStringList ->
-            List.all (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) searchStringList
+        ContainsTextParsed searchDict ->
+            let
+                andConditions =
+                    []
 
-        ContainsOrText searchStringList ->
-            List.any (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) searchStringList
+                notConditions =
+                    []
 
-        ContainsNotText searchStringList ->
-            not <| List.any (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) searchStringList
+                orConditions =
+                    Maybe.withDefault [] (Dict.get "||" searchDict)
 
-        DateStart startDate ->
-            if Date.compare startDate design.release_date == LT then
+                searchStringAndList =
+                    Maybe.map (\andCondition -> andConditions ++ [ andCondition ]) (Dict.get "&&" searchDict)
+
+                searchStringNotList =
+                    Maybe.map (\notCondition -> notConditions ++ [ notCondition ]) (Dict.get "!!" searchDict)
+            in
+            if
+                List.all (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design))
+                    andConditions
+                    && (not <| List.any (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) notConditions)
+                    && List.all
+                        (\eachOrSet ->
+                            List.any
+                                (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design))
+                                eachOrSet
+                        )
+                        orConditions
+            then
                 True
 
             else
