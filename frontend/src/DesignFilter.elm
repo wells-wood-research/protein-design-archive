@@ -426,6 +426,13 @@ stubMeetsOneFilter design filter =
             else
                 False
 
+        DateStart startDate ->
+            if Date.compare startDate design.release_date == LT then
+                True
+
+            else
+                False
+
         DateEnd endDate ->
             if Date.compare endDate design.release_date == GT then
                 True
