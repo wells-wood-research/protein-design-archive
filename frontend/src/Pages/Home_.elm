@@ -63,6 +63,7 @@ type alias Model =
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
     , searchString : String
+    , parsedSearchString : Dict String (List (List String))
     }
 
 
@@ -77,6 +78,7 @@ init mSharedScreenWidthF =
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
       , searchString = ""
+      , parsedSearchString = Dict.empty
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -186,6 +188,7 @@ update msg model =
                                 | designFilters = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
                                 , searchString = string
+                                , parsedSearchString = DesignFilter.parseStringToConditions string
                               }
                             , Effect.none
                             )

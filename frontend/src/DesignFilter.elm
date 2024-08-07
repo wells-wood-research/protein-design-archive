@@ -260,22 +260,24 @@ parseStringToConditions searchString =
             if String.contains "!!" condition then
                 let
                     splitConditions =
-                        List.map String.trim <| String.split "!!" condition
+                        String.replace "!!" "" condition
+                            |> String.trim
 
                     updatedList =
                         case Dict.get "!!" dict of
                             Just list ->
-                                list ++ [ splitConditions ]
+                                list ++ [ [ splitConditions ] ]
 
                             Nothing ->
-                                [ splitConditions ]
+                                [ [ splitConditions ] ]
                 in
                 Dict.insert "!!" updatedList dict
 
             else if String.contains "||" condition then
                 let
                     splitConditions =
-                        List.map String.trim <| String.split "||" condition
+                        String.split "||" condition
+                            |> List.map String.trim
 
                     updatedList =
                         case Dict.get "||" dict of
@@ -330,41 +332,7 @@ designMeetsOneFilter : ProteinDesign -> DesignFilter -> Bool
 designMeetsOneFilter design filter =
     case filter of
         ContainsTextParsed string ->
-            let
-                searchDict =
-                    parseStringToConditions string
-
-                andConditions =
-                    []
-
-                notConditions =
-                    []
-
-                orConditions =
-                    Maybe.withDefault [] (Dict.get "||" searchDict)
-
-                searchStringAndList =
-                    Maybe.map (\andCondition -> andConditions ++ [ andCondition ]) (Dict.get "&&" searchDict)
-
-                searchStringNotList =
-                    Maybe.map (\notCondition -> notConditions ++ [ notCondition ]) (Dict.get "!!" searchDict)
-            in
-            if
-                List.all (\searchString -> String.contains (String.toLower searchString) (designSearchableText design))
-                    andConditions
-                    && (not <| List.any (\searchString -> String.contains (String.toLower searchString) (designSearchableText design)) notConditions)
-                    && List.all
-                        (\eachOrSet ->
-                            List.any
-                                (\searchString -> String.contains (String.toLower searchString) (designSearchableText design))
-                                eachOrSet
-                        )
-                        orConditions
-            then
-                True
-
-            else
-                False
+            True
 
         DateStart startDate ->
             if Date.compare startDate design.release_date == LT then
@@ -396,30 +364,31 @@ stubMeetsOneFilter design filter =
                     parseStringToConditions string
 
                 andConditions =
-                    []
+                    case Dict.get "&&" searchDict of
+                        Just listOfListsOfConditions ->
+                            List.concatMap identity listOfListsOfConditions
+
+                        Nothing ->
+                            []
 
                 notConditions =
-                    []
+                    case Dict.get "!!" searchDict of
+                        Just listOfListsOfConditions ->
+                            List.concatMap identity listOfListsOfConditions
+
+                        Nothing ->
+                            []
 
                 orConditions =
                     Maybe.withDefault [] (Dict.get "||" searchDict)
 
-                searchStringAndList =
-                    Maybe.map (\andCondition -> andConditions ++ [ andCondition ]) (Dict.get "&&" searchDict)
-
-                searchStringNotList =
-                    Maybe.map (\notCondition -> notConditions ++ [ notCondition ]) (Dict.get "!!" searchDict)
+                searchableText =
+                    stubSearchableText design
             in
             if
-                List.all (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) andConditions
-                    && (not <| List.any (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) notConditions)
-                    && List.all
-                        (\eachOrSet ->
-                            List.any
-                                (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design))
-                                eachOrSet
-                        )
-                        orConditions
+                List.all (\searchString -> String.contains (String.toLower searchString) searchableText) andConditions
+                    && (not <| List.any (\searchString -> String.contains (String.toLower searchString) searchableText) notConditions)
+                    && List.all (\eachOrSet -> List.any (\searchString -> String.contains (String.toLower searchString) searchableText) eachOrSet) orConditions
             then
                 True
 
