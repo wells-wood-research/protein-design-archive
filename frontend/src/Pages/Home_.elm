@@ -18,7 +18,6 @@ import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Border as Border
 import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
@@ -36,6 +35,7 @@ import Style
 import Task
 import Time
 import Urls
+import Vega exposing (leTickCount)
 import View exposing (View)
 
 
@@ -62,7 +62,7 @@ type alias Model =
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
-    , parsedSearchString : Dict String (List (List String))
+    , searchString : String
     }
 
 
@@ -76,7 +76,7 @@ init mSharedScreenWidthF =
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
-      , parsedSearchString = Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]
+      , searchString = ""
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -101,7 +101,6 @@ getData url =
 
 type Msg
     = UpdateFilters String DesignFilter
-    | UpdateSearchFilters (List (Effect Msg))
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
     | SendDesignsHttpRequest
@@ -181,16 +180,23 @@ update msg model =
                         newDesignFilters =
                             Dict.insert key newFilter model.designFilters
                     in
-                    ( { model
-                        | designFilters = newDesignFilters
-                        , renderPlotState = AwaitingRender model.replotTime
-                        , parsedSearchString = parseFilterToConditions (Dict.get defaultKeys.searchTextKey newDesignFilters)
-                      }
-                    , Effect.none
-                    )
+                    case newFilter of
+                        ContainsTextParsed string ->
+                            ( { model
+                                | designFilters = newDesignFilters
+                                , renderPlotState = AwaitingRender model.replotTime
+                                , searchString = string
+                              }
+                            , Effect.none
+                            )
 
-                UpdateSearchFilters listMsg ->
-                    ( model, Effect.batch listMsg )
+                        _ ->
+                            ( { model
+                                | designFilters = newDesignFilters
+                                , renderPlotState = AwaitingRender model.replotTime
+                              }
+                            , Effect.none
+                            )
 
                 UpdateStartDateTextField string ->
                     let
@@ -389,81 +395,11 @@ searchInput : Model -> Element Msg
 searchInput model =
     Input.text
         [ width <| fillPortion 6 ]
-        { onChange =
-            \string ->
-                UpdateSearchFilters
-                    [ Effect.sendMsg (UpdateFilters defaultKeys.searchTextKey (ContainsText string))
-                    , Effect.sendMsg (UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed (parseStringToConditions string)))
-                    ]
-        , text =
-            Dict.get defaultKeys.searchTextKey model.designFilters
-                |> Maybe.map DesignFilter.toString
-                |> Maybe.withDefault ""
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed string)
+        , text = model.searchString
         , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
         , label = Input.labelHidden "Filter Designs Search Box"
         }
-
-
-parseFilterToConditions : Maybe DesignFilter -> Dict String (List (List String))
-parseFilterToConditions filter =
-    case filter of
-        Just (DesignFilter.ContainsText searchString) ->
-            parseStringToConditions searchString
-
-        _ ->
-            Dict.empty
-
-
-parseStringToConditions : String -> Dict String (List (List String))
-parseStringToConditions searchString =
-    let
-        conditionsList =
-            List.map String.trim <| String.split "&&" searchString
-
-        updateDict condition dict =
-            if String.contains "!!" condition then
-                let
-                    splitConditions =
-                        List.map String.trim <| String.split "!!" condition
-
-                    updatedList =
-                        case Dict.get "!!" dict of
-                            Just list ->
-                                list ++ [ splitConditions ]
-
-                            Nothing ->
-                                [ splitConditions ]
-                in
-                Dict.insert "!!" updatedList dict
-
-            else if String.contains "||" condition then
-                let
-                    splitConditions =
-                        List.map String.trim <| String.split "||" condition
-
-                    updatedList =
-                        case Dict.get "||" dict of
-                            Just list ->
-                                list ++ [ splitConditions ]
-
-                            Nothing ->
-                                [ splitConditions ]
-                in
-                Dict.insert "||" updatedList dict
-
-            else
-                let
-                    updatedList =
-                        case Dict.get "&&" dict of
-                            Just list ->
-                                list ++ [ [ condition ] ]
-
-                            Nothing ->
-                                [ [ condition ] ]
-                in
-                Dict.insert "&&" updatedList dict
-    in
-    List.foldl updateDict (Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]) conditionsList
 
 
 dateSearchArea : Model -> Element Msg

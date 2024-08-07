@@ -9,8 +9,7 @@ import Time exposing (Month(..))
 
 
 type DesignFilter
-    = ContainsText String
-    | ContainsTextParsed (Dict String (List (List String)))
+    = ContainsTextParsed String
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
@@ -110,9 +109,6 @@ checkboxDict =
 toString : DesignFilter -> String
 toString filter =
     case filter of
-        ContainsText string ->
-            string
-
         ContainsTextParsed _ ->
             "complicated_search_string"
 
@@ -164,7 +160,7 @@ toDesignFilter key =
             Vote False
 
         _ ->
-            ContainsText ""
+            ContainsTextParsed ""
 
 
 keyToLabel : String -> String
@@ -254,6 +250,58 @@ dateToPosition { firstDate, lastDate, date, height, radius } =
         |> (+) 3
 
 
+parseStringToConditions : String -> Dict String (List (List String))
+parseStringToConditions searchString =
+    let
+        conditionsList =
+            List.map String.trim <| String.split "&&" searchString
+
+        updateDict condition dict =
+            if String.contains "!!" condition then
+                let
+                    splitConditions =
+                        List.map String.trim <| String.split "!!" condition
+
+                    updatedList =
+                        case Dict.get "!!" dict of
+                            Just list ->
+                                list ++ [ splitConditions ]
+
+                            Nothing ->
+                                [ splitConditions ]
+                in
+                Dict.insert "!!" updatedList dict
+
+            else if String.contains "||" condition then
+                let
+                    splitConditions =
+                        List.map String.trim <| String.split "||" condition
+
+                    updatedList =
+                        case Dict.get "||" dict of
+                            Just list ->
+                                list ++ [ splitConditions ]
+
+                            Nothing ->
+                                [ splitConditions ]
+                in
+                Dict.insert "||" updatedList dict
+
+            else
+                let
+                    updatedList =
+                        case Dict.get "&&" dict of
+                            Just list ->
+                                list ++ [ [ condition ] ]
+
+                            Nothing ->
+                                [ [ condition ] ]
+                in
+                Dict.insert "&&" updatedList dict
+    in
+    List.foldl updateDict (Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]) conditionsList
+
+
 designMeetsAllFilters : List DesignFilter -> ProteinDesign -> Maybe ProteinDesign
 designMeetsAllFilters filters design =
     List.all (\f -> designMeetsOneFilter design f) filters
@@ -281,8 +329,11 @@ stubMeetsAllFilters filters design =
 designMeetsOneFilter : ProteinDesign -> DesignFilter -> Bool
 designMeetsOneFilter design filter =
     case filter of
-        ContainsTextParsed searchDict ->
+        ContainsTextParsed string ->
             let
+                searchDict =
+                    parseStringToConditions string
+
                 andConditions =
                     []
 
@@ -335,15 +386,15 @@ designMeetsOneFilter design filter =
         Vote _ ->
             True
 
-        _ ->
-            True
-
 
 stubMeetsOneFilter : ProteinDesignStub -> DesignFilter -> Bool
 stubMeetsOneFilter design filter =
     case filter of
-        ContainsTextParsed searchDict ->
+        ContainsTextParsed string ->
             let
+                searchDict =
+                    parseStringToConditions string
+
                 andConditions =
                     []
 
@@ -360,8 +411,7 @@ stubMeetsOneFilter design filter =
                     Maybe.map (\notCondition -> notConditions ++ [ notCondition ]) (Dict.get "!!" searchDict)
             in
             if
-                List.all (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design))
-                    andConditions
+                List.all (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) andConditions
                     && (not <| List.any (\searchString -> String.contains (String.toLower searchString) (stubSearchableText design)) notConditions)
                     && List.all
                         (\eachOrSet ->
@@ -385,8 +435,3 @@ stubMeetsOneFilter design filter =
 
         _ ->
             True
-
-
-
---DesignTag tag ->
---    List.member tag design.tags
