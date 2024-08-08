@@ -379,7 +379,7 @@ searchArea model =
                        , spacing 5
                        ]
                 )
-                [ text "Tip: separate AND conditions by &&, connect OR conditions by ||, and add &&!! in front of NOT conditions. Search does not operate nested conditions or use of brackets, unless as part of the searched phrase. Example: \"Woolfson && coiled-coil || coiled coil &&!! 4-helix\" is equivalent to \"(Woolfson) AND (coiled-coil OR coiled coil ) AND NOT (4-helix)\", not to \"(Woolfson AND coiled-coil ) OR ( coiled coil AND NOT 4-helix)\" " ]
+                [ text "Tip: separate AND conditions by &&, connect OR conditions by ||, and add &&!! in front of NOT conditions. Search does not operate nested conditions or use of brackets, unless as part of the searched phrase. && overrides other logic operators. Example: \"Woolfson && coiled-coil || coiled coil &&!! 4-helix\" is equivalent to \"(Woolfson) AND (coiled-coil OR coiled coil ) AND (NOT 4-helix)\"." ]
             ]
         ]
 
