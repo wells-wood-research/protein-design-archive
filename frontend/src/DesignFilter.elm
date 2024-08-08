@@ -260,16 +260,19 @@ parseStringToConditions searchString =
             if String.contains "!!" condition then
                 let
                     splitConditions =
-                        String.replace "!!" "" condition
-                            |> String.trim
+                        if String.contains "||" condition then
+                            List.map String.trim (String.split "||" condition)
+
+                        else
+                            [ String.trim <| String.replace "!!" "" condition ]
 
                     updatedList =
                         case Dict.get "!!" dict of
                             Just list ->
-                                list ++ [ [ splitConditions ] ]
+                                list ++ [ splitConditions ]
 
                             Nothing ->
-                                [ [ splitConditions ] ]
+                                [ splitConditions ]
                 in
                 Dict.insert "!!" updatedList dict
 
