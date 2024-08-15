@@ -189,7 +189,7 @@ update shared msg model =
                     )
 
                 AddToDownloadList ->
-                    ( model, Effect.addDesignToDownload model.designId )
+                    ( model, Effect.addDesignsToDownload [ model.designId ] )
 
                 RenderWhenReady _ ->
                     case model.renderPlotState of

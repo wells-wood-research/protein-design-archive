@@ -14,7 +14,7 @@ own file, so they can be imported by `Effect.elm`
 -}
 type Msg
     = DesignsDataReceived (Result Http.Error (List ProteinDesign))
-    | AddDesignToDownload String
+    | AddDesignsToDownload (List String)
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset

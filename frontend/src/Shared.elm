@@ -83,8 +83,12 @@ update _ msg model =
             , Effect.none
             )
 
-        AddDesignToDownload designId ->
-            ( { model | designsToDownload = Set.insert designId model.designsToDownload }
+        AddDesignsToDownload designIds ->
+            let
+                updatedDesignsToDownload =
+                    Set.union model.designsToDownload (Set.fromList designIds)
+            in
+            ( { model | designsToDownload = updatedDesignsToDownload }
             , Effect.none
             )
 

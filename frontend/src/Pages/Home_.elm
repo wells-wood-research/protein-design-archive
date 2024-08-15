@@ -17,7 +17,8 @@ import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Font exposing (center)
+import Element.Border as Border
+import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
 import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
@@ -102,6 +103,9 @@ type Msg
     | UpdateEndDateTextField String
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
+    | CsvRequested
+    | JsonRequested
+    | DownloadAll
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
@@ -215,6 +219,16 @@ update msg model =
                             update
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
+
+                DownloadAll ->
+                    let
+                        filteredDesignStubs =
+                            loadedDesignStubs
+                                |> Dict.values
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                                |> List.map (\x -> x.pdb)
+                    in
+                    ( model, Effect.addDesignsToDownload filteredDesignStubs )
 
                 RenderWhenReady _ ->
                     let
@@ -337,7 +351,8 @@ homeView model =
                 [ Plots.timelinePlotView (px screenWidth) screenWidthS
                 , column
                     [ paddingXY 20 0, spacing 10, width (fill |> maximum screenWidth) ]
-                    [ searchArea model
+                    [ downloadButton screenWidth (Just DownloadAll) (text "Download all currently displayed")
+                    , searchArea model
                     , dateSearchArea model
                     , numberArea designsToDisplay
                     , designList widthDesignCard designsToDisplay
@@ -352,6 +367,26 @@ designList widthDesignCard designs =
         , centerX
         ]
         (List.map (ProteinDesign.designCard widthDesignCard) designs)
+
+
+downloadButton : Int -> Maybe msg -> Element msg -> Element msg
+downloadButton screenWidth onPressCmd textLabel =
+    Input.button
+        (Style.monospacedFont
+            ++ [ padding 10
+               , width (fill |> maximum screenWidth)
+               , centerX
+               , Font.center
+               , Element.mouseOver
+                    [ Background.color <| rgb255 220 220 220
+                    ]
+               , Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
+               , Border.color <| rgb255 220 220 220
+               ]
+        )
+        { onPress = onPressCmd
+        , label = textLabel
+        }
 
 
 searchArea : Model -> Element Msg
