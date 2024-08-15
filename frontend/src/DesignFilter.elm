@@ -4,7 +4,15 @@ import Date exposing (Date, Unit(..))
 import Dict exposing (Dict)
 import Json.Decode exposing (string)
 import List exposing (filter)
-import ProteinDesign exposing (Classification(..), ProteinDesign, ProteinDesignStub, Tag(..), classificationToString, designSearchableText, stubSearchableText)
+import ProteinDesign
+    exposing
+        ( Classification(..)
+        , ProteinDesign
+        , ProteinDesignStub
+        , Tag(..)
+        , classificationToString
+        , stubSearchableText
+        )
 import Time exposing (Month(..))
 
 
@@ -307,18 +315,6 @@ parseStringToConditions searchString =
     List.foldl updateDict (Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]) conditionsList
 
 
-designMeetsAllFilters : List DesignFilter -> ProteinDesign -> Maybe ProteinDesign
-designMeetsAllFilters filters design =
-    List.all (\f -> designMeetsOneFilter design f) filters
-        |> (\allFiltersMet ->
-                if allFiltersMet then
-                    Just design
-
-                else
-                    Nothing
-           )
-
-
 stubMeetsAllFilters : List DesignFilter -> ProteinDesignStub -> Maybe ProteinDesignStub
 stubMeetsAllFilters filters design =
     List.all (\f -> stubMeetsOneFilter design f) filters
@@ -329,33 +325,6 @@ stubMeetsAllFilters filters design =
                 else
                     Nothing
            )
-
-
-designMeetsOneFilter : ProteinDesign -> DesignFilter -> Bool
-designMeetsOneFilter design filter =
-    case filter of
-        ContainsTextParsed string ->
-            True
-
-        DateStart startDate ->
-            if Date.compare startDate design.release_date == LT then
-                True
-
-            else
-                False
-
-        DateEnd endDate ->
-            if Date.compare endDate design.release_date == GT then
-                True
-
-            else
-                False
-
-        DesignClass classification ->
-            classification == design.classification
-
-        Vote _ ->
-            True
 
 
 stubMeetsOneFilter : ProteinDesignStub -> DesignFilter -> Bool

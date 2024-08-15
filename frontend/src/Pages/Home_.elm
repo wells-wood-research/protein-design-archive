@@ -1,7 +1,6 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
-import Boon exposing (Expression)
 import Browser.Dom
 import Browser.Events
 import Components.Title
@@ -18,7 +17,7 @@ import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Font as Font exposing (center)
+import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
@@ -35,7 +34,6 @@ import Style
 import Task
 import Time
 import Urls
-import Vega exposing (leTickCount)
 import View exposing (View)
 
 
