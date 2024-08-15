@@ -6,7 +6,7 @@ port module Effect exposing
     , pushRoutePath, replaceRoutePath
     , loadExternalUrl, back
     , map, toCmd
-    , addDesignsToDownload, removeDesignsFromDownload, renderVegaPlot, resetViewport
+    , addDesignsToDownload, downloadFile, removeDesignsFromDownload, renderVegaPlot, resetViewport
     )
 
 {-|
@@ -27,7 +27,10 @@ port module Effect exposing
 import Browser.Dom as Dom
 import Browser.Navigation
 import Dict exposing (Dict)
+import File exposing (File)
+import File.Download as Download
 import Plots exposing (PlotData)
+import ProteinDesign exposing (DownloadFile)
 import Route
 import Route.Path
 import Shared.Model
@@ -55,6 +58,7 @@ type Effect msg
     | Back
       -- DOM
     | ResetViewport msg
+      -- DOWNLOAD
     | AddDesignsToDownload (List String)
     | RemoveDesignsFromDownload (List String)
       -- SHARED
@@ -163,6 +167,10 @@ resetViewport msg =
     ResetViewport msg
 
 
+
+-- DOWNLOAD
+
+
 addDesignsToDownload : List String -> Effect msg
 addDesignsToDownload designIds =
     AddDesignsToDownload designIds
@@ -171,6 +179,16 @@ addDesignsToDownload designIds =
 removeDesignsFromDownload : List String -> Effect msg
 removeDesignsFromDownload designIds =
     RemoveDesignsFromDownload designIds
+
+
+downloadFile : String -> String -> DownloadFile -> Effect msg
+downloadFile fileName fileContent fileType =
+    case fileType of
+        ProteinDesign.Json ->
+            sendCmd (Download.string ("pda_" ++ fileName ++ ".json") "application/json" fileContent)
+
+        ProteinDesign.Csv ->
+            sendCmd (Download.string ("pda_" ++ fileName ++ ".csv") "text/csv" fileContent)
 
 
 

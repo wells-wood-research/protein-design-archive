@@ -4,7 +4,7 @@ import AppError exposing (AppError(..))
 import Browser.Dom
 import Browser.Events
 import Components.Title
-import Effect exposing (Effect)
+import Effect exposing (Effect, downloadFile)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -22,7 +22,7 @@ import Json.Encode as JsonEncode exposing (Value)
 import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (ProteinDesign, csvStringFromProteinDesign, designDetailsFromProteinDesign, jsonStringFromProteinDesign)
+import ProteinDesign exposing (DownloadFile, ProteinDesign, csvStringFromProteinDesign, designDetailsFromProteinDesign, jsonStringFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set exposing (Set)
@@ -174,7 +174,7 @@ update shared msg model =
                     ( model
                     , case model.csv of
                         Just csvString ->
-                            Effect.sendCmd (Download.string ("pda_" ++ model.designId ++ ".csv") "text/csv" csvString)
+                            Effect.downloadFile model.designId csvString ProteinDesign.Csv
 
                         Nothing ->
                             Effect.none
@@ -184,7 +184,7 @@ update shared msg model =
                     ( model
                     , case model.json of
                         Just jsonString ->
-                            Effect.sendCmd (Download.string ("pda_" ++ model.designId ++ ".json") "application/json" jsonString)
+                            Effect.downloadFile model.designId jsonString ProteinDesign.Json
 
                         Nothing ->
                             Effect.none

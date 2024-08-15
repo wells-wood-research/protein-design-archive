@@ -118,6 +118,11 @@ type alias DesignDetails msg =
     }
 
 
+type DownloadFile
+    = Csv
+    | Json
+
+
 csvListFromProteinDesign : ProteinDesign -> List ( String, String )
 csvListFromProteinDesign proteinDesign =
     [ ( "pdb_code", proteinDesign.pdb )
