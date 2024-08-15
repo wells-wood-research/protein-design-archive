@@ -397,7 +397,7 @@ searchInput model =
         [ width <| fillPortion 6 ]
         { onChange = \string -> UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed string)
         , text = model.searchString
-        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
+        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here, e.g. Woolfson && coiled-coil || coiled coil &&!! 4-helix")
         , label = Input.labelHidden "Filter Designs Search Box"
         }
 
