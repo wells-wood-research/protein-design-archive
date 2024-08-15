@@ -92,6 +92,15 @@ update _ msg model =
             , Effect.none
             )
 
+        RemoveDesignsFromDownload designIds ->
+            let
+                updatedDesignsToDownload =
+                    Set.diff model.designsToDownload (Set.fromList designIds)
+            in
+            ( { model | designsToDownload = updatedDesignsToDownload }
+            , Effect.none
+            )
+
         ViewportResult result ->
             case result of
                 Ok viewport ->

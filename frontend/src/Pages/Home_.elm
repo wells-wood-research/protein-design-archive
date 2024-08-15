@@ -21,6 +21,8 @@ import Element.Border as Border
 import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
+import File exposing (File)
+import File.Download as Download
 import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
 import Http
 import Json.Decode
@@ -29,6 +31,7 @@ import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesignStub)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Set exposing (Set)
 import Shared
 import Shared.Msg exposing (Msg(..))
 import Style
@@ -45,7 +48,7 @@ page shared _ =
         { init = \() -> init shared.mScreenWidthF
         , update = update
         , subscriptions = subscriptions
-        , view = view >> Components.Title.view
+        , view = view shared >> Components.Title.view
         }
 
 
@@ -103,9 +106,10 @@ type Msg
     | UpdateEndDateTextField String
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
-    | CsvRequested
-    | JsonRequested
-    | DownloadAll
+    | AddAll
+    | RemoveAll
+    | DownloadAllCsv
+    | DownloadAllJson
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
@@ -220,7 +224,7 @@ update msg model =
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
 
-                DownloadAll ->
+                AddAll ->
                     let
                         filteredDesignStubs =
                             loadedDesignStubs
@@ -229,6 +233,26 @@ update msg model =
                                 |> List.map (\x -> x.pdb)
                     in
                     ( model, Effect.addDesignsToDownload filteredDesignStubs )
+
+                RemoveAll ->
+                    let
+                        filteredDesignStubs =
+                            loadedDesignStubs
+                                |> Dict.values
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                                |> List.map (\x -> x.pdb)
+                    in
+                    ( model, Effect.removeDesignsFromDownload filteredDesignStubs )
+
+                DownloadAllCsv ->
+                    let
+                        filteredDesignStubs =
+                            loadedDesignStubs
+                                |> Dict.values
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                                |> List.map (\x -> x.pdb)
+                    in
+                    ( model, Effect.batch [ Effect.addDesignsToDownload filteredDesignStubs, Effect.sendCmd (Download.string ("pda_dataset" ++ ".csv") "text/csv" "test csv string") ] )
 
                 RenderWhenReady _ ->
                     let
@@ -303,19 +327,19 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Protein Design Archive"
     , attributes =
         [ centerX
         , width (fill |> minimum (getScreenWidthInt model.mScreenWidthF))
         ]
-    , element = homeView model
+    , element = homeView shared model
     }
 
 
-homeView : Model -> Element Msg
-homeView model =
+homeView : Shared.Model -> Model -> Element Msg
+homeView shared model =
     case model.designStubs of
         RemoteData.NotAsked ->
             text "Not asked for data..."
@@ -351,7 +375,7 @@ homeView model =
                 [ Plots.timelinePlotView (px screenWidth) screenWidthS
                 , column
                     [ paddingXY 20 0, spacing 10, width (fill |> maximum screenWidth) ]
-                    [ downloadButton screenWidth (Just DownloadAll) (text "Download all currently displayed")
+                    [ downloadArea shared model
                     , searchArea model
                     , dateSearchArea model
                     , numberArea designsToDisplay
@@ -369,19 +393,80 @@ designList widthDesignCard designs =
         (List.map (ProteinDesign.designCard widthDesignCard) designs)
 
 
-downloadButton : Int -> Maybe msg -> Element msg -> Element msg
-downloadButton screenWidth onPressCmd textLabel =
+downloadArea : Shared.Model -> Model -> Element Msg
+downloadArea shared model =
+    let
+        filteredDesignStubs =
+            case model.designStubs of
+                RemoteData.Success loadedDesignStubs ->
+                    loadedDesignStubs
+                        |> Dict.values
+                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                        |> List.map (\x -> x.pdb)
+
+                _ ->
+                    []
+
+        toDownload =
+            Set.toList shared.designsToDownload
+
+        screenWidth =
+            getScreenWidthInt model.mScreenWidthF
+
+        widthButton =
+            if screenWidth < 900 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 300
+
+        buttonAttributes =
+            if screenWidth < 900 then
+                [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
+                , Border.color <| rgb255 220 220 220
+                ]
+
+            else
+                [ centerX
+                , Font.center
+                ]
+
+        elementType =
+            if screenWidth < 900 then
+                column
+
+            else
+                row
+    in
+    elementType
+        (Style.bodyFont
+            ++ [ width (fill |> maximum screenWidth)
+               , Font.bold
+               , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+               , Border.color <| rgb255 220 220 220
+               ]
+        )
+        [ downloadButton widthButton buttonAttributes (Just DownloadAllCsv) (text "Download all selected as CSV")
+        , downloadButton widthButton buttonAttributes (Just DownloadAllJson) (text "Download all selected as JSON")
+        , if List.any (\design -> List.member design toDownload) filteredDesignStubs then
+            downloadButton widthButton buttonAttributes (Just RemoveAll) (text "Remove all from download selection")
+
+          else
+            downloadButton widthButton buttonAttributes (Just AddAll) (text "Add to download list")
+        ]
+
+
+downloadButton : Length -> List (Attribute msg) -> Maybe msg -> Element msg -> Element msg
+downloadButton widthButton buttonAttributes onPressCmd textLabel =
     Input.button
-        (Style.monospacedFont
+        (buttonAttributes
             ++ [ padding 10
-               , width (fill |> maximum screenWidth)
+               , width widthButton
                , centerX
                , Font.center
                , Element.mouseOver
                     [ Background.color <| rgb255 220 220 220
                     ]
-               , Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
-               , Border.color <| rgb255 220 220 220
                ]
         )
         { onPress = onPressCmd

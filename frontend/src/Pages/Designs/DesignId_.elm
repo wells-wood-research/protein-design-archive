@@ -25,6 +25,7 @@ import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesign, csvStringFromProteinDesign, designDetailsFromProteinDesign, jsonStringFromProteinDesign)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Set exposing (Set)
 import Shared
 import Style
 import Task
@@ -39,7 +40,7 @@ page shared route =
         { init = \_ -> init shared.mScreenWidthF route.params.designId
         , update = update shared
         , subscriptions = subscriptions
-        , view = view >> Components.Title.view
+        , view = view shared >> Components.Title.view
         }
 
 
@@ -97,6 +98,7 @@ type Msg
     | CsvRequested
     | JsonRequested
     | AddToDownloadList
+    | RemoveFromDownloadList
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
@@ -175,7 +177,7 @@ update shared msg model =
                             Effect.sendCmd (Download.string ("pda_" ++ model.designId ++ ".csv") "text/csv" csvString)
 
                         Nothing ->
-                            Debug.todo "Display error"
+                            Effect.none
                     )
 
                 JsonRequested ->
@@ -185,11 +187,14 @@ update shared msg model =
                             Effect.sendCmd (Download.string ("pda_" ++ model.designId ++ ".json") "application/json" jsonString)
 
                         Nothing ->
-                            Debug.todo "Display error"
+                            Effect.none
                     )
 
                 AddToDownloadList ->
                     ( model, Effect.addDesignsToDownload [ model.designId ] )
+
+                RemoveFromDownloadList ->
+                    ( model, Effect.removeDesignsFromDownload [ model.designId ] )
 
                 RenderWhenReady _ ->
                     case model.renderPlotState of
@@ -238,8 +243,8 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Design Details"
     , attributes =
         [ centerX
@@ -248,12 +253,19 @@ view model =
                 |> minimum (getScreenWidthInt model.mScreenWidthF)
             )
         ]
-    , element = details model.mScreenWidthF model.design
+    , element = details shared model
     }
 
 
-details : Maybe Float -> RemoteData Http.Error ProteinDesign -> Element Msg
-details mScreenWidthF mDesign =
+details : Shared.Model -> Model -> Element Msg
+details shared model =
+    let
+        mScreenWidthF =
+            model.mScreenWidthF
+
+        mDesign =
+            model.design
+    in
     row []
         [ column
             [ width fill ]
@@ -297,13 +309,13 @@ details mScreenWidthF mDesign =
                         ]
 
                 Success design ->
-                    designDetailsView mScreenWidthF design
+                    designDetailsView shared mScreenWidthF design
             ]
         ]
 
 
-designDetailsView : Maybe Float -> ProteinDesign -> Element Msg
-designDetailsView mScreenWidthF proteinDesign =
+designDetailsView : Shared.Model -> Maybe Float -> ProteinDesign -> Element Msg
+designDetailsView shared mScreenWidthF proteinDesign =
     column
         ([ centerX
          , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
@@ -313,7 +325,7 @@ designDetailsView mScreenWidthF proteinDesign =
             ++ Style.bodyFont
         )
         [ designDetailsHeader "Design Details" "/designs/" proteinDesign
-        , downloadArea mScreenWidthF
+        , downloadArea shared mScreenWidthF proteinDesign.pdb
         , designDetailsBody mScreenWidthF proteinDesign
         ]
 
@@ -336,8 +348,8 @@ downloadButton widthButton buttonAttributes onPressCmd textLabel =
         }
 
 
-downloadArea : Maybe Float -> Element Msg
-downloadArea mScreenWidthF =
+downloadArea : Shared.Model -> Maybe Float -> String -> Element Msg
+downloadArea shared mScreenWidthF designId =
     let
         screenWidth =
             getScreenWidthInt mScreenWidthF
@@ -375,7 +387,11 @@ downloadArea mScreenWidthF =
         ]
         [ downloadButton widthButton buttonAttributes (Just CsvRequested) (text "Download CSV")
         , downloadButton widthButton buttonAttributes (Just JsonRequested) (text "Download JSON")
-        , downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
+        , if Set.member designId shared.designsToDownload then
+            downloadButton widthButton buttonAttributes (Just RemoveFromDownloadList) (text "Remove from download")
+
+          else
+            downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
         ]
 
 
@@ -500,10 +516,6 @@ designDetailsBody mScreenWidthF proteinDesign =
             [ Keyed.el
                 [ width <| px (getScreenWidthIntNgl mScreenWidthF)
                 , height <| px 400
-
-                --, Border.width 2
-                --, Border.rounded 3
-                --, Border.color <| rgb255 220 220 220
                 ]
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
