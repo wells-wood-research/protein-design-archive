@@ -34,10 +34,10 @@ import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page { mScreenWidthF } route =
+page shared route =
     Page.new
-        { init = \_ -> init mScreenWidthF route.params.designId
-        , update = update
+        { init = \_ -> init shared.mScreenWidthF route.params.designId
+        , update = update shared
         , subscriptions = subscriptions
         , view = view >> Components.Title.view
         }
@@ -103,8 +103,8 @@ type Msg
     | ViewportReset
 
 
-update : Msg -> Model -> ( Model, Effect Msg )
-update msg model =
+update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
+update shared msg model =
     case model.design of
         RemoteData.NotAsked ->
             case msg of
@@ -189,7 +189,7 @@ update msg model =
                     )
 
                 AddToDownloadList ->
-                    ( model, Effect.none )
+                    ( model, Effect.addDesignToDownload model.designId )
 
                 RenderWhenReady _ ->
                     case model.renderPlotState of

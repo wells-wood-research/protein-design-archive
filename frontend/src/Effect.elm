@@ -6,7 +6,7 @@ port module Effect exposing
     , pushRoutePath, replaceRoutePath
     , loadExternalUrl, back
     , map, toCmd
-    , renderVegaPlot, resetViewport
+    , addDesignToDownload, renderVegaPlot, resetViewport
     )
 
 {-|
@@ -55,6 +55,7 @@ type Effect msg
     | Back
       -- DOM
     | ResetViewport msg
+    | AddDesignToDownload String
       -- SHARED
     | SendSharedMsg Shared.Msg.Msg
       -- PORTS
@@ -161,6 +162,11 @@ resetViewport msg =
     ResetViewport msg
 
 
+addDesignToDownload : String -> Effect msg
+addDesignToDownload designId =
+    AddDesignToDownload designId
+
+
 
 -- Ports
 
@@ -200,6 +206,9 @@ map fn effect =
 
         ResetViewport msg ->
             ResetViewport <| fn msg
+
+        AddDesignToDownload designId ->
+            AddDesignToDownload designId
 
         LoadExternalUrl url ->
             LoadExternalUrl url
@@ -248,6 +257,10 @@ toCmd options effect =
 
         ResetViewport msg ->
             Task.perform (\_ -> msg) (Dom.setViewport 0 0)
+
+        AddDesignToDownload designId ->
+            Task.succeed (Shared.Msg.AddDesignToDownload designId)
+                |> Task.perform options.fromSharedMsg
 
         SendSharedMsg sharedMsg ->
             Task.succeed sharedMsg
