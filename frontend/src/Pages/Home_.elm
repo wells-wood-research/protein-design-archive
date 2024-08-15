@@ -28,10 +28,10 @@ import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (ProteinDesignStub)
+import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
-import Set exposing (Set)
+import Set
 import Shared
 import Shared.Msg exposing (Msg(..))
 import Style
@@ -46,7 +46,7 @@ page : Shared.Model -> Route () -> Page Model Msg
 page shared _ =
     Page.new
         { init = \() -> init shared.mScreenWidthF
-        , update = update
+        , update = update shared
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view
         }
@@ -65,6 +65,7 @@ type alias Model =
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
+    , dataDownload : RemoteData Http.Error String
     }
 
 
@@ -78,6 +79,7 @@ init mSharedScreenWidthF =
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
+      , dataDownload = NotAsked
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -110,14 +112,16 @@ type Msg
     | RemoveAllSelected
     | DownloadAllSelectedCsv
     | DownloadAllSelectedJson
+    | RequestSelectedDesignData
+    | ForExportResponse DownloadFileType (Result Http.Error String)
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
 
 
-update : Msg -> Model -> ( Model, Effect Msg )
-update msg model =
+update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
+update shared msg model =
     case model.designStubs of
         RemoteData.NotAsked ->
             case msg of
@@ -199,12 +203,12 @@ update msg model =
                     in
                     case Date.fromIsoString phrase of
                         Err _ ->
-                            update
+                            update shared
                                 (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
                                 { model | mStartDate = ifEmptyOrNot string }
 
                         Ok date ->
-                            update
+                            update shared
                                 (UpdateFilters defaultKeys.dateStartKey (DateStart date))
                                 { model | mStartDate = ifEmptyOrNot string }
 
@@ -215,12 +219,12 @@ update msg model =
                     in
                     case Date.fromIsoString phrase of
                         Err _ ->
-                            update
+                            update shared
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
                                 { model | mEndDate = ifEmptyOrNot string }
 
                         Ok date ->
-                            update
+                            update shared
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
 
@@ -254,6 +258,26 @@ update msg model =
                                 |> List.map (\x -> x.pdb)
                     in
                     ( model, Effect.batch [ Effect.addDesignsToDownload filteredDesignStubs, Effect.sendCmd (Download.string ("pda_dataset" ++ ".csv") "text/csv" "test csv string") ] )
+
+                RequestSelectedDesignData ->
+                    ( { model | dataDownload = Loading }
+                    , Http.get
+                        { url = Urls.selectedDesigns (shared.designsToDownload |> Set.toList)
+                        , expect =
+                            Http.expectString (ForExportResponse Json)
+                        }
+                        |> Effect.sendCmd
+                    )
+
+                ForExportResponse _ (Err err) ->
+                    ( { model | dataDownload = Failure err }
+                    , Effect.none
+                    )
+
+                ForExportResponse fileType (Ok designData) ->
+                    ( { model | dataDownload = NotAsked }
+                    , Effect.downloadFile "exported_designs" designData fileType
+                    )
 
                 RenderWhenReady _ ->
                     let
@@ -448,7 +472,7 @@ downloadArea shared model =
                ]
         )
         [ downloadButton widthButton buttonAttributes (Just DownloadAllSelectedCsv) (text "Download all selected as CSV")
-        , downloadButton widthButton buttonAttributes (Just DownloadAllSelectedJson) (text "Download all selected as JSON")
+        , downloadButton widthButton buttonAttributes (Just RequestSelectedDesignData) (text "Download all selected as JSON")
         , if List.all (\design -> List.member design toDownload) filteredDesignStubs then
             downloadButton widthButton buttonAttributes (Just RemoveAllSelected) (text "Remove all from download selection")
 

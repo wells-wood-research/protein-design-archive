@@ -118,7 +118,7 @@ type alias DesignDetails msg =
     }
 
 
-type DownloadFile
+type DownloadFileType
     = Csv
     | Json
 

@@ -30,7 +30,7 @@ import Dict exposing (Dict)
 import File exposing (File)
 import File.Download as Download
 import Plots exposing (PlotData)
-import ProteinDesign exposing (DownloadFile)
+import ProteinDesign exposing (DownloadFileType)
 import Route
 import Route.Path
 import Shared.Model
@@ -181,7 +181,7 @@ removeDesignsFromDownload designIds =
     RemoveDesignsFromDownload designIds
 
 
-downloadFile : String -> String -> DownloadFile -> Effect msg
+downloadFile : String -> String -> DownloadFileType -> Effect msg
 downloadFile fileName fileContent fileType =
     case fileType of
         ProteinDesign.Json ->
