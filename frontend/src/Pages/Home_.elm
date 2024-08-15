@@ -338,6 +338,7 @@ homeView model =
                     [ paddingXY 20 0, spacing 10, width (fill |> maximum screenWidth) ]
                     [ searchArea model
                     , dateSearchArea model
+                    , numberArea designsToDisplay
                     , designList widthDesignCard designsToDisplay
                     ]
                 ]
@@ -418,6 +419,26 @@ dateSearchArea model =
                 , dateStartField model
                 , dateEndField model
                 ]
+
+
+numberArea :
+    List ProteinDesignStub
+    -> Element Msg
+numberArea designs =
+    let
+        numberOfDesigns =
+            List.length designs
+    in
+    row (Style.monospacedFont ++ [ alignLeft ])
+        [ el [ centerX, paddingXY 10 0 ]
+            (html <|
+                FeatherIcons.toHtml [] <|
+                    FeatherIcons.withSize 24 <|
+                        FeatherIcons.hash
+             -- or barChart
+            )
+        , text ("Number of designs: " ++ String.fromInt numberOfDesigns)
+        ]
 
 
 dateStartField : Model -> Element Msg
