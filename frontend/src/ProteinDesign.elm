@@ -8,6 +8,7 @@ import Element.Font as Font
 import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
+import Style
 import Time exposing (Month(..))
 
 
@@ -131,7 +132,7 @@ designDetailsFromProteinDesign proteinDesign =
                         |> text
                 }
       }
-    , { header = "Subtitle"
+    , { header = "Biological assembly"
       , property =
             el
                 [ padding 2
@@ -190,36 +191,40 @@ designDetailsFromProteinDesign proteinDesign =
       }
     , { header = "Reference link"
       , property =
-            newTabLink
-                [ Font.color <| rgb255 104 176 171
-                , Font.underline
-                ]
-                { url =
-                    if String.isEmpty proteinDesign.publication_ref.doi then
-                        if String.isEmpty proteinDesign.publication_ref.pubmed then
-                            "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdb
+            if String.isEmpty proteinDesign.publication_ref.doi && String.isEmpty proteinDesign.publication_ref.pubmed then
+                text "-"
+
+            else
+                newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url =
+                        if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                "https://www.rcsb.org/structure/"
+                                    ++ proteinDesign.pdb
+
+                            else
+                                "https://pubmed.ncbi.nlm.nih.gov/"
+                                    ++ proteinDesign.publication_ref.pubmed
 
                         else
-                            "https://pubmed.ncbi.nlm.nih.gov/"
-                                ++ proteinDesign.publication_ref.pubmed
+                            "https://doi.org/"
+                                ++ proteinDesign.publication_ref.doi
+                    , label =
+                        (if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                "-"
 
-                    else
-                        "https://doi.org/"
-                            ++ proteinDesign.publication_ref.doi
-                , label =
-                    (if String.isEmpty proteinDesign.publication_ref.doi then
-                        if String.isEmpty proteinDesign.publication_ref.pubmed then
-                            "-"
+                            else
+                                proteinDesign.publication_ref.pubmed
 
-                        else
-                            proteinDesign.publication_ref.pubmed
-
-                     else
-                        proteinDesign.publication_ref.doi
-                    )
-                        |> text
-                }
+                         else
+                            proteinDesign.publication_ref.doi
+                        )
+                            |> text
+                    }
       }
     , { header = "Authors"
       , property =
@@ -641,7 +646,7 @@ designCard widthDesignCard design =
                     , width fill
                     , alignTop
                     ]
-                    [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
+                    [ paragraph (Style.monospacedFont ++ [ Font.size 16 ]) [ text <| String.toUpper <| design.pdb ]
                     , paragraph [ Font.size 11, Font.color <| rgb255 130 130 130 ] [ wrappedRow [] [ text design.subtitle ] ]
                     , paragraph [ Font.size 11 ] [ wrappedRow [] [ text (authorsToString design.authors) ] ]
                     ]
