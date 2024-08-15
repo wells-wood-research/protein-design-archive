@@ -448,7 +448,7 @@ downloadArea shared model =
         )
         [ downloadButton widthButton buttonAttributes (Just DownloadAllCsv) (text "Download all selected as CSV")
         , downloadButton widthButton buttonAttributes (Just DownloadAllJson) (text "Download all selected as JSON")
-        , if List.any (\design -> List.member design toDownload) filteredDesignStubs then
+        , if List.all (\design -> List.member design toDownload) filteredDesignStubs then
             downloadButton widthButton buttonAttributes (Just RemoveAll) (text "Remove all from download selection")
 
           else
