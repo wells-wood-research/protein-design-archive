@@ -8,8 +8,11 @@ import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
+import Element.Input as Input
 import Element.Keyed as Keyed
 import FeatherIcons
+import File exposing (File)
+import File.Download as Download
 import Get exposing (..)
 import Html
 import Html.Attributes as HAtt
@@ -44,6 +47,8 @@ page { mScreenWidthF } route =
 type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
+    , csv : Maybe String
+    , json : Maybe String
     , errors : List AppError
     , mScreenWidthF : Maybe Float
     , replotTime : Int
@@ -55,6 +60,8 @@ init : Maybe Float -> String -> ( Model, Effect Msg )
 init mSharedScreenWidthF designId =
     ( { designId = designId
       , design = Loading
+      , csv = Nothing
+      , json = Nothing
       , errors = []
       , replotTime = 3
       , renderPlotState = WillRender
@@ -84,6 +91,8 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | CsvRequested
+    | JsonRequested
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
@@ -109,7 +118,7 @@ update msg model =
                     ( model, Effect.none )
 
                 DesignsDataReceived (Ok design) ->
-                    ( { model | design = Success design }
+                    ( { model | design = Success design, csv = Just model.designId }
                     , Effect.none
                     )
 
@@ -151,6 +160,26 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
+                CsvRequested ->
+                    ( model
+                    , case model.csv of
+                        Just csvString ->
+                            Effect.sendCmd (Download.string ("pda_" ++ model.designId ++ ".csv") "text/csv" csvString)
+
+                        Nothing ->
+                            Debug.todo "Display error"
+                    )
+
+                JsonRequested ->
+                    ( model
+                    , case model.json of
+                        Just jsonString ->
+                            Effect.sendCmd (Download.string ("pda_" ++ model.designId ++ ".json") "application/json" jsonString)
+
+                        Nothing ->
+                            Debug.todo "Display error"
+                    )
+
                 RenderWhenReady _ ->
                     case model.renderPlotState of
                         AwaitingRender 0 ->
@@ -212,7 +241,7 @@ view model =
     }
 
 
-details : Maybe Float -> RemoteData Http.Error ProteinDesign -> Element msg
+details : Maybe Float -> RemoteData Http.Error ProteinDesign -> Element Msg
 details mScreenWidthF mDesign =
     row []
         [ column
@@ -262,7 +291,7 @@ details mScreenWidthF mDesign =
         ]
 
 
-designDetailsView : Maybe Float -> ProteinDesign -> Element msg
+designDetailsView : Maybe Float -> ProteinDesign -> Element Msg
 designDetailsView mScreenWidthF proteinDesign =
     column
         ([ centerX
@@ -273,9 +302,20 @@ designDetailsView mScreenWidthF proteinDesign =
          ]
             ++ Style.bodyFont
         )
-        [ designDetailsHeader "Design Details" "/designs/" proteinDesign
+        [ downloadButton
+        , designDetailsHeader "Design Details" "/designs/" proteinDesign
         , designDetailsBody mScreenWidthF proteinDesign
         ]
+
+
+downloadButton : Element Msg
+downloadButton =
+    Input.button
+        [ padding 5
+        ]
+        { label = text "Download" --sidebarButton FeatherIcons.search
+        , onPress = CsvRequested |> Just
+        }
 
 
 designDetailsHeader : String -> String -> ProteinDesign -> Element msg
