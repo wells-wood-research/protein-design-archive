@@ -363,19 +363,7 @@ searchArea model =
             Element.px (getScreenWidthInt model.mScreenWidthF - 50)
         ]
         [ searchIcon
-        , column
-            [ width fill
-            , spacing 10
-            ]
-            [ searchInput model
-            , paragraph
-                (Style.monospacedFont
-                    ++ [ Font.size 12
-                       , spacing 5
-                       ]
-                )
-                [ text "Tip: separate AND conditions by &&, connect OR conditions by ||, and add &&!! in front of NOT conditions. Search does not operate nested conditions or use of brackets, unless as part of the searched phrase. && overrides other logic operators. Example: \"Woolfson && coiled-coil || coiled coil &&!! 4-helix\" is equivalent to \"(Woolfson) AND (coiled-coil OR coiled coil ) AND (NOT 4-helix)\"." ]
-            ]
+        , searchInput model
         ]
 
 
@@ -395,7 +383,10 @@ searchInput model =
         [ width <| fillPortion 6 ]
         { onChange = \string -> UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed string)
         , text = model.searchString
-        , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here, e.g. Woolfson && coiled-coil || coiled coil &&!! 4-helix")
+        , placeholder =
+            Just <|
+                Input.placeholder []
+                    (text "Enter search phrase here e.g. Woolfson && coiled-coil || coiled coil &&!! 4-helix")
         , label = Input.labelHidden "Filter Designs Search Box"
         }
 
