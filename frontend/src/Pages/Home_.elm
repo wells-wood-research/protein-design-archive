@@ -106,10 +106,10 @@ type Msg
     | UpdateEndDateTextField String
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
-    | AddAll
-    | RemoveAll
-    | DownloadAllCsv
-    | DownloadAllJson
+    | AddAllSelected
+    | RemoveAllSelected
+    | DownloadAllSelectedCsv
+    | DownloadAllSelectedJson
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
@@ -224,7 +224,7 @@ update msg model =
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
 
-                AddAll ->
+                AddAllSelected ->
                     let
                         filteredDesignStubs =
                             loadedDesignStubs
@@ -234,7 +234,8 @@ update msg model =
                     in
                     ( model, Effect.addDesignsToDownload filteredDesignStubs )
 
-                RemoveAll ->
+                RemoveAllSelected ->
+                    -- Is this intuitive enough? Maybe Remove should remove all designs, not only those displayed on a page?
                     let
                         filteredDesignStubs =
                             loadedDesignStubs
@@ -244,7 +245,7 @@ update msg model =
                     in
                     ( model, Effect.removeDesignsFromDownload filteredDesignStubs )
 
-                DownloadAllCsv ->
+                DownloadAllSelectedCsv ->
                     let
                         filteredDesignStubs =
                             loadedDesignStubs
@@ -446,13 +447,13 @@ downloadArea shared model =
                , Border.color <| rgb255 220 220 220
                ]
         )
-        [ downloadButton widthButton buttonAttributes (Just DownloadAllCsv) (text "Download all selected as CSV")
-        , downloadButton widthButton buttonAttributes (Just DownloadAllJson) (text "Download all selected as JSON")
+        [ downloadButton widthButton buttonAttributes (Just DownloadAllSelectedCsv) (text "Download all selected as CSV")
+        , downloadButton widthButton buttonAttributes (Just DownloadAllSelectedJson) (text "Download all selected as JSON")
         , if List.all (\design -> List.member design toDownload) filteredDesignStubs then
-            downloadButton widthButton buttonAttributes (Just RemoveAll) (text "Remove all from download selection")
+            downloadButton widthButton buttonAttributes (Just RemoveAllSelected) (text "Remove all from download selection")
 
           else
-            downloadButton widthButton buttonAttributes (Just AddAll) (text "Add to download list")
+            downloadButton widthButton buttonAttributes (Just AddAllSelected) (text "Add to download list")
         ]
 
 
