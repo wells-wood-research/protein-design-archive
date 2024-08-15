@@ -34,7 +34,6 @@ import Style
 import Task
 import Time
 import Urls
-import Vega exposing (num)
 import View exposing (View)
 
 
