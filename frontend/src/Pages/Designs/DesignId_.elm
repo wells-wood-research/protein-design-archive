@@ -18,11 +18,12 @@ import Get exposing (..)
 import Html
 import Html.Attributes as HAtt
 import Http
+import Json.Decode
 import Json.Encode as JsonEncode exposing (Value)
 import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesign, designDetailsFromProteinDesign, jsonStringFromProteinDesign)
+import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, fileTypeToString)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set exposing (Set)
@@ -38,7 +39,7 @@ page : Shared.Model -> Route { designId : String } -> Page Model Msg
 page shared route =
     Page.new
         { init = \_ -> init shared.mScreenWidthF route.params.designId
-        , update = update shared
+        , update = update
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view
         }
@@ -51,12 +52,11 @@ page shared route =
 type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
-    , csv : Maybe String
-    , json : Maybe String
     , errors : List AppError
     , mScreenWidthF : Maybe Float
     , replotTime : Int
     , renderPlotState : RenderPlotState
+    , dataDownload : RemoteData Http.Error String
     }
 
 
@@ -64,12 +64,11 @@ init : Maybe Float -> String -> ( Model, Effect Msg )
 init mSharedScreenWidthF designId =
     ( { designId = designId
       , design = Loading
-      , csv = Nothing
-      , json = Nothing
       , errors = []
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
+      , dataDownload = NotAsked
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -95,8 +94,8 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
-    | CsvRequested
-    | JsonRequested
+    | RequestSelectedDesignData DownloadFileType
+    | ForExportResponse DownloadFileType (Result Http.Error String)
     | AddToDownloadList
     | RemoveFromDownloadList
     | RenderWhenReady Time.Posix
@@ -105,8 +104,8 @@ type Msg
     | ViewportReset
 
 
-update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
-update shared msg model =
+update : Msg -> Model -> ( Model, Effect Msg )
+update msg model =
     case model.design of
         RemoteData.NotAsked ->
             case msg of
@@ -124,11 +123,7 @@ update shared msg model =
                     ( model, Effect.none )
 
                 DesignsDataReceived (Ok design) ->
-                    ( { model
-                        | design = Success design
-                        , csv = Just <| csvStringFromProteinDesign [ design ]
-                        , json = Just <| jsonStringFromProteinDesign design
-                      }
+                    ( { model | design = Success design }
                     , Effect.none
                     )
 
@@ -170,24 +165,38 @@ update shared msg model =
 
         RemoteData.Success _ ->
             case msg of
-                CsvRequested ->
-                    ( model
-                    , case model.csv of
-                        Just csvString ->
-                            Effect.downloadFile model.designId csvString ProteinDesign.Csv
-
-                        Nothing ->
-                            Effect.none
+                RequestSelectedDesignData fileType ->
+                    ( { model | dataDownload = Loading }
+                    , Http.get
+                        { url = Urls.downloadSelectedDesigns [ model.designId ]
+                        , expect =
+                            Http.expectString (ForExportResponse fileType)
+                        }
+                        |> Effect.sendCmd
                     )
 
-                JsonRequested ->
-                    ( model
-                    , case model.json of
-                        Just jsonString ->
-                            Effect.downloadFile model.designId jsonString ProteinDesign.Json
+                ForExportResponse _ (Err err) ->
+                    ( { model | dataDownload = Failure err }
+                    , Effect.none
+                    )
 
-                        Nothing ->
-                            Effect.none
+                ForExportResponse fileType (Ok designData) ->
+                    let
+                        encodedFileContent =
+                            case fileType of
+                                ProteinDesign.Json ->
+                                    designData
+
+                                ProteinDesign.Csv ->
+                                    case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
+                                        Ok designs ->
+                                            csvStringFromProteinDesignDownload designs
+
+                                        Err _ ->
+                                            designData
+                    in
+                    ( { model | dataDownload = NotAsked }
+                    , Effect.downloadFile model.designId encodedFileContent fileType
                     )
 
                 AddToDownloadList ->
@@ -385,8 +394,8 @@ downloadArea shared mScreenWidthF designId =
         , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
         , Border.color <| rgb255 220 220 220
         ]
-        [ downloadButton widthButton buttonAttributes (Just CsvRequested) (text "Download CSV")
-        , downloadButton widthButton buttonAttributes (Just JsonRequested) (text "Download JSON")
+        [ downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download CSV")
+        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download JSON")
         , if Set.member designId shared.designsToDownload then
             downloadButton widthButton buttonAttributes (Just RemoveFromDownloadList) (text "Remove from download")
 

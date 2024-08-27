@@ -28,7 +28,7 @@ import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub)
+import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder, fileTypeToString)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set
@@ -112,7 +112,7 @@ type Msg
     | RemoveAllSelected
     | DownloadAllSelectedCsv
     | DownloadAllSelectedJson
-    | RequestSelectedDesignData
+    | RequestSelectedDesignData DownloadFileType
     | ForExportResponse DownloadFileType (Result Http.Error String)
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
@@ -239,7 +239,6 @@ update shared msg model =
                     ( model, Effect.addDesignsToDownload filteredDesignStubs )
 
                 RemoveAllSelected ->
-                    -- Is this intuitive enough? Maybe Remove should remove all designs, not only those displayed on a page?
                     let
                         filteredDesignStubs =
                             loadedDesignStubs
@@ -249,22 +248,12 @@ update shared msg model =
                     in
                     ( model, Effect.removeDesignsFromDownload filteredDesignStubs )
 
-                DownloadAllSelectedCsv ->
-                    let
-                        filteredDesignStubs =
-                            loadedDesignStubs
-                                |> Dict.values
-                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
-                                |> List.map (\x -> x.pdb)
-                    in
-                    ( model, Effect.batch [ Effect.addDesignsToDownload filteredDesignStubs, Effect.sendCmd (Download.string ("pda_dataset" ++ ".csv") "text/csv" "test csv string") ] )
-
-                RequestSelectedDesignData ->
+                RequestSelectedDesignData fileType ->
                     ( { model | dataDownload = Loading }
                     , Http.get
-                        { url = Urls.selectedDesigns (shared.designsToDownload |> Set.toList)
+                        { url = Urls.downloadSelectedDesigns (shared.designsToDownload |> Set.toList)
                         , expect =
-                            Http.expectString (ForExportResponse Json)
+                            Http.expectString (ForExportResponse fileType)
                         }
                         |> Effect.sendCmd
                     )
@@ -275,8 +264,22 @@ update shared msg model =
                     )
 
                 ForExportResponse fileType (Ok designData) ->
+                    let
+                        encodedFileContent =
+                            case fileType of
+                                ProteinDesign.Json ->
+                                    designData
+
+                                ProteinDesign.Csv ->
+                                    case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
+                                        Ok designs ->
+                                            csvStringFromProteinDesignDownload designs
+
+                                        Err _ ->
+                                            designData
+                    in
                     ( { model | dataDownload = NotAsked }
-                    , Effect.downloadFile "exported_designs" designData fileType
+                    , Effect.downloadFile "exported_designs" encodedFileContent fileType
                     )
 
                 RenderWhenReady _ ->
@@ -400,10 +403,10 @@ homeView shared model =
                 [ Plots.timelinePlotView (px screenWidth) screenWidthS
                 , column
                     [ paddingXY 20 0, spacing 10, width (fill |> maximum screenWidth) ]
-                    [ downloadArea shared model
-                    , searchArea model
+                    [ searchArea model
                     , dateSearchArea model
                     , numberArea model.mScreenWidthF designsToDisplay shared.designsToDownload
+                    , downloadArea shared model
                     , designList widthDesignCard designsToDisplay
                     ]
                 ]
@@ -471,8 +474,8 @@ downloadArea shared model =
                , Border.color <| rgb255 220 220 220
                ]
         )
-        [ downloadButton widthButton buttonAttributes (Just DownloadAllSelectedCsv) (text "Download all selected as CSV")
-        , downloadButton widthButton buttonAttributes (Just RequestSelectedDesignData) (text "Download all selected as JSON")
+        [ downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download all selected as CSV")
+        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download all selected as JSON")
         , if List.all (\design -> List.member design toDownload) filteredDesignStubs then
             downloadButton widthButton buttonAttributes (Just RemoveAllSelected) (text "Remove all from download selection")
 
@@ -573,6 +576,13 @@ numberArea mScreenWidthF designsToDisplay designsToDownload =
         screenWidth =
             getScreenWidthInt mScreenWidthF
 
+        widthButton =
+            if screenWidth < 900 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 300
+
         elementType =
             if screenWidth < 900 then
                 column
@@ -582,7 +592,7 @@ numberArea mScreenWidthF designsToDisplay designsToDownload =
     in
     elementType
         (Style.bodyFont
-            ++ [ width (fill |> maximum screenWidth)
+            ++ [ width widthButton
                , Border.color <| rgb255 220 220 220
                , spacing 10
                ]

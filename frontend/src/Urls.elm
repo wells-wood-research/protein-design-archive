@@ -3,8 +3,8 @@ module Urls exposing (..)
 import Json.Encode as Encode
 
 
-selectedDesigns : List String -> String
-selectedDesigns pdbCodes =
+downloadSelectedDesigns : List String -> String
+downloadSelectedDesigns pdbCodes =
     if List.isEmpty pdbCodes then
         "http://localhost:5000/all-designs"
 

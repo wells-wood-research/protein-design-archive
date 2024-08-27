@@ -53,6 +53,25 @@ type alias ProteinDesignStub =
     }
 
 
+type alias ProteinDesignDownload =
+    { pdb : String
+    , chains : List Chain
+    , authors : List Author
+    , classification : Classification
+    , subtitle : String
+    , tags : List String
+    , release_date : Date
+    , publication : String
+    , publication_ref : Reference
+    , publication_country : String
+    , related_pdb : List String
+    , crystal_structure : Xtal
+    , exptl_method : List String
+    , formula_weight : Float
+    , synthesis_comment : String
+    }
+
+
 type Classification
     = Minimal
     | Rational
@@ -123,8 +142,18 @@ type DownloadFileType
     | Json
 
 
-csvListFromProteinDesign : ProteinDesign -> List ( String, String )
-csvListFromProteinDesign proteinDesign =
+fileTypeToString : DownloadFileType -> String
+fileTypeToString fileType =
+    case fileType of
+        Csv ->
+            "csv"
+
+        Json ->
+            "json"
+
+
+csvListFromProteinDesignDownload : ProteinDesignDownload -> List ( String, String )
+csvListFromProteinDesignDownload proteinDesign =
     [ ( "pdb_code", proteinDesign.pdb )
     , ( "release_date", Date.toIsoString proteinDesign.release_date )
     , ( "classification", classificationToString proteinDesign.classification )
@@ -139,19 +168,17 @@ csvListFromProteinDesign proteinDesign =
     , ( "publication_country", proteinDesign.publication_country )
     , ( "subtitle", proteinDesign.subtitle )
     , ( "tags", String.join ";" proteinDesign.tags )
-    , ( "keywords", String.join ";" proteinDesign.keywords )
-    , ( "abstract", proteinDesign.abstract )
     , ( "related_pdb", String.join ";" proteinDesign.related_pdb )
     ]
 
 
-csvStringFromProteinDesign : List ProteinDesign -> String
-csvStringFromProteinDesign proteinDesigns =
+csvStringFromProteinDesignDownload : List ProteinDesignDownload -> String
+csvStringFromProteinDesignDownload proteinDesigns =
     proteinDesigns
         |> CsvEncode.encode
             { encoder =
                 CsvEncode.withFieldNames
-                    csvListFromProteinDesign
+                    csvListFromProteinDesignDownload
             , fieldSeparator = ','
             }
 
@@ -368,6 +395,26 @@ rawDesignStubDecoder =
         |> required "keywords" (Decode.list Decode.string)
         |> required "release_date" dateDecoder
         |> required "publication" Decode.string
+
+
+downloadDesignDecoder : Decoder ProteinDesignDownload
+downloadDesignDecoder =
+    Decode.succeed ProteinDesignDownload
+        |> required "pdb" Decode.string
+        |> required "chains" (Decode.list chainDecoder)
+        |> required "authors" (Decode.list authorDecoder)
+        |> required "classification" classificationDecoder
+        |> required "subtitle" Decode.string
+        |> required "tags" (Decode.list Decode.string)
+        |> required "release_date" dateDecoder
+        |> required "publication" Decode.string
+        |> required "publication_ref" referenceDecoder
+        |> required "publication_country" Decode.string
+        |> required "related_pdb" (Decode.list Decode.string)
+        |> required "crystal_structure" xtalDecoder
+        |> required "exptl_method" (Decode.list Decode.string)
+        |> required "formula_weight" Decode.float
+        |> required "synthesis_comment" Decode.string
 
 
 classificationDecoder : Decoder Classification
