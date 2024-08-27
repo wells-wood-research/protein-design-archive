@@ -403,7 +403,7 @@ homeView shared model =
                     [ downloadArea shared model
                     , searchArea model
                     , dateSearchArea model
-                    , numberArea designsToDisplay
+                    , numberArea model.mScreenWidthF designsToDisplay shared.designsToDownload
                     , designList widthDesignCard designsToDisplay
                     ]
                 ]
@@ -567,10 +567,35 @@ dateSearchArea model =
                 ]
 
 
-numberArea :
+numberArea : Maybe Float -> List ProteinDesignStub -> Set.Set String -> Element Msg
+numberArea mScreenWidthF designsToDisplay designsToDownload =
+    let
+        screenWidth =
+            getScreenWidthInt mScreenWidthF
+
+        elementType =
+            if screenWidth < 900 then
+                column
+
+            else
+                row
+    in
+    elementType
+        (Style.bodyFont
+            ++ [ width (fill |> maximum screenWidth)
+               , Border.color <| rgb255 220 220 220
+               , spacing 10
+               ]
+        )
+        [ numberDisplayedArea designsToDisplay
+        , numberSavedToDownloadArea designsToDownload
+        ]
+
+
+numberDisplayedArea :
     List ProteinDesignStub
     -> Element Msg
-numberArea designs =
+numberDisplayedArea designs =
     let
         numberOfDesigns =
             List.length designs
@@ -583,7 +608,27 @@ numberArea designs =
                         FeatherIcons.hash
              -- or barChart
             )
-        , text ("Number of designs: " ++ String.fromInt numberOfDesigns)
+        , text ("Number of designs displayed: " ++ String.fromInt numberOfDesigns)
+        ]
+
+
+numberSavedToDownloadArea :
+    Set.Set String
+    -> Element Msg
+numberSavedToDownloadArea designs =
+    let
+        numberOfDesigns =
+            Set.size designs
+    in
+    row (Style.monospacedFont ++ [ alignLeft ])
+        [ el [ centerX, paddingXY 10 0 ]
+            (html <|
+                FeatherIcons.toHtml [] <|
+                    FeatherIcons.withSize 24 <|
+                        FeatherIcons.download
+             -- or barChart
+            )
+        , text ("Number of designs saved for download: " ++ String.fromInt numberOfDesigns)
         ]
 
 
