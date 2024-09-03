@@ -28,14 +28,15 @@ type alias ProteinDesign =
     , publication_ref : Reference
     , publication_country : String
     , abstract : String
-    , related_pdb : List String
+    , symmetry : String
     , crystal_structure : Xtal
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
-    , review : Bool
-    , previousDesign : String
-    , nextDesign : String
+    , previous_design : String
+    , next_design : String
+    , related_designs : List String
+    , related_natural : List String
     }
 
 
@@ -234,13 +235,21 @@ designDetailsFromProteinDesign proteinDesign =
             else
                 text <| authorsToString proteinDesign.authors
       }
-    , { header = "Related entries"
+    , { header = "Related designed entries"
       , property =
-            if List.isEmpty proteinDesign.related_pdb then
+            if List.isEmpty proteinDesign.related_designs then
                 text "-"
 
             else
-                text <| String.join ", " proteinDesign.related_pdb
+                text <| String.join ", " proteinDesign.related_designs
+      }
+    , { header = "Related natural proteins"
+      , property =
+            if List.isEmpty proteinDesign.related_natural then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.related_natural
       }
     , { header = "Formula weight"
       , property =
@@ -279,14 +288,15 @@ rawDesignDecoder =
         |> required "publication_ref" referenceDecoder
         |> required "publication_country" string
         |> required "abstract" string
-        |> required "related_pdb" (list string)
+        |> required "symmetry" string
         |> required "crystal_structure" xtalDecoder
         |> required "exptl_method" (list string)
         |> required "formula_weight" float
         |> required "synthesis_comment" string
-        |> required "review" bool
         |> optional "previous_design" string "/"
         |> optional "next_design" string "/"
+        |> required "related_designed_pdb" (list string)
+        |> required "related_natural_pdb" (list string)
 
 
 rawDesignStubDecoder : Decoder ProteinDesignStub
@@ -376,10 +386,11 @@ designSearchableText proteinDesign =
     , proteinDesign.publication_ref.astm
     , proteinDesign.publication_country
     , proteinDesign.abstract
-    , String.join " " proteinDesign.related_pdb
     , String.join " " proteinDesign.exptl_method
     , proteinDesign.synthesis_comment
     , xtalToString proteinDesign.crystal_structure
+    , String.join " " proteinDesign.related_designs
+    , String.join " " proteinDesign.related_natural
     ]
         |> String.join "\n"
         |> String.toLower
