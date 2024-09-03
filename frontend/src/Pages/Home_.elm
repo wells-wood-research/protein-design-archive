@@ -38,7 +38,6 @@ import Style
 import Task
 import Time
 import Urls
-import Vega exposing (num)
 import View exposing (View)
 
 
@@ -189,12 +188,23 @@ update shared msg model =
                         newDesignFilters =
                             Dict.insert key newFilter model.designFilters
                     in
-                    ( { model
-                        | designFilters = newDesignFilters
-                        , renderPlotState = AwaitingRender model.replotTime
-                      }
-                    , Effect.none
-                    )
+                    case newFilter of
+                        ContainsTextParsed string ->
+                            ( { model
+                                | designFilters = newDesignFilters
+                                , renderPlotState = AwaitingRender model.replotTime
+                                , searchString = string
+                              }
+                            , Effect.none
+                            )
+
+                        _ ->
+                            ( { model
+                                | designFilters = newDesignFilters
+                                , renderPlotState = AwaitingRender model.replotTime
+                              }
+                            , Effect.none
+                            )
 
                 UpdateStartDateTextField string ->
                     let
@@ -402,7 +412,7 @@ homeView shared model =
             column [ centerX ]
                 [ Plots.timelinePlotView (px screenWidth) screenWidthS
                 , column
-                    [ paddingXY 20 0, spacing 10, width (fill |> maximum screenWidth) ]
+                    [ paddingXY 20 0, spacing 15, width (fill |> maximum screenWidth) ]
                     [ searchArea model
                     , dateSearchArea model
                     , numberArea model.mScreenWidthF designsToDisplay shared.designsToDownload
@@ -501,27 +511,41 @@ downloadButton widthButton buttonAttributes onPressCmd textLabel =
         , label = textLabel
         }
 
-
 searchArea : Model -> Element Msg
 searchArea model =
-    row [ width fill, spaceEvenly ]
-        [ el [ centerX, paddingXY 10 0 ]
-            (html <|
-                FeatherIcons.toHtml [] <|
-                    FeatherIcons.withSize 24 <|
-                        FeatherIcons.search
-            )
-        , Input.text
-            (Style.monospacedFont ++ [ width fill, centerX ])
-            { onChange = \string -> UpdateFilters defaultKeys.searchTextKey (ContainsText string)
-            , text =
-                Dict.get defaultKeys.searchTextKey model.designFilters
-                    |> Maybe.map DesignFilter.toString
-                    |> Maybe.withDefault ""
-            , placeholder = Just <| Input.placeholder [] (text "Enter search phrase here")
-            , label = Input.labelHidden "Filter Designs Search Box"
-            }
+    row
+        [ width <|
+            Element.px (getScreenWidthInt model.mScreenWidthF - 50)
         ]
+        [ searchIcon
+        , searchInput model
+        ]
+
+
+searchIcon : Element Msg
+searchIcon =
+    el [ centerX, alignTop, padding 10 ]
+        (html <|
+            FeatherIcons.toHtml [] <|
+                FeatherIcons.withSize 24 <|
+                    FeatherIcons.search
+        )
+
+
+searchInput : Model -> Element Msg
+searchInput model =
+    Input.text
+        (Style.monospacedFont
+            ++ [ width <| fillPortion 6 ]
+        )
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed string)
+        , text = model.searchString
+        , placeholder =
+            Just <|
+                Input.placeholder []
+                    (text "Enter search phrase here e.g. Woolfson && coiled-coil || coiled coil &&!! 4-helix")
+        , label = Input.labelHidden "Filter Designs Search Box"
+        }
 
 
 dateSearchArea : Model -> Element Msg
@@ -726,3 +750,12 @@ dateEndField model =
                 }
             )
         ]
+
+
+designList : Length -> List ProteinDesignStub -> Element msg
+designList widthDesignCard designs =
+    wrappedRow
+        [ spaceEvenly
+        , centerX
+        ]
+        (List.map (ProteinDesign.designCard widthDesignCard) designs)

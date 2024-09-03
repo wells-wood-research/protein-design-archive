@@ -11,6 +11,7 @@ import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as JsonEncode exposing (..)
 import String exposing (fromFloat)
+import Style
 import Time exposing (Month(..))
 
 
@@ -30,14 +31,15 @@ type alias ProteinDesign =
     , publication_ref : Reference
     , publication_country : String
     , abstract : String
-    , related_pdb : List String
+    , symmetry : String
     , crystal_structure : Xtal
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
-    , review : Bool
-    , previousDesign : String
-    , nextDesign : String
+    , previous_design : String
+    , next_design : String
+    , related_designs : List String
+    , related_natural : List String
     }
 
 
@@ -231,7 +233,7 @@ designDetailsFromProteinDesign proteinDesign =
                         |> text
                 }
       }
-    , { header = "Subtitle"
+    , { header = "Biological assembly"
       , property =
             el
                 [ padding 2
@@ -290,36 +292,40 @@ designDetailsFromProteinDesign proteinDesign =
       }
     , { header = "Reference link"
       , property =
-            newTabLink
-                [ Font.color <| rgb255 104 176 171
-                , Font.underline
-                ]
-                { url =
-                    if String.isEmpty proteinDesign.publication_ref.doi then
-                        if String.isEmpty proteinDesign.publication_ref.pubmed then
-                            "https://www.rcsb.org/structure/"
-                                ++ proteinDesign.pdb
+            if String.isEmpty proteinDesign.publication_ref.doi && String.isEmpty proteinDesign.publication_ref.pubmed then
+                text "-"
+
+            else
+                newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url =
+                        if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                "https://www.rcsb.org/structure/"
+                                    ++ proteinDesign.pdb
+
+                            else
+                                "https://pubmed.ncbi.nlm.nih.gov/"
+                                    ++ proteinDesign.publication_ref.pubmed
 
                         else
-                            "https://pubmed.ncbi.nlm.nih.gov/"
-                                ++ proteinDesign.publication_ref.pubmed
+                            "https://doi.org/"
+                                ++ proteinDesign.publication_ref.doi
+                    , label =
+                        (if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                "-"
 
-                    else
-                        "https://doi.org/"
-                            ++ proteinDesign.publication_ref.doi
-                , label =
-                    (if String.isEmpty proteinDesign.publication_ref.doi then
-                        if String.isEmpty proteinDesign.publication_ref.pubmed then
-                            "-"
+                            else
+                                proteinDesign.publication_ref.pubmed
 
-                        else
-                            proteinDesign.publication_ref.pubmed
-
-                     else
-                        proteinDesign.publication_ref.doi
-                    )
-                        |> text
-                }
+                         else
+                            proteinDesign.publication_ref.doi
+                        )
+                            |> text
+                    }
       }
     , { header = "Authors"
       , property =
@@ -329,13 +335,21 @@ designDetailsFromProteinDesign proteinDesign =
             else
                 text <| authorsToString proteinDesign.authors
       }
-    , { header = "Related entries"
+    , { header = "Related designed entries"
       , property =
-            if List.isEmpty proteinDesign.related_pdb then
+            if List.isEmpty proteinDesign.related_designs then
                 text "-"
 
             else
-                text <| String.join ", " proteinDesign.related_pdb
+                text <| String.join ", " proteinDesign.related_designs
+      }
+    , { header = "Related natural proteins"
+      , property =
+            if List.isEmpty proteinDesign.related_natural then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.related_natural
       }
     , { header = "Formula weight"
       , property =
@@ -372,16 +386,17 @@ rawDesignDecoder =
         |> required "release_date" dateDecoder
         |> required "publication" Decode.string
         |> required "publication_ref" referenceDecoder
-        |> required "publication_country" Decode.string
-        |> required "abstract" Decode.string
-        |> required "related_pdb" (Decode.list Decode.string)
+        |> required "publication_country" string
+        |> required "abstract" string
+        |> required "symmetry" string
         |> required "crystal_structure" xtalDecoder
-        |> required "exptl_method" (Decode.list Decode.string)
-        |> required "formula_weight" Decode.float
-        |> required "synthesis_comment" Decode.string
-        |> required "review" Decode.bool
-        |> optional "previous_design" Decode.string "/"
-        |> optional "next_design" Decode.string "/"
+        |> required "exptl_method" (list string)
+        |> required "formula_weight" float
+        |> required "synthesis_comment" string
+        |> optional "previous_design" string "/"
+        |> optional "next_design" string "/"
+        |> required "related_designed_pdb" (list string)
+        |> required "related_natural_pdb" (list string)
 
 
 rawDesignStubDecoder : Decoder ProteinDesignStub
@@ -530,10 +545,11 @@ designSearchableText proteinDesign =
     , proteinDesign.publication_ref.astm
     , proteinDesign.publication_country
     , proteinDesign.abstract
-    , String.join " " proteinDesign.related_pdb
     , String.join " " proteinDesign.exptl_method
     , proteinDesign.synthesis_comment
     , xtalToString proteinDesign.crystal_structure
+    , String.join " " proteinDesign.related_designs
+    , String.join " " proteinDesign.related_natural
     ]
         |> String.join "\n"
         |> String.toLower
@@ -800,7 +816,7 @@ designCard widthDesignCard design =
                     , width fill
                     , alignTop
                     ]
-                    [ paragraph [ Font.size 16 ] [ text <| String.toUpper <| design.pdb ]
+                    [ paragraph (Style.monospacedFont ++ [ Font.size 16 ]) [ text <| String.toUpper <| design.pdb ]
                     , paragraph [ Font.size 11, Font.color <| rgb255 130 130 130 ] [ wrappedRow [] [ text design.subtitle ] ]
                     , paragraph [ Font.size 11 ] [ wrappedRow [] [ text (authorsToString design.authors) ] ]
                     ]

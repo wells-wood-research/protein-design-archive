@@ -9,11 +9,8 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Element.Input as Input
 import Element.Keyed as Keyed
 import FeatherIcons
-import File exposing (File)
-import File.Download as Download
 import Get exposing (..)
 import Html
 import Html.Attributes as HAtt
@@ -165,6 +162,7 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
+
                 RequestSelectedDesignData fileType ->
                     ( { model | dataDownload = Loading }
                     , Http.get
@@ -265,7 +263,6 @@ view shared model =
     , element = details shared model
     }
 
-
 details : Shared.Model -> Model -> Element Msg
 details shared model =
     let
@@ -325,6 +322,7 @@ details shared model =
 
 designDetailsView : Shared.Model -> Maybe Float -> ProteinDesign -> Element Msg
 designDetailsView shared mScreenWidthF proteinDesign =
+
     column
         ([ centerX
          , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
@@ -337,7 +335,6 @@ designDetailsView shared mScreenWidthF proteinDesign =
         , downloadArea shared mScreenWidthF proteinDesign.pdb
         , designDetailsBody mScreenWidthF proteinDesign
         ]
-
 
 downloadButton : Length -> List (Attribute msg) -> Maybe msg -> Element msg -> Element msg
 downloadButton widthButton buttonAttributes onPressCmd textLabel =
@@ -405,7 +402,7 @@ downloadArea shared mScreenWidthF designId =
 
 
 designDetailsHeader : String -> String -> ProteinDesign -> Element msg
-designDetailsHeader title path { previousDesign, nextDesign } =
+designDetailsHeader title path { previous_design, next_design } =
     row
         [ width fill
         , spaceEvenly
@@ -413,7 +410,7 @@ designDetailsHeader title path { previousDesign, nextDesign } =
         ]
         [ link
             []
-            { url = path ++ previousDesign
+            { url = path ++ previous_design
             , label =
                 el [ centerX ]
                     (html <|
@@ -427,7 +424,7 @@ designDetailsHeader title path { previousDesign, nextDesign } =
             [ text title ]
         , link
             []
-            { url = path ++ nextDesign
+            { url = path ++ next_design
             , label =
                 el [ centerX ]
                     (html <|
