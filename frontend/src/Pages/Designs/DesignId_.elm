@@ -4,8 +4,9 @@ import AppError exposing (AppError(..))
 import Browser.Dom
 import Browser.Events
 import Components.Title
-import Effect exposing (Effect)
+import Effect exposing (Effect, downloadFile)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Keyed as Keyed
@@ -14,11 +15,15 @@ import Get exposing (..)
 import Html
 import Html.Attributes as HAtt
 import Http
+import Json.Decode
+import Json.Encode as JsonEncode exposing (Value)
+import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (ProteinDesign, designDetailsFromProteinDesign)
+import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, fileTypeToString)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Set exposing (Set)
 import Shared
 import Style
 import Task
@@ -28,12 +33,12 @@ import View exposing (View)
 
 
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
-page { mScreenWidthF } route =
+page shared route =
     Page.new
-        { init = \_ -> init mScreenWidthF route.params.designId
+        { init = \_ -> init shared.mScreenWidthF route.params.designId
         , update = update
         , subscriptions = subscriptions
-        , view = view >> Components.Title.view
+        , view = view shared >> Components.Title.view
         }
 
 
@@ -48,6 +53,7 @@ type alias Model =
     , mScreenWidthF : Maybe Float
     , replotTime : Int
     , renderPlotState : RenderPlotState
+    , dataDownload : RemoteData Http.Error String
     }
 
 
@@ -59,6 +65,7 @@ init mSharedScreenWidthF designId =
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
+      , dataDownload = NotAsked
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -84,6 +91,10 @@ getData url =
 type Msg
     = SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error ProteinDesign)
+    | RequestSelectedDesignData DownloadFileType
+    | ForExportResponse DownloadFileType (Result Http.Error String)
+    | AddToDownloadList
+    | RemoveFromDownloadList
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
@@ -151,6 +162,47 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
+
+                RequestSelectedDesignData fileType ->
+                    ( { model | dataDownload = Loading }
+                    , Http.get
+                        { url = Urls.downloadSelectedDesigns [ model.designId ]
+                        , expect =
+                            Http.expectString (ForExportResponse fileType)
+                        }
+                        |> Effect.sendCmd
+                    )
+
+                ForExportResponse _ (Err err) ->
+                    ( { model | dataDownload = Failure err }
+                    , Effect.none
+                    )
+
+                ForExportResponse fileType (Ok designData) ->
+                    let
+                        encodedFileContent =
+                            case fileType of
+                                ProteinDesign.Json ->
+                                    designData
+
+                                ProteinDesign.Csv ->
+                                    case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
+                                        Ok designs ->
+                                            csvStringFromProteinDesignDownload designs
+
+                                        Err _ ->
+                                            designData
+                    in
+                    ( { model | dataDownload = NotAsked }
+                    , Effect.downloadFile model.designId encodedFileContent fileType
+                    )
+
+                AddToDownloadList ->
+                    ( model, Effect.addDesignsToDownload [ model.designId ] )
+
+                RemoveFromDownloadList ->
+                    ( model, Effect.removeDesignsFromDownload [ model.designId ] )
+
                 RenderWhenReady _ ->
                     case model.renderPlotState of
                         AwaitingRender 0 ->
@@ -198,8 +250,8 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Design Details"
     , attributes =
         [ centerX
@@ -208,12 +260,18 @@ view model =
                 |> minimum (getScreenWidthInt model.mScreenWidthF)
             )
         ]
-    , element = details model.mScreenWidthF model.design
+    , element = details shared model
     }
 
+details : Shared.Model -> Model -> Element Msg
+details shared model =
+    let
+        mScreenWidthF =
+            model.mScreenWidthF
 
-details : Maybe Float -> RemoteData Http.Error ProteinDesign -> Element msg
-details mScreenWidthF mDesign =
+        mDesign =
+            model.design
+    in
     row []
         [ column
             [ width fill ]
@@ -257,24 +315,89 @@ details mScreenWidthF mDesign =
                         ]
 
                 Success design ->
-                    designDetailsView mScreenWidthF design
+                    designDetailsView shared mScreenWidthF design
             ]
         ]
 
 
-designDetailsView : Maybe Float -> ProteinDesign -> Element msg
-designDetailsView mScreenWidthF proteinDesign =
+designDetailsView : Shared.Model -> Maybe Float -> ProteinDesign -> Element Msg
+designDetailsView shared mScreenWidthF proteinDesign =
+
     column
         ([ centerX
          , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
          , padding 30
-         , spacing 30
          , height fill
          ]
             ++ Style.bodyFont
         )
         [ designDetailsHeader "Design Details" "/designs/" proteinDesign
+        , downloadArea shared mScreenWidthF proteinDesign.pdb
         , designDetailsBody mScreenWidthF proteinDesign
+        ]
+
+downloadButton : Length -> List (Attribute msg) -> Maybe msg -> Element msg -> Element msg
+downloadButton widthButton buttonAttributes onPressCmd textLabel =
+    Input.button
+        (buttonAttributes
+            ++ [ padding 10
+               , width widthButton
+               , centerX
+               , Font.center
+               , Element.mouseOver
+                    [ Background.color <| rgb255 220 220 220
+                    ]
+               ]
+        )
+        { onPress = onPressCmd
+        , label = textLabel
+        }
+
+
+downloadArea : Shared.Model -> Maybe Float -> String -> Element Msg
+downloadArea shared mScreenWidthF designId =
+    let
+        screenWidth =
+            getScreenWidthInt mScreenWidthF
+
+        widthButton =
+            if screenWidth < 600 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 200
+
+        buttonAttributes =
+            if screenWidth < 600 then
+                [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
+                , Border.color <| rgb255 220 220 220
+                ]
+
+            else
+                [ centerX
+                , Font.center
+                ]
+
+        elementType =
+            if screenWidth < 600 then
+                column
+
+            else
+                row
+    in
+    elementType
+        [ width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+        , Font.bold
+        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+        , Border.color <| rgb255 220 220 220
+        ]
+        [ downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download CSV")
+        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download JSON")
+        , if Set.member designId shared.designsToDownload then
+            downloadButton widthButton buttonAttributes (Just RemoveFromDownloadList) (text "Remove from download")
+
+          else
+            downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
         ]
 
 
@@ -283,6 +406,7 @@ designDetailsHeader title path { previous_design, next_design } =
     row
         [ width fill
         , spaceEvenly
+        , paddingXY 0 30
         ]
         [ link
             []
@@ -330,7 +454,9 @@ designDetailsBody mScreenWidthF proteinDesign =
             , Font.justify
             ]
             [ table
-                [ padding 2 ]
+                [ padding 2
+                , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+                ]
                 { data = designDetailsFromProteinDesign proteinDesign
                 , columns =
                     [ { header =
@@ -396,10 +522,6 @@ designDetailsBody mScreenWidthF proteinDesign =
             [ Keyed.el
                 [ width <| px (getScreenWidthIntNgl mScreenWidthF)
                 , height <| px 400
-
-                --, Border.width 2
-                --, Border.rounded 3
-                --, Border.color <| rgb255 220 220 220
                 ]
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
@@ -419,7 +541,9 @@ designDetailsBody mScreenWidthF proteinDesign =
             [ text "Sequence"
             ]
         , table
-            [ padding 2 ]
+            [ padding 2
+            , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+            ]
             { data = proteinDesign.chains
             , columns =
                 [ { header =
@@ -482,7 +606,9 @@ designDetailsBody mScreenWidthF proteinDesign =
                 [ text "Description"
                 ]
             , paragraph
-                [ Font.justify ]
+                [ Font.justify
+                , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+                ]
                 [ proteinDesign.abstract
                     |> text
                 ]

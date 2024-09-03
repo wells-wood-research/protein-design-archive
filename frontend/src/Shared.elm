@@ -19,6 +19,7 @@ import Effect exposing (Effect)
 import Json.Decode
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Set exposing (Set)
 import Shared.Model
 import Shared.Msg as Msg exposing (Msg(..))
 import Task
@@ -47,7 +48,7 @@ type alias Model =
 
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init _ _ =
-    ( { designs = NotAsked, errors = [], mScreenWidthF = Nothing }
+    ( { designs = NotAsked, errors = [], designsToDownload = Set.empty, mScreenWidthF = Nothing }
     , Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
     )
 
@@ -79,6 +80,24 @@ update _ msg model =
                 | designs = Failure e
                 , errors = DesignRequestFailed :: model.errors
               }
+            , Effect.none
+            )
+
+        AddDesignsToDownload designIds ->
+            let
+                updatedDesignsToDownload =
+                    Set.union model.designsToDownload (Set.fromList designIds)
+            in
+            ( { model | designsToDownload = updatedDesignsToDownload }
+            , Effect.none
+            )
+
+        RemoveDesignsFromDownload designIds ->
+            let
+                updatedDesignsToDownload =
+                    Set.diff model.designsToDownload (Set.fromList designIds)
+            in
+            ( { model | designsToDownload = updatedDesignsToDownload }
             , Effect.none
             )
 
