@@ -18,11 +18,9 @@ import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font exposing (center)
+import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
-import File exposing (File)
-import File.Download as Download
 import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
 import Http
 import Json.Decode
@@ -65,6 +63,7 @@ type alias Model =
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
     , dataDownload : RemoteData Http.Error String
+    , searchString : String
     }
 
 
@@ -79,6 +78,7 @@ init mSharedScreenWidthF =
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
       , dataDownload = NotAsked
+      , searchString = ""
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -413,10 +413,10 @@ homeView shared model =
                 [ Plots.timelinePlotView (px screenWidth) screenWidthS
                 , column
                     [ paddingXY 20 0, spacing 15, width (fill |> maximum screenWidth) ]
-                    [ searchArea model
+                    [ downloadArea shared model
+                    , searchArea model
                     , dateSearchArea model
                     , numberArea model.mScreenWidthF designsToDisplay shared.designsToDownload
-                    , downloadArea shared model
                     , designList widthDesignCard designsToDisplay
                     ]
                 ]
@@ -510,6 +510,7 @@ downloadButton widthButton buttonAttributes onPressCmd textLabel =
         { onPress = onPressCmd
         , label = textLabel
         }
+
 
 searchArea : Model -> Element Msg
 searchArea model =
@@ -750,12 +751,3 @@ dateEndField model =
                 }
             )
         ]
-
-
-designList : Length -> List ProteinDesignStub -> Element msg
-designList widthDesignCard designs =
-    wrappedRow
-        [ spaceEvenly
-        , centerX
-        ]
-        (List.map (ProteinDesign.designCard widthDesignCard) designs)

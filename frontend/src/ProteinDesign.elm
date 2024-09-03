@@ -66,11 +66,13 @@ type alias ProteinDesignDownload =
     , publication : String
     , publication_ref : Reference
     , publication_country : String
-    , related_pdb : List String
+    , symmetry : String
     , crystal_structure : Xtal
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
+    , related_designs : List String
+    , related_natural : List String
     }
 
 
@@ -118,8 +120,13 @@ type alias Reference =
 
 type alias Chain =
     { chain_id : String
+    , chain_source : String
+    , chain_type : String
     , chain_seq_unnat : String
     , chain_seq_nat : String
+    , chain_length : Int
+    , chain_id_pdb : List String
+    , chain_id_auth : List String
     }
 
 
@@ -170,7 +177,8 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "publication_country", proteinDesign.publication_country )
     , ( "subtitle", proteinDesign.subtitle )
     , ( "tags", String.join ";" proteinDesign.tags )
-    , ( "related_pdb", String.join ";" proteinDesign.related_pdb )
+    , ( "related_designs", String.join ";" proteinDesign.related_designs )
+    , ( "related_natural_proteins", String.join ";" proteinDesign.related_natural )
     ]
 
 
@@ -206,7 +214,8 @@ jsonValueFromProteinDesign proteinDesign =
                 , ( "tags", JsonEncode.string <| String.join ";" proteinDesign.tags )
                 , ( "keywords", JsonEncode.string <| String.join ";" proteinDesign.keywords )
                 , ( "abstract", JsonEncode.string <| proteinDesign.abstract )
-                , ( "related_pdb", JsonEncode.string <| String.join ";" proteinDesign.related_pdb )
+                , ( "related_designed_proteins", JsonEncode.string <| String.join ";" proteinDesign.related_designs )
+                , ( "related_natural_proteins", JsonEncode.string <| String.join ";" proteinDesign.related_natural )
                 ]
           )
         ]
@@ -282,6 +291,30 @@ designDetailsFromProteinDesign proteinDesign =
             else
                 text <| Date.toIsoString proteinDesign.release_date
       }
+    , { header = "Related designed entries"
+      , property =
+            if List.isEmpty proteinDesign.related_designs then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.related_designs
+      }
+    , { header = "Related natural proteins"
+      , property =
+            if List.isEmpty proteinDesign.related_natural then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.related_natural
+      }
+    , { header = "Authors"
+      , property =
+            if List.isEmpty proteinDesign.authors then
+                text "-"
+
+            else
+                text <| authorsToString proteinDesign.authors
+      }
     , { header = "Publication"
       , property =
             if String.isEmpty proteinDesign.publication then
@@ -327,37 +360,21 @@ designDetailsFromProteinDesign proteinDesign =
                             |> text
                     }
       }
-    , { header = "Authors"
+    , { header = "Symmetry group"
       , property =
-            if List.isEmpty proteinDesign.authors then
+            if String.isEmpty proteinDesign.symmetry then
                 text "-"
 
             else
-                text <| authorsToString proteinDesign.authors
+                text <| proteinDesign.symmetry
       }
-    , { header = "Related designed entries"
+    , { header = "Experimental charact. method"
       , property =
-            if List.isEmpty proteinDesign.related_designs then
+            if List.isEmpty proteinDesign.exptl_method then
                 text "-"
 
             else
-                text <| String.join ", " proteinDesign.related_designs
-      }
-    , { header = "Related natural proteins"
-      , property =
-            if List.isEmpty proteinDesign.related_natural then
-                text "-"
-
-            else
-                text <| String.join ", " proteinDesign.related_natural
-      }
-    , { header = "Formula weight"
-      , property =
-            if String.isEmpty <| String.fromFloat proteinDesign.formula_weight then
-                text "-"
-
-            else
-                text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
+                text <| String.join "," proteinDesign.exptl_method
       }
     , { header = "Synthesis comment"
       , property =
@@ -366,6 +383,14 @@ designDetailsFromProteinDesign proteinDesign =
 
             else
                 text <| proteinDesign.synthesis_comment
+      }
+    , { header = "Formula weight"
+      , property =
+            if String.isEmpty <| String.fromFloat proteinDesign.formula_weight then
+                text "-"
+
+            else
+                text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
       }
     ]
 
@@ -386,17 +411,17 @@ rawDesignDecoder =
         |> required "release_date" dateDecoder
         |> required "publication" Decode.string
         |> required "publication_ref" referenceDecoder
-        |> required "publication_country" string
-        |> required "abstract" string
-        |> required "symmetry" string
+        |> required "publication_country" Decode.string
+        |> required "abstract" Decode.string
+        |> required "symmetry" Decode.string
         |> required "crystal_structure" xtalDecoder
-        |> required "exptl_method" (list string)
-        |> required "formula_weight" float
-        |> required "synthesis_comment" string
-        |> optional "previous_design" string "/"
-        |> optional "next_design" string "/"
-        |> required "related_designed_pdb" (list string)
-        |> required "related_natural_pdb" (list string)
+        |> required "exptl_method" (Decode.list Decode.string)
+        |> required "formula_weight" Decode.float
+        |> required "synthesis_comment" Decode.string
+        |> optional "previous_design" Decode.string "/"
+        |> optional "next_design" Decode.string "/"
+        |> required "related_designed_pdb" (Decode.list Decode.string)
+        |> required "related_natural_pdb" (Decode.list Decode.string)
 
 
 rawDesignStubDecoder : Decoder ProteinDesignStub
@@ -425,11 +450,13 @@ downloadDesignDecoder =
         |> required "publication" Decode.string
         |> required "publication_ref" referenceDecoder
         |> required "publication_country" Decode.string
-        |> required "related_pdb" (Decode.list Decode.string)
+        |> required "symmetry" Decode.string
         |> required "crystal_structure" xtalDecoder
         |> required "exptl_method" (Decode.list Decode.string)
         |> required "formula_weight" Decode.float
         |> required "synthesis_comment" Decode.string
+        |> required "related_designed_pdb" (Decode.list Decode.string)
+        |> required "related_natural_pdb" (Decode.list Decode.string)
 
 
 classificationDecoder : Decoder Classification
@@ -472,8 +499,13 @@ chainDecoder : Decoder Chain
 chainDecoder =
     Decode.succeed Chain
         |> required "chain_id" Decode.string
+        |> required "chain_source" Decode.string
+        |> required "chain_type" Decode.string
         |> required "chain_seq_unnat" Decode.string
         |> required "chain_seq_nat" Decode.string
+        |> required "chain_length" Decode.int
+        |> required "chain_id_pdb" (Decode.list Decode.string)
+        |> required "chain_id_auth" (Decode.list Decode.string)
 
 
 xtalDecoder : Decoder Xtal
@@ -582,7 +614,7 @@ refToString reference =
 
 chainToString : Chain -> String
 chainToString chain =
-    "id:[" ++ chain.chain_id ++ "]sequence:" ++ chain.chain_seq_unnat
+    "id:[" ++ chain.chain_id ++ "]fasta_primary_label:[" ++ String.join ";" chain.chain_id_pdb ++ "]fasta_auth_label:[" ++ String.join ";" chain.chain_id_auth ++ "]chain_type:[" ++ chain.chain_type ++ "]chain_source:[" ++ chain.chain_source ++ "]sequence:[" ++ chain.chain_seq_unnat ++ "]"
 
 
 authorToString : Author -> String

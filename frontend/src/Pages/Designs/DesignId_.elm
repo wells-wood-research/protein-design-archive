@@ -9,6 +9,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Element.Input as Input
 import Element.Keyed as Keyed
 import FeatherIcons
 import Get exposing (..)
@@ -162,7 +163,6 @@ update msg model =
 
         RemoteData.Success _ ->
             case msg of
-
                 RequestSelectedDesignData fileType ->
                     ( { model | dataDownload = Loading }
                     , Http.get
@@ -263,6 +263,7 @@ view shared model =
     , element = details shared model
     }
 
+
 details : Shared.Model -> Model -> Element Msg
 details shared model =
     let
@@ -322,7 +323,6 @@ details shared model =
 
 designDetailsView : Shared.Model -> Maybe Float -> ProteinDesign -> Element Msg
 designDetailsView shared mScreenWidthF proteinDesign =
-
     column
         ([ centerX
          , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
@@ -335,6 +335,7 @@ designDetailsView shared mScreenWidthF proteinDesign =
         , downloadArea shared mScreenWidthF proteinDesign.pdb
         , designDetailsBody mScreenWidthF proteinDesign
         ]
+
 
 downloadButton : Length -> List (Attribute msg) -> Maybe msg -> Element msg -> Element msg
 downloadButton widthButton buttonAttributes onPressCmd textLabel =
@@ -554,7 +555,7 @@ designDetailsBody mScreenWidthF proteinDesign =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Chain ID" ]
-                  , width = fillPortion 2
+                  , width = fill |> maximum 150
                   , view =
                         \chain ->
                             paragraph
@@ -574,6 +575,56 @@ designDetailsBody mScreenWidthF proteinDesign =
                   }
                 , { header =
                         paragraph
+                            [ Font.bold
+                            , paddingXY 5 10
+                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                            , Border.color <| rgb255 220 220 220
+                            ]
+                            [ text "Chain type" ]
+                  , width = fill |> maximum 150
+                  , view =
+                        \chain ->
+                            paragraph
+                                Style.monospacedFont
+                                [ column
+                                    [ width
+                                        (fill
+                                            |> maximum 150
+                                            |> minimum 150
+                                        )
+                                    , height fill
+                                    , paddingXY 5 10
+                                    ]
+                                    [ text chain.chain_type ]
+                                ]
+                  }
+                , { header =
+                        paragraph
+                            [ Font.bold
+                            , paddingXY 5 10
+                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                            , Border.color <| rgb255 220 220 220
+                            ]
+                            [ text "Chain source" ]
+                  , width = fill |> maximum 150
+                  , view =
+                        \chain ->
+                            paragraph
+                                Style.monospacedFont
+                                [ column
+                                    [ width
+                                        (fill
+                                            |> maximum 150
+                                            |> minimum 150
+                                        )
+                                    , height fill
+                                    , paddingXY 5 10
+                                    ]
+                                    [ text chain.chain_source ]
+                                ]
+                  }
+                , { header =
+                        paragraph
                             [ width fill
                             , Font.bold
                             , paddingXY 10 10
@@ -581,18 +632,43 @@ designDetailsBody mScreenWidthF proteinDesign =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Sequence" ]
-                  , width = fillPortion 8
+                  , width = fill |> maximum (getScreenWidthInt mScreenWidthF - 600)
                   , view =
                         \chain ->
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum (getScreenWidthInt mScreenWidthF - 200))
+                                    [ width (fill |> maximum (getScreenWidthInt mScreenWidthF - 800))
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 10 10
                                     ]
                                     [ text chain.chain_seq_unnat ]
+                                ]
+                  }
+                , { header =
+                        paragraph
+                            [ Font.bold
+                            , paddingXY 5 10
+                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+                            , Border.color <| rgb255 220 220 220
+                            ]
+                            [ text "Chain length" ]
+                  , width = fill |> maximum 150
+                  , view =
+                        \chain ->
+                            paragraph
+                                Style.monospacedFont
+                                [ column
+                                    [ width
+                                        (fill
+                                            |> maximum 150
+                                            |> minimum 150
+                                        )
+                                    , height fill
+                                    , paddingXY 5 10
+                                    ]
+                                    [ text <| String.fromInt chain.chain_length ]
                                 ]
                   }
                 ]
@@ -606,9 +682,11 @@ designDetailsBody mScreenWidthF proteinDesign =
                 [ text "Description"
                 ]
             , paragraph
-                [ Font.justify
-                , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
-                ]
+                (Style.monospacedFont
+                    ++ [ Font.justify
+                       , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+                       ]
+                )
                 [ proteinDesign.abstract
                     |> text
                 ]
