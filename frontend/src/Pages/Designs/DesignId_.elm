@@ -279,14 +279,14 @@ designDetailsView mScreenWidthF proteinDesign =
 
 
 designDetailsHeader : String -> String -> ProteinDesign -> Element msg
-designDetailsHeader title path { previousDesign, nextDesign } =
+designDetailsHeader title path { previous_design, next_design } =
     row
         [ width fill
         , spaceEvenly
         ]
         [ link
             []
-            { url = path ++ previousDesign
+            { url = path ++ previous_design
             , label =
                 el [ centerX ]
                     (html <|
@@ -300,7 +300,7 @@ designDetailsHeader title path { previousDesign, nextDesign } =
             [ text title ]
         , link
             []
-            { url = path ++ nextDesign
+            { url = path ++ next_design
             , label =
                 el [ centerX ]
                     (html <|

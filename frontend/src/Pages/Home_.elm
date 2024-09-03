@@ -381,7 +381,9 @@ searchIcon =
 searchInput : Model -> Element Msg
 searchInput model =
     Input.text
-        [ width <| fillPortion 6 ]
+        (Style.monospacedFont
+            ++ [ width <| fillPortion 6 ]
+        )
         { onChange = \string -> UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed string)
         , text = model.searchString
         , placeholder =
