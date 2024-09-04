@@ -45,7 +45,7 @@ page shared _ =
         { init = \() -> init shared.mScreenWidthF shared.mScreenHeightF
         , update = update shared
         , subscriptions = subscriptions
-        , view = view shared >> Components.Title.view
+        , view = view shared >> Components.Title.view shared.mScreenWidthF
         }
 
 
@@ -391,19 +391,19 @@ homeView shared model =
             getScreenWidthInt model.mScreenWidthF
 
         screenHeight =
-            getScreenWidthInt model.mScreenHeightF
+            getScreenWidthInt model.mScreenHeightF - 130
     in
     case model.designStubs of
         RemoteData.NotAsked ->
             column
                 (Style.monospacedFont
                     ++ [ width (fill |> maximum screenWidth)
-                       , height (fill |> maximum screenHeight)
+                       , height <| px screenHeight
                        , centerX
                        , spaceEvenly
                        ]
                 )
-                [ el [ centerX, alignTop, padding 30 ]
+                [ el [ centerX, centerY ]
                     (html <|
                         FeatherIcons.toHtml [] <|
                             FeatherIcons.withSize 100 <|
@@ -416,18 +416,18 @@ homeView shared model =
             column
                 (Style.monospacedFont
                     ++ [ width (fill |> maximum screenWidth)
-                       , height (fill |> maximum screenHeight)
+                       , height <| px screenHeight
                        , centerX
                        , spaceEvenly
                        ]
                 )
-                [ el [ centerX, alignTop, padding 50 ]
+                [ el [ centerX, centerY ]
                     (html <|
                         FeatherIcons.toHtml [] <|
                             FeatherIcons.withSize 106 <|
                                 FeatherIcons.loader
                     )
-                , paragraph [ center, Font.size 24, padding 50 ] [ text "Loading..." ]
+                , paragraph [ center, Font.size 24, padding 50, centerY ] [ text "Loading..." ]
                 ]
 
         RemoteData.Failure _ ->

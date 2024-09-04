@@ -36,10 +36,10 @@ import View exposing (View)
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
 page shared route =
     Page.new
-        { init = \_ -> init shared.mScreenWidthF route.params.designId
+        { init = \_ -> init shared.mScreenWidthF shared.mScreenHeightF route.params.designId
         , update = update
         , subscriptions = subscriptions
-        , view = view shared >> Components.Title.view
+        , view = view shared >> Components.Title.view shared.mScreenWidthF
         }
 
 
@@ -52,20 +52,22 @@ type alias Model =
     , design : RemoteData Http.Error ProteinDesign
     , errors : List AppError
     , mScreenWidthF : Maybe Float
+    , mScreenHeightF : Maybe Float
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , dataDownload : RemoteData Http.Error String
     }
 
 
-init : Maybe Float -> String -> ( Model, Effect Msg )
-init mSharedScreenWidthF designId =
+init : Maybe Float -> Maybe Float -> String -> ( Model, Effect Msg )
+init mSharedScreenWidthF mSharedScreenHeightF designId =
     ( { designId = designId
       , design = Loading
       , errors = []
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
+      , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
       }
     , Effect.batch
@@ -136,17 +138,20 @@ update msg model =
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.none )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width, mScreenHeightF = Just viewport.viewport.height }, Effect.none )
 
                         Err _ ->
                             ( model, Effect.none )
 
-                WindowResizes width _ ->
+                WindowResizes width height ->
                     let
                         widthF =
                             toFloat width
+
+                        heightF =
+                            toFloat height
                     in
-                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.resetViewport ViewportReset )
 
                 _ ->
                     ( model, Effect.none )
@@ -218,17 +223,20 @@ update msg model =
                         _ ->
                             ( model, Effect.none )
 
-                WindowResizes width _ ->
+                WindowResizes width height ->
                     let
                         widthF =
                             toFloat width
+
+                        heightF =
+                            toFloat height
                     in
-                    ( { model | mScreenWidthF = Just widthF, renderPlotState = AwaitingRender model.replotTime }, Effect.none )
+                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF, renderPlotState = AwaitingRender model.replotTime }, Effect.none )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width, mScreenHeightF = Just viewport.viewport.height }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
@@ -267,14 +275,14 @@ view shared model =
 details : Shared.Model -> Model -> Element Msg
 details shared model =
     let
-        mScreenWidthF =
-            model.mScreenWidthF
-
         mDesign =
             model.design
 
         screenWidth =
-            getScreenWidthInt mScreenWidthF
+            getScreenWidthInt model.mScreenWidthF
+
+        screenHeight =
+            getScreenWidthInt model.mScreenHeightF - 130
     in
     column
         [ width (fill |> maximum screenWidth) ]
@@ -283,11 +291,12 @@ details shared model =
                 column
                     (Style.monospacedFont
                         ++ [ width (fill |> maximum screenWidth)
+                           , height <| px screenHeight
                            , centerX
                            , spaceEvenly
                            ]
                     )
-                    [ el [ centerX, alignTop, padding 50 ]
+                    [ el [ centerY ]
                         (html <|
                             FeatherIcons.toHtml [] <|
                                 FeatherIcons.withSize 106 <|
@@ -300,28 +309,30 @@ details shared model =
                 column
                     (Style.monospacedFont
                         ++ [ width (fill |> maximum screenWidth)
+                           , height <| px screenHeight
                            , centerX
                            , spaceEvenly
                            ]
                     )
-                    [ el [ centerX, alignTop, padding 50 ]
+                    [ el [ centerY ]
                         (html <|
                             FeatherIcons.toHtml [] <|
                                 FeatherIcons.withSize 106 <|
                                     FeatherIcons.loader
                         )
-                    , paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Loading the design..." ]
+                    , paragraph [ Font.center, Font.size 16, padding 50, centerY ] [ text "Loading the design..." ]
                     ]
 
             Failure e ->
                 column
                     (Style.monospacedFont
                         ++ [ width (fill |> maximum screenWidth)
+                           , height <| px screenHeight
                            , centerX
                            , spaceEvenly
                            ]
                     )
-                    [ el [ centerX, alignTop, padding 50 ]
+                    [ el [ centerY ]
                         (html <|
                             FeatherIcons.toHtml [] <|
                                 FeatherIcons.withSize 106 <|
@@ -330,40 +341,40 @@ details shared model =
                     , paragraph [ Font.center, Font.size 24, padding 50 ]
                         [ case e of
                             Http.BadUrl _ ->
-                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Error loading design: invalid URL." ]
+                                paragraph [ Font.center, Font.size 24, padding 50, centerY ] [ text "Error loading design: invalid URL." ]
 
                             Http.Timeout ->
-                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Error loading design: it took too long to get a response." ]
+                                paragraph [ Font.center, Font.size 24, padding 50, centerY ] [ text "Error loading design: it took too long to get a response." ]
 
                             Http.NetworkError ->
-                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Error loading design: please connect to the Internet." ]
+                                paragraph [ Font.center, Font.size 24, padding 50, centerY ] [ text "Error loading design: please connect to the Internet." ]
 
                             Http.BadStatus i ->
-                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text ("Error loading design: status code " ++ String.fromInt i) ]
+                                paragraph [ Font.center, Font.size 24, padding 50, centerY ] [ text ("Error loading design: status code " ++ String.fromInt i) ]
 
                             Http.BadBody s ->
-                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text ("Error decoding JSON: " ++ s) ]
+                                paragraph [ Font.center, Font.size 24, padding 50, centerY ] [ text ("Error decoding JSON: " ++ s) ]
                         ]
                     ]
 
             Success design ->
-                designDetailsView shared mScreenWidthF design
+                designDetailsView shared screenWidth design
         ]
 
 
-designDetailsView : Shared.Model -> Maybe Float -> ProteinDesign -> Element Msg
-designDetailsView shared mScreenWidthF proteinDesign =
+designDetailsView : Shared.Model -> Int -> ProteinDesign -> Element Msg
+designDetailsView shared screenWidth proteinDesign =
     column
         ([ centerX
-         , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
-         , padding 30
+         , width (fill |> maximum screenWidth)
          , height fill
+         , paddingXY 10 0
          ]
             ++ Style.bodyFont
         )
         [ designDetailsHeader "Design Details" "/designs/" proteinDesign
-        , downloadArea shared mScreenWidthF proteinDesign.pdb
-        , designDetailsBody mScreenWidthF proteinDesign
+        , downloadArea shared screenWidth proteinDesign.pdb
+        , designDetailsBody screenWidth proteinDesign
         ]
 
 
@@ -385,12 +396,9 @@ downloadButton widthButton buttonAttributes onPressCmd textLabel =
         }
 
 
-downloadArea : Shared.Model -> Maybe Float -> String -> Element Msg
-downloadArea shared mScreenWidthF designId =
+downloadArea : Shared.Model -> Int -> String -> Element Msg
+downloadArea shared screenWidth designId =
     let
-        screenWidth =
-            getScreenWidthInt mScreenWidthF
-
         widthButton =
             if screenWidth < 600 then
                 Element.fill |> maximum (screenWidth - 10)
@@ -417,7 +425,7 @@ downloadArea shared mScreenWidthF designId =
                 row
     in
     elementType
-        [ width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+        [ width (fill |> maximum screenWidth)
         , Font.bold
         , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
         , Border.color <| rgb255 220 220 220
@@ -467,8 +475,8 @@ designDetailsHeader title path { previous_design, next_design } =
         ]
 
 
-designDetailsBody : Maybe Float -> ProteinDesign -> Element msg
-designDetailsBody mScreenWidthF proteinDesign =
+designDetailsBody : Int -> ProteinDesign -> Element msg
+designDetailsBody screenWidth proteinDesign =
     column
         ([ centerX
          , width fill
@@ -480,13 +488,13 @@ designDetailsBody mScreenWidthF proteinDesign =
         )
         [ column
             [ height fill
-            , width (fill |> maximum (getScreenWidthInt mScreenWidthF))
+            , width (fill |> maximum screenWidth)
             , spacing 10
             , Font.justify
             ]
             [ table
                 [ padding 2
-                , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+                , width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
                 ]
                 { data = designDetailsFromProteinDesign proteinDesign
                 , columns =
@@ -526,7 +534,7 @@ designDetailsBody mScreenWidthF proteinDesign =
                                 paragraph
                                     Style.monospacedFont
                                     [ column
-                                        [ width (fill |> maximum (getScreenWidthInt mScreenWidthF - 200))
+                                        [ width (fill |> maximum (screenWidth - 200))
                                         , height fill
                                         , scrollbarX
                                         , paddingXY 10 10
@@ -538,7 +546,7 @@ designDetailsBody mScreenWidthF proteinDesign =
                 }
             ]
         , column
-            [ width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+            [ width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
             , spacing 20
             ]
             [ column
@@ -551,13 +559,13 @@ designDetailsBody mScreenWidthF proteinDesign =
             , centerX
             ]
             [ Keyed.el
-                [ width <| px (getScreenWidthIntNgl mScreenWidthF)
+                [ width <| px (getScreenWidthIntNgl <| Just <| toFloat screenWidth)
                 , height <| px 400
                 ]
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" (getScreenWidthStringNgl mScreenWidthF)
+                    , HAtt.style "width" (getScreenWidthStringNgl <| Just <| toFloat screenWidth)
                     , HAtt.style "height" "400px"
                     , HAtt.style "align" "center"
                     , HAtt.alt "3D structure"
@@ -573,7 +581,7 @@ designDetailsBody mScreenWidthF proteinDesign =
             ]
         , table
             [ padding 2
-            , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+            , width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
             ]
             { data = proteinDesign.chains
             , columns =
@@ -662,13 +670,13 @@ designDetailsBody mScreenWidthF proteinDesign =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Sequence" ]
-                  , width = fill |> maximum (getScreenWidthInt mScreenWidthF - 600)
+                  , width = fill |> maximum (screenWidth - 600)
                   , view =
                         \chain ->
                             paragraph
                                 Style.monospacedFont
                                 [ column
-                                    [ width (fill |> maximum (getScreenWidthInt mScreenWidthF - 800))
+                                    [ width (fill |> maximum (screenWidth - 800))
                                     , height fill
                                     , scrollbarX
                                     , paddingXY 10 10
@@ -714,7 +722,7 @@ designDetailsBody mScreenWidthF proteinDesign =
             , paragraph
                 (Style.monospacedFont
                     ++ [ Font.justify
-                       , width (fill |> maximum (getScreenWidthIntNgl mScreenWidthF))
+                       , width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
                        ]
                 )
                 [ proteinDesign.abstract

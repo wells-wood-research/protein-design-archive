@@ -34,7 +34,7 @@ page { mScreenWidthF } route =
         { init = \_ -> init mScreenWidthF route.params.designId
         , update = update
         , subscriptions = subscriptions
-        , view = view >> Components.Title.view
+        , view = view >> Components.Title.view mScreenWidthF
         }
 
 
@@ -299,17 +299,14 @@ view model =
 details : Model -> Element Msg
 details model =
     let
-        mScreenWidthF =
-            model.mScreenWidthF
-
         mDesign =
             model.design
 
         screenWidth =
-            Maybe.withDefault 800.0 mScreenWidthF
+            getScreenWidthInt <| model.mScreenWidthF
 
         halfWidth =
-            screenWidth / 2
+            getScreenWidthInt <| Just (toFloat screenWidth / 2)
     in
     row []
         [ column
@@ -354,10 +351,10 @@ details model =
                         ]
 
                 Success proteinDesign ->
-                    if screenWidth > 800.0 then
+                    if screenWidth > 800 then
                         column
                             ([ centerX
-                             , width (fill |> maximum (getScreenWidthInt (Just screenWidth)))
+                             , width (fill |> maximum screenWidth)
                              , padding 30
                              , spacing 30
                              , height fill
@@ -367,7 +364,7 @@ details model =
                             [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
                             , row
                                 []
-                                [ Details.designDetailsBody (Just halfWidth) proteinDesign
+                                [ Details.designDetailsBody halfWidth proteinDesign
                                 , reviewArea halfWidth model
                                 ]
                             ]
@@ -375,7 +372,7 @@ details model =
                     else
                         column
                             ([ centerX
-                             , width (fill |> maximum (getScreenWidthInt (Just screenWidth)))
+                             , width (fill |> maximum screenWidth)
                              , padding 30
                              , spacing 30
                              , height fill
@@ -383,15 +380,15 @@ details model =
                                 ++ Style.bodyFont
                             )
                             [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
-                            , Details.designDetailsBody (Just screenWidth) proteinDesign
+                            , Details.designDetailsBody screenWidth proteinDesign
                             , reviewArea screenWidth model
                             ]
             ]
         ]
 
 
-reviewArea : Float -> Model -> Element Msg
-reviewArea elementWidthF model =
+reviewArea : Int -> Model -> Element Msg
+reviewArea elementWidthI model =
     column
         [ centerX
         , width fill
@@ -402,7 +399,7 @@ reviewArea elementWidthF model =
         ]
         [ classificationArea model
         , votingArea model
-        , commentArea elementWidthF model
+        , commentArea elementWidthI model
         ]
 
 
@@ -490,14 +487,12 @@ voteCheckbox ( model, dictKey ) =
         }
 
 
-commentArea : Float -> Model -> Element Msg
-commentArea elementWidthF model =
+commentArea : Int -> Model -> Element Msg
+commentArea elementWidthI model =
     column
         [ spacing 10
         , width
-            (fill
-                |> (Just elementWidthF |> getScreenWidthInt |> maximum)
-            )
+            (fill |> maximum elementWidthI)
         ]
         [ paragraph
             ([ padding

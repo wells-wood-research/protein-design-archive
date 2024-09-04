@@ -4,12 +4,18 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import FeatherIcons
+import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
+import Shared
 import Style
 import View exposing (View)
 
 
-view : View msg -> View msg
-view props =
+view : Maybe Float -> View msg -> View msg
+view mScreenWidthF props =
+    let
+        screenWidth =
+            getScreenWidthInt mScreenWidthF
+    in
     { title = props.title
     , attributes =
         [ Background.color <|
@@ -19,15 +25,15 @@ view props =
     , element =
         column
             props.attributes
-            [ title
+            [ title screenWidth
             , el props.attributes props.element
-            , footerArea
+            , footerArea screenWidth
             ]
     }
 
 
-title : Element msg
-title =
+title : Int -> Element msg
+title screenWidth =
     el
         (Style.titleFont
             ++ [ width fill
@@ -43,9 +49,24 @@ title =
             }
 
 
-footerArea : Element msg
-footerArea =
-    row
+footerArea : Int -> Element msg
+footerArea screenWidth =
+    let
+        widthButton =
+            if screenWidth < 900 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 300
+
+        elementType =
+            if screenWidth < 900 then
+                column
+
+            else
+                row
+    in
+    elementType
         (Style.monospacedFont
             ++ [ width fill
                , spaceEvenly
@@ -83,5 +104,5 @@ footerArea =
                         ]
                 }
             ]
-        , row [ width <| fillPortion 1, centerX ] [ text <| "Date od last update: " ++ "2024-09-04" ]
+        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date od last update: " ++ "2024-09-04" ]
         ]
