@@ -48,7 +48,7 @@ type alias Model =
 
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init _ _ =
-    ( { designs = NotAsked, errors = [], designsToDownload = Set.empty, mScreenWidthF = Nothing }
+    ( { designs = NotAsked, errors = [], designsToDownload = Set.empty, mScreenWidthF = Nothing, mScreenHeightF = Nothing }
     , Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
     )
 
@@ -104,17 +104,20 @@ update _ msg model =
         ViewportResult result ->
             case result of
                 Ok viewport ->
-                    ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.none )
+                    ( { model | mScreenWidthF = Just viewport.viewport.width, mScreenHeightF = Just viewport.viewport.height }, Effect.none )
 
                 Err _ ->
                     ( model, Effect.none )
 
-        WindowResizes width _ ->
+        WindowResizes width height ->
             let
                 widthF =
                     toFloat width
+
+                heightF =
+                    toFloat height
             in
-            ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+            ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.resetViewport ViewportReset )
 
         ViewportReset ->
             ( model, Effect.none )

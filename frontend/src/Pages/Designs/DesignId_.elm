@@ -272,52 +272,82 @@ details shared model =
 
         mDesign =
             model.design
+
+        screenWidth =
+            getScreenWidthInt mScreenWidthF
     in
-    row []
-        [ column
-            [ width fill ]
-            [ case mDesign of
-                NotAsked ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
+    column
+        [ width (fill |> maximum screenWidth) ]
+        [ case mDesign of
+            NotAsked ->
+                column
+                    (Style.monospacedFont
+                        ++ [ width (fill |> maximum screenWidth)
+                           , centerX
+                           , spaceEvenly
+                           ]
+                    )
+                    [ el [ centerX, alignTop, padding 50 ]
+                        (html <|
+                            FeatherIcons.toHtml [] <|
+                                FeatherIcons.withSize 106 <|
+                                    FeatherIcons.refreshCcw
                         )
-                        [ text "Error querying the database. Try reloading the page."
-                        ]
+                    , paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Error querying the database. Try reloading the page." ]
+                    ]
 
-                Loading ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
+            Loading ->
+                column
+                    (Style.monospacedFont
+                        ++ [ width (fill |> maximum screenWidth)
+                           , centerX
+                           , spaceEvenly
+                           ]
+                    )
+                    [ el [ centerX, alignTop, padding 50 ]
+                        (html <|
+                            FeatherIcons.toHtml [] <|
+                                FeatherIcons.withSize 106 <|
+                                    FeatherIcons.loader
                         )
-                        [ text "Loading the design..."
-                        ]
+                    , paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Loading the design..." ]
+                    ]
 
-                Failure e ->
-                    paragraph
-                        (Style.bodyFont
-                            ++ [ width fill, Font.center, Font.justify ]
+            Failure e ->
+                column
+                    (Style.monospacedFont
+                        ++ [ width (fill |> maximum screenWidth)
+                           , centerX
+                           , spaceEvenly
+                           ]
+                    )
+                    [ el [ centerX, alignTop, padding 50 ]
+                        (html <|
+                            FeatherIcons.toHtml [] <|
+                                FeatherIcons.withSize 106 <|
+                                    FeatherIcons.alertOctagon
                         )
+                    , paragraph [ Font.center, Font.size 24, padding 50 ]
                         [ case e of
                             Http.BadUrl _ ->
-                                text "Error loading design: invalid URL."
+                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Error loading design: invalid URL." ]
 
                             Http.Timeout ->
-                                text "Error loading design: it took too long to get a response."
+                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Error loading design: it took too long to get a response." ]
 
                             Http.NetworkError ->
-                                text "Error loading design: please connect to the Internet."
+                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text "Error loading design: please connect to the Internet." ]
 
                             Http.BadStatus i ->
-                                text ("Error loading design: status code " ++ String.fromInt i)
+                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text ("Error loading design: status code " ++ String.fromInt i) ]
 
                             Http.BadBody s ->
-                                text ("Error decoding JSON: " ++ s)
+                                paragraph [ Font.center, Font.size 24, padding 50 ] [ text ("Error decoding JSON: " ++ s) ]
                         ]
+                    ]
 
-                Success design ->
-                    designDetailsView shared mScreenWidthF design
-            ]
+            Success design ->
+                designDetailsView shared mScreenWidthF design
         ]
 
 
@@ -580,7 +610,7 @@ designDetailsBody mScreenWidthF proteinDesign =
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
-                            [ text "Chain type" ]
+                            [ text "Type" ]
                   , width = fill |> maximum 150
                   , view =
                         \chain ->
@@ -605,7 +635,7 @@ designDetailsBody mScreenWidthF proteinDesign =
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
-                            [ text "Chain source" ]
+                            [ text "Source" ]
                   , width = fill |> maximum 150
                   , view =
                         \chain ->
@@ -620,7 +650,7 @@ designDetailsBody mScreenWidthF proteinDesign =
                                     , height fill
                                     , paddingXY 5 10
                                     ]
-                                    [ text chain.chain_source ]
+                                    [ text <| String.toLower chain.chain_source ]
                                 ]
                   }
                 , { header =
@@ -653,7 +683,7 @@ designDetailsBody mScreenWidthF proteinDesign =
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
-                            [ text "Chain length" ]
+                            [ text "Length" ]
                   , width = fill |> maximum 150
                   , view =
                         \chain ->

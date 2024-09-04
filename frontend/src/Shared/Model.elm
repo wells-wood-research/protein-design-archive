@@ -23,4 +23,5 @@ type alias Model =
     , errors : List AppError
     , designsToDownload : Set String
     , mScreenWidthF : Maybe Float
+    , mScreenHeightF : Maybe Float
     }

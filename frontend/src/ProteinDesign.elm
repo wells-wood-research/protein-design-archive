@@ -297,7 +297,20 @@ designDetailsFromProteinDesign proteinDesign =
                 text "-"
 
             else
-                text <| String.join ", " proteinDesign.related_designs
+                row []
+                    (List.intersperse (text "; ") <|
+                        List.map
+                            (\related ->
+                                newTabLink
+                                    [ Font.color <| rgb255 104 176 171
+                                    , Font.underline
+                                    ]
+                                    { url = "https://www.rcsb.org/structure/" ++ related
+                                    , label = text <| related
+                                    }
+                            )
+                            proteinDesign.related_designs
+                    )
       }
     , { header = "Related natural proteins"
       , property =
@@ -305,7 +318,20 @@ designDetailsFromProteinDesign proteinDesign =
                 text "-"
 
             else
-                text <| String.join ", " proteinDesign.related_natural
+                row []
+                    (List.intersperse (text "; ") <|
+                        List.map
+                            (\related ->
+                                newTabLink
+                                    [ Font.color <| rgb255 104 176 171
+                                    , Font.underline
+                                    ]
+                                    { url = "https://www.rcsb.org/structure/" ++ related
+                                    , label = text <| related
+                                    }
+                            )
+                            proteinDesign.related_natural
+                    )
       }
     , { header = "Authors"
       , property =

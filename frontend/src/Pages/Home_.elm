@@ -18,7 +18,7 @@ import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font
+import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
 import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
@@ -42,7 +42,7 @@ import View exposing (View)
 page : Shared.Model -> Route () -> Page Model Msg
 page shared _ =
     Page.new
-        { init = \() -> init shared.mScreenWidthF
+        { init = \() -> init shared.mScreenWidthF shared.mScreenHeightF
         , update = update shared
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view
@@ -62,13 +62,14 @@ type alias Model =
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
+    , mScreenHeightF : Maybe Float
     , dataDownload : RemoteData Http.Error String
     , searchString : String
     }
 
 
-init : Maybe Float -> ( Model, Effect Msg )
-init mSharedScreenWidthF =
+init : Maybe Float -> Maybe Float -> ( Model, Effect Msg )
+init mSharedScreenWidthF mSharedScreenHeightF =
     ( { designStubs = Loading
       , errors = []
       , designFilters = Dict.empty
@@ -77,6 +78,7 @@ init mSharedScreenWidthF =
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
+      , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
       , searchString = ""
       }
@@ -158,17 +160,20 @@ update shared msg model =
                     , Effect.none
                     )
 
-                WindowResizes width _ ->
+                WindowResizes width height ->
                     let
                         widthF =
                             toFloat width
+
+                        heightF =
+                            toFloat height
                     in
-                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.resetViewport ViewportReset )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width, mScreenHeightF = Just viewport.viewport.height }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
@@ -316,17 +321,20 @@ update shared msg model =
                         _ ->
                             ( model, Effect.none )
 
-                WindowResizes width _ ->
+                WindowResizes width height ->
                     let
                         widthF =
                             toFloat width
+
+                        heightF =
+                            toFloat height
                     in
-                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.resetViewport ViewportReset )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width, mScreenHeightF = Just viewport.viewport.height }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
@@ -378,12 +386,49 @@ view shared model =
 
 homeView : Shared.Model -> Model -> Element Msg
 homeView shared model =
+    let
+        screenWidth =
+            getScreenWidthInt model.mScreenWidthF
+
+        screenHeight =
+            getScreenWidthInt model.mScreenHeightF
+    in
     case model.designStubs of
         RemoteData.NotAsked ->
-            text "Not asked for data..."
+            column
+                (Style.monospacedFont
+                    ++ [ width (fill |> maximum screenWidth)
+                       , height (fill |> maximum screenHeight)
+                       , centerX
+                       , spaceEvenly
+                       ]
+                )
+                [ el [ centerX, alignTop, padding 30 ]
+                    (html <|
+                        FeatherIcons.toHtml [] <|
+                            FeatherIcons.withSize 100 <|
+                                FeatherIcons.loader
+                    )
+                , paragraph [ center, Font.size 24, padding 50 ] [ text "Not asked for data..." ]
+                ]
 
         RemoteData.Loading ->
-            text "Requested data..."
+            column
+                (Style.monospacedFont
+                    ++ [ width (fill |> maximum screenWidth)
+                       , height (fill |> maximum screenHeight)
+                       , centerX
+                       , spaceEvenly
+                       ]
+                )
+                [ el [ centerX, alignTop, padding 50 ]
+                    (html <|
+                        FeatherIcons.toHtml [] <|
+                            FeatherIcons.withSize 106 <|
+                                FeatherIcons.loader
+                    )
+                , paragraph [ center, Font.size 24, padding 50 ] [ text "Loading..." ]
+                ]
 
         RemoteData.Failure _ ->
             text "Failed to load data, probably couldn't connect to server."
@@ -396,12 +441,6 @@ homeView shared model =
                         |> List.filterMap
                             (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
 
-                screenWidth =
-                    getScreenWidthInt model.mScreenWidthF
-
-                screenWidthS =
-                    getScreenWidthString model.mScreenWidthF
-
                 widthDesignCard =
                     if screenWidth < 800 then
                         Element.fill |> maximum (screenWidth - 10)
@@ -410,7 +449,7 @@ homeView shared model =
                         Element.px 390
             in
             column [ centerX ]
-                [ Plots.timelinePlotView (px screenWidth) screenWidthS
+                [ Plots.timelinePlotView model.mScreenWidthF
                 , column
                     [ paddingXY 20 0, spacing 15, width (fill |> maximum screenWidth) ]
                     [ downloadArea shared model

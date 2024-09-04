@@ -3,6 +3,7 @@ module Plots exposing (PlotData, RenderPlotState(..), timelinePlotDesigns, timel
 import Date exposing (Unit(..))
 import Element exposing (..)
 import Element.Keyed as Keyed
+import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
 import Html
 import Html.Attributes as HAtt
 import ProteinDesign exposing (ProteinDesign, ProteinDesignStub)
@@ -29,8 +30,15 @@ timelinePlotId =
     "timeline-plot"
 
 
-timelinePlotView : Length -> String -> Element msg
-timelinePlotView widthL widthS =
+timelinePlotView : Maybe Float -> Element msg
+timelinePlotView widthF =
+    let
+        widthL =
+            px (getScreenWidthInt widthF)
+
+        widthS =
+            getScreenWidthString widthF
+    in
     column
         [ spacing 15, Element.width widthL, centerX ]
         [ Keyed.el [ centerX ]
