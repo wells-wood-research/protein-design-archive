@@ -17,7 +17,8 @@ import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Font as Font
+import Element.Border as Border
+import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
 import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
@@ -25,9 +26,10 @@ import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (ProteinDesignStub)
+import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder, fileTypeToString)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Set
 import Shared
 import Shared.Msg exposing (Msg(..))
 import Style
@@ -40,10 +42,10 @@ import View exposing (View)
 page : Shared.Model -> Route () -> Page Model Msg
 page shared _ =
     Page.new
-        { init = \() -> init shared.mScreenWidthF
-        , update = update
+        { init = \() -> init shared.mScreenWidthF shared.mScreenHeightF
+        , update = update shared
         , subscriptions = subscriptions
-        , view = view >> Components.Title.view
+        , view = view shared >> Components.Title.view shared.mScreenWidthF
         }
 
 
@@ -60,12 +62,14 @@ type alias Model =
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
+    , mScreenHeightF : Maybe Float
+    , dataDownload : RemoteData Http.Error String
     , searchString : String
     }
 
 
-init : Maybe Float -> ( Model, Effect Msg )
-init mSharedScreenWidthF =
+init : Maybe Float -> Maybe Float -> ( Model, Effect Msg )
+init mSharedScreenWidthF mSharedScreenHeightF =
     ( { designStubs = Loading
       , errors = []
       , designFilters = Dict.empty
@@ -74,6 +78,8 @@ init mSharedScreenWidthF =
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
+      , mScreenHeightF = mSharedScreenHeightF
+      , dataDownload = NotAsked
       , searchString = ""
       }
     , Effect.batch
@@ -103,14 +109,20 @@ type Msg
     | UpdateEndDateTextField String
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
+    | AddAllSelected
+    | RemoveAllSelected
+    | DownloadAllSelectedCsv
+    | DownloadAllSelectedJson
+    | RequestSelectedDesignData DownloadFileType
+    | ForExportResponse DownloadFileType (Result Http.Error String)
     | RenderWhenReady Time.Posix
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
 
 
-update : Msg -> Model -> ( Model, Effect Msg )
-update msg model =
+update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
+update shared msg model =
     case model.designStubs of
         RemoteData.NotAsked ->
             case msg of
@@ -148,17 +160,20 @@ update msg model =
                     , Effect.none
                     )
 
-                WindowResizes width _ ->
+                WindowResizes width height ->
                     let
                         widthF =
                             toFloat width
+
+                        heightF =
+                            toFloat height
                     in
-                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.resetViewport ViewportReset )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width, mScreenHeightF = Just viewport.viewport.height }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
@@ -203,12 +218,12 @@ update msg model =
                     in
                     case Date.fromIsoString phrase of
                         Err _ ->
-                            update
+                            update shared
                                 (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
                                 { model | mStartDate = ifEmptyOrNot string }
 
                         Ok date ->
-                            update
+                            update shared
                                 (UpdateFilters defaultKeys.dateStartKey (DateStart date))
                                 { model | mStartDate = ifEmptyOrNot string }
 
@@ -219,14 +234,68 @@ update msg model =
                     in
                     case Date.fromIsoString phrase of
                         Err _ ->
-                            update
+                            update shared
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
                                 { model | mEndDate = ifEmptyOrNot string }
 
                         Ok date ->
-                            update
+                            update shared
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
+
+                AddAllSelected ->
+                    let
+                        filteredDesignStubs =
+                            loadedDesignStubs
+                                |> Dict.values
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                                |> List.map (\x -> x.pdb)
+                    in
+                    ( model, Effect.addDesignsToDownload filteredDesignStubs )
+
+                RemoveAllSelected ->
+                    let
+                        filteredDesignStubs =
+                            loadedDesignStubs
+                                |> Dict.values
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                                |> List.map (\x -> x.pdb)
+                    in
+                    ( model, Effect.removeDesignsFromDownload filteredDesignStubs )
+
+                RequestSelectedDesignData fileType ->
+                    ( { model | dataDownload = Loading }
+                    , Http.get
+                        { url = Urls.downloadSelectedDesigns (shared.designsToDownload |> Set.toList)
+                        , expect =
+                            Http.expectString (ForExportResponse fileType)
+                        }
+                        |> Effect.sendCmd
+                    )
+
+                ForExportResponse _ (Err err) ->
+                    ( { model | dataDownload = Failure err }
+                    , Effect.none
+                    )
+
+                ForExportResponse fileType (Ok designData) ->
+                    let
+                        encodedFileContent =
+                            case fileType of
+                                ProteinDesign.Json ->
+                                    designData
+
+                                ProteinDesign.Csv ->
+                                    case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
+                                        Ok designs ->
+                                            csvStringFromProteinDesignDownload designs
+
+                                        Err _ ->
+                                            designData
+                    in
+                    ( { model | dataDownload = NotAsked }
+                    , Effect.downloadFile "exported_designs" encodedFileContent fileType
+                    )
 
                 RenderWhenReady _ ->
                     let
@@ -252,17 +321,20 @@ update msg model =
                         _ ->
                             ( model, Effect.none )
 
-                WindowResizes width _ ->
+                WindowResizes width height ->
                     let
                         widthF =
                             toFloat width
+
+                        heightF =
+                            toFloat height
                     in
-                    ( { model | mScreenWidthF = Just widthF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.resetViewport ViewportReset )
 
                 ViewportResult result ->
                     case result of
                         Ok viewport ->
-                            ( { model | mScreenWidthF = Just viewport.viewport.width }, Effect.resetViewport ViewportReset )
+                            ( { model | mScreenWidthF = Just viewport.viewport.width, mScreenHeightF = Just viewport.viewport.height }, Effect.resetViewport ViewportReset )
 
                         Err _ ->
                             ( model, Effect.none )
@@ -301,25 +373,62 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Protein Design Archive"
     , attributes =
         [ centerX
         , width (fill |> minimum (getScreenWidthInt model.mScreenWidthF))
         ]
-    , element = homeView model
+    , element = homeView shared model
     }
 
 
-homeView : Model -> Element Msg
-homeView model =
+homeView : Shared.Model -> Model -> Element Msg
+homeView shared model =
+    let
+        screenWidth =
+            getScreenWidthInt model.mScreenWidthF
+
+        screenHeight =
+            getScreenWidthInt model.mScreenHeightF - 210
+    in
     case model.designStubs of
         RemoteData.NotAsked ->
-            text "Not asked for data..."
+            column
+                (Style.monospacedFont
+                    ++ [ width (fill |> maximum screenWidth)
+                       , height <| px screenHeight
+                       , centerX
+                       , spaceEvenly
+                       ]
+                )
+                [ el [ centerX, centerY ]
+                    (html <|
+                        FeatherIcons.toHtml [] <|
+                            FeatherIcons.withSize 100 <|
+                                FeatherIcons.loader
+                    )
+                , paragraph [ center, Font.size 24, padding 50 ] [ text "Not asked for data..." ]
+                ]
 
         RemoteData.Loading ->
-            text "Requested data..."
+            column
+                (Style.monospacedFont
+                    ++ [ width (fill |> maximum screenWidth)
+                       , height <| px screenHeight
+                       , centerX
+                       , spaceEvenly
+                       ]
+                )
+                [ el [ centerX, centerY ]
+                    (html <|
+                        FeatherIcons.toHtml [] <|
+                            FeatherIcons.withSize 106 <|
+                                FeatherIcons.loader
+                    )
+                , paragraph [ center, Font.size 24, padding 50, centerY ] [ text "Loading..." ]
+                ]
 
         RemoteData.Failure _ ->
             text "Failed to load data, probably couldn't connect to server."
@@ -332,12 +441,6 @@ homeView model =
                         |> List.filterMap
                             (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
 
-                screenWidth =
-                    getScreenWidthInt model.mScreenWidthF
-
-                screenWidthS =
-                    getScreenWidthString model.mScreenWidthF
-
                 widthDesignCard =
                     if screenWidth < 800 then
                         Element.fill |> maximum (screenWidth - 10)
@@ -346,15 +449,106 @@ homeView model =
                         Element.px 390
             in
             column [ centerX ]
-                [ Plots.timelinePlotView (px screenWidth) screenWidthS
+                [ Plots.timelinePlotView model.mScreenWidthF
                 , column
                     [ paddingXY 20 0, spacing 15, width (fill |> maximum screenWidth) ]
-                    [ searchArea model
+                    [ downloadArea shared model
+                    , searchArea model
                     , dateSearchArea model
-                    , numberArea designsToDisplay
+                    , numberArea model.mScreenWidthF designsToDisplay shared.designsToDownload
                     , designList widthDesignCard designsToDisplay
                     ]
                 ]
+
+
+designList : Length -> List ProteinDesignStub -> Element msg
+designList widthDesignCard designs =
+    wrappedRow
+        [ spaceEvenly
+        , centerX
+        ]
+        (List.map (ProteinDesign.designCard widthDesignCard) designs)
+
+
+downloadArea : Shared.Model -> Model -> Element Msg
+downloadArea shared model =
+    let
+        filteredDesignStubs =
+            case model.designStubs of
+                RemoteData.Success loadedDesignStubs ->
+                    loadedDesignStubs
+                        |> Dict.values
+                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                        |> List.map (\x -> x.pdb)
+
+                _ ->
+                    []
+
+        toDownload =
+            Set.toList shared.designsToDownload
+
+        screenWidth =
+            getScreenWidthInt model.mScreenWidthF
+
+        widthButton =
+            if screenWidth < 900 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 300
+
+        buttonAttributes =
+            if screenWidth < 900 then
+                [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
+                , Border.color <| rgb255 220 220 220
+                ]
+
+            else
+                [ centerX
+                , Font.center
+                ]
+
+        elementType =
+            if screenWidth < 900 then
+                column
+
+            else
+                row
+    in
+    elementType
+        (Style.bodyFont
+            ++ [ width (fill |> maximum screenWidth)
+               , Font.bold
+               , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+               , Border.color <| rgb255 220 220 220
+               ]
+        )
+        [ downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download all selected as CSV")
+        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download all selected as JSON")
+        , if List.all (\design -> List.member design toDownload) filteredDesignStubs then
+            downloadButton widthButton buttonAttributes (Just RemoveAllSelected) (text "Remove all from download selection")
+
+          else
+            downloadButton widthButton buttonAttributes (Just AddAllSelected) (text "Add to download list")
+        ]
+
+
+downloadButton : Length -> List (Attribute msg) -> Maybe msg -> Element msg -> Element msg
+downloadButton widthButton buttonAttributes onPressCmd textLabel =
+    Input.button
+        (buttonAttributes
+            ++ [ padding 10
+               , width widthButton
+               , centerX
+               , Font.center
+               , Element.mouseOver
+                    [ Background.color <| rgb255 220 220 220
+                    ]
+               ]
+        )
+        { onPress = onPressCmd
+        , label = textLabel
+        }
 
 
 searchArea : Model -> Element Msg
@@ -381,7 +575,9 @@ searchIcon =
 searchInput : Model -> Element Msg
 searchInput model =
     Input.text
-        [ width <| fillPortion 6 ]
+        (Style.monospacedFont
+            ++ [ width <| fillPortion 6 ]
+        )
         { onChange = \string -> UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed string)
         , text = model.searchString
         , placeholder =
@@ -438,10 +634,42 @@ dateSearchArea model =
                 ]
 
 
-numberArea :
+numberArea : Maybe Float -> List ProteinDesignStub -> Set.Set String -> Element Msg
+numberArea mScreenWidthF designsToDisplay designsToDownload =
+    let
+        screenWidth =
+            getScreenWidthInt mScreenWidthF
+
+        widthButton =
+            if screenWidth < 900 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 300
+
+        elementType =
+            if screenWidth < 900 then
+                column
+
+            else
+                row
+    in
+    elementType
+        (Style.bodyFont
+            ++ [ width widthButton
+               , Border.color <| rgb255 220 220 220
+               , spacing 10
+               ]
+        )
+        [ numberDisplayedArea designsToDisplay
+        , numberSavedToDownloadArea designsToDownload
+        ]
+
+
+numberDisplayedArea :
     List ProteinDesignStub
     -> Element Msg
-numberArea designs =
+numberDisplayedArea designs =
     let
         numberOfDesigns =
             List.length designs
@@ -454,7 +682,27 @@ numberArea designs =
                         FeatherIcons.hash
              -- or barChart
             )
-        , text ("Number of designs: " ++ String.fromInt numberOfDesigns)
+        , text ("Number of designs displayed: " ++ String.fromInt numberOfDesigns)
+        ]
+
+
+numberSavedToDownloadArea :
+    Set.Set String
+    -> Element Msg
+numberSavedToDownloadArea designs =
+    let
+        numberOfDesigns =
+            Set.size designs
+    in
+    row (Style.monospacedFont ++ [ alignLeft ])
+        [ el [ centerX, paddingXY 10 0 ]
+            (html <|
+                FeatherIcons.toHtml [] <|
+                    FeatherIcons.withSize 24 <|
+                        FeatherIcons.download
+             -- or barChart
+            )
+        , text ("Number of designs saved for download: " ++ String.fromInt numberOfDesigns)
         ]
 
 
@@ -542,12 +790,3 @@ dateEndField model =
                 }
             )
         ]
-
-
-designList : Length -> List ProteinDesignStub -> Element msg
-designList widthDesignCard designs =
-    wrappedRow
-        [ spaceEvenly
-        , centerX
-        ]
-        (List.map (ProteinDesign.designCard widthDesignCard) designs)

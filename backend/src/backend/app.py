@@ -1,7 +1,9 @@
 import json
 import typing as t
+import csv
+import io
 
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 
 from backend.db import CLIENT, DESIGNS, PDA_DB
@@ -13,8 +15,25 @@ CORS(app, origins=["http://localhost:1234"])
 @app.get("/all-designs")
 def get_all_design_data():
     """Gets all the design data."""
-    projection = {"_id": 0}
-    designs = list(DESIGNS.find({}, projection=projection))
+    selected_pdb_files_str = request.args.get("pdb-codes")
+    print("This:", selected_pdb_files_str)
+    designs = []
+    projection = {
+        "_id": 0,
+        "keywords": 0,
+        "classification_suggested": 0,
+        "classification_suggested_reason": 0,
+        "picture_path": 0,
+        "abstract": 0,
+        "review": 0,
+        "previous_design": 0,
+        "next_design": 0
+    }
+    if selected_pdb_files_str:
+        pdb_codes = json.loads(selected_pdb_files_str)
+        designs = list(DESIGNS.find({"pdb": {"$in": pdb_codes}}, projection=projection))
+    else:
+        designs = list(DESIGNS.find({}, projection=projection))
     return designs
 
 
