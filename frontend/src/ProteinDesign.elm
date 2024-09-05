@@ -169,6 +169,7 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "classification", classificationToString proteinDesign.classification )
     , ( "chains", String.join ";" (List.map chainToString proteinDesign.chains) )
     , ( "formula_weight", fromFloat proteinDesign.formula_weight )
+    , ( "symmetry", proteinDesign.symmetry )
     , ( "crystal_structure(a;b;c;alpha;beta;gamma)", xtalToString proteinDesign.crystal_structure )
     , ( "exptl_method", String.join ";" proteinDesign.exptl_method )
     , ( "synthesis_comment", proteinDesign.synthesis_comment )
