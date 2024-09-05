@@ -4,8 +4,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import FeatherIcons
-import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
-import Shared
+import Get exposing (getScreenWidthInt)
 import Style
 import View exposing (View)
 
@@ -36,7 +35,7 @@ title : Int -> Element msg
 title screenWidth =
     el
         (Style.titleFont
-            ++ [ width fill
+            ++ [ width (fill |> maximum screenWidth)
                , padding 20
                , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
                , Border.color <| rgb255 220 220 220
@@ -51,24 +50,9 @@ title screenWidth =
 
 footerArea : Int -> Element msg
 footerArea screenWidth =
-    let
-        widthButton =
-            if screenWidth < 900 then
-                Element.fill |> maximum (screenWidth - 10)
-
-            else
-                Element.px 300
-
-        elementType =
-            if screenWidth < 900 then
-                column
-
-            else
-                row
-    in
-    elementType
+    column
         (Style.monospacedFont
-            ++ [ width fill
+            ++ [ width (fill |> maximum screenWidth)
                , spaceEvenly
                , Background.color <| rgb255 220 220 220
                ]

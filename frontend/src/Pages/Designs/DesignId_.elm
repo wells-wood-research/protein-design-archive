@@ -282,7 +282,7 @@ details shared model =
             getScreenWidthInt model.mScreenWidthF
 
         screenHeight =
-            getScreenWidthInt model.mScreenHeightF - 130
+            getScreenWidthInt model.mScreenHeightF - 210
     in
     column
         [ width (fill |> maximum screenWidth) ]
@@ -296,7 +296,7 @@ details shared model =
                            , spaceEvenly
                            ]
                     )
-                    [ el [ centerY ]
+                    [ el [ centerX, centerY ]
                         (html <|
                             FeatherIcons.toHtml [] <|
                                 FeatherIcons.withSize 106 <|
@@ -314,7 +314,7 @@ details shared model =
                            , spaceEvenly
                            ]
                     )
-                    [ el [ centerY ]
+                    [ el [ centerX, centerY ]
                         (html <|
                             FeatherIcons.toHtml [] <|
                                 FeatherIcons.withSize 106 <|
@@ -332,7 +332,7 @@ details shared model =
                            , spaceEvenly
                            ]
                     )
-                    [ el [ centerY ]
+                    [ el [ centerX, centerY ]
                         (html <|
                             FeatherIcons.toHtml [] <|
                                 FeatherIcons.withSize 106 <|
@@ -586,128 +586,109 @@ designDetailsBody screenWidth proteinDesign =
             { data = proteinDesign.chains
             , columns =
                 [ { header =
-                        paragraph
+                        wrappedRow
                             [ Font.bold
                             , paddingXY 5 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Chain ID" ]
-                  , width = fill |> maximum 150
+                  , width = fillPortion 1
                   , view =
                         \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width
-                                        (fill
-                                            |> maximum 150
-                                            |> minimum 80
-                                        )
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 5 10
-                                    ]
-                                    [ text chain.chain_id ]
-                                ]
+                            wrappedRow
+                                (Style.monospacedFont
+                                    ++ [ width (fill |> maximum 100)
+                                       , height fill
+                                       , scrollbarX
+                                       , paddingXY 5 10
+                                       ]
+                                )
+                                [ text chain.chain_id ]
                   }
                 , { header =
-                        paragraph
+                        wrappedRow
                             [ Font.bold
                             , paddingXY 5 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Type" ]
-                  , width = fill |> maximum 150
+                  , width = fillPortion 1
                   , view =
                         \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width
-                                        (fill
-                                            |> maximum 150
-                                            |> minimum 150
-                                        )
-                                    , height fill
-                                    , paddingXY 5 10
-                                    ]
-                                    [ text chain.chain_type ]
-                                ]
+                            wrappedRow
+                                (Style.monospacedFont
+                                    ++ [ width (fill |> maximum 100)
+                                       , height fill
+                                       , scrollbarX
+                                       , paddingXY 5 10
+                                       ]
+                                )
+                                [ text chain.chain_type ]
                   }
                 , { header =
-                        paragraph
+                        wrappedRow
                             [ Font.bold
                             , paddingXY 5 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Source" ]
-                  , width = fill |> maximum 150
+                  , width = fillPortion 2
                   , view =
                         \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width
-                                        (fill
-                                            |> maximum 150
-                                            |> minimum 150
-                                        )
-                                    , height fill
-                                    , paddingXY 5 10
-                                    ]
-                                    [ text <| String.toLower chain.chain_source ]
-                                ]
+                            wrappedRow
+                                (Style.monospacedFont
+                                    ++ [ width (fill |> maximum 100)
+                                       , height fill
+                                       , scrollbarX
+                                       , paddingXY 5 10
+                                       ]
+                                )
+                                [ text <| String.toLower chain.chain_source ]
                   }
                 , { header =
-                        paragraph
-                            [ width fill
-                            , Font.bold
+                        wrappedRow
+                            [ Font.bold
                             , paddingXY 10 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Sequence" ]
-                  , width = fill |> maximum (screenWidth - 600)
+                  , width = fillPortion 6
                   , view =
                         \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (fill |> maximum (screenWidth - 800))
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 10 10
-                                    ]
-                                    [ text chain.chain_seq_unnat ]
-                                ]
+                            wrappedRow
+                                (Style.monospacedFont
+                                    ++ [ width (fill |> maximum (screenWidth - 400))
+                                       , height fill
+                                       , scrollbarX
+                                       , paddingXY 5 10
+                                       ]
+                                )
+                                [ text chain.chain_seq_unnat ]
                   }
                 , { header =
-                        paragraph
+                        wrappedRow
                             [ Font.bold
                             , paddingXY 5 10
                             , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Length" ]
-                  , width = fill |> maximum 150
+                  , width = fillPortion 1
                   , view =
                         \chain ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width
-                                        (fill
-                                            |> maximum 150
-                                            |> minimum 150
-                                        )
-                                    , height fill
-                                    , paddingXY 5 10
-                                    ]
-                                    [ text <| String.fromInt chain.chain_length ]
-                                ]
+                            wrappedRow
+                                (Style.monospacedFont
+                                    ++ [ width (fill |> maximum 100)
+                                       , height fill
+                                       , scrollbarX
+                                       , paddingXY 5 10
+                                       ]
+                                )
+                                [ text <| String.fromInt chain.chain_length ]
                   }
                 ]
             }
