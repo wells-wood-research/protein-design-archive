@@ -88,5 +88,5 @@ footerArea screenWidth =
                         ]
                 }
             ]
-        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date od last update: " ++ "2024-09-04" ]
+        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date of last update: " ++ "2024-09-04" ]
         ]
