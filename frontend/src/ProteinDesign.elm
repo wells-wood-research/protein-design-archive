@@ -13,6 +13,7 @@ import Json.Encode as JsonEncode exposing (..)
 import String exposing (fromFloat)
 import Style
 import Time exposing (Month(..))
+import Urls exposing (..)
 
 
 type alias ProteinDesign =
@@ -305,7 +306,7 @@ designDetailsFromProteinDesign proteinDesign =
                                     [ Font.color <| rgb255 104 176 171
                                     , Font.underline
                                     ]
-                                    { url = "https://www.rcsb.org/structure/" ++ related
+                                    { url = "/designs/" ++ related
                                     , label = text <| related
                                     }
                             )
