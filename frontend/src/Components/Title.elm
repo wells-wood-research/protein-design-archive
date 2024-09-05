@@ -80,7 +80,7 @@ footerArea =
                         [ el [ centerX, alignTop, padding 10 ]
                             (Element.image
                                 [ width <| px 30, padding 5, Border.color <| rgb255 64 64 64, Border.width 2, Border.roundEach { bottomLeft = 100, bottomRight = 50, topLeft = 100, topRight = 50 } ]
-                                { src = "/wells-wood-logo.svg"
+                                { src = "/pda/favicon.svg"
                                 , description = "Wells Wood Research Group icon"
                                 }
                             )
