@@ -26,7 +26,7 @@ view mScreenWidthF props =
             props.attributes
             [ title screenWidth
             , el props.attributes props.element
-            , footerArea screenWidth
+            , footerArea
             ]
     }
 
@@ -48,11 +48,11 @@ title screenWidth =
             }
 
 
-footerArea : Int -> Element msg
-footerArea screenWidth =
-    column
+footerArea : Element msg
+footerArea =
+    wrappedRow
         (Style.monospacedFont
-            ++ [ width (fill |> maximum screenWidth)
+            ++ [ width fill
                , spaceEvenly
                , Background.color <| rgb255 220 220 220
                ]
