@@ -2,7 +2,7 @@
 /.env
 /elm-stuff
 /node_modules
-/static/pdb_files/*
-!/static/pdb_files/.gitkeep
+/dist/pdb_files/*
+!/dist/pdb_files/.gitkeep
 .DS_Store
 *.pem
