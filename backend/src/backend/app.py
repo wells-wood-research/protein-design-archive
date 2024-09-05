@@ -1,7 +1,9 @@
 import json
 import typing as t
+import csv
+import io
 
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 
 from backend.db import CLIENT, DESIGNS, PDA_DB
@@ -13,8 +15,25 @@ CORS(app, origins=["https://pragmaticproteindesign.bio.ed.ac.uk"])
 @app.get("/all-designs")
 def get_all_design_data():
     """Gets all the design data."""
-    projection = {"_id": 0}
-    designs = list(DESIGNS.find({}, projection=projection))
+    selected_pdb_files_str = request.args.get("pdb-codes")
+    print("This:", selected_pdb_files_str)
+    designs = []
+    projection = {
+        "_id": 0,
+        "keywords": 0,
+        "classification_suggested": 0,
+        "classification_suggested_reason": 0,
+        "picture_path": 0,
+        "abstract": 0,
+        "review": 0,
+        "previous_design": 0,
+        "next_design": 0
+    }
+    if selected_pdb_files_str:
+        pdb_codes = json.loads(selected_pdb_files_str)
+        designs = list(DESIGNS.find({"pdb": {"$in": pdb_codes}}, projection=projection))
+    else:
+        designs = list(DESIGNS.find({}, projection=projection))
     return designs
 
 
@@ -27,9 +46,11 @@ def get_all_design_stubs():
         "pdb": 1,
         "picture_path": 1,
         "authors": 1,
-        "keyword": 1,
+        "subtitle": 1,
         "tags": 1,
+        "keywords": 1,
         "release_date": 1,
+        "publication": 1
     }
     designs = list(DESIGNS.find({}, projection=projection))
     return designs
@@ -39,38 +60,5 @@ def get_all_design_stubs():
 def get_design_details(designId: str) -> t.Any:
     """Gets complete data for the one design that this details page is for."""
     projection = {"_id": 0}
-    design = DESIGNS.find_one({"pdb": designId.upper()}, projection)
-    if design:
-        (previous_design, next_design) = get_surrounding_pdb_codes(designId)
-        design["previous_design"] = previous_design
-        design["next_design"] = next_design
+    design = DESIGNS.find_one({"pdb": designId.lower()}, projection)
     return design
-
-
-def get_surrounding_pdb_codes(designId) -> t.Tuple[t.Optional[str], t.Optional[str]]:
-    """Gets complete data for the one design that this details page is for,
-    as well as the previous and next design on the list"""
-    projection = {"_id": 0, "pdb": 1}
-    design_pdbs = sorted(
-        list(set([d["pdb"] for d in list(DESIGNS.find({}, projection))]))
-    )
-
-    previous_design: t.Optional[str] = None
-    next_design: t.Optional[str] = None
-
-    try:
-        current_design_index = design_pdbs.index(designId.upper())
-        previous_design_index = current_design_index - 1
-        next_design_index = current_design_index + 1
-        if (previous_design_index) > 0:
-            previous_design = design_pdbs[previous_design_index]
-        else:
-            previous_design = design_pdbs[-1]
-        if (next_design_index) < (len(design_pdbs) - 1):
-            next_design = design_pdbs[next_design_index]
-        else:
-            next_design = design_pdbs[0]
-
-    except ValueError:
-        pass
-    return (previous_design, next_design)

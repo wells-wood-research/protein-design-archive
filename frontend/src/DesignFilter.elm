@@ -2,13 +2,22 @@ module DesignFilter exposing (..)
 
 import Date exposing (Date, Unit(..))
 import Dict exposing (Dict)
+import Json.Decode exposing (string)
 import List exposing (filter)
-import ProteinDesign exposing (Classification(..), ProteinDesign, ProteinDesignStub, Tag(..), classificationToString, designSearchableText, stubSearchableText)
+import ProteinDesign
+    exposing
+        ( Classification(..)
+        , ProteinDesign
+        , ProteinDesignStub
+        , Tag(..)
+        , classificationToString
+        , stubSearchableText
+        )
 import Time exposing (Month(..))
 
 
 type DesignFilter
-    = ContainsText String
+    = ContainsTextParsed String
     | DateStart Date.Date
     | DateEnd Date.Date
     | DesignClass Classification
@@ -23,11 +32,12 @@ defaultKeys :
     { dateStartKey : String
     , dateEndKey : String
     , searchTextKey : String
+    , searchTextParsedKey : String
     , classificationMinimalKey : String
     , classificationRationalKey : String
     , classificationEngineeredKey : String
-    , classificationCompPhysKey : String
-    , classificationCompDLKey : String
+    , classificationPhysKey : String
+    , classificationDeepLearningKey : String
     , classificationConsensusKey : String
     , classificationOtherKey : String
     , keywordSyntheticKey : String
@@ -50,11 +60,12 @@ defaultKeys =
     { dateStartKey = "deposition-date-start"
     , dateEndKey = "deposition-date-end"
     , searchTextKey = "search-text-string"
+    , searchTextParsedKey = "search-text-parsed"
     , classificationMinimalKey = "design-classification-minimal"
     , classificationRationalKey = "design-classification-rational"
     , classificationEngineeredKey = "design-classification-engineered"
-    , classificationCompPhysKey = "design-classification-comp-phys"
-    , classificationCompDLKey = "design-classification-comp-dl"
+    , classificationPhysKey = "design-classification-comp-phys"
+    , classificationDeepLearningKey = "design-classification-comp-dl"
     , classificationConsensusKey = "design-classification-consensus"
     , classificationOtherKey = "design-classification-other"
     , keywordSyntheticKey = "design-keyword-synthetic"
@@ -81,8 +92,8 @@ checkboxDict =
         [ ( defaultKeys.classificationMinimalKey, False )
         , ( defaultKeys.classificationRationalKey, False )
         , ( defaultKeys.classificationEngineeredKey, False )
-        , ( defaultKeys.classificationCompPhysKey, False )
-        , ( defaultKeys.classificationCompDLKey, False )
+        , ( defaultKeys.classificationPhysKey, False )
+        , ( defaultKeys.classificationDeepLearningKey, False )
         , ( defaultKeys.classificationConsensusKey, False )
         , ( defaultKeys.classificationOtherKey, False )
         , ( defaultKeys.keywordSyntheticKey, False )
@@ -106,8 +117,8 @@ checkboxDict =
 toString : DesignFilter -> String
 toString filter =
     case filter of
-        ContainsText string ->
-            string
+        ContainsTextParsed _ ->
+            "complicated_search_string"
 
         DateStart startDate ->
             Date.toIsoString startDate
@@ -126,11 +137,6 @@ toString filter =
                 "remove"
 
 
-
---DesignTag tag ->
---    tagToString tag
-
-
 toDesignFilter : String -> DesignFilter
 toDesignFilter key =
     case key of
@@ -144,10 +150,10 @@ toDesignFilter key =
             DesignClass Engineered
 
         "design-classification-comp-phys" ->
-            DesignClass CompPhys
+            DesignClass Phys
 
         "design-classification-comp-dl" ->
-            DesignClass CompDL
+            DesignClass DeepLearning
 
         "design-classification-consensus" ->
             DesignClass Consensus
@@ -161,48 +167,8 @@ toDesignFilter key =
         "vote-remove" ->
             Vote False
 
-        {---
-        "design-keyword-synthetic" ->
-            DesignTag Synthetic
-
-        "design-keyword-de-novo" ->
-            DesignTag DeNovo
-
-        "design-keyword-novel" ->
-            DesignTag Novel
-
-        "design-keyword-designed" ->
-            DesignTag Designed
-
-        "design-keyword-protein-binding" ->
-            DesignTag ProteinBinding
-
-        "design-keyword-metal-binding" ->
-            DesignTag MetalBinding
-
-        "design-keyword-transcription" ->
-            DesignTag Transcription
-
-        "design-keyword-growth" ->
-            DesignTag Growth
-
-        "design-keyword-structural" ->
-            DesignTag Structural
-
-        "design-keyword-alpha-helical-bundle" ->
-            DesignTag AlphaHelicalBundle
-
-        "design-keyword-beta-beta-alpha" ->
-            DesignTag BetaBetaAlpha
-
-        "design-keyword-coiled-coil" ->
-            DesignTag CoiledCoil
-
-        "design-keyword-unknown" ->
-            DesignTag UnknownFunction
---}
         _ ->
-            ContainsText ""
+            ContainsTextParsed ""
 
 
 keyToLabel : String -> String
@@ -292,16 +258,61 @@ dateToPosition { firstDate, lastDate, date, height, radius } =
         |> (+) 3
 
 
-designMeetsAllFilters : List DesignFilter -> ProteinDesign -> Maybe ProteinDesign
-designMeetsAllFilters filters design =
-    List.all (\f -> designMeetsOneFilter design f) filters
-        |> (\allFiltersMet ->
-                if allFiltersMet then
-                    Just design
+parseStringToConditions : String -> Dict String (List (List String))
+parseStringToConditions searchString =
+    let
+        conditionsList =
+            List.map String.trim <| String.split "&&" searchString
 
-                else
-                    Nothing
-           )
+        updateDict condition dict =
+            if String.contains "!!" condition then
+                let
+                    splitConditions =
+                        if String.contains "||" condition then
+                            List.map String.trim (String.split "||" condition)
+
+                        else
+                            [ String.trim <| String.replace "!!" "" condition ]
+
+                    updatedList =
+                        case Dict.get "!!" dict of
+                            Just list ->
+                                list ++ [ splitConditions ]
+
+                            Nothing ->
+                                [ splitConditions ]
+                in
+                Dict.insert "!!" updatedList dict
+
+            else if String.contains "||" condition then
+                let
+                    splitConditions =
+                        String.split "||" condition
+                            |> List.map String.trim
+
+                    updatedList =
+                        case Dict.get "||" dict of
+                            Just list ->
+                                list ++ [ splitConditions ]
+
+                            Nothing ->
+                                [ splitConditions ]
+                in
+                Dict.insert "||" updatedList dict
+
+            else
+                let
+                    updatedList =
+                        case Dict.get "&&" dict of
+                            Just list ->
+                                list ++ [ [ condition ] ]
+
+                            Nothing ->
+                                [ [ condition ] ]
+                in
+                Dict.insert "&&" updatedList dict
+    in
+    List.foldl updateDict (Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]) conditionsList
 
 
 stubMeetsAllFilters : List DesignFilter -> ProteinDesignStub -> Maybe ProteinDesignStub
@@ -316,38 +327,46 @@ stubMeetsAllFilters filters design =
            )
 
 
-designMeetsOneFilter : ProteinDesign -> DesignFilter -> Bool
-designMeetsOneFilter design filter =
-    case filter of
-        ContainsText searchString ->
-            design
-                |> designSearchableText
-                |> String.contains (String.toLower searchString)
-
-        DateStart startDate ->
-            if Date.compare startDate design.release_date == LT then
-                True
-
-            else
-                False
-
-        DateEnd endDate ->
-            if Date.compare endDate design.release_date == GT then
-                True
-
-            else
-                False
-
-        DesignClass classification ->
-            classification == design.classification
-
-        Vote _ ->
-            True
-
-
 stubMeetsOneFilter : ProteinDesignStub -> DesignFilter -> Bool
 stubMeetsOneFilter design filter =
     case filter of
+        ContainsTextParsed string ->
+            let
+                searchDict =
+                    parseStringToConditions string
+
+                andConditions =
+                    case Dict.get "&&" searchDict of
+                        Just listOfListsOfConditions ->
+                            List.concatMap identity listOfListsOfConditions
+
+                        Nothing ->
+                            []
+
+                notConditions =
+                    case Dict.get "!!" searchDict of
+                        Just listOfListsOfConditions ->
+                            List.concatMap identity listOfListsOfConditions
+
+                        Nothing ->
+                            []
+
+                orConditions =
+                    Maybe.withDefault [] (Dict.get "||" searchDict)
+
+                searchableText =
+                    stubSearchableText design
+            in
+            if
+                List.all (\searchString -> String.contains (String.toLower searchString) searchableText) andConditions
+                    && (not <| List.any (\searchString -> String.contains (String.toLower searchString) searchableText) notConditions)
+                    && List.all (\eachOrSet -> List.any (\searchString -> String.contains (String.toLower searchString) searchableText) eachOrSet) orConditions
+            then
+                True
+
+            else
+                False
+
         DateStart startDate ->
             if Date.compare startDate design.release_date == LT then
                 True
@@ -362,16 +381,5 @@ stubMeetsOneFilter design filter =
             else
                 False
 
-        ContainsText searchString ->
-            design
-                |> stubSearchableText
-                |> String.contains (String.toLower searchString)
-
         _ ->
             True
-
-
-
--- to fix Debug.todo
---DesignTag tag ->
---    List.member tag design.tags

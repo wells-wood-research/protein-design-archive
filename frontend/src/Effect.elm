@@ -6,7 +6,7 @@ port module Effect exposing
     , pushRoutePath, replaceRoutePath
     , loadExternalUrl, back
     , map, toCmd
-    , renderVegaPlot, resetViewport
+    , addDesignsToDownload, downloadFile, removeDesignsFromDownload, renderVegaPlot, resetViewport
     )
 
 {-|
@@ -27,8 +27,11 @@ port module Effect exposing
 import Browser.Dom as Dom
 import Browser.Navigation
 import Dict exposing (Dict)
+import File exposing (File)
+import File.Download as Download
 import Plots exposing (PlotData)
-import Route exposing (Route)
+import ProteinDesign exposing (DownloadFileType)
+import Route
 import Route.Path
 import Shared.Model
 import Shared.Msg
@@ -55,6 +58,9 @@ type Effect msg
     | Back
       -- DOM
     | ResetViewport msg
+      -- DOWNLOAD
+    | AddDesignsToDownload (List String)
+    | RemoveDesignsFromDownload (List String)
       -- SHARED
     | SendSharedMsg Shared.Msg.Msg
       -- PORTS
@@ -162,6 +168,30 @@ resetViewport msg =
 
 
 
+-- DOWNLOAD
+
+
+addDesignsToDownload : List String -> Effect msg
+addDesignsToDownload designIds =
+    AddDesignsToDownload designIds
+
+
+removeDesignsFromDownload : List String -> Effect msg
+removeDesignsFromDownload designIds =
+    RemoveDesignsFromDownload designIds
+
+
+downloadFile : String -> String -> DownloadFileType -> Effect msg
+downloadFile fileName fileContent fileType =
+    case fileType of
+        ProteinDesign.Json ->
+            sendCmd (Download.string ("pda_" ++ fileName ++ ".json") "application/json" fileContent)
+
+        ProteinDesign.Csv ->
+            sendCmd (Download.string ("pda_" ++ fileName ++ ".csv") "text/csv" fileContent)
+
+
+
 -- Ports
 
 
@@ -200,6 +230,12 @@ map fn effect =
 
         ResetViewport msg ->
             ResetViewport <| fn msg
+
+        AddDesignsToDownload designIds ->
+            AddDesignsToDownload designIds
+
+        RemoveDesignsFromDownload designIds ->
+            RemoveDesignsFromDownload designIds
 
         LoadExternalUrl url ->
             LoadExternalUrl url
@@ -248,6 +284,14 @@ toCmd options effect =
 
         ResetViewport msg ->
             Task.perform (\_ -> msg) (Dom.setViewport 0 0)
+
+        AddDesignsToDownload designIds ->
+            Task.succeed (Shared.Msg.AddDesignsToDownload designIds)
+                |> Task.perform options.fromSharedMsg
+
+        RemoveDesignsFromDownload designIds ->
+            Task.succeed (Shared.Msg.RemoveDesignsFromDownload designIds)
+                |> Task.perform options.fromSharedMsg
 
         SendSharedMsg sharedMsg ->
             Task.succeed sharedMsg

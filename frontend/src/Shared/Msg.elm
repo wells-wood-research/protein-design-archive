@@ -1,5 +1,6 @@
 module Shared.Msg exposing (Msg(..))
 
+import Browser.Dom
 import Http
 import ProteinDesign exposing (ProteinDesign)
 
@@ -13,3 +14,8 @@ own file, so they can be imported by `Effect.elm`
 -}
 type Msg
     = DesignsDataReceived (Result Http.Error (List ProteinDesign))
+    | AddDesignsToDownload (List String)
+    | RemoveDesignsFromDownload (List String)
+    | WindowResizes Int Int
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
+    | ViewportReset
