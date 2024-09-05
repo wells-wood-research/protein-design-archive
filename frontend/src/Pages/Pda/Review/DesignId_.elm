@@ -15,7 +15,7 @@ import Element.Input as Input
 import Get exposing (..)
 import Http
 import Page exposing (Page)
-import Pages.Designs.DesignId_ as Details
+import Pages.Pda.Designs.DesignId_ as Details
 import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (ProteinDesign)
 import RemoteData exposing (RemoteData(..))
