@@ -258,7 +258,6 @@ update shared msg model =
                         filteredDesignStubs =
                             loadedDesignStubs
                                 |> Dict.values
-                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
                                 |> List.map (\x -> x.pdb)
                     in
                     ( model, Effect.removeDesignsFromDownload filteredDesignStubs )
@@ -491,14 +490,14 @@ downloadArea shared model =
             getScreenWidthInt model.mScreenWidthF
 
         widthButton =
-            if screenWidth < 900 then
+            if screenWidth < 1200 then
                 Element.fill |> maximum (screenWidth - 10)
 
             else
                 Element.px 300
 
         buttonAttributes =
-            if screenWidth < 900 then
+            if screenWidth < 1200 then
                 [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
                 , Border.color <| rgb255 220 220 220
                 ]
@@ -509,7 +508,7 @@ downloadArea shared model =
                 ]
 
         elementType =
-            if screenWidth < 900 then
+            if screenWidth < 1200 then
                 column
 
             else
@@ -523,13 +522,10 @@ downloadArea shared model =
                , Border.color <| rgb255 220 220 220
                ]
         )
-        [ downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download all selected as CSV")
-        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download all selected as JSON")
-        , if List.all (\design -> List.member design toDownload) filteredDesignStubs then
-            downloadButton widthButton buttonAttributes (Just RemoveAllSelected) (text "Remove all from download selection")
-
-          else
-            downloadButton widthButton buttonAttributes (Just AddAllSelected) (text "Add to download list")
+        [ downloadButton widthButton buttonAttributes (Just AddAllSelected) (text "Add displayed")
+        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download as CSV")
+        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download as JSON")
+        , downloadButton widthButton buttonAttributes (Just RemoveAllSelected) (text "Clear download list")
         ]
 
 
