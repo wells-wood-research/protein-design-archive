@@ -282,7 +282,7 @@ details shared model =
             getScreenWidthInt model.mScreenWidthF
 
         screenHeight =
-            getScreenWidthInt model.mScreenHeightF - 210
+            getScreenWidthInt model.mScreenHeightF - 130
     in
     column
         [ width (fill |> maximum screenWidth) ]

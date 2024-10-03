@@ -17,10 +17,8 @@ view mScreenWidthF props =
     in
     { title = props.title
     , attributes =
-        [ Background.color <|
-            Element.rgb255 250 250 250
-        ]
-            ++ props.attributes
+        (Background.color <| Element.rgb255 250 250 250)
+            :: props.attributes
     , element =
         column
             props.attributes

@@ -391,7 +391,7 @@ homeView shared model =
             getScreenWidthInt model.mScreenWidthF
 
         screenHeight =
-            getScreenWidthInt model.mScreenHeightF - 210
+            getScreenWidthInt model.mScreenHeightF - 130
     in
     case model.designStubs of
         RemoteData.NotAsked ->
