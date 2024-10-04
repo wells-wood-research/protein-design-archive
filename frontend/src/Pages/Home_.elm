@@ -65,6 +65,8 @@ type alias Model =
     , mScreenHeightF : Maybe Float
     , dataDownload : RemoteData Http.Error String
     , searchString : String
+    , sliderSimilaritySequenceValue : Float
+    , sliderSimilarityStructureValue : Float
     }
 
 
@@ -81,6 +83,8 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
       , searchString = ""
+      , sliderSimilaritySequenceValue = 5000.0
+      , sliderSimilarityStructureValue = 100.0
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -107,6 +111,7 @@ type Msg
     = UpdateFilters String DesignFilter
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
+    | UpdateSimilaritySlider String Float
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
     | AddAllSelected
@@ -242,6 +247,21 @@ update shared msg model =
                             update shared
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
+
+                UpdateSimilaritySlider key threshold ->
+                    case key of
+                        "similarity-sequence-bit" ->
+                            update shared
+                                (UpdateFilters key (SimilaritySequence threshold))
+                                { model | sliderSimilaritySequenceValue = threshold }
+
+                        "similarity-structure-lddt" ->
+                            update shared
+                                (UpdateFilters key (SimilarityStructure threshold))
+                                { model | sliderSimilarityStructureValue = threshold }
+
+                        _ ->
+                            update shared msg model
 
                 AddAllSelected ->
                     let
@@ -637,17 +657,14 @@ similarityFilteringArea model =
         Just widthF ->
             if widthF <= 900.0 then
                 column (Style.monospacedFont ++ [ centerX, spacing 10, width fill ])
-                    [ row []
-                        [ el [ centerX, paddingXY 10 0 ]
-                            (html <|
-                                FeatherIcons.toHtml [] <|
-                                    FeatherIcons.withSize 24 <|
-                                        FeatherIcons.calendar
-                            )
-                        , text "Type to show designs with max. similarity <="
-                        ]
+                    [ el [ centerX, paddingXY 10 0 ]
+                        (html <|
+                            FeatherIcons.toHtml [] <|
+                                FeatherIcons.withSize 24 <|
+                                    FeatherIcons.calendar
+                        )
+                    , text "Slide to set similarity threshold: "
                     , sequenceSimilarityField model
-                    , text " AND "
                     , structureSimilarityField model
                     ]
 
@@ -659,9 +676,8 @@ similarityFilteringArea model =
                                 FeatherIcons.withSize 24 <|
                                     FeatherIcons.calendar
                         )
-                    , text "Type to show designs with max. similarity <="
+                    , text "Slide to set similarity threshold: "
                     , sequenceSimilarityField model
-                    , text " AND "
                     , structureSimilarityField model
                     ]
 
@@ -673,9 +689,8 @@ similarityFilteringArea model =
                             FeatherIcons.withSize 24 <|
                                 FeatherIcons.calendar
                     )
-                , text "Type to show designs with max. similarity <="
+                , text "Slide to set similarity threshold: "
                 , sequenceSimilarityField model
-                , text " AND/OR "
                 , structureSimilarityField model
                 ]
 
@@ -841,42 +856,20 @@ dateEndField model =
 sequenceSimilarityField : Model -> Element Msg
 sequenceSimilarityField model =
     row [ alignLeft, width fill ]
-        [ el [ paddingXY 5 0 ]
-            (Input.text
-                [ width <| px 100
-                , Background.color <|
-                    case model.mEndDate of
-                        Nothing ->
-                            rgb255 255 255 255
-
-                        Just "" ->
-                            rgb255 255 255 255
-
-                        Just string ->
-                            case Date.fromIsoString <| string of
-                                Ok endDate ->
-                                    case Date.fromIsoString <| Maybe.withDefault "" model.mStartDate of
-                                        Ok startDate ->
-                                            if Date.compare endDate startDate == GT then
-                                                rgb255 223 255 214
-
-                                            else
-                                                rgb255 255 215 213
-
-                                        Err _ ->
-                                            rgb255 223 255 214
-
-                                Err _ ->
-                                    rgb255 255 215 213
-                ]
-                { onChange =
-                    \string ->
-                        UpdateEndDateTextField string
-                , text = Maybe.withDefault "" model.mEndDate
-                , placeholder = Just <| Input.placeholder [] (text "e.g. 50")
-                , label = Input.labelHidden "Filter Designs by Similarity - sequence"
-                }
-            )
+        [ Input.slider
+            [ paddingXY 5 0
+            , width <| px 200
+            ]
+            { onChange =
+                \threshold ->
+                    UpdateSimilaritySlider defaultKeys.similaritySequenceKey threshold
+            , label = Input.labelHidden "Filter Designs by Similarity - sequence"
+            , min = 0.0
+            , max = 5000.0
+            , value = model.sliderSimilaritySequenceValue
+            , thumb = Input.defaultThumb
+            , step = Nothing
+            }
         , text " bit score (sequence)"
         ]
 
@@ -884,41 +877,19 @@ sequenceSimilarityField model =
 structureSimilarityField : Model -> Element Msg
 structureSimilarityField model =
     row [ alignLeft, width fill ]
-        [ el [ paddingXY 5 0 ]
-            (Input.text
-                [ width <| px 100
-                , Background.color <|
-                    case model.mEndDate of
-                        Nothing ->
-                            rgb255 255 255 255
-
-                        Just "" ->
-                            rgb255 255 255 255
-
-                        Just string ->
-                            case Date.fromIsoString <| string of
-                                Ok endDate ->
-                                    case Date.fromIsoString <| Maybe.withDefault "" model.mStartDate of
-                                        Ok startDate ->
-                                            if Date.compare endDate startDate == GT then
-                                                rgb255 223 255 214
-
-                                            else
-                                                rgb255 255 215 213
-
-                                        Err _ ->
-                                            rgb255 223 255 214
-
-                                Err _ ->
-                                    rgb255 255 215 213
-                ]
-                { onChange =
-                    \string ->
-                        UpdateEndDateTextField string
-                , text = Maybe.withDefault "" model.mEndDate
-                , placeholder = Just <| Input.placeholder [] (text "e.g. 90")
-                , label = Input.labelHidden "Filter Designs by Similarity - structure"
-                }
-            )
+        [ Input.slider
+            [ paddingXY 5 0
+            , width <| px 200
+            ]
+            { onChange =
+                \threshold ->
+                    UpdateSimilaritySlider defaultKeys.similarityStructureKey threshold
+            , label = Input.labelHidden "Filter Designs by Similarity - structure"
+            , min = 0.0
+            , max = 100.0
+            , value = model.sliderSimilarityStructureValue
+            , thumb = Input.defaultThumb
+            , step = Nothing
+            }
         , text "% LDDT (structure)"
         ]
