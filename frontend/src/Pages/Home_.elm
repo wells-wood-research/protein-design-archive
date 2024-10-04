@@ -454,6 +454,7 @@ homeView shared model =
                     [ downloadArea shared model
                     , searchArea model
                     , dateSearchArea model
+                    , similarityFilteringArea model
                     , numberArea model.mScreenWidthF designsToDisplay shared.designsToDownload
                     , designList widthDesignCard designsToDisplay
                     ]
@@ -597,7 +598,7 @@ dateSearchArea model =
                                     FeatherIcons.withSize 24 <|
                                         FeatherIcons.calendar
                             )
-                        , text "Type to show designs released "
+                        , text "Type to show designs released"
                         ]
                     , dateStartField model
                     , dateEndField model
@@ -611,7 +612,7 @@ dateSearchArea model =
                                 FeatherIcons.withSize 24 <|
                                     FeatherIcons.calendar
                         )
-                    , text "Type to show designs released "
+                    , text "Type to show designs released"
                     , dateStartField model
                     , dateEndField model
                     ]
@@ -624,9 +625,58 @@ dateSearchArea model =
                             FeatherIcons.withSize 24 <|
                                 FeatherIcons.calendar
                     )
-                , text "Type to show designs released "
+                , text "Type to show designs released"
                 , dateStartField model
                 , dateEndField model
+                ]
+
+
+similarityFilteringArea : Model -> Element Msg
+similarityFilteringArea model =
+    case model.mScreenWidthF of
+        Just widthF ->
+            if widthF <= 900.0 then
+                column (Style.monospacedFont ++ [ centerX, spacing 10, width fill ])
+                    [ row []
+                        [ el [ centerX, paddingXY 10 0 ]
+                            (html <|
+                                FeatherIcons.toHtml [] <|
+                                    FeatherIcons.withSize 24 <|
+                                        FeatherIcons.calendar
+                            )
+                        , text "Type to show designs with max. similarity <="
+                        ]
+                    , sequenceSimilarityField model
+                    , text " AND "
+                    , structureSimilarityField model
+                    ]
+
+            else
+                row (Style.monospacedFont ++ [ alignLeft, spaceEvenly ])
+                    [ el [ centerX, paddingXY 10 0 ]
+                        (html <|
+                            FeatherIcons.toHtml [] <|
+                                FeatherIcons.withSize 24 <|
+                                    FeatherIcons.calendar
+                        )
+                    , text "Type to show designs with max. similarity <="
+                    , sequenceSimilarityField model
+                    , text " AND "
+                    , structureSimilarityField model
+                    ]
+
+        _ ->
+            row (Style.monospacedFont ++ [ alignLeft ])
+                [ el [ centerX, paddingXY 10 0 ]
+                    (html <|
+                        FeatherIcons.toHtml [] <|
+                            FeatherIcons.withSize 24 <|
+                                FeatherIcons.calendar
+                    )
+                , text "Type to show designs with max. similarity <="
+                , sequenceSimilarityField model
+                , text " AND/OR "
+                , structureSimilarityField model
                 ]
 
 
@@ -705,7 +755,7 @@ numberSavedToDownloadArea designs =
 dateStartField : Model -> Element Msg
 dateStartField model =
     row [ alignLeft, width fill ]
-        [ text "after "
+        [ text " after "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
@@ -748,7 +798,7 @@ dateStartField model =
 dateEndField : Model -> Element Msg
 dateEndField model =
     row [ alignLeft, width fill ]
-        [ text "before"
+        [ text " before "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
@@ -785,4 +835,90 @@ dateEndField model =
                 , label = Input.labelHidden "Filter Designs by Date - end"
                 }
             )
+        ]
+
+
+sequenceSimilarityField : Model -> Element Msg
+sequenceSimilarityField model =
+    row [ alignLeft, width fill ]
+        [ el [ paddingXY 5 0 ]
+            (Input.text
+                [ width <| px 100
+                , Background.color <|
+                    case model.mEndDate of
+                        Nothing ->
+                            rgb255 255 255 255
+
+                        Just "" ->
+                            rgb255 255 255 255
+
+                        Just string ->
+                            case Date.fromIsoString <| string of
+                                Ok endDate ->
+                                    case Date.fromIsoString <| Maybe.withDefault "" model.mStartDate of
+                                        Ok startDate ->
+                                            if Date.compare endDate startDate == GT then
+                                                rgb255 223 255 214
+
+                                            else
+                                                rgb255 255 215 213
+
+                                        Err _ ->
+                                            rgb255 223 255 214
+
+                                Err _ ->
+                                    rgb255 255 215 213
+                ]
+                { onChange =
+                    \string ->
+                        UpdateEndDateTextField string
+                , text = Maybe.withDefault "" model.mEndDate
+                , placeholder = Just <| Input.placeholder [] (text "e.g. 50")
+                , label = Input.labelHidden "Filter Designs by Similarity - sequence"
+                }
+            )
+        , text " bit score (sequence)"
+        ]
+
+
+structureSimilarityField : Model -> Element Msg
+structureSimilarityField model =
+    row [ alignLeft, width fill ]
+        [ el [ paddingXY 5 0 ]
+            (Input.text
+                [ width <| px 100
+                , Background.color <|
+                    case model.mEndDate of
+                        Nothing ->
+                            rgb255 255 255 255
+
+                        Just "" ->
+                            rgb255 255 255 255
+
+                        Just string ->
+                            case Date.fromIsoString <| string of
+                                Ok endDate ->
+                                    case Date.fromIsoString <| Maybe.withDefault "" model.mStartDate of
+                                        Ok startDate ->
+                                            if Date.compare endDate startDate == GT then
+                                                rgb255 223 255 214
+
+                                            else
+                                                rgb255 255 215 213
+
+                                        Err _ ->
+                                            rgb255 223 255 214
+
+                                Err _ ->
+                                    rgb255 255 215 213
+                ]
+                { onChange =
+                    \string ->
+                        UpdateEndDateTextField string
+                , text = Maybe.withDefault "" model.mEndDate
+                , placeholder = Just <| Input.placeholder [] (text "e.g. 90")
+                , label = Input.labelHidden "Filter Designs by Similarity - structure"
+                }
+            )
+        , text "% LDDT (structure)"
         ]

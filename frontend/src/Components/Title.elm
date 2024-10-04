@@ -1,9 +1,11 @@
 module Components.Title exposing (view)
 
+import Date
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import FeatherIcons
+import File
 import Get exposing (getScreenWidthInt)
 import Style
 import View exposing (View)
@@ -86,5 +88,5 @@ footerArea =
                         ]
                 }
             ]
-        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date of last update: " ++ "2024-09-04" ]
+        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date of last update: " ++ "2024-09-30" ]
         ]
