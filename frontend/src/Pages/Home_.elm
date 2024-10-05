@@ -33,6 +33,8 @@ import Set
 import Shared
 import Shared.Msg exposing (Msg(..))
 import Style
+import Svg as S
+import Svg.Attributes as SAtt
 import Task
 import Time
 import Urls
@@ -83,7 +85,7 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
       , searchString = ""
-      , sliderSimilaritySequenceValue = 5000.0
+      , sliderSimilaritySequenceValue = 1000.0
       , sliderSimilarityStructureValue = 100.0
       }
     , Effect.batch
@@ -253,12 +255,12 @@ update shared msg model =
                         "similarity-sequence-bit" ->
                             update shared
                                 (UpdateFilters key (SimilaritySequence threshold))
-                                { model | sliderSimilaritySequenceValue = threshold }
+                                { model | sliderSimilaritySequenceValue = threshold, renderPlotState = AwaitingRender model.replotTime }
 
                         "similarity-structure-lddt" ->
                             update shared
                                 (UpdateFilters key (SimilarityStructure threshold))
-                                { model | sliderSimilarityStructureValue = threshold }
+                                { model | sliderSimilarityStructureValue = threshold, renderPlotState = AwaitingRender model.replotTime }
 
                         _ ->
                             update shared msg model
@@ -770,7 +772,7 @@ numberSavedToDownloadArea designs =
 dateStartField : Model -> Element Msg
 dateStartField model =
     row [ alignLeft, width fill ]
-        [ text " after "
+        [ text " after: "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
@@ -813,7 +815,7 @@ dateStartField model =
 dateEndField : Model -> Element Msg
 dateEndField model =
     row [ alignLeft, width fill ]
-        [ text " before "
+        [ text " before: "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
@@ -859,27 +861,51 @@ sequenceSimilarityField model =
         [ Input.slider
             [ paddingXY 5 0
             , width <| px 200
+            , Border.rounded 5
+            , Border.widthEach { bottom = 1, top = 1, left = 1, right = 1 }
+            , Border.color <| rgb255 220 220 220
+            , Background.gradient
+                { angle = pi / 2
+                , steps =
+                    [ rgb255 255 255 255
+                    , rgb255 255 215 128
+                    ]
+                }
             ]
             { onChange =
                 \threshold ->
                     UpdateSimilaritySlider defaultKeys.similaritySequenceKey threshold
             , label = Input.labelHidden "Filter Designs by Similarity - sequence"
             , min = 0.0
-            , max = 5000.0
+            , max = 1000.0
             , value = model.sliderSimilaritySequenceValue
             , thumb = Input.defaultThumb
-            , step = Nothing
+            , step = Just 5.0
             }
+        , text <| " " ++ (String.fromInt <| round model.sliderSimilaritySequenceValue)
         , text " bit score (sequence)"
         ]
 
 
 structureSimilarityField : Model -> Element Msg
 structureSimilarityField model =
-    row [ alignLeft, width fill ]
+    row
+        [ paddingXY 5 0
+        , alignLeft
+        , width fill
+        ]
         [ Input.slider
-            [ paddingXY 5 0
-            , width <| px 200
+            [ width <| px 200
+            , Border.rounded 5
+            , Border.widthEach { bottom = 1, top = 1, left = 1, right = 1 }
+            , Border.color <| rgb255 200 200 200
+            , Background.gradient
+                { angle = pi / 2
+                , steps =
+                    [ rgb255 255 255 255
+                    , rgb255 67 162 87
+                    ]
+                }
             ]
             { onChange =
                 \threshold ->
@@ -891,5 +917,6 @@ structureSimilarityField model =
             , thumb = Input.defaultThumb
             , step = Nothing
             }
-        , text "% LDDT (structure)"
+        , text <| " " ++ (String.fromInt <| round model.sliderSimilarityStructureValue)
+        , text " % LDDT (structure)"
         ]
