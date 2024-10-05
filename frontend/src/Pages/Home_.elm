@@ -857,6 +857,17 @@ dateEndField model =
 
 sequenceSimilarityField : Model -> Element Msg
 sequenceSimilarityField model =
+    let
+        stringScore =
+            String.fromInt <| round model.sliderSimilaritySequenceValue
+
+        scoreToShow =
+            if String.length stringScore < 4 then
+                " " ++ stringScore
+
+            else
+                stringScore
+    in
     row [ alignLeft, width fill ]
         [ Input.slider
             [ paddingXY 5 0
@@ -868,7 +879,7 @@ sequenceSimilarityField model =
                 { angle = pi / 2
                 , steps =
                     [ rgb255 255 255 255
-                    , rgb255 255 215 128
+                    , rgb255 68 129 187
                     ]
                 }
             ]
@@ -882,13 +893,24 @@ sequenceSimilarityField model =
             , thumb = Input.defaultThumb
             , step = Just 5.0
             }
-        , text <| " " ++ (String.fromInt <| round model.sliderSimilaritySequenceValue)
+        , text <| " " ++ scoreToShow
         , text " bit score (sequence)"
         ]
 
 
 structureSimilarityField : Model -> Element Msg
 structureSimilarityField model =
+    let
+        stringScore =
+            String.fromInt <| round model.sliderSimilarityStructureValue
+
+        scoreToShow =
+            if String.length stringScore < 3 then
+                " " ++ stringScore
+
+            else
+                stringScore
+    in
     row
         [ paddingXY 5 0
         , alignLeft
@@ -917,6 +939,6 @@ structureSimilarityField model =
             , thumb = Input.defaultThumb
             , step = Nothing
             }
-        , text <| " " ++ (String.fromInt <| round model.sliderSimilarityStructureValue)
+        , text <| " " ++ scoreToShow
         , text " % LDDT (structure)"
         ]
