@@ -332,7 +332,7 @@ designDetailsFromProteinDesign proteinDesign =
                             proteinDesign.seq_sim_designed
                     )
       }
-    , { header = "Sequence related natural proteins (bits)"
+    , { header = "Sequence related proteins (bits)"
       , property =
             if List.isEmpty proteinDesign.seq_sim_natural then
                 text "-"
@@ -380,7 +380,7 @@ designDetailsFromProteinDesign proteinDesign =
                             proteinDesign.struct_sim_designed
                     )
       }
-    , { header = "Structure related natural proteins (LDDT)"
+    , { header = "Structure related proteins (LDDT)"
       , property =
             if List.isEmpty proteinDesign.struct_sim_natural then
                 text "-"
@@ -398,7 +398,7 @@ designDetailsFromProteinDesign proteinDesign =
                                         { url = "https://www.rcsb.org/structure/" ++ related.partner
                                         , label = text <| related.partner
                                         }
-                                    , text <| "(" ++ String.fromFloat related.similarity ++ ")"
+                                    , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
                                     ]
                             )
                             proteinDesign.struct_sim_natural

@@ -393,5 +393,19 @@ stubMeetsOneFilter design filter =
             else
                 False
 
+        SimilaritySequence sim ->
+            if sim == 1000.0 || List.any (\related -> related.similarity <= sim) design.seq_sim_designed || List.any (\related -> related.similarity <= sim) design.seq_sim_natural then
+                True
+
+            else
+                False
+
+        SimilarityStructure sim ->
+            if sim == 1.0 || List.any (\related -> related.similarity <= sim) design.struct_sim_designed || List.any (\related -> related.similarity <= sim) design.struct_sim_natural then
+                True
+
+            else
+                False
+
         _ ->
             True

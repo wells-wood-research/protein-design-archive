@@ -59,6 +59,7 @@ type alias Model =
     { designStubs : RemoteData Http.Error (Dict String ProteinDesignStub)
     , errors : List AppError
     , designFilters : Dict String DesignFilter
+    , designFiltersCashed : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
     , replotTime : Int
@@ -77,6 +78,7 @@ init mSharedScreenWidthF mSharedScreenHeightF =
     ( { designStubs = Loading
       , errors = []
       , designFilters = Dict.empty
+      , designFiltersCashed = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
       , replotTime = 3
@@ -198,12 +200,12 @@ update shared msg model =
                 UpdateFilters key newFilter ->
                     let
                         newDesignFilters =
-                            Dict.insert key newFilter model.designFilters
+                            Dict.insert key newFilter model.designFiltersCashed
                     in
                     case newFilter of
                         ContainsTextParsed string ->
                             ( { model
-                                | designFilters = newDesignFilters
+                                | designFiltersCashed = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
                                 , searchString = string
                               }
@@ -212,7 +214,7 @@ update shared msg model =
 
                         _ ->
                             ( { model
-                                | designFilters = newDesignFilters
+                                | designFiltersCashed = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
                               }
                             , Effect.none
@@ -323,14 +325,14 @@ update shared msg model =
                         filteredDesignStubs =
                             loadedDesignStubs
                                 |> Dict.values
-                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFiltersCashed))
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
                     in
                     case model.renderPlotState of
                         AwaitingRender 0 ->
-                            ( { model | renderPlotState = Rendered }
+                            ( { model | renderPlotState = Rendered, designFilters = model.designFiltersCashed }
                             , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
                             )
 
@@ -822,7 +824,11 @@ sequenceSimilarityField model =
             else
                 stringScore
     in
-    row [ alignLeft, width fill ]
+    row
+        [ paddingXY 5 0
+        , alignLeft
+        , width fill
+        ]
         [ Input.slider
             [ paddingXY 5 0
             , width <| px 200
@@ -894,5 +900,5 @@ structureSimilarityField model =
             , step = Nothing
             }
         , text <| " " ++ scoreToShow
-        , text " % LDDT (structure)"
+        , text "% LDDT (structure)"
         ]
