@@ -39,10 +39,14 @@ type alias ProteinDesign =
     , synthesis_comment : String
     , previous_design : String
     , next_design : String
-    , seq_sim_designed : List Related
-    , seq_sim_natural : List Related
-    , struct_sim_designed : List Related
-    , struct_sim_natural : List Related
+    , seq_thr_sim_designed : List Related
+    , seq_thr_sim_natural : List Related
+    , struct_thr_sim_designed : List Related
+    , struct_thr_sim_natural : List Related
+    , seq_max_sim_designed : Related
+    , seq_max_sim_natural : Related
+    , struct_max_sim_designed : Related
+    , struct_max_sim_natural : Related
     }
 
 
@@ -55,10 +59,8 @@ type alias ProteinDesignStub =
     , keywords : List String
     , release_date : Date
     , publication : String
-    , seq_sim_designed : List Related
-    , seq_sim_natural : List Related
-    , struct_sim_designed : List Related
-    , struct_sim_natural : List Related
+    , seq_max_sim_natural : Related
+    , struct_max_sim_natural : Related
     }
 
 
@@ -78,10 +80,14 @@ type alias ProteinDesignDownload =
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
-    , seq_sim_designed : List Related
-    , seq_sim_natural : List Related
-    , struct_sim_designed : List Related
-    , struct_sim_natural : List Related
+    , seq_thr_sim_designed : List Related
+    , seq_thr_sim_natural : List Related
+    , struct_thr_sim_designed : List Related
+    , struct_thr_sim_natural : List Related
+    , seq_max_sim_designed : Related
+    , seq_max_sim_natural : Related
+    , struct_max_sim_designed : Related
+    , struct_max_sim_natural : Related
     }
 
 
@@ -89,6 +95,29 @@ type alias Related =
     { similarity : Float
     , partner : String
     }
+
+
+defaultRelated : Related
+defaultRelated =
+    { similarity = 0.0
+    , partner = ""
+    }
+
+
+emptyArrayAsDefault : Decoder Related
+emptyArrayAsDefault =
+    Decode.oneOf
+        [ Decode.list Decode.value
+            |> Decode.andThen
+                (\val ->
+                    if List.isEmpty val then
+                        Decode.succeed defaultRelated
+
+                    else
+                        Decode.fail "Expected an empty array."
+                )
+        , Decode.null defaultRelated
+        ]
 
 
 type Classification
@@ -190,10 +219,14 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "publication_country", proteinDesign.publication_country )
     , ( "subtitle", proteinDesign.subtitle )
     , ( "tags", String.join ";" proteinDesign.tags )
-    , ( "sequence_related_designs", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.seq_sim_designed )
-    , ( "sequence_related_natural_proteins", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.seq_sim_natural )
-    , ( "structure_related_designs", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.struct_sim_designed )
-    , ( "structure_related_natural_proteins", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.struct_sim_natural )
+    , ( "sequence_related_designs_above_50_bits", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.seq_thr_sim_designed )
+    , ( "sequence_related_natural_proteins_above_50_bits", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.seq_thr_sim_natural )
+    , ( "structure_related_designs_above_95_lddt", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.struct_thr_sim_designed )
+    , ( "structure_related_natural_above_95_lddt", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.struct_thr_sim_natural )
+    , ( "highest_sequence_related_design", relatedToString proteinDesign.seq_max_sim_designed )
+    , ( "highest_sequence_related_natural_protein", relatedToString proteinDesign.seq_max_sim_natural )
+    , ( "highest_structure_related_design", relatedToString proteinDesign.struct_max_sim_designed )
+    , ( "highest_structure_related_natural_protein", relatedToString proteinDesign.struct_max_sim_natural )
     ]
 
 
@@ -229,10 +262,14 @@ jsonValueFromProteinDesign proteinDesign =
                 , ( "tags", JsonEncode.string <| String.join ";" proteinDesign.tags )
                 , ( "keywords", JsonEncode.string <| String.join ";" proteinDesign.keywords )
                 , ( "abstract", JsonEncode.string <| proteinDesign.abstract )
-                , ( "sequence_related_designs", JsonEncode.list relatedEncoder proteinDesign.seq_sim_designed )
-                , ( "sequence_related_natural_proteins", JsonEncode.list relatedEncoder proteinDesign.seq_sim_natural )
-                , ( "structure_related_designs", JsonEncode.list relatedEncoder proteinDesign.struct_sim_designed )
-                , ( "structure_related_natural_proteins", JsonEncode.list relatedEncoder proteinDesign.struct_sim_natural )
+                , ( "sequence_related_designs_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_designed )
+                , ( "sequence_related_natural_proteins_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_natural )
+                , ( "structure_related_designs_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_designed )
+                , ( "structure_related_natural_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_natural )
+                , ( "highest_sequence_related_design", relatedEncoder proteinDesign.seq_max_sim_designed )
+                , ( "highest_sequence_related_natural_protein", relatedEncoder proteinDesign.seq_max_sim_natural )
+                , ( "highest_structure_related_design", relatedEncoder proteinDesign.struct_max_sim_designed )
+                , ( "highest_structure_related_natural_protein", relatedEncoder proteinDesign.struct_max_sim_natural )
                 ]
           )
         ]
@@ -310,7 +347,7 @@ designDetailsFromProteinDesign proteinDesign =
       }
     , { header = "Sequence related designs (bits)"
       , property =
-            if List.isEmpty proteinDesign.seq_sim_designed then
+            if List.isEmpty proteinDesign.seq_thr_sim_designed then
                 text "-"
 
             else
@@ -329,12 +366,12 @@ designDetailsFromProteinDesign proteinDesign =
                                     , text <| "(" ++ String.fromFloat related.similarity ++ ")"
                                     ]
                             )
-                            proteinDesign.seq_sim_designed
+                            proteinDesign.seq_thr_sim_designed
                     )
       }
     , { header = "Sequence related proteins (bits)"
       , property =
-            if List.isEmpty proteinDesign.seq_sim_natural then
+            if List.isEmpty proteinDesign.seq_thr_sim_natural then
                 text "-"
 
             else
@@ -353,12 +390,12 @@ designDetailsFromProteinDesign proteinDesign =
                                     , text <| "(" ++ String.fromFloat related.similarity ++ ")"
                                     ]
                             )
-                            proteinDesign.seq_sim_natural
+                            proteinDesign.seq_thr_sim_natural
                     )
       }
     , { header = "Structure related designs (LDDT)"
       , property =
-            if List.isEmpty proteinDesign.struct_sim_designed then
+            if List.isEmpty proteinDesign.struct_thr_sim_designed then
                 text "-"
 
             else
@@ -377,12 +414,12 @@ designDetailsFromProteinDesign proteinDesign =
                                     , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
                                     ]
                             )
-                            proteinDesign.struct_sim_designed
+                            proteinDesign.struct_thr_sim_designed
                     )
       }
     , { header = "Structure related proteins (LDDT)"
       , property =
-            if List.isEmpty proteinDesign.struct_sim_natural then
+            if List.isEmpty proteinDesign.struct_thr_sim_natural then
                 text "-"
 
             else
@@ -401,7 +438,7 @@ designDetailsFromProteinDesign proteinDesign =
                                     , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
                                     ]
                             )
-                            proteinDesign.struct_sim_natural
+                            proteinDesign.struct_thr_sim_natural
                     )
       }
     , { header = "Authors"
@@ -517,10 +554,14 @@ rawDesignDecoder =
         |> required "synthesis_comment" Decode.string
         |> optional "previous_design" Decode.string "/"
         |> optional "next_design" Decode.string "/"
-        |> required "seq_sim_designed" (Decode.list relatedDecoder)
-        |> required "seq_sim_natural" (Decode.list relatedDecoder)
-        |> required "struct_sim_designed" (Decode.list relatedDecoder)
-        |> required "struct_sim_natural" (Decode.list relatedDecoder)
+        |> required "seq_thr_sim_designed" (Decode.list relatedDecoder)
+        |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
+        |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
+        |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
 
 
 rawDesignStubDecoder : Decoder ProteinDesignStub
@@ -534,10 +575,8 @@ rawDesignStubDecoder =
         |> required "keywords" (Decode.list Decode.string)
         |> required "release_date" dateDecoder
         |> required "publication" Decode.string
-        |> required "seq_sim_designed" (Decode.list relatedDecoder)
-        |> required "seq_sim_natural" (Decode.list relatedDecoder)
-        |> required "struct_sim_designed" (Decode.list relatedDecoder)
-        |> required "struct_sim_natural" (Decode.list relatedDecoder)
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
 
 
 downloadDesignDecoder : Decoder ProteinDesignDownload
@@ -558,10 +597,14 @@ downloadDesignDecoder =
         |> required "exptl_method" (Decode.list Decode.string)
         |> required "formula_weight" Decode.float
         |> required "synthesis_comment" Decode.string
-        |> required "seq_sim_designed" (Decode.list relatedDecoder)
-        |> required "seq_sim_natural" (Decode.list relatedDecoder)
-        |> required "struct_sim_designed" (Decode.list relatedDecoder)
-        |> required "struct_sim_natural" (Decode.list relatedDecoder)
+        |> required "seq_thr_sim_designed" (Decode.list relatedDecoder)
+        |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
+        |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
+        |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
+        |> required "seq_max_sim_designed" relatedDecoder
+        |> required "seq_max_sim_natural" relatedDecoder
+        |> required "struct_max_sim_designed" relatedDecoder
+        |> required "struct_max_sim_natural" relatedDecoder
 
 
 relatedDecoder : Decoder Related
@@ -698,8 +741,8 @@ designSearchableText proteinDesign =
     , String.join " " proteinDesign.exptl_method
     , proteinDesign.synthesis_comment
     , xtalToString proteinDesign.crystal_structure
-    , String.join " " <| List.map relatedToString proteinDesign.seq_sim_natural
-    , String.join " " <| List.map relatedToString proteinDesign.struct_sim_natural
+    , String.join " " <| List.map relatedToString proteinDesign.seq_thr_sim_natural
+    , String.join " " <| List.map relatedToString proteinDesign.struct_thr_sim_natural
     ]
         |> String.join "\n"
         |> String.toLower
