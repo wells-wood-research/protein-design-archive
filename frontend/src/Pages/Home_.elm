@@ -473,7 +473,7 @@ homeView shared model =
                 [ Plots.timelinePlotView model.mScreenWidthF
                 , column
                     [ paddingXY 20 0, spacing 15, width (fill |> maximum screenWidth) ]
-                    [ downloadArea shared model
+                    [ downloadArea model
                     , searchArea model
                     , dateSearchArea model
                     , similarityFilteringArea model
@@ -492,23 +492,9 @@ designList widthDesignCard designs =
         (List.map (ProteinDesign.designCard widthDesignCard) designs)
 
 
-downloadArea : Shared.Model -> Model -> Element Msg
-downloadArea shared model =
+downloadArea : Model -> Element Msg
+downloadArea model =
     let
-        filteredDesignStubs =
-            case model.designStubs of
-                RemoteData.Success loadedDesignStubs ->
-                    loadedDesignStubs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
-                        |> List.map (\x -> x.pdb)
-
-                _ ->
-                    []
-
-        toDownload =
-            Set.toList shared.designsToDownload
-
         screenWidth =
             getScreenWidthInt model.mScreenWidthF
 
@@ -609,92 +595,60 @@ searchInput model =
 
 dateSearchArea : Model -> Element Msg
 dateSearchArea model =
-    case model.mScreenWidthF of
-        Just widthF ->
-            if widthF <= 900 then
-                column (Style.monospacedFont ++ [ centerX, spacing 10, width fill ])
-                    [ row []
-                        [ el [ centerX, paddingXY 10 0 ]
-                            (html <|
-                                FeatherIcons.toHtml [] <|
-                                    FeatherIcons.withSize 24 <|
-                                        FeatherIcons.calendar
-                            )
-                        , text "Type to show designs released"
-                        ]
-                    , dateStartField model
-                    , dateEndField model
-                    ]
+    let
+        screenWidth =
+            getScreenWidthInt model.mScreenWidthF
+
+        elementType =
+            if screenWidth < 1200 then
+                column
 
             else
-                row (Style.monospacedFont ++ [ alignLeft, spaceEvenly ])
-                    [ el [ centerX, paddingXY 10 0 ]
-                        (html <|
-                            FeatherIcons.toHtml [] <|
-                                FeatherIcons.withSize 24 <|
-                                    FeatherIcons.calendar
-                        )
-                    , text "Type to show designs released"
-                    , dateStartField model
-                    , dateEndField model
-                    ]
-
-        _ ->
-            row (Style.monospacedFont ++ [ alignLeft ])
-                [ el [ centerX, paddingXY 10 0 ]
-                    (html <|
-                        FeatherIcons.toHtml [] <|
-                            FeatherIcons.withSize 24 <|
-                                FeatherIcons.calendar
-                    )
-                , text "Type to show designs released"
-                , dateStartField model
-                , dateEndField model
-                ]
+                row
+    in
+    elementType
+        (Style.monospacedFont ++ [ centerX, spacing 10, alignLeft ])
+        [ row []
+            [ el [ centerX, paddingXY 10 0 ]
+                (html <|
+                    FeatherIcons.toHtml [] <|
+                        FeatherIcons.withSize 24 <|
+                            FeatherIcons.calendar
+                )
+            , text "Type to show designs released"
+            ]
+        , dateStartField model
+        , dateEndField model
+        ]
 
 
 similarityFilteringArea : Model -> Element Msg
 similarityFilteringArea model =
-    case model.mScreenWidthF of
-        Just widthF ->
-            if widthF <= 900.0 then
-                column (Style.monospacedFont ++ [ centerX, spacing 10, width fill ])
-                    [ el [ centerX, paddingXY 10 0 ]
-                        (html <|
-                            FeatherIcons.toHtml [] <|
-                                FeatherIcons.withSize 24 <|
-                                    FeatherIcons.calendar
-                        )
-                    , text "Slide to set similarity threshold: "
-                    , sequenceSimilarityField model
-                    , structureSimilarityField model
-                    ]
+    let
+        screenWidth =
+            getScreenWidthInt model.mScreenWidthF
+
+        elementType =
+            if screenWidth < 1300 then
+                column
 
             else
-                row (Style.monospacedFont ++ [ alignLeft, spaceEvenly ])
-                    [ el [ centerX, paddingXY 10 0 ]
-                        (html <|
-                            FeatherIcons.toHtml [] <|
-                                FeatherIcons.withSize 24 <|
-                                    FeatherIcons.calendar
-                        )
-                    , text "Slide to set similarity threshold: "
-                    , sequenceSimilarityField model
-                    , structureSimilarityField model
-                    ]
-
-        _ ->
-            row (Style.monospacedFont ++ [ alignLeft ])
-                [ el [ centerX, paddingXY 10 0 ]
-                    (html <|
-                        FeatherIcons.toHtml [] <|
-                            FeatherIcons.withSize 24 <|
-                                FeatherIcons.calendar
-                    )
-                , text "Slide to set similarity threshold: "
-                , sequenceSimilarityField model
-                , structureSimilarityField model
-                ]
+                row
+    in
+    elementType
+        (Style.monospacedFont ++ [ centerX, spacing 10, alignLeft ])
+        [ row []
+            [ el [ centerX, paddingXY 10 0 ]
+                (html <|
+                    FeatherIcons.toHtml [] <|
+                        FeatherIcons.withSize 24 <|
+                            FeatherIcons.barChart2
+                )
+            , text "Slide to set similarity threshold: "
+            ]
+        , sequenceSimilarityField model
+        , structureSimilarityField model
+        ]
 
 
 numberArea : Maybe Float -> List ProteinDesignStub -> Set.Set String -> Element Msg
