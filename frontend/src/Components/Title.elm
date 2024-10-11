@@ -1,11 +1,9 @@
 module Components.Title exposing (view)
 
-import Date
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import FeatherIcons
-import File
 import Get exposing (getScreenWidthInt)
 import Style
 import View exposing (View)

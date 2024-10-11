@@ -21,20 +21,18 @@ import Element.Border as Border
 import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
-import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
+import Get exposing (getScreenWidthFloat, getScreenWidthInt)
 import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder, fileTypeToString)
+import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set
 import Shared
 import Shared.Msg exposing (Msg(..))
 import Style
-import Svg as S
-import Svg.Attributes as SAtt
 import Task
 import Time
 import Urls
@@ -644,7 +642,7 @@ similarityFilteringArea model =
                 (html <|
                     FeatherIcons.toHtml [] <|
                         FeatherIcons.withSize 24 <|
-                            FeatherIcons.barChart2
+                            FeatherIcons.crosshair
                 )
             , text "Slide to set similarity threshold: "
             ]

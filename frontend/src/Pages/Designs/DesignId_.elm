@@ -4,7 +4,7 @@ import AppError exposing (AppError(..))
 import Browser.Dom
 import Browser.Events
 import Components.Title
-import Effect exposing (Effect, downloadFile)
+import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -17,14 +17,11 @@ import Html
 import Html.Attributes as HAtt
 import Http
 import Json.Decode
-import Json.Encode as JsonEncode exposing (Value)
-import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, reviewCommentsArea)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
-import Set exposing (Set)
 import Shared
 import Style
 import Task

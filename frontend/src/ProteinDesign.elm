@@ -1,18 +1,16 @@
 module ProteinDesign exposing (..)
 
 import Csv.Encode as CsvEncode
-import Date exposing (Date, Unit(..), fromIsoString)
+import Date exposing (Date, Unit(..))
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as JsonEncode exposing (..)
 import String exposing (fromFloat)
 import Style
-import Svg.Attributes exposing (fontSize)
 import Time exposing (Month(..))
 import Urls exposing (..)
 
