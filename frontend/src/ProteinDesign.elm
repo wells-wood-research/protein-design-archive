@@ -794,20 +794,24 @@ designCard widthDesignCard design =
 
 reviewCommentsArea : ProteinDesign -> Element msg
 reviewCommentsArea proteinDesign =
-    column (Style.monospacedFont ++ [ paddingXY 10 0 ])
-        (wrappedRow
-            [ Font.size 14
-            , paddingXY 0 5
-            ]
-            [ text <| "Manual data curation comments: " ]
-            :: List.map
-                (\comment ->
-                    wrappedRow
-                        [ Font.size 14 ]
-                        [ text <| comment ]
-                )
-                proteinDesign.review_comment
-        )
+    if proteinDesign.review_comment == [ "" ] then
+        text ""
+
+    else
+        column (Style.monospacedFont ++ [ paddingXY 10 0 ])
+            (wrappedRow
+                [ Font.size 14
+                , paddingXY 0 5
+                ]
+                [ text <| "Manual data curation comments: " ]
+                :: List.map
+                    (\comment ->
+                        wrappedRow
+                            [ Font.size 14 ]
+                            [ text <| comment ]
+                    )
+                    proteinDesign.review_comment
+            )
 
 
 designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
