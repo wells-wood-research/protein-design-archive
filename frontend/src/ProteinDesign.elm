@@ -120,6 +120,20 @@ emptyArrayAsDefault =
         ]
 
 
+relatedDetail : Related -> String -> Element msg
+relatedDetail related baseUrl =
+    row []
+        [ newTabLink
+            [ Font.color <| rgb255 104 176 171
+            , Font.underline
+            ]
+            { url = baseUrl ++ related.partner
+            , label = text <| related.partner
+            }
+        , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
+        ]
+
+
 type Classification
     = Minimal
     | Rational
@@ -278,255 +292,6 @@ jsonValueFromProteinDesign proteinDesign =
 jsonStringFromProteinDesign : ProteinDesign -> String
 jsonStringFromProteinDesign proteinDesign =
     JsonEncode.encode 4 (jsonValueFromProteinDesign proteinDesign)
-
-
-designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
-designDetailsFromProteinDesign proteinDesign =
-    [ { header = "PDB code"
-      , property =
-            newTabLink
-                [ Font.color <| rgb255 104 176 171
-                , Font.underline
-                ]
-                { url =
-                    "https://www.rcsb.org/structure/"
-                        ++ proteinDesign.pdb
-                , label =
-                    proteinDesign.pdb
-                        |> text
-                }
-      }
-    , { header = "Biological assembly"
-      , property =
-            el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width (fill |> maximum 350)
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
-      }
-    , { header = "Subtitle"
-      , property =
-            if String.isEmpty proteinDesign.subtitle then
-                text "-"
-
-            else
-                text <| proteinDesign.subtitle
-      }
-    , { header = "Classification"
-      , property =
-            if String.isEmpty <| classificationToString proteinDesign.classification then
-                text "-"
-
-            else
-                text <| classificationToString proteinDesign.classification
-      }
-    , { header = "Tags"
-      , property =
-            if List.isEmpty proteinDesign.tags then
-                text "-"
-
-            else
-                text <| String.join ", " proteinDesign.tags
-      }
-    , { header = "Release date"
-      , property =
-            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
-                text "-"
-
-            else
-                text <| Date.toIsoString proteinDesign.release_date
-      }
-    , { header = "Sequence related designs (bits)"
-      , property =
-            if List.isEmpty proteinDesign.seq_thr_sim_designed then
-                text "-"
-
-            else
-                row []
-                    (List.intersperse (text "; ") <|
-                        List.map
-                            (\related ->
-                                row []
-                                    [ newTabLink
-                                        [ Font.color <| rgb255 104 176 171
-                                        , Font.underline
-                                        ]
-                                        { url = "/designs/" ++ related.partner
-                                        , label = text <| related.partner
-                                        }
-                                    , text <| "(" ++ String.fromFloat related.similarity ++ ")"
-                                    ]
-                            )
-                            proteinDesign.seq_thr_sim_designed
-                    )
-      }
-    , { header = "Sequence related proteins (bits)"
-      , property =
-            if List.isEmpty proteinDesign.seq_thr_sim_natural then
-                text "-"
-
-            else
-                row []
-                    (List.intersperse (text "; ") <|
-                        List.map
-                            (\related ->
-                                row []
-                                    [ newTabLink
-                                        [ Font.color <| rgb255 104 176 171
-                                        , Font.underline
-                                        ]
-                                        { url = "https://www.rcsb.org/structure/" ++ related.partner
-                                        , label = text <| related.partner
-                                        }
-                                    , text <| "(" ++ String.fromFloat related.similarity ++ ")"
-                                    ]
-                            )
-                            proteinDesign.seq_thr_sim_natural
-                    )
-      }
-    , { header = "Structure related designs (LDDT)"
-      , property =
-            if List.isEmpty proteinDesign.struct_thr_sim_designed then
-                text "-"
-
-            else
-                row []
-                    (List.intersperse (text ";") <|
-                        List.map
-                            (\related ->
-                                row []
-                                    [ newTabLink
-                                        [ Font.color <| rgb255 104 176 171
-                                        , Font.underline
-                                        ]
-                                        { url = "/designs/" ++ related.partner
-                                        , label = text <| related.partner
-                                        }
-                                    , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
-                                    ]
-                            )
-                            proteinDesign.struct_thr_sim_designed
-                    )
-      }
-    , { header = "Structure related proteins (LDDT)"
-      , property =
-            if List.isEmpty proteinDesign.struct_thr_sim_natural then
-                text "-"
-
-            else
-                row []
-                    (List.intersperse (text "; ") <|
-                        List.map
-                            (\related ->
-                                row []
-                                    [ newTabLink
-                                        [ Font.color <| rgb255 104 176 171
-                                        , Font.underline
-                                        ]
-                                        { url = "https://www.rcsb.org/structure/" ++ related.partner
-                                        , label = text <| related.partner
-                                        }
-                                    , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
-                                    ]
-                            )
-                            proteinDesign.struct_thr_sim_natural
-                    )
-      }
-    , { header = "Authors"
-      , property =
-            if List.isEmpty proteinDesign.authors then
-                text "-"
-
-            else
-                text <| authorsToString proteinDesign.authors
-      }
-    , { header = "Publication"
-      , property =
-            if String.isEmpty proteinDesign.publication then
-                text "-"
-
-            else
-                text <| proteinDesign.publication
-      }
-    , { header = "Reference link"
-      , property =
-            if String.isEmpty proteinDesign.publication_ref.doi && String.isEmpty proteinDesign.publication_ref.pubmed then
-                text "-"
-
-            else
-                newTabLink
-                    [ Font.color <| rgb255 104 176 171
-                    , Font.underline
-                    ]
-                    { url =
-                        if String.isEmpty proteinDesign.publication_ref.doi then
-                            if String.isEmpty proteinDesign.publication_ref.pubmed then
-                                "https://www.rcsb.org/structure/"
-                                    ++ proteinDesign.pdb
-
-                            else
-                                "https://pubmed.ncbi.nlm.nih.gov/"
-                                    ++ proteinDesign.publication_ref.pubmed
-
-                        else
-                            "https://doi.org/"
-                                ++ proteinDesign.publication_ref.doi
-                    , label =
-                        (if String.isEmpty proteinDesign.publication_ref.doi then
-                            if String.isEmpty proteinDesign.publication_ref.pubmed then
-                                "-"
-
-                            else
-                                proteinDesign.publication_ref.pubmed
-
-                         else
-                            proteinDesign.publication_ref.doi
-                        )
-                            |> text
-                    }
-      }
-    , { header = "Symmetry group"
-      , property =
-            if String.isEmpty proteinDesign.symmetry then
-                text "-"
-
-            else
-                text <| proteinDesign.symmetry
-      }
-    , { header = "Experimental charact. method"
-      , property =
-            if List.isEmpty proteinDesign.exptl_method then
-                text "-"
-
-            else
-                text <| String.join "," proteinDesign.exptl_method
-      }
-    , { header = "Synthesis comment"
-      , property =
-            if String.isEmpty proteinDesign.synthesis_comment then
-                text "-"
-
-            else
-                text <| proteinDesign.synthesis_comment
-      }
-    , { header = "Formula weight"
-      , property =
-            if String.isEmpty <| String.fromFloat proteinDesign.formula_weight then
-                text "-"
-
-            else
-                text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
-      }
-    ]
 
 
 rawDesignDecoder : Decoder ProteinDesign
@@ -991,7 +756,7 @@ designCard widthDesignCard design =
         [ width <| widthDesignCard
         , clip
         ]
-        { url = "/designs/" ++ design.pdb
+        { url = Urls.internalRelatedLink ++ design.pdb
         , label =
             row
                 [ width <| widthDesignCard
@@ -1020,3 +785,216 @@ designCard widthDesignCard design =
                     ]
                 ]
         }
+
+
+designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
+designDetailsFromProteinDesign proteinDesign =
+    [ { header = "PDB code"
+      , property =
+            newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url =
+                    Urls.externalRelatedLink
+                        ++ proteinDesign.pdb
+                , label =
+                    proteinDesign.pdb
+                        |> text
+                }
+      }
+    , { header = "Biological assembly"
+      , property =
+            el
+                [ padding 2
+                , Border.width 2
+                , Border.color <| rgb255 220 220 220
+                , Border.rounded 3
+                , alignTop
+                , width (fill |> maximum 350)
+                ]
+                (image
+                    [ width fill ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
+                )
+      }
+    , { header = "Subtitle"
+      , property =
+            if String.isEmpty proteinDesign.subtitle then
+                text "-"
+
+            else
+                text <| proteinDesign.subtitle
+      }
+    , { header = "Classification"
+      , property =
+            if String.isEmpty <| classificationToString proteinDesign.classification then
+                text "-"
+
+            else
+                text <| classificationToString proteinDesign.classification
+      }
+    , { header = "Tags"
+      , property =
+            if List.isEmpty proteinDesign.tags then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.tags
+      }
+    , { header = "Release date"
+      , property =
+            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
+                text "-"
+
+            else
+                text <| Date.toIsoString proteinDesign.release_date
+      }
+    , { header = "Sequence related designs (bits)"
+      , property =
+            if List.isEmpty proteinDesign.seq_thr_sim_designed then
+                if proteinDesign.seq_max_sim_designed == defaultRelated then
+                    text "-"
+
+                else
+                    (\related -> relatedDetail related Urls.internalRelatedLink) proteinDesign.seq_max_sim_designed
+
+            else
+                row []
+                    (List.intersperse (text "; ") <|
+                        List.map (\related -> relatedDetail related Urls.internalRelatedLink) proteinDesign.seq_thr_sim_designed
+                    )
+      }
+    , { header = "Sequence related proteins (bits)"
+      , property =
+            if List.isEmpty proteinDesign.seq_thr_sim_natural then
+                if proteinDesign.seq_max_sim_natural == defaultRelated then
+                    text "-"
+
+                else
+                    (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.seq_max_sim_natural
+
+            else
+                row []
+                    (List.intersperse (text "; ") <|
+                        List.map (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.seq_thr_sim_natural
+                    )
+      }
+    , { header = "Structure related designs (LDDT)"
+      , property =
+            if List.isEmpty proteinDesign.struct_thr_sim_designed then
+                if proteinDesign.struct_max_sim_designed == defaultRelated then
+                    text "-"
+
+                else
+                    (\related -> relatedDetail related Urls.internalRelatedLink) proteinDesign.struct_max_sim_designed
+
+            else
+                row []
+                    (List.intersperse (text ";") <|
+                        List.map (\related -> relatedDetail related Urls.internalRelatedLink) proteinDesign.struct_thr_sim_designed
+                    )
+      }
+    , { header = "Structure related proteins (LDDT)"
+      , property =
+            if List.isEmpty proteinDesign.struct_thr_sim_natural then
+                if proteinDesign.struct_max_sim_natural == defaultRelated then
+                    text "-"
+
+                else
+                    (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.struct_max_sim_natural
+
+            else
+                row []
+                    (List.intersperse (text "; ") <|
+                        List.map (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.struct_thr_sim_natural
+                    )
+      }
+    , { header = "Authors"
+      , property =
+            if List.isEmpty proteinDesign.authors then
+                text "-"
+
+            else
+                text <| authorsToString proteinDesign.authors
+      }
+    , { header = "Publication"
+      , property =
+            if String.isEmpty proteinDesign.publication then
+                text "-"
+
+            else
+                text <| proteinDesign.publication
+      }
+    , { header = "Reference link"
+      , property =
+            if String.isEmpty proteinDesign.publication_ref.doi && String.isEmpty proteinDesign.publication_ref.pubmed then
+                text "-"
+
+            else
+                newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url =
+                        if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                Urls.externalRelatedLink
+                                    ++ proteinDesign.pdb
+
+                            else
+                                "https://pubmed.ncbi.nlm.nih.gov/"
+                                    ++ proteinDesign.publication_ref.pubmed
+
+                        else
+                            "https://doi.org/"
+                                ++ proteinDesign.publication_ref.doi
+                    , label =
+                        (if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                "-"
+
+                            else
+                                proteinDesign.publication_ref.pubmed
+
+                         else
+                            proteinDesign.publication_ref.doi
+                        )
+                            |> text
+                    }
+      }
+    , { header = "Symmetry group"
+      , property =
+            if String.isEmpty proteinDesign.symmetry then
+                text "-"
+
+            else
+                text <| proteinDesign.symmetry
+      }
+    , { header = "Experimental charact. method"
+      , property =
+            if List.isEmpty proteinDesign.exptl_method then
+                text "-"
+
+            else
+                text <| String.join "," proteinDesign.exptl_method
+      }
+    , { header = "Synthesis comment"
+      , property =
+            if String.isEmpty proteinDesign.synthesis_comment then
+                text "-"
+
+            else
+                text <| proteinDesign.synthesis_comment
+      }
+    , { header = "Formula weight"
+      , property =
+            if String.isEmpty <| String.fromFloat proteinDesign.formula_weight then
+                text "-"
+
+            else
+                text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
+      }
+    ]
