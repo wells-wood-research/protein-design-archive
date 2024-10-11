@@ -17,10 +17,8 @@ view mScreenWidthF props =
     in
     { title = props.title
     , attributes =
-        [ Background.color <|
-            Element.rgb255 250 250 250
-        ]
-            ++ props.attributes
+        (Background.color <| Element.rgb255 250 250 250)
+            :: props.attributes
     , element =
         column
             props.attributes
@@ -43,7 +41,7 @@ title screenWidth =
         )
     <|
         link [ centerX ]
-            { label = paragraph [] [ text "Protein Design Archive" ]
+            { label = paragraph [] [ text "The Protein Design Archive" ]
             , url = "/"
             }
 
@@ -88,5 +86,5 @@ footerArea =
                         ]
                 }
             ]
-        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date of last update: " ++ "2024-09-04" ]
+        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date of last update: " ++ "2024-09-30" ]
         ]

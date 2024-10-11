@@ -50,7 +50,9 @@ def get_all_design_stubs():
         "tags": 1,
         "keywords": 1,
         "release_date": 1,
-        "publication": 1
+        "publication": 1,
+        "seq_max_sim_natural": 1,
+        "struct_max_sim_natural": 1
     }
     designs = list(DESIGNS.find({}, projection=projection))
     return designs

@@ -3,7 +3,7 @@ module Plots exposing (PlotData, RenderPlotState(..), timelinePlotDesigns, timel
 import Date exposing (Unit(..))
 import Element exposing (..)
 import Element.Keyed as Keyed
-import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
+import Get exposing (getScreenWidthInt, getScreenWidthString)
 import Html
 import Html.Attributes as HAtt
 import ProteinDesign exposing (ProteinDesign, ProteinDesignStub)

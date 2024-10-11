@@ -20,6 +20,8 @@ type DesignFilter
     = ContainsTextParsed String
     | DateStart Date.Date
     | DateEnd Date.Date
+    | SimilaritySequence Float
+    | SimilarityStructure Float
     | DesignClass Classification
     | Vote Bool
 
@@ -33,6 +35,8 @@ defaultKeys :
     , dateEndKey : String
     , searchTextKey : String
     , searchTextParsedKey : String
+    , similaritySequenceKey : String
+    , similarityStructureKey : String
     , classificationMinimalKey : String
     , classificationRationalKey : String
     , classificationEngineeredKey : String
@@ -61,6 +65,8 @@ defaultKeys =
     , dateEndKey = "deposition-date-end"
     , searchTextKey = "search-text-string"
     , searchTextParsedKey = "search-text-parsed"
+    , similaritySequenceKey = "similarity-sequence-bit"
+    , similarityStructureKey = "similarity-structure-lddt"
     , classificationMinimalKey = "design-classification-minimal"
     , classificationRationalKey = "design-classification-rational"
     , classificationEngineeredKey = "design-classification-engineered"
@@ -135,6 +141,12 @@ toString filter =
 
             else
                 "remove"
+
+        SimilaritySequence threshold ->
+            "sequence similarity below " ++ String.fromFloat threshold
+
+        SimilarityStructure threshold ->
+            "structure similarity below " ++ String.fromFloat threshold
 
 
 toDesignFilter : String -> DesignFilter
@@ -376,6 +388,24 @@ stubMeetsOneFilter design filter =
 
         DateEnd endDate ->
             if Date.compare endDate design.release_date == GT then
+                True
+
+            else
+                False
+
+        SimilaritySequence sim ->
+            if sim == 1000.0 || design.seq_max_sim_natural.similarity <= sim then
+                True
+
+            else
+                False
+
+        SimilarityStructure sim ->
+            let
+                scaled_similarity =
+                    sim / 100.0
+            in
+            if scaled_similarity == 1.0 || design.struct_max_sim_natural.similarity < scaled_similarity then
                 True
 
             else

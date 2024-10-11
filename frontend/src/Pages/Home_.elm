@@ -21,12 +21,12 @@ import Element.Border as Border
 import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
-import Get exposing (getScreenWidthFloat, getScreenWidthInt, getScreenWidthString)
+import Get exposing (getScreenWidthFloat, getScreenWidthInt)
 import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder, fileTypeToString)
+import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set
@@ -57,6 +57,7 @@ type alias Model =
     { designStubs : RemoteData Http.Error (Dict String ProteinDesignStub)
     , errors : List AppError
     , designFilters : Dict String DesignFilter
+    , designFiltersCached : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
     , replotTime : Int
@@ -65,6 +66,8 @@ type alias Model =
     , mScreenHeightF : Maybe Float
     , dataDownload : RemoteData Http.Error String
     , searchString : String
+    , sliderSimilaritySequenceValue : Float
+    , sliderSimilarityStructureValue : Float
     }
 
 
@@ -73,6 +76,7 @@ init mSharedScreenWidthF mSharedScreenHeightF =
     ( { designStubs = Loading
       , errors = []
       , designFilters = Dict.empty
+      , designFiltersCached = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
       , replotTime = 3
@@ -81,6 +85,8 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
       , searchString = ""
+      , sliderSimilaritySequenceValue = 1000.0
+      , sliderSimilarityStructureValue = 100.0
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -107,6 +113,7 @@ type Msg
     = UpdateFilters String DesignFilter
     | UpdateStartDateTextField String
     | UpdateEndDateTextField String
+    | UpdateSimilaritySlider String Float
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
     | AddAllSelected
@@ -191,12 +198,12 @@ update shared msg model =
                 UpdateFilters key newFilter ->
                     let
                         newDesignFilters =
-                            Dict.insert key newFilter model.designFilters
+                            Dict.insert key newFilter model.designFiltersCached
                     in
                     case newFilter of
                         ContainsTextParsed string ->
                             ( { model
-                                | designFilters = newDesignFilters
+                                | designFiltersCached = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
                                 , searchString = string
                               }
@@ -205,7 +212,7 @@ update shared msg model =
 
                         _ ->
                             ( { model
-                                | designFilters = newDesignFilters
+                                | designFiltersCached = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
                               }
                             , Effect.none
@@ -243,6 +250,21 @@ update shared msg model =
                                 (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
                                 { model | mEndDate = ifEmptyOrNot string }
 
+                UpdateSimilaritySlider key threshold ->
+                    case key of
+                        "similarity-sequence-bit" ->
+                            update shared
+                                (UpdateFilters key (SimilaritySequence threshold))
+                                { model | sliderSimilaritySequenceValue = threshold, renderPlotState = AwaitingRender model.replotTime }
+
+                        "similarity-structure-lddt" ->
+                            update shared
+                                (UpdateFilters key (SimilarityStructure threshold))
+                                { model | sliderSimilarityStructureValue = threshold, renderPlotState = AwaitingRender model.replotTime }
+
+                        _ ->
+                            update shared msg model
+
                 AddAllSelected ->
                     let
                         filteredDesignStubs =
@@ -258,7 +280,6 @@ update shared msg model =
                         filteredDesignStubs =
                             loadedDesignStubs
                                 |> Dict.values
-                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
                                 |> List.map (\x -> x.pdb)
                     in
                     ( model, Effect.removeDesignsFromDownload filteredDesignStubs )
@@ -302,14 +323,14 @@ update shared msg model =
                         filteredDesignStubs =
                             loadedDesignStubs
                                 |> Dict.values
-                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFiltersCached))
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
                     in
                     case model.renderPlotState of
                         AwaitingRender 0 ->
-                            ( { model | renderPlotState = Rendered }
+                            ( { model | renderPlotState = Rendered, designFilters = model.designFiltersCached }
                             , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
                             )
 
@@ -329,7 +350,7 @@ update shared msg model =
                         heightF =
                             toFloat height
                     in
-                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.batch [ Effect.resetViewport ViewportReset, Effect.resizeShared (getScreenWidthInt model.mScreenWidthF) (getScreenWidthInt model.mScreenHeightF) ] )
 
                 ViewportResult result ->
                     case result of
@@ -340,7 +361,7 @@ update shared msg model =
                             ( model, Effect.none )
 
                 ViewportReset ->
-                    ( { model | renderPlotState = AwaitingRender model.replotTime }, Effect.none )
+                    ( { model | renderPlotState = AwaitingRender model.replotTime }, Effect.resizeShared (getScreenWidthInt model.mScreenWidthF) (getScreenWidthInt model.mScreenHeightF) )
 
                 _ ->
                     ( model, Effect.none )
@@ -391,7 +412,7 @@ homeView shared model =
             getScreenWidthInt model.mScreenWidthF
 
         screenHeight =
-            getScreenWidthInt model.mScreenHeightF - 210
+            getScreenWidthInt model.mScreenHeightF - 130
     in
     case model.designStubs of
         RemoteData.NotAsked ->
@@ -452,9 +473,10 @@ homeView shared model =
                 [ Plots.timelinePlotView model.mScreenWidthF
                 , column
                     [ paddingXY 20 0, spacing 15, width (fill |> maximum screenWidth) ]
-                    [ downloadArea shared model
+                    [ downloadArea model
                     , searchArea model
                     , dateSearchArea model
+                    , similarityFilteringArea model
                     , numberArea model.mScreenWidthF designsToDisplay shared.designsToDownload
                     , designList widthDesignCard designsToDisplay
                     ]
@@ -470,35 +492,21 @@ designList widthDesignCard designs =
         (List.map (ProteinDesign.designCard widthDesignCard) designs)
 
 
-downloadArea : Shared.Model -> Model -> Element Msg
-downloadArea shared model =
+downloadArea : Model -> Element Msg
+downloadArea model =
     let
-        filteredDesignStubs =
-            case model.designStubs of
-                RemoteData.Success loadedDesignStubs ->
-                    loadedDesignStubs
-                        |> Dict.values
-                        |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFilters))
-                        |> List.map (\x -> x.pdb)
-
-                _ ->
-                    []
-
-        toDownload =
-            Set.toList shared.designsToDownload
-
         screenWidth =
             getScreenWidthInt model.mScreenWidthF
 
         widthButton =
-            if screenWidth < 900 then
+            if screenWidth < 1200 then
                 Element.fill |> maximum (screenWidth - 10)
 
             else
                 Element.px 300
 
         buttonAttributes =
-            if screenWidth < 900 then
+            if screenWidth < 1200 then
                 [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
                 , Border.color <| rgb255 220 220 220
                 ]
@@ -509,7 +517,7 @@ downloadArea shared model =
                 ]
 
         elementType =
-            if screenWidth < 900 then
+            if screenWidth < 1200 then
                 column
 
             else
@@ -523,13 +531,10 @@ downloadArea shared model =
                , Border.color <| rgb255 220 220 220
                ]
         )
-        [ downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download all selected as CSV")
-        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download all selected as JSON")
-        , if List.all (\design -> List.member design toDownload) filteredDesignStubs then
-            downloadButton widthButton buttonAttributes (Just RemoveAllSelected) (text "Remove all from download selection")
-
-          else
-            downloadButton widthButton buttonAttributes (Just AddAllSelected) (text "Add to download list")
+        [ downloadButton widthButton buttonAttributes (Just AddAllSelected) (text "Add displayed")
+        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download as CSV")
+        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download as JSON")
+        , downloadButton widthButton buttonAttributes (Just RemoveAllSelected) (text "Clear download list")
         ]
 
 
@@ -590,48 +595,60 @@ searchInput model =
 
 dateSearchArea : Model -> Element Msg
 dateSearchArea model =
-    case model.mScreenWidthF of
-        Just widthF ->
-            if widthF <= 900 then
-                column (Style.monospacedFont ++ [ centerX, spacing 10, width fill ])
-                    [ row []
-                        [ el [ centerX, paddingXY 10 0 ]
-                            (html <|
-                                FeatherIcons.toHtml [] <|
-                                    FeatherIcons.withSize 24 <|
-                                        FeatherIcons.calendar
-                            )
-                        , text "Type to show designs released "
-                        ]
-                    , dateStartField model
-                    , dateEndField model
-                    ]
+    let
+        screenWidth =
+            getScreenWidthInt model.mScreenWidthF
+
+        elementType =
+            if screenWidth < 1200 then
+                column
 
             else
-                row (Style.monospacedFont ++ [ alignLeft, spaceEvenly ])
-                    [ el [ centerX, paddingXY 10 0 ]
-                        (html <|
-                            FeatherIcons.toHtml [] <|
-                                FeatherIcons.withSize 24 <|
-                                    FeatherIcons.calendar
-                        )
-                    , text "Type to show designs released "
-                    , dateStartField model
-                    , dateEndField model
-                    ]
+                row
+    in
+    elementType
+        (Style.monospacedFont ++ [ centerX, spacing 10, alignLeft ])
+        [ row []
+            [ el [ centerX, paddingXY 10 0 ]
+                (html <|
+                    FeatherIcons.toHtml [] <|
+                        FeatherIcons.withSize 24 <|
+                            FeatherIcons.calendar
+                )
+            , text "Type to show designs released"
+            ]
+        , dateStartField model
+        , dateEndField model
+        ]
 
-        _ ->
-            row (Style.monospacedFont ++ [ alignLeft ])
-                [ el [ centerX, paddingXY 10 0 ]
-                    (html <|
-                        FeatherIcons.toHtml [] <|
-                            FeatherIcons.withSize 24 <|
-                                FeatherIcons.calendar
-                    )
-                , text "Type to show designs released "
-                , dateStartField model
-                , dateEndField model
-                ]
+
+similarityFilteringArea : Model -> Element Msg
+similarityFilteringArea model =
+    let
+        screenWidth =
+            getScreenWidthInt model.mScreenWidthF
+
+        elementType =
+            if screenWidth < 1300 then
+                column
+
+            else
+                row
+    in
+    elementType
+        (Style.monospacedFont ++ [ centerX, spacing 10, alignLeft ])
+        [ row []
+            [ el [ centerX, paddingXY 10 0 ]
+                (html <|
+                    FeatherIcons.toHtml [] <|
+                        FeatherIcons.withSize 24 <|
+                            FeatherIcons.crosshair
+                )
+            , text "Slide to set similarity threshold: "
+            ]
+        , sequenceSimilarityField model
+        , structureSimilarityField model
+        ]
 
 
 numberArea : Maybe Float -> List ProteinDesignStub -> Set.Set String -> Element Msg
@@ -709,7 +726,7 @@ numberSavedToDownloadArea designs =
 dateStartField : Model -> Element Msg
 dateStartField model =
     row [ alignLeft, width fill ]
-        [ text "after "
+        [ text " after: "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
@@ -752,7 +769,7 @@ dateStartField model =
 dateEndField : Model -> Element Msg
 dateEndField model =
     row [ alignLeft, width fill ]
-        [ text "before"
+        [ text " before: "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
@@ -789,4 +806,97 @@ dateEndField model =
                 , label = Input.labelHidden "Filter Designs by Date - end"
                 }
             )
+        ]
+
+
+sequenceSimilarityField : Model -> Element Msg
+sequenceSimilarityField model =
+    let
+        stringScore =
+            String.fromInt <| round model.sliderSimilaritySequenceValue
+
+        scoreToShow =
+            if String.length stringScore < 4 then
+                " " ++ stringScore
+
+            else
+                stringScore
+    in
+    row
+        [ paddingXY 5 0
+        , alignLeft
+        , width fill
+        ]
+        [ Input.slider
+            [ paddingXY 5 0
+            , width <| px 200
+            , Border.rounded 5
+            , Border.widthEach { bottom = 1, top = 1, left = 1, right = 1 }
+            , Border.color <| rgb255 220 220 220
+            , Background.gradient
+                { angle = pi / 2
+                , steps =
+                    [ rgb255 255 255 255
+                    , rgb255 68 129 187
+                    ]
+                }
+            ]
+            { onChange =
+                \threshold ->
+                    UpdateSimilaritySlider defaultKeys.similaritySequenceKey threshold
+            , label = Input.labelHidden "Filter Designs by Similarity - sequence"
+            , min = 0.0
+            , max = 1000.0
+            , value = model.sliderSimilaritySequenceValue
+            , thumb = Input.defaultThumb
+            , step = Just 5.0
+            }
+        , text <| " " ++ scoreToShow
+        , text " bit score (sequence)"
+        ]
+
+
+structureSimilarityField : Model -> Element Msg
+structureSimilarityField model =
+    let
+        stringScore =
+            String.fromInt <| round model.sliderSimilarityStructureValue
+
+        scoreToShow =
+            if String.length stringScore < 3 then
+                " " ++ stringScore
+
+            else
+                stringScore
+    in
+    row
+        [ paddingXY 5 0
+        , alignLeft
+        , width fill
+        ]
+        [ Input.slider
+            [ width <| px 200
+            , Border.rounded 5
+            , Border.widthEach { bottom = 1, top = 1, left = 1, right = 1 }
+            , Border.color <| rgb255 200 200 200
+            , Background.gradient
+                { angle = pi / 2
+                , steps =
+                    [ rgb255 255 255 255
+                    , rgb255 67 162 87
+                    ]
+                }
+            ]
+            { onChange =
+                \threshold ->
+                    UpdateSimilaritySlider defaultKeys.similarityStructureKey threshold
+            , label = Input.labelHidden "Filter Designs by Similarity - structure"
+            , min = 0.0
+            , max = 100.0
+            , value = model.sliderSimilarityStructureValue
+            , thumb = Input.defaultThumb
+            , step = Nothing
+            }
+        , text <| " " ++ scoreToShow
+        , text "% LDDT (structure)"
         ]

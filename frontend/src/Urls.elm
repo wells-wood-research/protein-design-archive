@@ -24,3 +24,13 @@ allDesignStubs =
 designDetailsFromId : String -> String
 designDetailsFromId designId =
     "http://localhost:5000/design-details/" ++ designId
+
+
+externalRelatedLink : String
+externalRelatedLink =
+    "https://www.rcsb.org/structure/"
+
+
+internalRelatedLink : String
+internalRelatedLink =
+    "/designs/"

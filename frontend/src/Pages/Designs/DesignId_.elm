@@ -4,7 +4,7 @@ import AppError exposing (AppError(..))
 import Browser.Dom
 import Browser.Events
 import Components.Title
-import Effect exposing (Effect, downloadFile)
+import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -17,14 +17,12 @@ import Html
 import Html.Attributes as HAtt
 import Http
 import Json.Decode
-import Json.Encode as JsonEncode exposing (Value)
-import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, fileTypeToString)
+import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, reviewCommentsArea)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
-import Set exposing (Set)
+import Set
 import Shared
 import Style
 import Task
@@ -282,7 +280,7 @@ details shared model =
             getScreenWidthInt model.mScreenWidthF
 
         screenHeight =
-            getScreenWidthInt model.mScreenHeightF - 210
+            getScreenWidthInt model.mScreenHeightF - 130
     in
     column
         [ width (fill |> maximum screenWidth) ]
@@ -480,7 +478,7 @@ designDetailsBody screenWidth proteinDesign =
     column
         ([ centerX
          , width fill
-         , padding 30
+         , paddingXY 30 10
          , spacing 30
          , height fill
          ]
@@ -703,11 +701,33 @@ designDetailsBody screenWidth proteinDesign =
             , paragraph
                 (Style.monospacedFont
                     ++ [ Font.justify
-                       , width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
+                       , width (fill |> maximum (getScreenWidthIntNgl <| Just (toFloat screenWidth)))
                        ]
                 )
                 [ proteinDesign.abstract
                     |> text
                 ]
+            , paragraph
+                Style.h2Font
+                [ text "Curation comments"
+                ]
+            , column
+                (Style.monospacedFont
+                    ++ [ Font.justify
+                       , width <| px <| (getScreenWidthIntNgl <| Just (toFloat screenWidth))
+                       ]
+                )
+                (if proteinDesign.review_comment == [ "" ] then
+                    [ text "" ]
+
+                 else
+                    List.map
+                        (\comment ->
+                            wrappedRow
+                                [ width fill ]
+                                [ row [ width fill ] [ text comment ] ]
+                        )
+                        proteinDesign.review_comment
+                )
             ]
         ]

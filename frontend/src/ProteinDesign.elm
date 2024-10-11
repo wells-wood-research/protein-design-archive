@@ -1,12 +1,11 @@
 module ProteinDesign exposing (..)
 
 import Csv.Encode as CsvEncode
-import Date exposing (Date, Unit(..), fromIsoString)
+import Date exposing (Date, Unit(..))
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Html exposing (header)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as JsonEncode exposing (..)
@@ -39,8 +38,15 @@ type alias ProteinDesign =
     , synthesis_comment : String
     , previous_design : String
     , next_design : String
-    , related_designs : List String
-    , related_natural : List String
+    , seq_thr_sim_designed : List Related
+    , seq_thr_sim_natural : List Related
+    , struct_thr_sim_designed : List Related
+    , struct_thr_sim_natural : List Related
+    , seq_max_sim_designed : Related
+    , seq_max_sim_natural : Related
+    , struct_max_sim_designed : Related
+    , struct_max_sim_natural : Related
+    , review_comment : List String
     }
 
 
@@ -53,6 +59,8 @@ type alias ProteinDesignStub =
     , keywords : List String
     , release_date : Date
     , publication : String
+    , seq_max_sim_natural : Related
+    , struct_max_sim_natural : Related
     }
 
 
@@ -72,9 +80,59 @@ type alias ProteinDesignDownload =
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
-    , related_designs : List String
-    , related_natural : List String
+    , seq_thr_sim_designed : List Related
+    , seq_thr_sim_natural : List Related
+    , struct_thr_sim_designed : List Related
+    , struct_thr_sim_natural : List Related
+    , seq_max_sim_designed : Related
+    , seq_max_sim_natural : Related
+    , struct_max_sim_designed : Related
+    , struct_max_sim_natural : Related
+    , review_comment : List String
     }
+
+
+type alias Related =
+    { similarity : Float
+    , partner : String
+    }
+
+
+defaultRelated : Related
+defaultRelated =
+    { similarity = 0.0
+    , partner = ""
+    }
+
+
+emptyArrayAsDefault : Decoder Related
+emptyArrayAsDefault =
+    Decode.oneOf
+        [ Decode.list Decode.value
+            |> Decode.andThen
+                (\val ->
+                    if List.isEmpty val then
+                        Decode.succeed defaultRelated
+
+                    else
+                        Decode.fail "Expected an empty array."
+                )
+        , Decode.null defaultRelated
+        ]
+
+
+relatedDetail : Related -> String -> Element msg
+relatedDetail related baseUrl =
+    row []
+        [ newTabLink
+            [ Font.color <| rgb255 104 176 171
+            , Font.underline
+            ]
+            { url = baseUrl ++ related.partner
+            , label = text <| related.partner
+            }
+        , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
+        ]
 
 
 type Classification
@@ -126,8 +184,6 @@ type alias Chain =
     , chain_seq_unnat : String
     , chain_seq_nat : String
     , chain_length : Int
-    , chain_id_pdb : List String
-    , chain_id_auth : List String
     }
 
 
@@ -178,8 +234,14 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "publication_country", proteinDesign.publication_country )
     , ( "subtitle", proteinDesign.subtitle )
     , ( "tags", String.join ";" proteinDesign.tags )
-    , ( "related_designs", String.join ";" proteinDesign.related_designs )
-    , ( "related_natural_proteins", String.join ";" proteinDesign.related_natural )
+    , ( "sequence_related_designs_above_50_bits", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.seq_thr_sim_designed )
+    , ( "sequence_related_natural_proteins_above_50_bits", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.seq_thr_sim_natural )
+    , ( "structure_related_designs_above_95_lddt", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.struct_thr_sim_designed )
+    , ( "structure_related_natural_above_95_lddt", String.join ";" <| List.map (\related -> relatedToString related) proteinDesign.struct_thr_sim_natural )
+    , ( "highest_sequence_related_design", relatedToString proteinDesign.seq_max_sim_designed )
+    , ( "highest_sequence_related_natural_protein", relatedToString proteinDesign.seq_max_sim_natural )
+    , ( "highest_structure_related_design", relatedToString proteinDesign.struct_max_sim_designed )
+    , ( "highest_structure_related_natural_protein", relatedToString proteinDesign.struct_max_sim_natural )
     ]
 
 
@@ -215,8 +277,14 @@ jsonValueFromProteinDesign proteinDesign =
                 , ( "tags", JsonEncode.string <| String.join ";" proteinDesign.tags )
                 , ( "keywords", JsonEncode.string <| String.join ";" proteinDesign.keywords )
                 , ( "abstract", JsonEncode.string <| proteinDesign.abstract )
-                , ( "related_designed_proteins", JsonEncode.string <| String.join ";" proteinDesign.related_designs )
-                , ( "related_natural_proteins", JsonEncode.string <| String.join ";" proteinDesign.related_natural )
+                , ( "sequence_related_designs_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_designed )
+                , ( "sequence_related_natural_proteins_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_natural )
+                , ( "structure_related_designs_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_designed )
+                , ( "structure_related_natural_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_natural )
+                , ( "highest_sequence_related_design", relatedEncoder proteinDesign.seq_max_sim_designed )
+                , ( "highest_sequence_related_natural_protein", relatedEncoder proteinDesign.seq_max_sim_natural )
+                , ( "highest_structure_related_design", relatedEncoder proteinDesign.struct_max_sim_designed )
+                , ( "highest_structure_related_natural_protein", relatedEncoder proteinDesign.struct_max_sim_natural )
                 ]
           )
         ]
@@ -225,201 +293,6 @@ jsonValueFromProteinDesign proteinDesign =
 jsonStringFromProteinDesign : ProteinDesign -> String
 jsonStringFromProteinDesign proteinDesign =
     JsonEncode.encode 4 (jsonValueFromProteinDesign proteinDesign)
-
-
-designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
-designDetailsFromProteinDesign proteinDesign =
-    [ { header = "PDB code"
-      , property =
-            newTabLink
-                [ Font.color <| rgb255 104 176 171
-                , Font.underline
-                ]
-                { url =
-                    "https://www.rcsb.org/structure/"
-                        ++ proteinDesign.pdb
-                , label =
-                    proteinDesign.pdb
-                        |> text
-                }
-      }
-    , { header = "Biological assembly"
-      , property =
-            el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width (fill |> maximum 350)
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
-      }
-    , { header = "Subtitle"
-      , property =
-            if String.isEmpty proteinDesign.subtitle then
-                text "-"
-
-            else
-                text <| proteinDesign.subtitle
-      }
-    , { header = "Classification"
-      , property =
-            if String.isEmpty <| classificationToString proteinDesign.classification then
-                text "-"
-
-            else
-                text <| classificationToString proteinDesign.classification
-      }
-    , { header = "Tags"
-      , property =
-            if List.isEmpty proteinDesign.tags then
-                text "-"
-
-            else
-                text <| String.join ", " proteinDesign.tags
-      }
-    , { header = "Release date"
-      , property =
-            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
-                text "-"
-
-            else
-                text <| Date.toIsoString proteinDesign.release_date
-      }
-    , { header = "Related designed entries"
-      , property =
-            if List.isEmpty proteinDesign.related_designs then
-                text "-"
-
-            else
-                row []
-                    (List.intersperse (text "; ") <|
-                        List.map
-                            (\related ->
-                                newTabLink
-                                    [ Font.color <| rgb255 104 176 171
-                                    , Font.underline
-                                    ]
-                                    { url = "/designs/" ++ related
-                                    , label = text <| related
-                                    }
-                            )
-                            proteinDesign.related_designs
-                    )
-      }
-    , { header = "Related natural proteins"
-      , property =
-            if List.isEmpty proteinDesign.related_natural then
-                text "-"
-
-            else
-                row []
-                    (List.intersperse (text "; ") <|
-                        List.map
-                            (\related ->
-                                newTabLink
-                                    [ Font.color <| rgb255 104 176 171
-                                    , Font.underline
-                                    ]
-                                    { url = "https://www.rcsb.org/structure/" ++ related
-                                    , label = text <| related
-                                    }
-                            )
-                            proteinDesign.related_natural
-                    )
-      }
-    , { header = "Authors"
-      , property =
-            if List.isEmpty proteinDesign.authors then
-                text "-"
-
-            else
-                text <| authorsToString proteinDesign.authors
-      }
-    , { header = "Publication"
-      , property =
-            if String.isEmpty proteinDesign.publication then
-                text "-"
-
-            else
-                text <| proteinDesign.publication
-      }
-    , { header = "Reference link"
-      , property =
-            if String.isEmpty proteinDesign.publication_ref.doi && String.isEmpty proteinDesign.publication_ref.pubmed then
-                text "-"
-
-            else
-                newTabLink
-                    [ Font.color <| rgb255 104 176 171
-                    , Font.underline
-                    ]
-                    { url =
-                        if String.isEmpty proteinDesign.publication_ref.doi then
-                            if String.isEmpty proteinDesign.publication_ref.pubmed then
-                                "https://www.rcsb.org/structure/"
-                                    ++ proteinDesign.pdb
-
-                            else
-                                "https://pubmed.ncbi.nlm.nih.gov/"
-                                    ++ proteinDesign.publication_ref.pubmed
-
-                        else
-                            "https://doi.org/"
-                                ++ proteinDesign.publication_ref.doi
-                    , label =
-                        (if String.isEmpty proteinDesign.publication_ref.doi then
-                            if String.isEmpty proteinDesign.publication_ref.pubmed then
-                                "-"
-
-                            else
-                                proteinDesign.publication_ref.pubmed
-
-                         else
-                            proteinDesign.publication_ref.doi
-                        )
-                            |> text
-                    }
-      }
-    , { header = "Symmetry group"
-      , property =
-            if String.isEmpty proteinDesign.symmetry then
-                text "-"
-
-            else
-                text <| proteinDesign.symmetry
-      }
-    , { header = "Experimental charact. method"
-      , property =
-            if List.isEmpty proteinDesign.exptl_method then
-                text "-"
-
-            else
-                text <| String.join "," proteinDesign.exptl_method
-      }
-    , { header = "Synthesis comment"
-      , property =
-            if String.isEmpty proteinDesign.synthesis_comment then
-                text "-"
-
-            else
-                text <| proteinDesign.synthesis_comment
-      }
-    , { header = "Formula weight"
-      , property =
-            if String.isEmpty <| String.fromFloat proteinDesign.formula_weight then
-                text "-"
-
-            else
-                text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
-      }
-    ]
 
 
 rawDesignDecoder : Decoder ProteinDesign
@@ -447,8 +320,15 @@ rawDesignDecoder =
         |> required "synthesis_comment" Decode.string
         |> optional "previous_design" Decode.string "/"
         |> optional "next_design" Decode.string "/"
-        |> required "related_designed_pdb" (Decode.list Decode.string)
-        |> required "related_natural_pdb" (Decode.list Decode.string)
+        |> required "seq_thr_sim_designed" (Decode.list relatedDecoder)
+        |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
+        |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
+        |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "review_comment" (Decode.list Decode.string)
 
 
 rawDesignStubDecoder : Decoder ProteinDesignStub
@@ -462,6 +342,8 @@ rawDesignStubDecoder =
         |> required "keywords" (Decode.list Decode.string)
         |> required "release_date" dateDecoder
         |> required "publication" Decode.string
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
 
 
 downloadDesignDecoder : Decoder ProteinDesignDownload
@@ -482,8 +364,22 @@ downloadDesignDecoder =
         |> required "exptl_method" (Decode.list Decode.string)
         |> required "formula_weight" Decode.float
         |> required "synthesis_comment" Decode.string
-        |> required "related_designed_pdb" (Decode.list Decode.string)
-        |> required "related_natural_pdb" (Decode.list Decode.string)
+        |> required "seq_thr_sim_designed" (Decode.list relatedDecoder)
+        |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
+        |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
+        |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
+        |> required "seq_max_sim_designed" relatedDecoder
+        |> required "seq_max_sim_natural" relatedDecoder
+        |> required "struct_max_sim_designed" relatedDecoder
+        |> required "struct_max_sim_natural" relatedDecoder
+        |> required "review_comment" (Decode.list Decode.string)
+
+
+relatedDecoder : Decoder Related
+relatedDecoder =
+    Decode.succeed Related
+        |> required "sim" Decode.float
+        |> required "partner" Decode.string
 
 
 classificationDecoder : Decoder Classification
@@ -531,8 +427,6 @@ chainDecoder =
         |> required "chain_seq_unnat" Decode.string
         |> required "chain_seq_nat" Decode.string
         |> required "chain_length" Decode.int
-        |> required "chain_id_pdb" (Decode.list Decode.string)
-        |> required "chain_id_auth" (Decode.list Decode.string)
 
 
 xtalDecoder : Decoder Xtal
@@ -585,6 +479,14 @@ referenceEncoder reference =
         ]
 
 
+relatedEncoder : Related -> JsonEncode.Value
+relatedEncoder related =
+    JsonEncode.object
+        [ ( "sim", JsonEncode.float related.similarity )
+        , ( "partner", JsonEncode.string related.partner )
+        ]
+
+
 designSearchableText : ProteinDesign -> String
 designSearchableText proteinDesign =
     [ proteinDesign.pdb
@@ -607,8 +509,8 @@ designSearchableText proteinDesign =
     , String.join " " proteinDesign.exptl_method
     , proteinDesign.synthesis_comment
     , xtalToString proteinDesign.crystal_structure
-    , String.join " " proteinDesign.related_designs
-    , String.join " " proteinDesign.related_natural
+    , String.join " " <| List.map relatedToString proteinDesign.seq_thr_sim_natural
+    , String.join " " <| List.map relatedToString proteinDesign.struct_thr_sim_natural
     ]
         |> String.join "\n"
         |> String.toLower
@@ -639,9 +541,14 @@ refToString reference =
         ]
 
 
+relatedToString : Related -> String
+relatedToString related =
+    related.partner ++ "(" ++ String.fromFloat related.similarity ++ ")"
+
+
 chainToString : Chain -> String
 chainToString chain =
-    "id:[" ++ chain.chain_id ++ "]fasta_primary_label:[" ++ String.join ";" chain.chain_id_pdb ++ "]fasta_auth_label:[" ++ String.join ";" chain.chain_id_auth ++ "]chain_type:[" ++ chain.chain_type ++ "]chain_source:[" ++ chain.chain_source ++ "]sequence:[" ++ chain.chain_seq_unnat ++ "]"
+    "id:[" ++ chain.chain_id ++ "]chain_type:[" ++ chain.chain_type ++ "]chain_source:[" ++ chain.chain_source ++ "]sequence:[" ++ chain.chain_seq_unnat ++ "]"
 
 
 authorToString : Author -> String
@@ -852,7 +759,7 @@ designCard widthDesignCard design =
         [ width <| widthDesignCard
         , clip
         ]
-        { url = "/designs/" ++ design.pdb
+        { url = Urls.internalRelatedLink ++ design.pdb
         , label =
             row
                 [ width <| widthDesignCard
@@ -881,3 +788,233 @@ designCard widthDesignCard design =
                     ]
                 ]
         }
+
+
+reviewCommentsArea : ProteinDesign -> Element msg
+reviewCommentsArea proteinDesign =
+    if proteinDesign.review_comment == [ "" ] then
+        text ""
+
+    else
+        column (Style.monospacedFont ++ [ paddingXY 10 0 ])
+            (List.map
+                (\comment ->
+                    wrappedRow
+                        [ Font.size 14, paddingXY 0 5 ]
+                        [ text <| comment ]
+                )
+                proteinDesign.review_comment
+            )
+
+
+designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
+designDetailsFromProteinDesign proteinDesign =
+    [ { header = "PDB code"
+      , property =
+            newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url =
+                    Urls.externalRelatedLink
+                        ++ proteinDesign.pdb
+                , label =
+                    proteinDesign.pdb
+                        |> text
+                }
+      }
+    , { header = "Biological assembly"
+      , property =
+            el
+                [ padding 2
+                , Border.width 2
+                , Border.color <| rgb255 220 220 220
+                , Border.rounded 3
+                , alignTop
+                , width (fill |> maximum 350)
+                ]
+                (image
+                    [ width fill ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
+                )
+      }
+    , { header = "Subtitle"
+      , property =
+            if String.isEmpty proteinDesign.subtitle then
+                text "-"
+
+            else
+                text <| proteinDesign.subtitle
+      }
+    , { header = "Classification"
+      , property =
+            if String.isEmpty <| classificationToString proteinDesign.classification then
+                text "-"
+
+            else
+                text <| classificationToString proteinDesign.classification
+      }
+    , { header = "Tags"
+      , property =
+            if List.isEmpty proteinDesign.tags then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.tags
+      }
+    , { header = "Release date"
+      , property =
+            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
+                text "-"
+
+            else
+                text <| Date.toIsoString proteinDesign.release_date
+      }
+    , { header = "Sequence related designs (bits)"
+      , property =
+            if List.isEmpty proteinDesign.seq_thr_sim_designed then
+                if proteinDesign.seq_max_sim_designed == defaultRelated then
+                    text "-"
+
+                else
+                    (\related -> relatedDetail related Urls.internalRelatedLink) proteinDesign.seq_max_sim_designed
+
+            else
+                row []
+                    (List.intersperse (text "; ") <|
+                        List.map (\related -> relatedDetail related Urls.internalRelatedLink) proteinDesign.seq_thr_sim_designed
+                    )
+      }
+    , { header = "Sequence related proteins (bits)"
+      , property =
+            if List.isEmpty proteinDesign.seq_thr_sim_natural then
+                if proteinDesign.seq_max_sim_natural == defaultRelated then
+                    text "-"
+
+                else
+                    (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.seq_max_sim_natural
+
+            else
+                row []
+                    (List.intersperse (text "; ") <|
+                        List.map (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.seq_thr_sim_natural
+                    )
+      }
+    , { header = "Structure related designs (LDDT)"
+      , property =
+            if List.isEmpty proteinDesign.struct_thr_sim_designed then
+                if proteinDesign.struct_max_sim_designed == defaultRelated then
+                    text "-"
+
+                else
+                    (\related -> relatedDetail related Urls.internalRelatedLink) proteinDesign.struct_max_sim_designed
+
+            else
+                row []
+                    (List.intersperse (text ";") <|
+                        List.map (\related -> relatedDetail related Urls.internalRelatedLink) proteinDesign.struct_thr_sim_designed
+                    )
+      }
+    , { header = "Structure related proteins (LDDT)"
+      , property =
+            if List.isEmpty proteinDesign.struct_thr_sim_natural then
+                if proteinDesign.struct_max_sim_natural == defaultRelated then
+                    text "-"
+
+                else
+                    (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.struct_max_sim_natural
+
+            else
+                row []
+                    (List.intersperse (text "; ") <|
+                        List.map (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.struct_thr_sim_natural
+                    )
+      }
+    , { header = "Authors"
+      , property =
+            if List.isEmpty proteinDesign.authors then
+                text "-"
+
+            else
+                text <| authorsToString proteinDesign.authors
+      }
+    , { header = "Publication"
+      , property =
+            if String.isEmpty proteinDesign.publication then
+                text "-"
+
+            else
+                text <| proteinDesign.publication
+      }
+    , { header = "Reference link"
+      , property =
+            if String.isEmpty proteinDesign.publication_ref.doi && String.isEmpty proteinDesign.publication_ref.pubmed then
+                text "-"
+
+            else
+                newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url =
+                        if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                Urls.externalRelatedLink
+                                    ++ proteinDesign.pdb
+
+                            else
+                                "https://pubmed.ncbi.nlm.nih.gov/"
+                                    ++ proteinDesign.publication_ref.pubmed
+
+                        else
+                            "https://doi.org/"
+                                ++ proteinDesign.publication_ref.doi
+                    , label =
+                        (if String.isEmpty proteinDesign.publication_ref.doi then
+                            if String.isEmpty proteinDesign.publication_ref.pubmed then
+                                "-"
+
+                            else
+                                proteinDesign.publication_ref.pubmed
+
+                         else
+                            proteinDesign.publication_ref.doi
+                        )
+                            |> text
+                    }
+      }
+    , { header = "Symmetry group"
+      , property =
+            if String.isEmpty proteinDesign.symmetry then
+                text "-"
+
+            else
+                text <| proteinDesign.symmetry
+      }
+    , { header = "Experimental charact. method"
+      , property =
+            if List.isEmpty proteinDesign.exptl_method then
+                text "-"
+
+            else
+                text <| String.join "," proteinDesign.exptl_method
+      }
+    , { header = "Synthesis comment"
+      , property =
+            if String.isEmpty proteinDesign.synthesis_comment then
+                text "-"
+
+            else
+                text <| proteinDesign.synthesis_comment
+      }
+    , { header = "Formula weight"
+      , property =
+            if String.isEmpty <| String.fromFloat proteinDesign.formula_weight then
+                text "-"
+
+            else
+                text <| String.fromFloat proteinDesign.formula_weight ++ " Da"
+      }
+    ]
