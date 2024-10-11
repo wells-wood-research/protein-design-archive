@@ -352,7 +352,7 @@ update shared msg model =
                         heightF =
                             toFloat height
                     in
-                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.resetViewport ViewportReset )
+                    ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF }, Effect.batch [ Effect.resetViewport ViewportReset, Effect.resizeShared (getScreenWidthInt model.mScreenWidthF) (getScreenWidthInt model.mScreenHeightF) ] )
 
                 ViewportResult result ->
                     case result of
@@ -363,7 +363,7 @@ update shared msg model =
                             ( model, Effect.none )
 
                 ViewportReset ->
-                    ( { model | renderPlotState = AwaitingRender model.replotTime }, Effect.none )
+                    ( { model | renderPlotState = AwaitingRender model.replotTime }, Effect.resizeShared (getScreenWidthInt model.mScreenWidthF) (getScreenWidthInt model.mScreenHeightF) )
 
                 _ ->
                     ( model, Effect.none )
