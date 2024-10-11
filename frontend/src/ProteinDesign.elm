@@ -797,18 +797,13 @@ reviewCommentsArea proteinDesign =
 
     else
         column (Style.monospacedFont ++ [ paddingXY 10 0 ])
-            (wrappedRow
-                [ Font.size 14
-                , paddingXY 0 5
-                ]
-                [ text <| "Manual data curation comments: " ]
-                :: List.map
-                    (\comment ->
-                        wrappedRow
-                            [ Font.size 14 ]
-                            [ text <| comment ]
-                    )
-                    proteinDesign.review_comment
+            (List.map
+                (\comment ->
+                    wrappedRow
+                        [ Font.size 14, paddingXY 0 5 ]
+                        [ text <| comment ]
+                )
+                proteinDesign.review_comment
             )
 
 

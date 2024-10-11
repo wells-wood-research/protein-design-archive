@@ -490,8 +490,7 @@ designDetailsBody screenWidth proteinDesign =
             , spacing 10
             , Font.justify
             ]
-            [ reviewCommentsArea proteinDesign
-            , table
+            [ table
                 [ padding 2
                 , width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
                 ]
@@ -702,11 +701,33 @@ designDetailsBody screenWidth proteinDesign =
             , paragraph
                 (Style.monospacedFont
                     ++ [ Font.justify
-                       , width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
+                       , width (fill |> maximum (getScreenWidthIntNgl <| Just (toFloat screenWidth)))
                        ]
                 )
                 [ proteinDesign.abstract
                     |> text
                 ]
+            , paragraph
+                Style.h2Font
+                [ text "Curation comments"
+                ]
+            , column
+                (Style.monospacedFont
+                    ++ [ Font.justify
+                       , width <| px <| (getScreenWidthIntNgl <| Just (toFloat screenWidth))
+                       ]
+                )
+                (if proteinDesign.review_comment == [ "" ] then
+                    [ text "" ]
+
+                 else
+                    List.map
+                        (\comment ->
+                            wrappedRow
+                                [ width fill ]
+                                [ row [ width fill ] [ text comment ] ]
+                        )
+                        proteinDesign.review_comment
+                )
             ]
         ]

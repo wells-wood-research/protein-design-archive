@@ -41,7 +41,7 @@ title screenWidth =
         )
     <|
         link [ centerX ]
-            { label = paragraph [] [ text "Protein Design Archive" ]
+            { label = paragraph [] [ text "The Protein Design Archive" ]
             , url = "/"
             }
 
