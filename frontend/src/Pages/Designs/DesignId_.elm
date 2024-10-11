@@ -22,6 +22,7 @@ import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, reviewCommentsArea)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Set
 import Shared
 import Style
 import Task

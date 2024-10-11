@@ -19,6 +19,7 @@ import Effect exposing (Effect)
 import Json.Decode
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Set
 import Shared.Model
 import Shared.Msg as Msg exposing (Msg(..))
 import Task
