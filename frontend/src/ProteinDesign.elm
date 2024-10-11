@@ -12,6 +12,7 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode as JsonEncode exposing (..)
 import String exposing (fromFloat)
 import Style
+import Svg.Attributes exposing (fontSize)
 import Time exposing (Month(..))
 import Urls exposing (..)
 
@@ -47,6 +48,7 @@ type alias ProteinDesign =
     , seq_max_sim_natural : Related
     , struct_max_sim_designed : Related
     , struct_max_sim_natural : Related
+    , review_comment : List String
     }
 
 
@@ -88,6 +90,7 @@ type alias ProteinDesignDownload =
     , seq_max_sim_natural : Related
     , struct_max_sim_designed : Related
     , struct_max_sim_natural : Related
+    , review_comment : List String
     }
 
 
@@ -327,6 +330,7 @@ rawDesignDecoder =
         |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
         |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
         |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "review_comment" (Decode.list Decode.string)
 
 
 rawDesignStubDecoder : Decoder ProteinDesignStub
@@ -370,6 +374,7 @@ downloadDesignDecoder =
         |> required "seq_max_sim_natural" relatedDecoder
         |> required "struct_max_sim_designed" relatedDecoder
         |> required "struct_max_sim_natural" relatedDecoder
+        |> required "review_comment" (Decode.list Decode.string)
 
 
 relatedDecoder : Decoder Related
@@ -785,6 +790,24 @@ designCard widthDesignCard design =
                     ]
                 ]
         }
+
+
+reviewCommentsArea : ProteinDesign -> Element msg
+reviewCommentsArea proteinDesign =
+    column (Style.monospacedFont ++ [ paddingXY 10 0 ])
+        (wrappedRow
+            [ Font.size 14
+            , paddingXY 0 5
+            ]
+            [ text <| "Manual data curation comments: " ]
+            :: List.map
+                (\comment ->
+                    wrappedRow
+                        [ Font.size 14 ]
+                        [ text <| comment ]
+                )
+                proteinDesign.review_comment
+        )
 
 
 designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)

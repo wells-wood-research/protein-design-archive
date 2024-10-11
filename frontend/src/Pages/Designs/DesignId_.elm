@@ -21,7 +21,7 @@ import Json.Encode as JsonEncode exposing (Value)
 import List exposing (drop)
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, fileTypeToString)
+import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, reviewCommentsArea)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set exposing (Set)
@@ -480,7 +480,7 @@ designDetailsBody screenWidth proteinDesign =
     column
         ([ centerX
          , width fill
-         , padding 30
+         , paddingXY 30 10
          , spacing 30
          , height fill
          ]
@@ -492,7 +492,8 @@ designDetailsBody screenWidth proteinDesign =
             , spacing 10
             , Font.justify
             ]
-            [ table
+            [ reviewCommentsArea proteinDesign
+            , table
                 [ padding 2
                 , width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
                 ]
