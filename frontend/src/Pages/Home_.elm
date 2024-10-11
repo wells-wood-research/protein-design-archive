@@ -57,7 +57,7 @@ type alias Model =
     { designStubs : RemoteData Http.Error (Dict String ProteinDesignStub)
     , errors : List AppError
     , designFilters : Dict String DesignFilter
-    , designFiltersCashed : Dict String DesignFilter
+    , designFiltersCached : Dict String DesignFilter
     , mStartDate : Maybe String
     , mEndDate : Maybe String
     , replotTime : Int
@@ -76,7 +76,7 @@ init mSharedScreenWidthF mSharedScreenHeightF =
     ( { designStubs = Loading
       , errors = []
       , designFilters = Dict.empty
-      , designFiltersCashed = Dict.empty
+      , designFiltersCached = Dict.empty
       , mStartDate = Nothing
       , mEndDate = Nothing
       , replotTime = 3
@@ -198,12 +198,12 @@ update shared msg model =
                 UpdateFilters key newFilter ->
                     let
                         newDesignFilters =
-                            Dict.insert key newFilter model.designFiltersCashed
+                            Dict.insert key newFilter model.designFiltersCached
                     in
                     case newFilter of
                         ContainsTextParsed string ->
                             ( { model
-                                | designFiltersCashed = newDesignFilters
+                                | designFiltersCached = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
                                 , searchString = string
                               }
@@ -212,7 +212,7 @@ update shared msg model =
 
                         _ ->
                             ( { model
-                                | designFiltersCashed = newDesignFilters
+                                | designFiltersCached = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
                               }
                             , Effect.none
@@ -323,14 +323,14 @@ update shared msg model =
                         filteredDesignStubs =
                             loadedDesignStubs
                                 |> Dict.values
-                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFiltersCashed))
+                                |> List.filterMap (DesignFilter.stubMeetsAllFilters (Dict.values model.designFiltersCached))
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
                     in
                     case model.renderPlotState of
                         AwaitingRender 0 ->
-                            ( { model | renderPlotState = Rendered, designFilters = model.designFiltersCashed }
+                            ( { model | renderPlotState = Rendered, designFilters = model.designFiltersCached }
                             , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
                             )
 
