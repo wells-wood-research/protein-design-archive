@@ -1,28 +1,19 @@
 module Pages.Help exposing (Model, Msg, page)
 
+import Browser.Dom
+import Browser.Events
 import Components.Title
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Font as Font
 import Get exposing (..)
 import Page exposing (Page)
+import Plots exposing (RenderPlotState(..))
 import Route exposing (Route)
 import Shared
 import Style
+import Time
 import View exposing (View)
-
-
-
-{---
-page : Shared.Model -> Route () -> Page Model Msg
-page shared route =
-    Page.new
-        { init = init
-        , update = update
-        , subscriptions = subscriptions
-        , view = view shared >> Components.Title.view shared.mScreenWidthF
-        }
----}
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -42,6 +33,8 @@ page shared _ =
 type alias Model =
     { mScreenWidthF : Maybe Float
     , mScreenHeightF : Maybe Float
+    , replotTime : Int
+    , renderPlotState : RenderPlotState
     }
 
 
@@ -49,6 +42,8 @@ init : Maybe Float -> Maybe Float -> ( Model, Effect Msg )
 init mSharedScreenWidthF mSharedScreenHeightF =
     ( { mScreenWidthF = mSharedScreenWidthF
       , mScreenHeightF = mSharedScreenHeightF
+      , replotTime = 3
+      , renderPlotState = WillRender
       }
     , Effect.none
     )
@@ -59,25 +54,59 @@ init mSharedScreenWidthF mSharedScreenHeightF =
 
 
 type Msg
-    = NoOp
+    = RenderWhenReady Time.Posix
+    | WindowResizes Int Int
+    | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
+    | ViewportReset
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model
-            , Effect.none
-            )
+        RenderWhenReady _ ->
+            case model.renderPlotState of
+                AwaitingRender 0 ->
+                    ( { model | renderPlotState = Rendered }
+                    , Effect.resetViewport ViewportReset
+                    )
+
+                AwaitingRender remaining ->
+                    ( { model | renderPlotState = AwaitingRender (remaining - 1) }
+                    , Effect.none
+                    )
+
+                _ ->
+                    ( model, Effect.none )
+
+        WindowResizes width height ->
+            let
+                widthF =
+                    toFloat width
+
+                heightF =
+                    toFloat height
+            in
+            ( { model | mScreenWidthF = Just widthF, mScreenHeightF = Just heightF, renderPlotState = AwaitingRender model.replotTime }, Effect.none )
+
+        ViewportResult result ->
+            case result of
+                Ok viewport ->
+                    ( { model | mScreenWidthF = Just viewport.viewport.width, mScreenHeightF = Just viewport.viewport.height }, Effect.resetViewport ViewportReset )
+
+                Err _ ->
+                    ( model, Effect.none )
+
+        _ ->
+            ( model, Effect.none )
 
 
 
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
+subscriptions : model -> Sub Msg
+subscriptions _ =
+    Browser.Events.onResize (\width height -> WindowResizes width height)
 
 
 
@@ -87,10 +116,17 @@ subscriptions model =
 view : Model -> View Msg
 view model =
     let
+        title =
+            "Help Page"
+    in
+    let
         screenWidth =
             getScreenWidthInt model.mScreenWidthF
+
+        screenHeight =
+            getScreenWidthInt model.mScreenHeightF - 130
     in
-    { title = "Help Page"
+    { title = title
     , attributes =
         [ centerX
         , width
@@ -98,7 +134,27 @@ view model =
                 |> minimum screenWidth
             )
         ]
-    , element = helpBody screenWidth
+    , element =
+        column
+            [ width
+                (fill
+                    |> minimum screenWidth
+                )
+            , height
+                (fill
+                    |> minimum screenHeight
+                )
+            ]
+            [ paragraph
+                (Style.h2Font
+                    ++ [ width fill
+                       , paddingXY 0 30
+                       , Font.center
+                       ]
+                )
+                [ text title ]
+            , helpBody screenWidth
+            ]
     }
 
 
