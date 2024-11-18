@@ -370,7 +370,7 @@ designDetailsView shared screenWidth proteinDesign =
          ]
             ++ Style.bodyFont
         )
-        [ designDetailsHeader "Design Details" "/designs/" proteinDesign
+        [ designDetailsHeader screenWidth "Design Details" "/designs/" proteinDesign
         , downloadArea shared screenWidth proteinDesign.pdb
         , designDetailsBody screenWidth proteinDesign
         ]
@@ -438,38 +438,43 @@ downloadArea shared screenWidth designId =
         ]
 
 
-designDetailsHeader : String -> String -> ProteinDesign -> Element msg
-designDetailsHeader title path { previous_design, next_design } =
+designDetailsHeader : Int -> String -> String -> ProteinDesign -> Element msg
+designDetailsHeader screenWidth title path { previous_design, next_design } =
     row
-        [ width fill
-        , spaceEvenly
-        , paddingXY 0 30
-        ]
-        [ link
-            []
-            { url = path ++ previous_design
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowLeftCircle
-                    )
-            }
-        , paragraph
-            (Style.h2Font ++ [ Font.center ])
-            [ text title ]
-        , link
-            []
-            { url = path ++ next_design
-            , label =
-                el [ centerX ]
-                    (html <|
-                        FeatherIcons.toHtml [ HAtt.align "center" ] <|
-                            FeatherIcons.withSize 36 <|
-                                FeatherIcons.arrowRightCircle
-                    )
-            }
+        [ width (fill |> maximum screenWidth) ]
+        [ row
+            [ centerX
+            , spacing 30
+            , paddingXY 0 30
+            ]
+            [ link
+                []
+                { url = path ++ previous_design
+                , label =
+                    el []
+                        (html <|
+                            FeatherIcons.toHtml [ HAtt.align "center" ] <|
+                                FeatherIcons.withSize 36 <|
+                                    FeatherIcons.withStrokeWidth 1.2 <|
+                                        FeatherIcons.arrowLeftCircle
+                        )
+                }
+            , paragraph
+                (Style.h2Font ++ [ Font.center ])
+                [ text title ]
+            , link
+                []
+                { url = path ++ next_design
+                , label =
+                    el []
+                        (html <|
+                            FeatherIcons.toHtml [] <|
+                                FeatherIcons.withSize 36 <|
+                                    FeatherIcons.withStrokeWidth 1.2 <|
+                                        FeatherIcons.arrowRightCircle
+                        )
+                }
+            ]
         ]
 
 

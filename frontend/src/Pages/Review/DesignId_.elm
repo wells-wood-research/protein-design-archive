@@ -361,7 +361,7 @@ details model =
                              ]
                                 ++ Style.bodyFont
                             )
-                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
+                            [ Details.designDetailsHeader screenWidth "Design Review" "/review/" proteinDesign
                             , row
                                 []
                                 [ Details.designDetailsBody halfWidth proteinDesign
@@ -379,7 +379,7 @@ details model =
                              ]
                                 ++ Style.bodyFont
                             )
-                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
+                            [ Details.designDetailsHeader screenWidth "Design Review" "/review/" proteinDesign
                             , Details.designDetailsBody screenWidth proteinDesign
                             , reviewArea screenWidth model
                             ]
