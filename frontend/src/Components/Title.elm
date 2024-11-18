@@ -43,13 +43,17 @@ title screenWidth =
             { label = paragraph [] [ text "The Protein Design Archive" ]
             , url = "/"
             }
-        , el [ alignRight, centerY ]
-            (html <|
-                FeatherIcons.toHtml [] <|
-                    FeatherIcons.withSize 36 <|
-                        FeatherIcons.withStrokeWidth 1.2 <|
-                            FeatherIcons.helpCircle
-            )
+        , link [ alignRight ]
+            { label =
+                el [ centerY ]
+                    (html <|
+                        FeatherIcons.toHtml [] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.withStrokeWidth 1.2 <|
+                                    FeatherIcons.helpCircle
+                    )
+            , url = "/help"
+            }
         ]
 
 
