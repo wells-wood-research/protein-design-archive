@@ -117,7 +117,7 @@ view : Model -> View Msg
 view model =
     let
         title =
-            "Help Page"
+            "PDA | Help"
     in
     let
         screenWidth =
