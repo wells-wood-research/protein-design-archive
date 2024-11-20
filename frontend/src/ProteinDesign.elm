@@ -831,6 +831,14 @@ designDetailsFromProteinDesign proteinDesign =
             else
                 text <| Date.toIsoString proteinDesign.release_date
       }
+    , { header = "Subtitle"
+      , property =
+            if String.isEmpty proteinDesign.subtitle then
+                text "-"
+
+            else
+                text <| proteinDesign.subtitle
+      }
     , { header = "Sequence related designs (bits)"
       , property =
             if List.isEmpty proteinDesign.seq_thr_sim_designed then
@@ -891,30 +899,6 @@ designDetailsFromProteinDesign proteinDesign =
                         List.map (\related -> relatedDetail related Urls.externalRelatedLink) proteinDesign.struct_thr_sim_natural
                     )
       }
-    , { header = "Subtitle"
-      , property =
-            if String.isEmpty proteinDesign.subtitle then
-                text "-"
-
-            else
-                text <| proteinDesign.subtitle
-      }
-    , { header = "Classification"
-      , property =
-            if String.isEmpty <| classificationToString proteinDesign.classification then
-                text "-"
-
-            else
-                text <| classificationToString proteinDesign.classification
-      }
-    , { header = "Tags"
-      , property =
-            if List.isEmpty proteinDesign.tags then
-                text "-"
-
-            else
-                text <| String.join ", " proteinDesign.tags
-      }
     , { header = "Authors"
       , property =
             if List.isEmpty proteinDesign.authors then
@@ -967,6 +951,22 @@ designDetailsFromProteinDesign proteinDesign =
                         )
                             |> text
                     }
+      }
+    , { header = "Classification"
+      , property =
+            if String.isEmpty <| classificationToString proteinDesign.classification then
+                text "-"
+
+            else
+                text <| classificationToString proteinDesign.classification
+      }
+    , { header = "Tags"
+      , property =
+            if List.isEmpty proteinDesign.tags then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.tags
       }
     , { header = "Symmetry group"
       , property =
