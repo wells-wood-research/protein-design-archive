@@ -284,7 +284,7 @@ subscriptions _ =
 
 view : Model -> View Msg
 view model =
-    { title = "Design Review"
+    { title = "PDA | " ++ model.designId ++ " review"
     , attributes =
         [ centerX
         , width
