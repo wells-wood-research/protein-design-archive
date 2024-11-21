@@ -628,14 +628,24 @@ designDetailsBodyStructure proteinDesign screenWidth screenHeight =
 
 designDetailsBodySequence : ProteinDesign -> Int -> Element msg
 designDetailsBodySequence proteinDesign screenWidth =
-    column []
+    let
+        elPadding =
+            10
+
+        narrowColumnWidth =
+            screenWidth // 10 - elPadding
+
+        wideColumnWidth =
+            screenWidth - 4 * (narrowColumnWidth + elPadding)
+    in
+    column [ spacing 20 ]
         [ paragraph
             Style.h2Font
             [ text "Sequence"
             ]
         , table
             [ padding 2
-            , width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
+            , width fill
             ]
             { data = proteinDesign.chains
             , columns =
@@ -647,12 +657,12 @@ designDetailsBodySequence proteinDesign screenWidth =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Chain ID" ]
-                  , width = fillPortion 1
+                  , width = px narrowColumnWidth
                   , view =
                         \chain ->
                             wrappedRow
                                 (Style.monospacedFont
-                                    ++ [ width (fill |> maximum 100)
+                                    ++ [ width (fill |> maximum narrowColumnWidth)
                                        , height fill
                                        , scrollbarX
                                        , paddingXY 5 10
@@ -668,12 +678,12 @@ designDetailsBodySequence proteinDesign screenWidth =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Type" ]
-                  , width = fillPortion 1
+                  , width = px narrowColumnWidth
                   , view =
                         \chain ->
                             wrappedRow
                                 (Style.monospacedFont
-                                    ++ [ width (fill |> maximum 100)
+                                    ++ [ width (fill |> maximum narrowColumnWidth)
                                        , height fill
                                        , scrollbarX
                                        , paddingXY 5 10
@@ -689,12 +699,12 @@ designDetailsBodySequence proteinDesign screenWidth =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Source" ]
-                  , width = fillPortion 2
+                  , width = px narrowColumnWidth
                   , view =
                         \chain ->
                             wrappedRow
                                 (Style.monospacedFont
-                                    ++ [ width (fill |> maximum 100)
+                                    ++ [ width (fill |> maximum narrowColumnWidth)
                                        , height fill
                                        , scrollbarX
                                        , paddingXY 5 10
@@ -710,12 +720,12 @@ designDetailsBodySequence proteinDesign screenWidth =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Sequence" ]
-                  , width = fillPortion 6
+                  , width = px wideColumnWidth
                   , view =
                         \chain ->
                             wrappedRow
                                 (Style.monospacedFont
-                                    ++ [ width (fill |> maximum (screenWidth - 400))
+                                    ++ [ width (fill |> maximum wideColumnWidth)
                                        , height fill
                                        , scrollbarX
                                        , paddingXY 5 10
@@ -731,12 +741,12 @@ designDetailsBodySequence proteinDesign screenWidth =
                             , Border.color <| rgb255 220 220 220
                             ]
                             [ text "Length" ]
-                  , width = fillPortion 1
+                  , width = px narrowColumnWidth
                   , view =
                         \chain ->
                             wrappedRow
                                 (Style.monospacedFont
-                                    ++ [ width (fill |> maximum 100)
+                                    ++ [ width (fill |> maximum narrowColumnWidth)
                                        , height fill
                                        , scrollbarX
                                        , paddingXY 5 10
@@ -762,7 +772,7 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
         , paragraph
             (Style.monospacedFont
                 ++ [ Font.justify
-                   , width (fill |> maximum (getScreenWidthIntNgl <| Just (toFloat screenWidth)))
+                   , width (fill |> maximum screenWidth)
                    ]
             )
             [ proteinDesign.abstract
@@ -775,7 +785,8 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
         , column
             (Style.monospacedFont
                 ++ [ Font.justify
-                   , width <| px <| (getScreenWidthIntNgl <| Just (toFloat screenWidth))
+                   , width (fill |> maximum screenWidth)
+                   , spacing 10
                    ]
             )
             (if proteinDesign.review_comment == [ "" ] then
@@ -785,8 +796,12 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
                 List.map
                     (\comment ->
                         wrappedRow
-                            [ width fill ]
-                            [ row [ width fill ] [ text comment ] ]
+                            [ width fill
+                            ]
+                            [ row
+                                [ width fill ]
+                                [ text <| comment ]
+                            ]
                     )
                     proteinDesign.review_comment
             )
@@ -798,7 +813,7 @@ designDetailsBody proteinDesign screenWidth screenHeight =
     column
         (Style.bodyFont
             ++ [ width (fill |> maximum screenWidth)
-               , paddingXY 30 10
+               , paddingXY 30 20
                , spacing 30
                , centerX
                ]
