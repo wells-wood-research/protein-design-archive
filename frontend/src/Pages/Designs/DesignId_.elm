@@ -356,12 +356,12 @@ details shared model =
                     ]
 
             Success design ->
-                designDetailsView shared screenWidth design
+                designDetailsView shared design screenWidth screenHeight
         ]
 
 
-designDetailsView : Shared.Model -> Int -> ProteinDesign -> Element Msg
-designDetailsView shared screenWidth proteinDesign =
+designDetailsView : Shared.Model -> ProteinDesign -> Int -> Int -> Element Msg
+designDetailsView shared proteinDesign screenWidth screenHeight =
     column
         ([ centerX
          , width (fill |> maximum screenWidth)
@@ -370,9 +370,9 @@ designDetailsView shared screenWidth proteinDesign =
          ]
             ++ Style.bodyFont
         )
-        [ designDetailsHeader screenWidth "Design Details" "/designs/" proteinDesign
-        , downloadArea shared screenWidth proteinDesign.pdb
-        , designDetailsBody screenWidth proteinDesign
+        [ designDetailsHeader "Design Details" "/designs/" proteinDesign screenWidth
+        , downloadArea shared proteinDesign.pdb screenWidth
+        , designDetailsBody proteinDesign screenWidth screenHeight
         ]
 
 
@@ -394,8 +394,8 @@ downloadButton widthButton buttonAttributes onPressCmd textLabel =
         }
 
 
-downloadArea : Shared.Model -> Int -> String -> Element Msg
-downloadArea shared screenWidth designId =
+downloadArea : Shared.Model -> String -> Int -> Element Msg
+downloadArea shared designId screenWidth =
     let
         widthButton =
             if screenWidth < 600 then
@@ -439,8 +439,8 @@ downloadArea shared screenWidth designId =
         ]
 
 
-designDetailsHeader : Int -> String -> String -> ProteinDesign -> Element msg
-designDetailsHeader screenWidth title path { previous_design, next_design } =
+designDetailsHeader : String -> String -> ProteinDesign -> Int -> Element msg
+designDetailsHeader title path { previous_design, next_design } screenWidth =
     row
         [ width (fill |> maximum screenWidth) ]
         [ row
@@ -486,7 +486,7 @@ designDetailsBodyTable proteinDesign screenWidth =
             900
 
         elPadding =
-            30
+            40
 
         tableWidth =
             if screenWidth < limitingScreenSize then
@@ -511,7 +511,6 @@ designDetailsBodyTable proteinDesign screenWidth =
     in
     elementType
         [ width fill
-        , paddingXY 10 0
         , spacing 10
         , Font.justify
         ]
@@ -584,18 +583,18 @@ designDetailsBodyTable proteinDesign screenWidth =
         ]
 
 
-designDetailsBodyStructure : ProteinDesign -> Int -> Element msg
-designDetailsBodyStructure proteinDesign screenWidth =
+designDetailsBodyStructure : ProteinDesign -> Int -> Int -> Element msg
+designDetailsBodyStructure proteinDesign screenWidth screenHeight =
+    let
+        picHeight =
+            screenHeight // 2
+    in
     column
-        (Style.bodyFont
-            ++ [ width (fill |> maximum screenWidth)
-               , paddingXY 10 10
-               , spacing 30
-               , centerX
-               ]
-        )
+        [ width fill
+        , spacing 20
+        ]
         [ column
-            [ width (fill |> maximum (getScreenWidthIntNgl <| Just <| toFloat screenWidth))
+            [ width (fill |> maximum screenWidth)
             , spacing 20
             ]
             [ column
@@ -608,14 +607,14 @@ designDetailsBodyStructure proteinDesign screenWidth =
             , centerX
             ]
             [ Keyed.el
-                [ width <| px (getScreenWidthIntNgl <| Just <| toFloat screenWidth)
-                , height <| px 400
+                [ width (fill |> maximum screenWidth)
+                , height <| px picHeight
                 ]
                 ( proteinDesign.pdb
                 , Html.node "ngl-viewer"
                     [ HAtt.id "viewer"
-                    , HAtt.style "width" (getScreenWidthStringNgl <| Just <| toFloat screenWidth)
-                    , HAtt.style "height" "400px"
+                    , HAtt.style "width" (String.fromInt screenWidth ++ "px")
+                    , HAtt.style "height" (String.fromInt picHeight ++ "px")
                     , HAtt.style "align" "center"
                     , HAtt.alt "3D structure"
                     , HAtt.attribute "pdb-string" proteinDesign.pdb
@@ -794,18 +793,18 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
         ]
 
 
-designDetailsBody : Int -> ProteinDesign -> Element msg
-designDetailsBody screenWidth proteinDesign =
+designDetailsBody : ProteinDesign -> Int -> Int -> Element msg
+designDetailsBody proteinDesign screenWidth screenHeight =
     column
         (Style.bodyFont
             ++ [ width (fill |> maximum screenWidth)
-               , paddingXY 10 10
+               , paddingXY 30 10
                , spacing 30
                , centerX
                ]
         )
         [ designDetailsBodyTable proteinDesign screenWidth
-        , designDetailsBodyStructure proteinDesign screenWidth
+        , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         , designDetailsBodySequence proteinDesign screenWidth
         , designDetailsBodyParagraphs proteinDesign screenWidth
         ]
