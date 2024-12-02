@@ -145,15 +145,7 @@ view model =
                     |> minimum screenHeight
                 )
             ]
-            [ paragraph
-                (Style.h2Font
-                    ++ [ width fill
-                       , paddingXY 0 30
-                       , Font.center
-                       ]
-                )
-                [ text title ]
-            , helpBody screenWidth
+            [ helpBody screenWidth
             ]
     }
 
@@ -163,7 +155,7 @@ helpBody screenWidth =
     column
         ([ centerX
          , width fill
-         , paddingXY 30 10
+         , paddingXY 30 20
          , spacing 30
          , height fill
          ]
@@ -171,20 +163,33 @@ helpBody screenWidth =
         )
         [ column
             [ width fill
-            , spacing 20
+            , spacing 10
             ]
             [ paragraph
                 Style.h2Font
-                [ text "Section header"
+                [ text "Citation"
                 ]
-            , paragraph
+            , column
                 (Style.monospacedFont
                     ++ [ Font.justify
-                       , width (fill |> maximum (getScreenWidthIntNgl <| Just (toFloat screenWidth)))
+                       , width fill
                        ]
                 )
-                [ "Helpful advice"
-                    |> text
+                [ text <| "If you find The Protein Design Archive useful in your work, please cite as:\n"
+                , column [ spacing 5, paddingXY 30 10 ]
+                    [ text <| "The Protein Design Archive (PDA): insights from 40 years of protein design"
+                    , text <| "Marta Chronowska, Michael J. Stam, Derek N. Woolfson, Luigi F. Di Constanzo, Christopher W. Wood"
+                    , row []
+                        [ text <| "bioRxiv 2024.09.05.611465; doi: "
+                        , newTabLink
+                            [ Font.color <| rgb255 104 176 171
+                            , Font.underline
+                            ]
+                            { url = "https://doi.org/10.1101/2024.09.05.611465"
+                            , label = text <| "https://doi.org/10.1101/2024.09.05.611465"
+                            }
+                        ]
+                    ]
                 ]
             ]
         ]
