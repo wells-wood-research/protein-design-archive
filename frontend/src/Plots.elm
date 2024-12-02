@@ -231,7 +231,7 @@ timelinePlotStubs widthF heightF designs =
                     , axFormat <| str ".4"
                     , axTickCount <| num 16
                     , axOffset <| vNum 250.0
-                    , axLabelFontSize <| num 24.0
+                    , axLabelFontSize <| num 12.0
                     ]
 
         mk =
