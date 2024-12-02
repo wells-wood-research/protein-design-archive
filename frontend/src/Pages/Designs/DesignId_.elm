@@ -194,7 +194,7 @@ update msg model =
                                             csvStringFromProteinDesignDownload designs
 
                                         Err _ ->
-                                            designData
+                                            "There was an error in generating CSV file. Please try downloading JSON instead."
                     in
                     ( { model | dataDownload = NotAsked }
                     , Effect.downloadFile model.designId encodedFileContent fileType

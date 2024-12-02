@@ -225,6 +225,7 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "classification", classificationToString proteinDesign.classification )
     , ( "chains", String.join ";" (List.map chainToString proteinDesign.chains) )
     , ( "formula_weight", fromFloat proteinDesign.formula_weight )
+    , ( "symmetry", proteinDesign.symmetry )
     , ( "crystal_structure(a;b;c;alpha;beta;gamma)", xtalToString proteinDesign.crystal_structure )
     , ( "exptl_method", String.join ";" proteinDesign.exptl_method )
     , ( "synthesis_comment", proteinDesign.synthesis_comment )
@@ -242,6 +243,7 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "highest_sequence_related_natural_protein", relatedToString proteinDesign.seq_max_sim_natural )
     , ( "highest_structure_related_design", relatedToString proteinDesign.struct_max_sim_designed )
     , ( "highest_structure_related_natural_protein", relatedToString proteinDesign.struct_max_sim_natural )
+    , ( "data_curation_comments", String.join ";" proteinDesign.review_comment )
     ]
 
 
@@ -267,6 +269,7 @@ jsonValueFromProteinDesign proteinDesign =
                 , ( "chains", JsonEncode.list chainEncoder proteinDesign.chains )
                 , ( "formula_weight", JsonEncode.string <| fromFloat proteinDesign.formula_weight )
                 , ( "exptl_method", JsonEncode.string <| String.join ";" proteinDesign.exptl_method )
+                , ( "symmetry ", JsonEncode.string <| proteinDesign.symmetry )
                 , ( "crystal_structure", xtalEncoder proteinDesign.crystal_structure )
                 , ( "synthesis_comment", JsonEncode.string <| proteinDesign.synthesis_comment )
                 , ( "authors", JsonEncode.list authorEncoder proteinDesign.authors )
@@ -275,8 +278,6 @@ jsonValueFromProteinDesign proteinDesign =
                 , ( "publication_country", JsonEncode.string <| proteinDesign.publication_country )
                 , ( "subtitle", JsonEncode.string <| proteinDesign.subtitle )
                 , ( "tags", JsonEncode.string <| String.join ";" proteinDesign.tags )
-                , ( "keywords", JsonEncode.string <| String.join ";" proteinDesign.keywords )
-                , ( "abstract", JsonEncode.string <| proteinDesign.abstract )
                 , ( "sequence_related_designs_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_designed )
                 , ( "sequence_related_natural_proteins_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_natural )
                 , ( "structure_related_designs_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_designed )
@@ -285,6 +286,7 @@ jsonValueFromProteinDesign proteinDesign =
                 , ( "highest_sequence_related_natural_protein", relatedEncoder proteinDesign.seq_max_sim_natural )
                 , ( "highest_structure_related_design", relatedEncoder proteinDesign.struct_max_sim_designed )
                 , ( "highest_structure_related_natural_protein", relatedEncoder proteinDesign.struct_max_sim_natural )
+                , ( "data_curation_comments", JsonEncode.string <| String.join ";" proteinDesign.review_comment )
                 ]
           )
         ]
@@ -368,10 +370,10 @@ downloadDesignDecoder =
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
-        |> required "seq_max_sim_designed" relatedDecoder
-        |> required "seq_max_sim_natural" relatedDecoder
-        |> required "struct_max_sim_designed" relatedDecoder
-        |> required "struct_max_sim_natural" relatedDecoder
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
         |> required "review_comment" (Decode.list Decode.string)
 
 
