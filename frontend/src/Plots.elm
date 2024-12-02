@@ -226,11 +226,11 @@ timelinePlotStubs widthF heightF designs =
         ax =
             axes
                 << axis "xScale"
-                    siTop
+                    siBottom
                     [ axDomain false
                     , axFormat <| str ".4"
                     , axTickCount <| num 16
-                    , axOffset <| vNum 250.0
+                    , axOffset <| vNum 80.0
                     , axLabelFontSize <| num 12.0
                     ]
 
