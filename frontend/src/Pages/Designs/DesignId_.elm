@@ -258,7 +258,7 @@ subscriptions _ =
 
 view : Shared.Model -> Model -> View Msg
 view shared model =
-    { title = "Design Details"
+    { title = "PDA | " ++ model.designId
     , attributes =
         [ centerX
         , width
