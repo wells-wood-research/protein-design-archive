@@ -31,7 +31,7 @@ view mScreenWidthF props =
 
 title : Int -> Element msg
 title screenWidth =
-    el
+    row
         (Style.titleFont
             ++ [ width (fill |> maximum screenWidth)
                , padding 20
@@ -39,11 +39,22 @@ title screenWidth =
                , Border.color <| rgb255 220 220 220
                ]
         )
-    <|
-        link [ centerX ]
+        [ link [ centerX ]
             { label = paragraph [] [ text "The Protein Design Archive" ]
             , url = "/pda/"
             }
+        , link [ alignRight ]
+            { label =
+                el [ centerY ]
+                    (html <|
+                        FeatherIcons.toHtml [] <|
+                            FeatherIcons.withSize 36 <|
+                                FeatherIcons.withStrokeWidth 1.2 <|
+                                    FeatherIcons.helpCircle
+                    )
+            , url = "/help"
+            }
+        ]
 
 
 footerArea : Element msg

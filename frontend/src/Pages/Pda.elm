@@ -26,7 +26,7 @@ import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder)
+import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder, jsonStringFromProteinDesignDownload)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set
@@ -154,9 +154,12 @@ update shared msg model =
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
+
+                        plotHeight =
+                            getScreenWidthFloat model.mScreenHeightF
                     in
                     ( { model | designStubs = Success designs }
-                    , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
+                    , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth plotHeight filteredDesignStubs)
                     )
 
                 DesignsDataReceived (Err e) ->
@@ -304,7 +307,12 @@ update shared msg model =
                         encodedFileContent =
                             case fileType of
                                 ProteinDesign.Json ->
-                                    designData
+                                    case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
+                                        Ok designs ->
+                                            jsonStringFromProteinDesignDownload designs
+
+                                        Err _ ->
+                                            designData
 
                                 ProteinDesign.Csv ->
                                     case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
@@ -327,11 +335,14 @@ update shared msg model =
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
+
+                        plotHeight =
+                            getScreenWidthFloat model.mScreenHeightF
                     in
                     case model.renderPlotState of
                         AwaitingRender 0 ->
                             ( { model | renderPlotState = Rendered, designFilters = model.designFiltersCached }
-                            , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
+                            , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth plotHeight filteredDesignStubs)
                             )
 
                         AwaitingRender remaining ->
@@ -629,13 +640,13 @@ similarityFilteringArea model =
             getScreenWidthInt model.mScreenWidthF
 
         elementType =
-            if screenWidth < 1300 then
+            if screenWidth < 1000 then
                 column
 
             else
                 row
     in
-    elementType
+    column
         (Style.monospacedFont ++ [ centerX, spacing 10, alignLeft ])
         [ row []
             [ el [ centerX, paddingXY 10 0 ]
@@ -646,9 +657,66 @@ similarityFilteringArea model =
                 )
             , text "Slide to set similarity threshold: "
             ]
-        , sequenceSimilarityField model
-        , structureSimilarityField model
+        , elementType []
+            [ sequenceSimilarityField model
+            , similarityExclusionButton model defaultKeys.similaritySequenceExclusionKey DesignFilter.SimilaritySequenceExclusion
+            ]
+        , elementType []
+            [ structureSimilarityField model
+            , similarityExclusionButton model defaultKeys.similarityStructureExclusionKey DesignFilter.SimilarityStructureExclusion
+            ]
         ]
+
+
+similarityExclusionButton : Model -> String -> (Bool -> DesignFilter) -> Element Msg
+similarityExclusionButton model dictKey filter =
+    Input.checkbox [ paddingXY 3 10, alignTop ]
+        { onChange =
+            \checkboxStatus ->
+                UpdateFilters dictKey (filter checkboxStatus)
+        , icon = Input.defaultCheckbox
+        , checked =
+            case Dict.get dictKey model.designFiltersCached of
+                Just (SimilaritySequenceExclusion value) ->
+                    value
+
+                Just (SimilarityStructureExclusion value) ->
+                    value
+
+                _ ->
+                    False
+        , label =
+            let
+                label =
+                    case Dict.get dictKey model.designFiltersCached of
+                        Just (SimilaritySequenceExclusion value) ->
+                            if value then
+                                "uncomputed excluded"
+
+                            else
+                                "exclude uncomputed"
+
+                        Just (SimilarityStructureExclusion value) ->
+                            if value then
+                                "uncomputed excluded"
+
+                            else
+                                "exclude uncomputed"
+
+                        _ ->
+                            "exclude uncomputed"
+            in
+            Input.labelRight
+                [ centerY
+                , width fill
+                , paddingXY 5 0
+                , Font.italic
+                ]
+                (paragraph
+                    Style.monospacedFont
+                    [ text <| label ]
+                )
+        }
 
 
 numberArea : Maybe Float -> List ProteinDesignStub -> Set.Set String -> Element Msg
