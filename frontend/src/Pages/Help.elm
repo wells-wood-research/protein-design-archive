@@ -326,7 +326,22 @@ uiArea columnWidth =
             Style.h2Font
             [ text "Explanation of the website interface and certain choices"
             ]
-        , paragraph
+        , websiteStructureArea columnWidth
+        , relatedProteinsArea columnWidth
+        , filteringArea columnWidth
+        ]
+
+
+websiteStructureArea : Int -> Element msg
+websiteStructureArea columnWidth =
+    column
+        (Style.monospacedFont
+            ++ [ Font.justify
+               , width <| px columnWidth
+               , spacing 5
+               ]
+        )
+        [ paragraph
             Style.h3Font
             [ text "Website structure"
             ]
@@ -350,6 +365,70 @@ uiArea columnWidth =
                 , paragraph [ width fill ] [ text <| ". This is described in detail below." ]
                 ]
             ]
+        ]
+
+
+relatedProteinsArea : Int -> Element msg
+relatedProteinsArea columnWidth =
+    column
+        (Style.monospacedFont
+            ++ [ Font.justify
+               , width <| px columnWidth
+               , spacing 5
+               ]
+        )
+        [ paragraph
+            Style.h3Font
+            [ text "Related proteins"
+            ]
+        , paragraph [ width fill ]
+            [ text <| "The Design Details table contains fields such as \"Sequence related designs (bits)\", \"Structure related proteins (LDDT)\" etc., which list hyperlinked PDB codes and values in brackets. These are entries that have come up in "
+            , newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url = "https://www.nature.com/articles/nbt.3988"
+                , label = text <| "MMseqs2"
+                }
+            , text <| " (for sequence) and "
+            , newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url = "https://www.nature.com/articles/s41587-023-01773-0"
+                , label = text <| "Foldseek"
+                }
+            , text <| " (for structure) analysis as being similar to the currently viewed design. In this context, "
+            , paragraph [ Font.italic ] [ text <| " designs" ]
+            , text <| " refers to related structure also found in The PDA, and"
+            , paragraph [ Font.italic ] [ text <| " proteins" ]
+            , text <| " refers to natural proteins, that is ones not found in The PDA."
+            , paragraph [ Font.italic ] [ text <| " bits" ]
+            , text <| " refers to the bit score, and "
+            , paragraph [ Font.italic ] [ text <| " LDDT" ]
+            , text <| " refers to the Local Distance Difference Test, as calculated by respective software."
+            ]
+        , paragraph [ width fill ]
+            [ paragraph [ width fill ] [ text <| " We have selected values of " ]
+            , paragraph [ Font.bold ] [ text <| "50 bit score and 95% LDDT as thresholds above which we list related entries." ]
+            , paragraph [ width fill ] [ text <| " For designs that do not have any structures that meet these criteria, we list the most similar ones instead." ]
+            ]
+        ]
+
+
+filteringArea : Int -> Element msg
+filteringArea columnWidth =
+    column
+        (Style.monospacedFont
+            ++ [ Font.justify
+               , width <| px columnWidth
+               , spacing 5
+               ]
+        )
+        [ paragraph
+            Style.h3Font
+            [ text "Filetring functionality"
+            ]
         , column
             (Style.monospacedFont
                 ++ [ Font.justify
@@ -357,41 +436,12 @@ uiArea columnWidth =
                    , spacing 5
                    ]
             )
-            [ paragraph
-                Style.h3Font
-                [ text "Related proteins"
-                ]
-            , paragraph [ width fill ]
-                [ text <| "The Design Details table contains fields such as \"Sequence related designs (bits)\", \"Structure related proteins (LDDT)\" etc., which list hyperlinked PDB codes and values in brackets. These are entries that have come up in "
-                , newTabLink
-                    [ Font.color <| rgb255 104 176 171
-                    , Font.underline
-                    ]
-                    { url = "https://www.nature.com/articles/nbt.3988"
-                    , label = text <| "MMseqs2"
-                    }
-                , text <| " (for sequence) and "
-                , newTabLink
-                    [ Font.color <| rgb255 104 176 171
-                    , Font.underline
-                    ]
-                    { url = "https://www.nature.com/articles/s41587-023-01773-0"
-                    , label = text <| "Foldseek"
-                    }
-                , text <| " (for structure) analysis as being similar to the currently viewed design. In this context, "
-                , paragraph [ Font.italic ] [ text <| " designs" ]
-                , text <| " refers to related structure also found in The PDA, and"
-                , paragraph [ Font.italic ] [ text <| " proteins" ]
-                , text <| " refers to natural proteins, that is ones not found in The PDA."
-                , paragraph [ Font.italic ] [ text <| " bits" ]
-                , text <| " refers to the bit score, and "
-                , paragraph [ Font.italic ] [ text <| " LDDT" ]
-                , text <| " refers to the Local Distance Difference Test, as calculated by respective software."
-                ]
-            , paragraph [ width fill ]
-                [ paragraph [ width fill ] [ text <| " We have selected values of " ]
-                , paragraph [ Font.bold ] [ text <| "50 bit score and 95% LDDT as thresholds above which we list related entries." ]
-                , paragraph [ width fill ] [ text <| " For designs that do not have any structures that meet these criteria, we list the most similar ones instead." ]
+            [ paragraph [ width fill ]
+                [ paragraph [ width fill ] [ text <| "The PDA dataset can be currently filtered based on the following criteria: by case-insensitive string-matching a search phrase, by release date, and by maximum similarity to natural proteins. We have implemented boolean logic in the text-based search: phrases can be separated by && (AND), || (OR), and &&!! (AND NOT). Intentions behind the example search phrase: " ]
+                , paragraph [ width fill, Font.italic ] [ text <| " Woolfson && coiled-coil || coiled coil &&!! 4-helix" ]
+                , paragraph [ width fill ] [ text <| " could be translated as: " ]
+                , paragraph [ width fill, Font.italic ] [ text <| " Show me designs that were designed by Woolfson, are coiled(-)coil, and are not 4-helical." ]
+                , paragraph [ width fill ] [ text <| " Release date can be used to filter as a closed range, or with open upper or lower bound. For similarity search exluding entries that do not have any related partners, if so desired, one needs to manually tick the checkbox. Filters are combined when multiple are defined simultaneously." ]
                 ]
             ]
         ]
@@ -400,7 +450,7 @@ uiArea columnWidth =
 dataCollectionArea : Int -> Element msg
 dataCollectionArea columnWidth =
     column
-        [ width fill
+        [ width <| px columnWidth
         , spacing 10
         ]
         [ paragraph
@@ -410,19 +460,29 @@ dataCollectionArea columnWidth =
         , column
             (Style.monospacedFont
                 ++ [ Font.justify
-                   , width
-                        (fill
-                            |> maximum columnWidth
-                        )
+                   , width fill
                    ]
             )
             [ paragraph
-                [ width
-                    (fill
-                        |> maximum columnWidth
-                    )
+                [ width fill
                 ]
-                [ text <| "If you find The PDA useful in your work, please cite as:" ]
+                [ text <| "Data was collected and is updated monthly by running a search query on RCSB PDB with the following criteria: polymer entity type IS protein, polymer entity type IS NOT DNA, polymer entity type IS NOT RNA, polymer entity type IS NOT NA-hybrid, AND source organism taxonomy name (full lineage) IS synthetic construct. These entries are then manually reviewed, and if any appears to not be relevant to the de novo protein design field, it is added to the "
+                , newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url = "https://github.com/wells-wood-research/chronowska-stam-wood-2024-protein-design-archive/blob/main/entries_to_manually_exclude.csv"
+                    , label = text <| "excluded"
+                    }
+                , text <|
+                    " list for transparency and discarded from The PDA dataset. Although the following is not exhaustive, example reasons for entries to be discarded are: "
+                , column
+                    [ width fill, spacing 5, paddingXY 30 10 ]
+                    [ text <| "* method of development - if protein was created without rational reasoning, such as by screening a large random library, it is discarded,"
+                    , text <| "* length - very short peptides, such as less than 14 amino acids (threshold chosen based on MMseqs2 similarity screening limitations), tend to be discarded unless their method of development strongly suggests that they should be included,"
+                    , text <| "* identity of synthetic construct - certain entities that are not de novo designed proteins tend to be labelled as synthetic constructs when deposited to the PDB database, such as the scFv16 antibody used to stabilise GPCR/G-protein complexes; as these are not the focus of their study and have not been rationally designed, they are discarded."
+                    ]
+                ]
             ]
         ]
 
@@ -430,7 +490,7 @@ dataCollectionArea columnWidth =
 dataProcessingArea : Int -> Element msg
 dataProcessingArea columnWidth =
     column
-        [ width fill
+        [ width <| px columnWidth
         , spacing 10
         ]
         [ paragraph
@@ -440,18 +500,31 @@ dataProcessingArea columnWidth =
         , column
             (Style.monospacedFont
                 ++ [ Font.justify
-                   , width
-                        (fill
-                            |> maximum columnWidth
-                        )
+                   , width fill
                    ]
             )
             [ paragraph
-                [ width
-                    (fill
-                        |> maximum columnWidth
-                    )
+                [ width fill
                 ]
-                [ text <| "If you find The PDA useful in your work, please cite as:" ]
+                [ paragraph [ width fill ] [ text <| "Details of data processing are available in the " ]
+                , newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url = "https://doi.org/10.1101/2024.09.05.611465"
+                    , label = text <| "pre-print"
+                    }
+                , paragraph [ width fill ] [ text <| " methods section, and the code used to generate the dataset is available fully with instructions on " ]
+                , newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url = "https://github.com/wells-wood-research/chronowska-stam-wood-2024-protein-design-archive/tree/main"
+                    , label = text <| "GitHub"
+                    }
+                , paragraph [ width fill ] [ text <| ". Please note that the method of extracting designed chains for analysis has been significantly improved between submission of " ]
+                , paragraph [ width fill, Font.italic ] [ text <| "The Protein Design Archive (PDA): insights from 40 years of protein design" ]
+                , paragraph [ width fill ] [ text <| " paper and updates made since October 2024. For any questions and feedback, we ask that you contact us following the link at the bottom of the page." ]
+                ]
             ]
         ]
