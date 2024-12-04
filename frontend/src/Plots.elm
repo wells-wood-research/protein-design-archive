@@ -226,11 +226,11 @@ timelinePlotStubs widthF heightF designs =
         ax =
             axes
                 << axis "xScale"
-                    siBottom
+                    siTop
                     [ axDomain false
                     , axFormat <| str ".4"
                     , axTickCount <| num 16
-                    , axOffset <| vNum 80.0
+                    , axOffset <| vNum 250 -- vNum 80.0 # if siBottom
                     , axLabelFontSize <| num 12.0
                     ]
 
@@ -275,6 +275,11 @@ timelinePlotStubs widthF heightF designs =
     in
     { plotId = timelinePlotId
     , spec =
-        toVega
-            [ Vega.width (0.85 * widthF), Vega.height (0.5 * heightF), Vega.padding 50, ds, si [], sc [], ax [], mk [] ]
+        if widthF < 800.0 then
+            toVega
+                [ Vega.width (0.9 * widthF), Vega.height (0.5 * heightF), Vega.paddings 0 30 0 10, ds, si [], sc [], ax [], mk [] ]
+
+        else
+            toVega
+                [ Vega.width (0.85 * widthF), Vega.height (0.5 * heightF), Vega.paddings 50 30 0 10, ds, si [], sc [], ax [], mk [] ]
     }
