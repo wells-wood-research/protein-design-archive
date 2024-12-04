@@ -22,6 +22,8 @@ type DesignFilter
     | DateEnd Date.Date
     | SimilaritySequence Float
     | SimilarityStructure Float
+    | SimilaritySequenceExclusion Bool
+    | SimilarityStructureExclusion Bool
     | DesignClass Classification
     | Vote Bool
 
@@ -37,6 +39,8 @@ defaultKeys :
     , searchTextParsedKey : String
     , similaritySequenceKey : String
     , similarityStructureKey : String
+    , similaritySequenceExclusionKey : String
+    , similarityStructureExclusionKey : String
     , classificationMinimalKey : String
     , classificationRationalKey : String
     , classificationEngineeredKey : String
@@ -67,6 +71,8 @@ defaultKeys =
     , searchTextParsedKey = "search-text-parsed"
     , similaritySequenceKey = "similarity-sequence-bit"
     , similarityStructureKey = "similarity-structure-lddt"
+    , similaritySequenceExclusionKey = "similarity-exclude-uncomputed-sequence"
+    , similarityStructureExclusionKey = "similarity-exclude-uncomputed-structure"
     , classificationMinimalKey = "design-classification-minimal"
     , classificationRationalKey = "design-classification-rational"
     , classificationEngineeredKey = "design-classification-engineered"
@@ -147,6 +153,20 @@ toString filter =
 
         SimilarityStructure threshold ->
             "structure similarity below " ++ String.fromFloat threshold
+
+        SimilaritySequenceExclusion isTicked ->
+            if isTicked then
+                "exclude uncomputed sequence"
+
+            else
+                "include uncomputed sequence"
+
+        SimilarityStructureExclusion isTicked ->
+            if isTicked then
+                "exclude uncomputed structure"
+
+            else
+                "include uncomputed structure"
 
 
 toDesignFilter : String -> DesignFilter
@@ -410,6 +430,28 @@ stubMeetsOneFilter design filter =
 
             else
                 False
+
+        SimilaritySequenceExclusion isTicked ->
+            if isTicked then
+                if design.seq_max_sim_natural.partner == "" then
+                    False
+
+                else
+                    True
+
+            else
+                True
+
+        SimilarityStructureExclusion isTicked ->
+            if isTicked then
+                if design.struct_max_sim_natural.partner == "" then
+                    False
+
+                else
+                    True
+
+            else
+                True
 
         _ ->
             True

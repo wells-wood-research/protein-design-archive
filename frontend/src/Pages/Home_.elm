@@ -646,9 +646,66 @@ similarityFilteringArea model =
                 )
             , text "Slide to set similarity threshold: "
             ]
-        , sequenceSimilarityField model
-        , structureSimilarityField model
+        , row []
+            [ sequenceSimilarityField model
+            , similarityExclusionButton model defaultKeys.similaritySequenceExclusionKey DesignFilter.SimilaritySequenceExclusion
+            ]
+        , row []
+            [ structureSimilarityField model
+            , similarityExclusionButton model defaultKeys.similarityStructureExclusionKey DesignFilter.SimilarityStructureExclusion
+            ]
         ]
+
+
+similarityExclusionButton : Model -> String -> (Bool -> DesignFilter) -> Element Msg
+similarityExclusionButton model dictKey filter =
+    Input.checkbox [ paddingXY 3 10, alignTop ]
+        { onChange =
+            \checkboxStatus ->
+                UpdateFilters dictKey (filter checkboxStatus)
+        , icon = Input.defaultCheckbox
+        , checked =
+            case Dict.get dictKey model.designFiltersCached of
+                Just (SimilaritySequenceExclusion value) ->
+                    value
+
+                Just (SimilarityStructureExclusion value) ->
+                    value
+
+                _ ->
+                    False
+        , label =
+            let
+                label =
+                    case Dict.get dictKey model.designFiltersCached of
+                        Just (SimilaritySequenceExclusion value) ->
+                            if value then
+                                "uncomputed excluded"
+
+                            else
+                                "exclude uncomputed"
+
+                        Just (SimilarityStructureExclusion value) ->
+                            if value then
+                                "uncomputed excluded"
+
+                            else
+                                "exclude uncomputed"
+
+                        _ ->
+                            "exclude uncomputed"
+            in
+            Input.labelRight
+                [ centerY
+                , width fill
+                , paddingXY 5 0
+                , Font.italic
+                ]
+                (paragraph
+                    Style.monospacedFont
+                    [ text <| label ]
+                )
+        }
 
 
 numberArea : Maybe Float -> List ProteinDesignStub -> Set.Set String -> Element Msg
