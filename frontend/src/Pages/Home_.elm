@@ -640,13 +640,13 @@ similarityFilteringArea model =
             getScreenWidthInt model.mScreenWidthF
 
         elementType =
-            if screenWidth < 1300 then
+            if screenWidth < 1000 then
                 column
 
             else
                 row
     in
-    elementType
+    column
         (Style.monospacedFont ++ [ centerX, spacing 10, alignLeft ])
         [ row []
             [ el [ centerX, paddingXY 10 0 ]
@@ -657,11 +657,11 @@ similarityFilteringArea model =
                 )
             , text "Slide to set similarity threshold: "
             ]
-        , row []
+        , elementType []
             [ sequenceSimilarityField model
             , similarityExclusionButton model defaultKeys.similaritySequenceExclusionKey DesignFilter.SimilaritySequenceExclusion
             ]
-        , row []
+        , elementType []
             [ structureSimilarityField model
             , similarityExclusionButton model defaultKeys.similarityStructureExclusionKey DesignFilter.SimilarityStructureExclusion
             ]
