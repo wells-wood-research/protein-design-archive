@@ -823,22 +823,13 @@ designDetailsFromProteinDesign proteinDesign =
                         |> text
                 }
       }
-    , { header = "Biological assembly"
+    , { header = "Release date"
       , property =
-            el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width (fill |> maximum 350)
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
+            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
+                text "-"
+
+            else
+                text <| Date.toIsoString proteinDesign.release_date
       }
     , { header = "Subtitle"
       , property =
@@ -847,30 +838,6 @@ designDetailsFromProteinDesign proteinDesign =
 
             else
                 text <| proteinDesign.subtitle
-      }
-    , { header = "Classification"
-      , property =
-            if String.isEmpty <| classificationToString proteinDesign.classification then
-                text "-"
-
-            else
-                text <| classificationToString proteinDesign.classification
-      }
-    , { header = "Tags"
-      , property =
-            if List.isEmpty proteinDesign.tags then
-                text "-"
-
-            else
-                text <| String.join ", " proteinDesign.tags
-      }
-    , { header = "Release date"
-      , property =
-            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
-                text "-"
-
-            else
-                text <| Date.toIsoString proteinDesign.release_date
       }
     , { header = "Sequence related designs (bits)"
       , property =
@@ -984,6 +951,22 @@ designDetailsFromProteinDesign proteinDesign =
                         )
                             |> text
                     }
+      }
+    , { header = "Classification"
+      , property =
+            if String.isEmpty <| classificationToString proteinDesign.classification then
+                text "-"
+
+            else
+                text <| classificationToString proteinDesign.classification
+      }
+    , { header = "Tags"
+      , property =
+            if List.isEmpty proteinDesign.tags then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.tags
       }
     , { header = "Symmetry group"
       , property =
