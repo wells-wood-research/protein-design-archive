@@ -154,9 +154,12 @@ update shared msg model =
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
+
+                        plotHeight =
+                            getScreenWidthFloat model.mScreenHeightF
                     in
                     ( { model | designStubs = Success designs }
-                    , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
+                    , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth plotHeight filteredDesignStubs)
                     )
 
                 DesignsDataReceived (Err e) ->
@@ -332,11 +335,14 @@ update shared msg model =
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
+
+                        plotHeight =
+                            getScreenWidthFloat model.mScreenHeightF
                     in
                     case model.renderPlotState of
                         AwaitingRender 0 ->
                             ( { model | renderPlotState = Rendered, designFilters = model.designFiltersCached }
-                            , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth filteredDesignStubs)
+                            , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth plotHeight filteredDesignStubs)
                             )
 
                         AwaitingRender remaining ->

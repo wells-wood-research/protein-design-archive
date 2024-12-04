@@ -119,7 +119,7 @@ timelinePlotDesigns widthF designs =
         ax =
             axes
                 << axis "xScale"
-                    siBottom
+                    siTop
                     [ axDomain false
                     , axFormat <| str ".4"
                     ]
@@ -170,8 +170,8 @@ timelinePlotDesigns widthF designs =
     }
 
 
-timelinePlotStubs : Float -> List ProteinDesignStub -> PlotData
-timelinePlotStubs widthF designs =
+timelinePlotStubs : Float -> Float -> List ProteinDesignStub -> PlotData
+timelinePlotStubs widthF heightF designs =
     let
         ds =
             let
@@ -229,6 +229,9 @@ timelinePlotStubs widthF designs =
                     siBottom
                     [ axDomain false
                     , axFormat <| str ".4"
+                    , axTickCount <| num 16
+                    , axOffset <| vNum 80.0
+                    , axLabelFontSize <| num 12.0
                     ]
 
         mk =
@@ -273,5 +276,5 @@ timelinePlotStubs widthF designs =
     { plotId = timelinePlotId
     , spec =
         toVega
-            [ Vega.width (0.85 * widthF), Vega.height 300, Vega.padding 50, ds, si [], sc [], ax [], mk [] ]
+            [ Vega.width (0.85 * widthF), Vega.height (0.5 * heightF), Vega.padding 50, ds, si [], sc [], ax [], mk [] ]
     }
