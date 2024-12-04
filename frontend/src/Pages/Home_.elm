@@ -26,7 +26,7 @@ import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder)
+import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder, jsonStringFromProteinDesignDownload)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set
@@ -304,7 +304,12 @@ update shared msg model =
                         encodedFileContent =
                             case fileType of
                                 ProteinDesign.Json ->
-                                    designData
+                                    case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
+                                        Ok designs ->
+                                            jsonStringFromProteinDesignDownload designs
+
+                                        Err _ ->
+                                            designData
 
                                 ProteinDesign.Csv ->
                                     case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of

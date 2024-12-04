@@ -19,7 +19,7 @@ import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, reviewCommentsArea)
+import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromProteinDesignDownload, designDetailsFromProteinDesign, downloadDesignDecoder, jsonStringFromProteinDesignDownload)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set
@@ -186,7 +186,12 @@ update msg model =
                         encodedFileContent =
                             case fileType of
                                 ProteinDesign.Json ->
-                                    designData
+                                    case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
+                                        Ok designs ->
+                                            jsonStringFromProteinDesignDownload designs
+
+                                        Err _ ->
+                                            "There was an error in generating JSON file. Please try downloading CSV instead and contact us with feedback if the issue persists."
 
                                 ProteinDesign.Csv ->
                                     case Json.Decode.decodeString (Json.Decode.list downloadDesignDecoder) designData of
@@ -194,7 +199,7 @@ update msg model =
                                             csvStringFromProteinDesignDownload designs
 
                                         Err _ ->
-                                            designData
+                                            "There was an error in generating CSV file. Please try downloading JSON instead and contact us with feedback if the issue persists."
                     in
                     ( { model | dataDownload = NotAsked }
                     , Effect.downloadFile model.designId encodedFileContent fileType
