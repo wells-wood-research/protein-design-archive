@@ -284,7 +284,7 @@ subscriptions _ =
 
 view : Model -> View Msg
 view model =
-    { title = "Design Review"
+    { title = "PDA | " ++ model.designId ++ " review"
     , attributes =
         [ centerX
         , width
@@ -304,6 +304,10 @@ details model =
 
         screenWidth =
             getScreenWidthInt <| model.mScreenWidthF
+
+        -- fake value because not available in review and not needed
+        screenHeight =
+            1000
 
         halfWidth =
             getScreenWidthInt <| Just (toFloat screenWidth / 2)
@@ -361,11 +365,11 @@ details model =
                              ]
                                 ++ Style.bodyFont
                             )
-                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
+                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign screenWidth
                             , row
                                 []
-                                [ Details.designDetailsBody halfWidth proteinDesign
-                                , reviewArea halfWidth model
+                                [ Details.designDetailsBody proteinDesign halfWidth screenHeight
+                                , reviewArea model halfWidth
                                 ]
                             ]
 
@@ -379,16 +383,16 @@ details model =
                              ]
                                 ++ Style.bodyFont
                             )
-                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign
-                            , Details.designDetailsBody screenWidth proteinDesign
-                            , reviewArea screenWidth model
+                            [ Details.designDetailsHeader "Design Review" "/review/" proteinDesign screenWidth
+                            , Details.designDetailsBody proteinDesign screenWidth screenHeight
+                            , reviewArea model screenWidth
                             ]
             ]
         ]
 
 
-reviewArea : Int -> Model -> Element Msg
-reviewArea elementWidthI model =
+reviewArea : Model -> Int -> Element Msg
+reviewArea model elementWidthI =
     column
         [ centerX
         , width fill

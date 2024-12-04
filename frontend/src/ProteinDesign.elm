@@ -223,14 +223,15 @@ csvListFromProteinDesignDownload proteinDesign =
     [ ( "pdb_code", proteinDesign.pdb )
     , ( "release_date", Date.toIsoString proteinDesign.release_date )
     , ( "classification", classificationToString proteinDesign.classification )
-    , ( "chains", String.join ";" (List.map chainToString proteinDesign.chains) )
+    , ( "chains", String.join "|" (List.map chainToString proteinDesign.chains) )
     , ( "formula_weight", fromFloat proteinDesign.formula_weight )
-    , ( "crystal_structure(a;b;c;alpha;beta;gamma)", xtalToString proteinDesign.crystal_structure )
-    , ( "exptl_method", String.join ";" proteinDesign.exptl_method )
+    , ( "symmetry", proteinDesign.symmetry )
+    , ( "crystal_structure(a|b|c|alpha|beta|gamma)", xtalToString proteinDesign.crystal_structure )
+    , ( "exptl_method", String.join "|" proteinDesign.exptl_method )
     , ( "synthesis_comment", proteinDesign.synthesis_comment )
     , ( "authors", authorsToString proteinDesign.authors )
     , ( "publication", proteinDesign.publication )
-    , ( "publication_ref(doi;pubmed;csd;issn;astm)", refToString proteinDesign.publication_ref )
+    , ( "publication_ref(doi|pubmed|csd|issn|astm)", refToString proteinDesign.publication_ref )
     , ( "publication_country", proteinDesign.publication_country )
     , ( "subtitle", proteinDesign.subtitle )
     , ( "tags", String.join ";" proteinDesign.tags )
@@ -242,6 +243,7 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "highest_sequence_related_natural_protein", relatedToString proteinDesign.seq_max_sim_natural )
     , ( "highest_structure_related_design", relatedToString proteinDesign.struct_max_sim_designed )
     , ( "highest_structure_related_natural_protein", relatedToString proteinDesign.struct_max_sim_natural )
+    , ( "data_curation_comments", String.join ";" proteinDesign.review_comment )
     ]
 
 
@@ -256,43 +258,44 @@ csvStringFromProteinDesignDownload proteinDesigns =
             }
 
 
-jsonValueFromProteinDesign : ProteinDesign -> JsonEncode.Value
-jsonValueFromProteinDesign proteinDesign =
+jsonValueFromProteinDesignDownloadList : List ProteinDesignDownload -> JsonEncode.Value
+jsonValueFromProteinDesignDownloadList proteinDesigns =
+    JsonEncode.list jsonValueFromProteinDesignDownload proteinDesigns
+
+
+jsonValueFromProteinDesignDownload : ProteinDesignDownload -> JsonEncode.Value
+jsonValueFromProteinDesignDownload proteinDesign =
     JsonEncode.object
-        [ ( proteinDesign.pdb
-          , JsonEncode.object <|
-                [ ( "pdb", JsonEncode.string <| proteinDesign.pdb )
-                , ( "release_date", JsonEncode.string <| Date.toIsoString proteinDesign.release_date )
-                , ( "classification", JsonEncode.string <| classificationToString proteinDesign.classification )
-                , ( "chains", JsonEncode.list chainEncoder proteinDesign.chains )
-                , ( "formula_weight", JsonEncode.string <| fromFloat proteinDesign.formula_weight )
-                , ( "exptl_method", JsonEncode.string <| String.join ";" proteinDesign.exptl_method )
-                , ( "crystal_structure", xtalEncoder proteinDesign.crystal_structure )
-                , ( "synthesis_comment", JsonEncode.string <| proteinDesign.synthesis_comment )
-                , ( "authors", JsonEncode.list authorEncoder proteinDesign.authors )
-                , ( "publication", JsonEncode.string <| proteinDesign.publication )
-                , ( "publication_ref", referenceEncoder proteinDesign.publication_ref )
-                , ( "publication_country", JsonEncode.string <| proteinDesign.publication_country )
-                , ( "subtitle", JsonEncode.string <| proteinDesign.subtitle )
-                , ( "tags", JsonEncode.string <| String.join ";" proteinDesign.tags )
-                , ( "keywords", JsonEncode.string <| String.join ";" proteinDesign.keywords )
-                , ( "abstract", JsonEncode.string <| proteinDesign.abstract )
-                , ( "sequence_related_designs_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_designed )
-                , ( "sequence_related_natural_proteins_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_natural )
-                , ( "structure_related_designs_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_designed )
-                , ( "structure_related_natural_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_natural )
-                , ( "highest_sequence_related_design", relatedEncoder proteinDesign.seq_max_sim_designed )
-                , ( "highest_sequence_related_natural_protein", relatedEncoder proteinDesign.seq_max_sim_natural )
-                , ( "highest_structure_related_design", relatedEncoder proteinDesign.struct_max_sim_designed )
-                , ( "highest_structure_related_natural_protein", relatedEncoder proteinDesign.struct_max_sim_natural )
-                ]
-          )
+        [ ( "pdb", JsonEncode.string proteinDesign.pdb )
+        , ( "release_date", JsonEncode.string <| Date.toIsoString proteinDesign.release_date )
+        , ( "classification", JsonEncode.string <| classificationToString proteinDesign.classification )
+        , ( "chains", JsonEncode.list chainEncoder proteinDesign.chains )
+        , ( "formula_weight", JsonEncode.float proteinDesign.formula_weight )
+        , ( "exptl_method", JsonEncode.string <| String.join "" proteinDesign.exptl_method )
+        , ( "symmetry", JsonEncode.string proteinDesign.symmetry )
+        , ( "crystal_structure", xtalEncoder proteinDesign.crystal_structure )
+        , ( "synthesis_comment", JsonEncode.string proteinDesign.synthesis_comment )
+        , ( "authors", JsonEncode.list authorEncoder proteinDesign.authors )
+        , ( "publication", JsonEncode.string proteinDesign.publication )
+        , ( "publication_ref", referenceEncoder proteinDesign.publication_ref )
+        , ( "publication_country", JsonEncode.string proteinDesign.publication_country )
+        , ( "subtitle", JsonEncode.string proteinDesign.subtitle )
+        , ( "tags", JsonEncode.list JsonEncode.string proteinDesign.tags )
+        , ( "sequence_related_designs_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_designed )
+        , ( "sequence_related_natural_proteins_above_50_bits", JsonEncode.list relatedEncoder proteinDesign.seq_thr_sim_natural )
+        , ( "structure_related_designs_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_designed )
+        , ( "structure_related_natural_above_95_lddt", JsonEncode.list relatedEncoder proteinDesign.struct_thr_sim_natural )
+        , ( "highest_sequence_related_design", relatedEncoder proteinDesign.seq_max_sim_designed )
+        , ( "highest_sequence_related_natural_protein", relatedEncoder proteinDesign.seq_max_sim_natural )
+        , ( "highest_structure_related_design", relatedEncoder proteinDesign.struct_max_sim_designed )
+        , ( "highest_structure_related_natural_protein", relatedEncoder proteinDesign.struct_max_sim_natural )
+        , ( "data_curation_comments", JsonEncode.list JsonEncode.string proteinDesign.review_comment )
         ]
 
 
-jsonStringFromProteinDesign : ProteinDesign -> String
-jsonStringFromProteinDesign proteinDesign =
-    JsonEncode.encode 4 (jsonValueFromProteinDesign proteinDesign)
+jsonStringFromProteinDesignDownload : List ProteinDesignDownload -> String
+jsonStringFromProteinDesignDownload proteinDesigns =
+    JsonEncode.encode 4 (jsonValueFromProteinDesignDownloadList proteinDesigns)
 
 
 rawDesignDecoder : Decoder ProteinDesign
@@ -368,10 +371,10 @@ downloadDesignDecoder =
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
-        |> required "seq_max_sim_designed" relatedDecoder
-        |> required "seq_max_sim_natural" relatedDecoder
-        |> required "struct_max_sim_designed" relatedDecoder
-        |> required "struct_max_sim_natural" relatedDecoder
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
         |> required "review_comment" (Decode.list Decode.string)
 
 
@@ -532,7 +535,7 @@ stubSearchableText proteinDesign =
 
 refToString : Reference -> String
 refToString reference =
-    String.join " " <|
+    String.join "|" <|
         [ reference.doi
         , reference.pubmed
         , reference.csd
@@ -543,12 +546,27 @@ refToString reference =
 
 relatedToString : Related -> String
 relatedToString related =
-    related.partner ++ "(" ++ String.fromFloat related.similarity ++ ")"
+    if related.partner == "" then
+        ""
+
+    else
+        related.partner ++ "(" ++ String.fromFloat related.similarity ++ ")"
 
 
 chainToString : Chain -> String
 chainToString chain =
-    "id:[" ++ chain.chain_id ++ "]chain_type:[" ++ chain.chain_type ++ "]chain_source:[" ++ chain.chain_source ++ "]sequence:[" ++ chain.chain_seq_unnat ++ "]"
+    "id:"
+        ++ chain.chain_id
+        ++ ";type:"
+        ++ chain.chain_type
+        ++ ";source:"
+        ++ chain.chain_source
+        ++ ";length:"
+        ++ String.fromInt chain.chain_length
+        ++ ";seq_nat:"
+        ++ chain.chain_seq_nat
+        ++ ";seq_unnat:"
+        ++ chain.chain_seq_unnat
 
 
 authorToString : Author -> String
@@ -563,7 +581,7 @@ authorsToString authors =
 
 xtalToString : Xtal -> String
 xtalToString xtal =
-    String.join ";" [ xtal.length_a, xtal.length_b, xtal.length_c, xtal.angle_a, xtal.angle_b, xtal.angle_g ]
+    String.join "|" [ xtal.length_a, xtal.length_b, xtal.length_c, xtal.angle_a, xtal.angle_b, xtal.angle_g ]
 
 
 stringToClassification : String -> Classification
@@ -823,22 +841,13 @@ designDetailsFromProteinDesign proteinDesign =
                         |> text
                 }
       }
-    , { header = "Biological assembly"
+    , { header = "Release date"
       , property =
-            el
-                [ padding 2
-                , Border.width 2
-                , Border.color <| rgb255 220 220 220
-                , Border.rounded 3
-                , alignTop
-                , width (fill |> maximum 350)
-                ]
-                (image
-                    [ width fill ]
-                    { src = proteinDesign.picture_path
-                    , description = "Structure of " ++ proteinDesign.pdb
-                    }
-                )
+            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
+                text "-"
+
+            else
+                text <| Date.toIsoString proteinDesign.release_date
       }
     , { header = "Subtitle"
       , property =
@@ -847,30 +856,6 @@ designDetailsFromProteinDesign proteinDesign =
 
             else
                 text <| proteinDesign.subtitle
-      }
-    , { header = "Classification"
-      , property =
-            if String.isEmpty <| classificationToString proteinDesign.classification then
-                text "-"
-
-            else
-                text <| classificationToString proteinDesign.classification
-      }
-    , { header = "Tags"
-      , property =
-            if List.isEmpty proteinDesign.tags then
-                text "-"
-
-            else
-                text <| String.join ", " proteinDesign.tags
-      }
-    , { header = "Release date"
-      , property =
-            if String.isEmpty <| Date.toIsoString proteinDesign.release_date then
-                text "-"
-
-            else
-                text <| Date.toIsoString proteinDesign.release_date
       }
     , { header = "Sequence related designs (bits)"
       , property =
@@ -984,6 +969,22 @@ designDetailsFromProteinDesign proteinDesign =
                         )
                             |> text
                     }
+      }
+    , { header = "Classification"
+      , property =
+            if String.isEmpty <| classificationToString proteinDesign.classification then
+                text "-"
+
+            else
+                text <| classificationToString proteinDesign.classification
+      }
+    , { header = "Tags"
+      , property =
+            if List.isEmpty proteinDesign.tags then
+                text "-"
+
+            else
+                text <| String.join ", " proteinDesign.tags
       }
     , { header = "Symmetry group"
       , property =
