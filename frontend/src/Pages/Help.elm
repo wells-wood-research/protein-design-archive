@@ -169,13 +169,14 @@ helpBody model =
         , uiArea columnWidth
         , dataCollectionArea columnWidth
         , dataProcessingArea columnWidth
+        , referencesArea columnWidth
         ]
 
 
 citationArea : Int -> Element msg
 citationArea columnWidth =
     column
-        [ width fill
+        [ width <| px columnWidth
         , spacing 10
         ]
         [ paragraph
@@ -254,7 +255,7 @@ citationArea columnWidth =
 codeAvailabilityArea : Int -> Element msg
 codeAvailabilityArea columnWidth =
     column
-        [ width fill
+        [ width <| px columnWidth
         , spacing 10
         ]
         [ paragraph
@@ -360,7 +361,7 @@ websiteStructureArea columnWidth =
             , paragraph [ width fill ]
                 [ paragraph [ width fill ] [ text <| "The " ]
                 , paragraph [ width fill, Font.bold ] [ text <| "Design Details page" ]
-                , paragraph [ width fill ] [ text <| " should be self-explanatory, starting with a table summarising basic publication and experimental information, followed by an interactive 3D structure, sequence information, and ending with a description (primary publication's abstract). One point may potenially cause confusion: " ]
+                , paragraph [ width fill ] [ text <| " is self-explanatory. It provides information about a design, such as publication and basic experimental facts, interactive 3D structure, chain and sequence details, and a description, that is the abstract of the primary publication associated with this design. One element might merit elaborating on, that is " ]
                 , paragraph [ width fill, Font.bold ] [ text <| "related proteins" ]
                 , paragraph [ width fill ] [ text <| ". This is described in detail below." ]
                 ]
@@ -390,7 +391,7 @@ relatedProteinsArea columnWidth =
                 { url = "https://www.nature.com/articles/nbt.3988"
                 , label = text <| "MMseqs2"
                 }
-            , text <| " (for sequence) and "
+            , text <| " [1] (for sequence) and "
             , newTabLink
                 [ Font.color <| rgb255 104 176 171
                 , Font.underline
@@ -398,20 +399,20 @@ relatedProteinsArea columnWidth =
                 { url = "https://www.nature.com/articles/s41587-023-01773-0"
                 , label = text <| "Foldseek"
                 }
-            , text <| " (for structure) analysis as being similar to the currently viewed design. In this context, "
+            , text <| " [2] (for structure) analysis as being similar to the currently viewed design. In the context of this analysis, "
             , paragraph [ Font.italic ] [ text <| " designs" ]
-            , text <| " refers to related structure also found in The PDA, and"
+            , text <| " refers to other structures also found in The PDA, and"
             , paragraph [ Font.italic ] [ text <| " proteins" ]
             , text <| " refers to natural proteins, that is ones not found in The PDA."
             , paragraph [ Font.italic ] [ text <| " bits" ]
             , text <| " refers to the bit score, and "
             , paragraph [ Font.italic ] [ text <| " LDDT" ]
-            , text <| " refers to the Local Distance Difference Test, as calculated by respective software."
+            , text <| " refers to the Local Distance Difference Test, as calculated by MMseqs2 and Foldseek, respectively."
             ]
         , paragraph [ width fill ]
             [ paragraph [ width fill ] [ text <| " We have selected values of " ]
             , paragraph [ Font.bold ] [ text <| "50 bit score and 95% LDDT as thresholds above which we list related entries." ]
-            , paragraph [ width fill ] [ text <| " For designs that do not have any structures that meet these criteria, we list the most similar ones instead." ]
+            , paragraph [ width fill ] [ text <| " For designs that do not have any structures that meet these criteria, we list a related partner with the highest similarity score." ]
             ]
         ]
 
@@ -437,11 +438,11 @@ filteringArea columnWidth =
                    ]
             )
             [ paragraph [ width fill ]
-                [ paragraph [ width fill ] [ text <| "The PDA dataset can be currently filtered based on the following criteria: by case-insensitive string-matching a search phrase, by release date, and by maximum similarity to natural proteins. We have implemented boolean logic in the text-based search: phrases can be separated by && (AND), || (OR), and &&!! (AND NOT). Intentions behind the example search phrase: " ]
+                [ paragraph [ width fill ] [ text <| "The PDA website allows filtering the dataset based on the following, currently implemented criteria: by case-insensitive string-matching a search phrase, by release date, and by maximum similarity to natural proteins. We have implemented boolean logic in the text-based search: phrases can be separated by && (AND), || (OR), and &&!! (AND NOT). To illustrate, intentions behind the example search phrase: " ]
                 , paragraph [ width fill, Font.italic ] [ text <| " Woolfson && coiled-coil || coiled coil &&!! 4-helix" ]
                 , paragraph [ width fill ] [ text <| " could be translated as: " ]
                 , paragraph [ width fill, Font.italic ] [ text <| " Show me designs that were designed by Woolfson, are coiled(-)coil, and are not 4-helical." ]
-                , paragraph [ width fill ] [ text <| " Release date can be used to filter as a closed range, or with open upper or lower bound. For similarity search exluding entries that do not have any related partners, if so desired, one needs to manually tick the checkbox. Filters are combined when multiple are defined simultaneously." ]
+                , paragraph [ width fill ] [ text <| " Release date can be used to filter as a closed range, or with open upper or lower bound. Filtering by similarity can be performed with or without entries that do not have any related partners calculated (either due to an error, such as being too short, or because of their novelty) - to exclude, one needs to manually tick the checkbox next to the threshold slider. Filters are combined when multiple are defined simultaneously." ]
                 ]
             ]
         ]
@@ -480,7 +481,7 @@ dataCollectionArea columnWidth =
                     [ width fill, spacing 5, paddingXY 30 10 ]
                     [ text <| "* method of development - if protein was created without rational reasoning, such as by screening a large random library, it is discarded,"
                     , text <| "* length - very short peptides, such as less than 14 amino acids (threshold chosen based on MMseqs2 similarity screening limitations), tend to be discarded unless their method of development strongly suggests that they should be included,"
-                    , text <| "* identity of synthetic construct - certain entities that are not de novo designed proteins tend to be labelled as synthetic constructs when deposited to the PDB database, such as the scFv16 antibody used to stabilise GPCR/G-protein complexes; as these are not the focus of their study and have not been rationally designed, they are discarded."
+                    , text <| "* identity of synthetic construct - certain entities that are not de novo designed proteins tend to be labelled as synthetic constructs when deposited to the PDB database, such as the scFv16 antibody used to stabilise GPCR/G-protein complexes; as these are not the focus of their study as de novo designs, they are discarded."
                     ]
                 ]
             ]
@@ -524,7 +525,58 @@ dataProcessingArea columnWidth =
                     }
                 , paragraph [ width fill ] [ text <| ". Please note that the method of extracting designed chains for analysis has been significantly improved between submission of " ]
                 , paragraph [ width fill, Font.italic ] [ text <| "The Protein Design Archive (PDA): insights from 40 years of protein design" ]
-                , paragraph [ width fill ] [ text <| " paper and updates made since October 2024. For any questions and feedback, we ask that you contact us following the link at the bottom of the page." ]
+                , paragraph [ width fill ] [ text <| " paper and updates made since October 2024. Please see the code on GitHub for the currently implemented, improved method. For any questions and feedback, we ask that you contact us following the link at the bottom of the page." ]
                 ]
+            ]
+        ]
+
+
+referencesArea : Int -> Element msg
+referencesArea columnWidth =
+    column
+        [ width <| px columnWidth
+        , spacing 10
+        ]
+        [ paragraph
+            Style.h2Font
+            [ text "References"
+            ]
+        , paragraph
+            (Style.monospacedFont
+                ++ [ Font.justify
+                   , Font.size 14
+                   , width (fill |> maximum columnWidth)
+                   ]
+            )
+            [ paragraph [ width fill ] [ text <| "[1]" ]
+            , paragraph [ Font.italic, width fill ] [ text <| " MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets" ]
+            , paragraph [ width fill ] [ text <| ". Steinegger, M., Söding, J." ]
+            , paragraph [ width fill ] [ text <| ", Nat Biotechnol 35, 1026–1028 (2017) " ]
+            , newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url = "https://doi.org/10.1038/nbt.3988"
+                , label = text "https://doi.org/10.1038/nbt.3988"
+                }
+            ]
+        , paragraph
+            (Style.monospacedFont
+                ++ [ Font.justify
+                   , Font.size 14
+                   , width (fill |> maximum columnWidth)
+                   ]
+            )
+            [ paragraph [ width fill ] [ text <| "[2]" ]
+            , paragraph [ Font.italic, width fill ] [ text <| " Fast and accurate protein structure search with Foldseek" ]
+            , paragraph [ width fill ] [ text <| ". van Kempen, M., Kim, S.S., Tumescheit, C. et al." ]
+            , paragraph [ width fill ] [ text <| ", Nat Biotechnol 42, 243–246 (2024) " ]
+            , newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url = "https://doi.org/10.1038/s41587-023-01773-0"
+                , label = text "https://doi.org/10.1038/s41587-023-01773-0"
+                }
             ]
         ]
