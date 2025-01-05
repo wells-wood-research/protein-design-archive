@@ -479,9 +479,9 @@ dataCollectionArea columnWidth =
                     " list for transparency and discarded from The PDA dataset. Although the following is not exhaustive, example reasons for entries to be discarded are: "
                 , column
                     [ width fill, spacing 5, paddingXY 30 10 ]
-                    [ text <| "* method of development - if protein was created without rational reasoning, such as by screening a large random library, it is discarded,"
-                    , text <| "* length - very short peptides, such as less than 14 amino acids (threshold chosen based on MMseqs2 similarity screening limitations), tend to be discarded unless their method of development strongly suggests that they should be included,"
-                    , text <| "* identity of synthetic construct - certain entities that are not de novo designed proteins tend to be labelled as synthetic constructs when deposited to the PDB database, such as the scFv16 antibody used to stabilise GPCR/G-protein complexes; as these are not the focus of their study as de novo designs, they are discarded."
+                    [ paragraph [ width fill ] [ text <| "* method of development - if protein was created without rational reasoning, such as by screening a large random library, it is discarded," ]
+                    , paragraph [ width fill ] [ text <| "* length - very short peptides, such as less than 14 amino acids (threshold chosen based on MMseqs2 similarity screening limitations), tend to be discarded unless their method of development strongly suggests that they should be included," ]
+                    , paragraph [ width fill ] [ text <| "* identity of synthetic construct - certain entities that are not de novo designed proteins tend to be labelled as synthetic constructs when deposited to the PDB database, such as the scFv16 antibody used to stabilise GPCR/G-protein complexes; as these are not the focus of their study as de novo designs, they are discarded." ]
                     ]
                 ]
             ]
