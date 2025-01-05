@@ -226,7 +226,7 @@ citationArea columnWidth =
                                 (columnWidth - 30)
                         )
                     ]
-                    [ text "Marta Chronowska, Michael J. Stam, Derek N. Woolfson, Luigi F. Di Constanzo, Christopher W. Wood" ]
+                    [ text "Marta Chronowska, Michael J. Stam, Derek N. Woolfson, Luigi F. Di Costanzo, Christopher W. Wood" ]
                 , paragraph
                     [ Font.alignLeft
                     , width
