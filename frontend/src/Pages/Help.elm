@@ -428,7 +428,7 @@ filteringArea columnWidth =
         )
         [ paragraph
             Style.h3Font
-            [ text "Filetring functionality"
+            [ text "Filtering functionality"
             ]
         , column
             (Style.monospacedFont
