@@ -97,5 +97,5 @@ footerArea =
                         ]
                 }
             ]
-        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date of last update: " ++ "2024-10-31" ]
+        , row [ width <| fillPortion 1, centerX, padding 10 ] [ text <| "Date of last update: " ++ "2025-01-01" ]
         ]
