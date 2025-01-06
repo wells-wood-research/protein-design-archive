@@ -1,4 +1,4 @@
-module Pages.Help exposing (Model, Msg, page)
+module Pages.Pda.Help exposing (Model, Msg, page)
 
 import Browser.Dom
 import Browser.Events

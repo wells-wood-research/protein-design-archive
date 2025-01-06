@@ -52,7 +52,7 @@ title screenWidth =
                                 FeatherIcons.withStrokeWidth 1.2 <|
                                     FeatherIcons.helpCircle
                     )
-            , url = "/help"
+            , url = "/pda/help"
             }
         ]
 
