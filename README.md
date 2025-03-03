@@ -2,8 +2,8 @@
 
 Welcome to The Protein Design Archive (PDA) Database, an up-to-date, complete, online resource for the protein design community and beyond.
 
-This repository presents the code used for building the frontend and backend of The Protein Design Archive (PDA) database: https://github.com/wells-wood-research/protein-design-archive
-Repository containing the details of dataset preparation can be found here: https://github.com/wells-wood-research/chronowska-stam-wood-2024-protein-design-archive/tree/main
+This repository presents the code used for building the frontend and backend of The Protein Design Archive (PDA) database: https://github.com/wells-wood-research/protein-design-archive.<br>
+Repository containing the details of dataset preparation can be found here: https://github.com/wells-wood-research/chronowska-stam-wood-2024-protein-design-archive/tree/main.
 
 ## Citation
 
