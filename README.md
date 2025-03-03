@@ -22,4 +22,4 @@ Details about the PDA website, such as explanation of the interface and certain 
 
 ## Issues and suggestions
 
-Please contact us with suggestions by filing an issue on this repository, or [emailing](mailto:wchris@ed.ac.uk?subject=[GitHub]%20The%20PDA%20website%20comment).
+Please contact us with suggestions by filing an [issue](https://github.com/wells-wood-research/protein-design-archive/issues/new) on this GitHub repository, or [emailing](mailto:wchris@ed.ac.uk?subject=[GitHub]%20The%20PDA%20website%20comment).
