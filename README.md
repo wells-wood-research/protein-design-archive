@@ -1,21 +1,25 @@
 # Protein Design Archive (PDA) Database
 
-An up-to-date, complete, online resource for the protein design community and beyond.
+Welcome to The Protein Design Archive (PDA) Database, an up-to-date, complete, online resource for the protein design community and beyond.
 
-## Data preparation
+This repository presents the code used for building the frontend and backend of The Protein Design Archive (PDA) database: https://github.com/wells-wood-research/protein-design-archive.<br>
+Repository containing the details of dataset preparation can be found here: https://github.com/wells-wood-research/chronowska-stam-wood-2024-protein-design-archive/tree/main.
 
-### 1. Data collection
+## Citation
 
-Data has been scraped from the RCSB PDB database using the script in ```backend/scripts/data_collection.py```.
+If you find The PDA useful in your work, please cite as:
 
-It relies on having a list of PDB codes to scrape data for, cif files to scrape information from, and in-house rules for assigning suggested classification for the protein designs.
+```
+The Protein Design Archive (PDA): insights from 40 years of protein design
+Marta Chronowska, Michael J. Stam, Derek N. Woolfson, Luigi F. Di Costanzo, Christopher W. Wood
+bioRxiv 2024.09.05.611465
+doi: https://doi.org/10.1101/2024.09.05.611465
+```
 
-### 2. Downloading PDB files for display with NGL viewer
+## Website details
 
-Run the following commands:
+Details about the PDA website, such as explanation of the interface and certain choices that were made by its creators, can be found here: https://pragmaticproteindesign.bio.ed.ac.uk/pda/help
 
-```chmod +x download_pdbs.sh```
+## Issues and suggestions
 
-```bash download_pdbs.sh -f pdb_codes.csv -o frontend/static/pdb_files -a```
-
-Make sure to specify the output path correctly and adjust the ```frontend/static/ngl-web-component.js``` file to point to the correct online path of the pdb files' directory.
+Please contact us with suggestions by filing an [issue](https://github.com/wells-wood-research/protein-design-archive/issues/new) on this GitHub repository, or [emailing](mailto:wchris@ed.ac.uk?subject=[GitHub]%20The%20PDA%20website%20comment) us.
