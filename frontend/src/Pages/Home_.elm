@@ -58,16 +58,12 @@ type alias Model =
     , errors : List AppError
     , designFilters : Dict String DesignFilter
     , designFiltersCached : Dict String DesignFilter
-    , mStartDate : Maybe String
-    , mEndDate : Maybe String
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , mScreenWidthF : Maybe Float
     , mScreenHeightF : Maybe Float
     , dataDownload : RemoteData Http.Error String
     , searchString : String
-    , sliderSimilaritySequenceValue : Float
-    , sliderSimilarityStructureValue : Float
     }
 
 
@@ -77,16 +73,12 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , errors = []
       , designFilters = Dict.empty
       , designFiltersCached = Dict.empty
-      , mStartDate = Nothing
-      , mEndDate = Nothing
       , replotTime = 3
       , renderPlotState = WillRender
       , mScreenWidthF = mSharedScreenWidthF
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
       , searchString = ""
-      , sliderSimilaritySequenceValue = 1000.0
-      , sliderSimilarityStructureValue = 100.0
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -111,15 +103,10 @@ getData url =
 
 type Msg
     = UpdateFilters String DesignFilter
-    | UpdateStartDateTextField String
-    | UpdateEndDateTextField String
-    | UpdateSimilaritySlider String Float
     | SendDesignsHttpRequest
     | DesignsDataReceived (Result Http.Error (List ProteinDesignStub))
     | AddAllSelected
     | RemoveAllSelected
-    | DownloadAllSelectedCsv
-    | DownloadAllSelectedJson
     | RequestSelectedDesignData DownloadFileType
     | ForExportResponse DownloadFileType (Result Http.Error String)
     | RenderWhenReady Time.Posix
@@ -198,6 +185,12 @@ update shared msg model =
 
         RemoteData.Success loadedDesignStubs ->
             case msg of
+                SendDesignsHttpRequest ->
+                    ( model, Effect.none )
+
+                DesignsDataReceived _ ->
+                    ( model, Effect.none )
+
                 UpdateFilters key newFilter ->
                     let
                         newDesignFilters =
@@ -221,53 +214,18 @@ update shared msg model =
                             , Effect.none
                             )
 
-                UpdateStartDateTextField string ->
-                    let
-                        phrase =
-                            removeHyphenFromIsoDate string
-                    in
-                    case Date.fromIsoString phrase of
-                        Err _ ->
-                            update shared
-                                (UpdateFilters defaultKeys.dateStartKey (DateStart defaultStartDate))
-                                { model | mStartDate = ifEmptyOrNot string }
-
-                        Ok date ->
-                            update shared
-                                (UpdateFilters defaultKeys.dateStartKey (DateStart date))
-                                { model | mStartDate = ifEmptyOrNot string }
-
-                UpdateEndDateTextField string ->
-                    let
-                        phrase =
-                            removeHyphenFromIsoDate string
-                    in
-                    case Date.fromIsoString phrase of
-                        Err _ ->
-                            update shared
-                                (UpdateFilters defaultKeys.dateEndKey (DateEnd defaultEndDate))
-                                { model | mEndDate = ifEmptyOrNot string }
-
-                        Ok date ->
-                            update shared
-                                (UpdateFilters defaultKeys.dateEndKey (DateEnd date))
-                                { model | mEndDate = ifEmptyOrNot string }
-
-                UpdateSimilaritySlider key threshold ->
-                    case key of
-                        "similarity-sequence-bit" ->
-                            update shared
-                                (UpdateFilters key (SimilaritySequence threshold))
-                                { model | sliderSimilaritySequenceValue = threshold, renderPlotState = AwaitingRender model.replotTime }
-
-                        "similarity-structure-lddt" ->
-                            update shared
-                                (UpdateFilters key (SimilarityStructure threshold))
-                                { model | sliderSimilarityStructureValue = threshold, renderPlotState = AwaitingRender model.replotTime }
-
-                        _ ->
-                            update shared msg model
-
+                -- UpdateSimilaritySlider key threshold ->
+                --     case key of
+                --         "similarity-sequence-bit" ->
+                --             update shared
+                --                 (UpdateFilters key (SimilaritySequence threshold))
+                --                 { model | sliderSimilaritySequenceValue = threshold, renderPlotState = AwaitingRender model.replotTime }
+                --         "similarity-structure-lddt" ->
+                --             update shared
+                --                 (UpdateFilters key (SimilarityStructure threshold))
+                --                 { model | sliderSimilarityStructureValue = threshold, renderPlotState = AwaitingRender model.replotTime }
+                --         _ ->
+                --             update shared msg model
                 AddAllSelected ->
                     let
                         filteredDesignStubs =
@@ -373,18 +331,6 @@ update shared msg model =
 
                 ViewportReset ->
                     ( { model | renderPlotState = AwaitingRender model.replotTime }, Effect.resizeShared (getScreenWidthInt model.mScreenWidthF) (getScreenWidthInt model.mScreenHeightF) )
-
-                _ ->
-                    ( model, Effect.none )
-
-
-ifEmptyOrNot : String -> Maybe String
-ifEmptyOrNot string =
-    if String.isEmpty string then
-        Nothing
-
-    else
-        Just string
 
 
 
@@ -793,13 +739,26 @@ numberSavedToDownloadArea designs =
 
 dateStartField : Model -> Element Msg
 dateStartField model =
+    let
+        startDateString =
+            Dict.get defaultKeys.dateStartKey model.designFiltersCached
+                |> Maybe.andThen
+                    (\val ->
+                        case val of
+                            DateStart st ->
+                                Just st
+
+                            _ ->
+                                Nothing
+                    )
+    in
     row [ alignLeft, width fill ]
         [ text " after: "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
                 , Background.color <|
-                    case model.mStartDate of
+                    case startDateString of
                         Nothing ->
                             rgb255 255 255 255
 
@@ -809,7 +768,7 @@ dateStartField model =
                         Just string ->
                             case Date.fromIsoString <| string of
                                 Ok startDate ->
-                                    case Date.fromIsoString <| Maybe.withDefault "" model.mEndDate of
+                                    case Date.fromIsoString <| Maybe.withDefault "" startDateString of
                                         Ok endDate ->
                                             if Date.compare endDate startDate == GT then
                                                 rgb255 223 255 214
@@ -825,8 +784,9 @@ dateStartField model =
                 ]
                 { onChange =
                     \string ->
-                        UpdateStartDateTextField string
-                , text = Maybe.withDefault "" model.mStartDate
+                        UpdateFilters defaultKeys.dateStartKey (DateStart string)
+                , text =
+                    startDateString |> Maybe.withDefault ""
                 , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
                 , label = Input.labelHidden "Filter Designs by Date - start"
                 }
@@ -836,13 +796,26 @@ dateStartField model =
 
 dateEndField : Model -> Element Msg
 dateEndField model =
+    let
+        endDateString =
+            Dict.get defaultKeys.dateEndKey model.designFiltersCached
+                |> Maybe.andThen
+                    (\val ->
+                        case val of
+                            DateEnd st ->
+                                Just st
+
+                            _ ->
+                                Nothing
+                    )
+    in
     row [ alignLeft, width fill ]
         [ text " before: "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
                 , Background.color <|
-                    case model.mEndDate of
+                    case endDateString of
                         Nothing ->
                             rgb255 255 255 255
 
@@ -852,7 +825,7 @@ dateEndField model =
                         Just string ->
                             case Date.fromIsoString <| string of
                                 Ok endDate ->
-                                    case Date.fromIsoString <| Maybe.withDefault "" model.mStartDate of
+                                    case Date.fromIsoString <| Maybe.withDefault "" endDateString of
                                         Ok startDate ->
                                             if Date.compare endDate startDate == GT then
                                                 rgb255 223 255 214
@@ -868,8 +841,10 @@ dateEndField model =
                 ]
                 { onChange =
                     \string ->
-                        UpdateEndDateTextField string
-                , text = Maybe.withDefault "" model.mEndDate
+                        UpdateFilters defaultKeys.dateEndKey (DateEnd string)
+                , text =
+                    endDateString
+                        |> Maybe.withDefault ""
                 , placeholder = Just <| Input.placeholder [] (text "YYYY-MM-DD")
                 , label = Input.labelHidden "Filter Designs by Date - end"
                 }
@@ -880,8 +855,21 @@ dateEndField model =
 sequenceSimilarityField : Model -> Element Msg
 sequenceSimilarityField model =
     let
+        value =
+            Dict.get defaultKeys.similaritySequenceKey model.designFiltersCached
+                |> Maybe.andThen
+                    (\val ->
+                        case val of
+                            SimilaritySequence fl ->
+                                Just fl
+
+                            _ ->
+                                Nothing
+                    )
+                |> Maybe.withDefault 1000.0
+
         stringScore =
-            String.fromInt <| round model.sliderSimilaritySequenceValue
+            String.fromInt <| round value
 
         scoreToShow =
             if String.length stringScore < 4 then
@@ -911,11 +899,11 @@ sequenceSimilarityField model =
             ]
             { onChange =
                 \threshold ->
-                    UpdateSimilaritySlider defaultKeys.similaritySequenceKey threshold
+                    UpdateFilters defaultKeys.similaritySequenceKey (SimilaritySequence threshold)
             , label = Input.labelHidden "Filter Designs by Similarity - sequence"
             , min = 0.0
             , max = 1000.0
-            , value = model.sliderSimilaritySequenceValue
+            , value = value
             , thumb = Input.defaultThumb
             , step = Just 5.0
             }
@@ -927,8 +915,21 @@ sequenceSimilarityField model =
 structureSimilarityField : Model -> Element Msg
 structureSimilarityField model =
     let
+        value =
+            Dict.get defaultKeys.similarityStructureKey model.designFiltersCached
+                |> Maybe.andThen
+                    (\val ->
+                        case val of
+                            SimilarityStructure fl ->
+                                Just fl
+
+                            _ ->
+                                Nothing
+                    )
+                |> Maybe.withDefault 100.0
+
         stringScore =
-            String.fromInt <| round model.sliderSimilarityStructureValue
+            String.fromInt <| round value
 
         scoreToShow =
             if String.length stringScore < 3 then
@@ -957,11 +958,11 @@ structureSimilarityField model =
             ]
             { onChange =
                 \threshold ->
-                    UpdateSimilaritySlider defaultKeys.similarityStructureKey threshold
+                    UpdateFilters defaultKeys.similarityStructureKey (SimilarityStructure threshold)
             , label = Input.labelHidden "Filter Designs by Similarity - structure"
             , min = 0.0
             , max = 100.0
-            , value = model.sliderSimilarityStructureValue
+            , value = value
             , thumb = Input.defaultThumb
             , step = Nothing
             }

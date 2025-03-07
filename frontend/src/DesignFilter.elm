@@ -18,8 +18,8 @@ import Time exposing (Month(..))
 
 type DesignFilter
     = ContainsTextParsed String
-    | DateStart Date.Date
-    | DateEnd Date.Date
+    | DateStart String
+    | DateEnd String
     | SimilaritySequence Float
     | SimilarityStructure Float
     | SimilaritySequenceExclusion Bool
@@ -129,14 +129,14 @@ checkboxDict =
 toString : DesignFilter -> String
 toString filter =
     case filter of
-        ContainsTextParsed _ ->
-            "complicated_search_string"
+        ContainsTextParsed string ->
+            string
 
         DateStart startDate ->
-            Date.toIsoString startDate
+            startDate
 
         DateEnd endDate ->
-            Date.toIsoString endDate
+            endDate
 
         DesignClass classification ->
             classificationToString classification
@@ -399,19 +399,29 @@ stubMeetsOneFilter design filter =
             else
                 False
 
-        DateStart startDate ->
-            if Date.compare startDate design.release_date == LT then
-                True
+        DateStart startDateString ->
+            case Date.fromIsoString startDateString of
+                Err _ ->
+                    True
 
-            else
-                False
+                Ok startDate ->
+                    if Date.compare startDate design.release_date == LT then
+                        True
 
-        DateEnd endDate ->
-            if Date.compare endDate design.release_date == GT then
-                True
+                    else
+                        False
 
-            else
-                False
+        DateEnd endDateString ->
+            case Date.fromIsoString endDateString of
+                Err _ ->
+                    True
+
+                Ok endDate ->
+                    if Date.compare endDate design.release_date == GT then
+                        True
+
+                    else
+                        False
 
         SimilaritySequence sim ->
             if sim == 1000.0 || design.seq_max_sim_natural.similarity <= sim then
