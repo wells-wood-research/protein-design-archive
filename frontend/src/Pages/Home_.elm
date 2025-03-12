@@ -744,6 +744,18 @@ dateStartField model =
                             _ ->
                                 Nothing
                     )
+
+        endDateString =
+            Dict.get defaultKeys.dateEndKey model.designFiltersCached
+                |> Maybe.andThen
+                    (\val ->
+                        case val of
+                            DateEnd st ->
+                                Just st
+
+                            _ ->
+                                Nothing
+                    )
     in
     row [ alignLeft, width fill ]
         [ text " after: "
@@ -761,7 +773,7 @@ dateStartField model =
                         Just string ->
                             case Date.fromIsoString <| string of
                                 Ok startDate ->
-                                    case Date.fromIsoString <| Maybe.withDefault "" startDateString of
+                                    case Date.fromIsoString <| Maybe.withDefault "" endDateString of
                                         Ok endDate ->
                                             if Date.compare endDate startDate == GT then
                                                 rgb255 223 255 214
@@ -790,6 +802,18 @@ dateStartField model =
 dateEndField : Model -> Element Msg
 dateEndField model =
     let
+        startDateString =
+            Dict.get defaultKeys.dateStartKey model.designFiltersCached
+                |> Maybe.andThen
+                    (\val ->
+                        case val of
+                            DateStart st ->
+                                Just st
+
+                            _ ->
+                                Nothing
+                    )
+
         endDateString =
             Dict.get defaultKeys.dateEndKey model.designFiltersCached
                 |> Maybe.andThen
@@ -818,7 +842,7 @@ dateEndField model =
                         Just string ->
                             case Date.fromIsoString <| string of
                                 Ok endDate ->
-                                    case Date.fromIsoString <| Maybe.withDefault "" endDateString of
+                                    case Date.fromIsoString <| Maybe.withDefault "" startDateString of
                                         Ok startDate ->
                                             if Date.compare endDate startDate == GT then
                                                 rgb255 223 255 214
