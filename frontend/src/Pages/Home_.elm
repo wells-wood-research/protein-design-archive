@@ -28,12 +28,14 @@ import Plots exposing (RenderPlotState(..))
 import ProteinDesign exposing (DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder, jsonStringFromProteinDesignDownload)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
+import Route.Path
 import Set
 import Shared
 import Shared.Msg exposing (Msg(..))
 import Style
 import Task
 import Time
+import Url exposing (..)
 import Urls
 import View exposing (View)
 
@@ -62,7 +64,6 @@ type alias Model =
     , mScreenWidthF : Maybe Float
     , mScreenHeightF : Maybe Float
     , dataDownload : RemoteData Http.Error String
-    , route : String
     }
 
 
@@ -77,7 +78,6 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , mScreenWidthF = mSharedScreenWidthF
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
-      , route = "empty-url"
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -232,9 +232,12 @@ update shared msg model =
                     ( { model
                         | designFiltersCached = newDesignFilters
                         , renderPlotState = AwaitingRender model.replotTime
-                        , route = newUrl
                       }
-                    , Effect.none
+                    , Effect.pushRoute
+                        { path = Route.Path.Home_
+                        , query = Dict.singleton "url" newUrl
+                        , hash = Nothing
+                        }
                     )
 
                 AddAllSelected ->

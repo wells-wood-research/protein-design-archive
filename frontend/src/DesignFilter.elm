@@ -14,7 +14,7 @@ import ProteinDesign
         , stubSearchableText
         )
 import Time exposing (Month(..))
-import Url.Builder exposing (absolute)
+import Url.Builder exposing (relative)
 
 
 type DesignFilter
@@ -132,7 +132,7 @@ encodeFilters filters =
     filters
         |> Dict.map (\key value -> Url.Builder.string key (valueToString value))
         |> Dict.values
-        |> absolute [ "search" ]
+        |> relative [ "search" ]
 
 
 valueToString : DesignFilter -> String
