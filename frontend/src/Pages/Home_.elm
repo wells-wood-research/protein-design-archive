@@ -3,15 +3,14 @@ module Pages.Home_ exposing (Model, Msg, page)
 import AppError exposing (AppError(..))
 import Browser.Dom
 import Browser.Events
+import Browser.Navigation as Nav
 import Components.Title
 import Date
 import DesignFilter
     exposing
         ( DesignFilter(..)
-        , defaultEndDate
         , defaultKeys
-        , defaultStartDate
-        , removeHyphenFromIsoDate
+        , encodeFilters
         )
 import Dict exposing (Dict)
 import Effect exposing (Effect)
@@ -64,6 +63,7 @@ type alias Model =
     , mScreenHeightF : Maybe Float
     , dataDownload : RemoteData Http.Error String
     , searchString : String
+    , route : String
     }
 
 
@@ -79,6 +79,7 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
       , searchString = ""
+      , route = "empty-url"
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -195,6 +196,9 @@ update shared msg model =
                     let
                         newDesignFilters =
                             Dict.insert key newFilter model.designFiltersCached
+
+                        newUrl =
+                            encodeFilters newDesignFilters
                     in
                     case newFilter of
                         ContainsTextParsed string ->
@@ -202,6 +206,7 @@ update shared msg model =
                                 | designFiltersCached = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
                                 , searchString = string
+                                , route = newUrl
                               }
                             , Effect.none
                             )
@@ -210,22 +215,11 @@ update shared msg model =
                             ( { model
                                 | designFiltersCached = newDesignFilters
                                 , renderPlotState = AwaitingRender model.replotTime
+                                , route = newUrl
                               }
                             , Effect.none
                             )
 
-                -- UpdateSimilaritySlider key threshold ->
-                --     case key of
-                --         "similarity-sequence-bit" ->
-                --             update shared
-                --                 (UpdateFilters key (SimilaritySequence threshold))
-                --                 { model | sliderSimilaritySequenceValue = threshold, renderPlotState = AwaitingRender model.replotTime }
-                --         "similarity-structure-lddt" ->
-                --             update shared
-                --                 (UpdateFilters key (SimilarityStructure threshold))
-                --                 { model | sliderSimilarityStructureValue = threshold, renderPlotState = AwaitingRender model.replotTime }
-                --         _ ->
-                --             update shared msg model
                 AddAllSelected ->
                     let
                         filteredDesignStubs =

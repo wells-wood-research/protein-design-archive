@@ -14,6 +14,7 @@ import ProteinDesign
         , stubSearchableText
         )
 import Time exposing (Month(..))
+import Url.Builder exposing (absolute)
 
 
 type DesignFilter
@@ -124,6 +125,14 @@ checkboxDict =
         , ( defaultKeys.voteKeep, False )
         , ( defaultKeys.voteRemove, False )
         ]
+
+
+encodeFilters : Dict String DesignFilter -> String
+encodeFilters filters =
+    filters
+        |> Dict.map (\key value -> Url.Builder.string key (toString value))
+        |> Dict.values
+        |> absolute [ "search" ]
 
 
 toString : DesignFilter -> String
