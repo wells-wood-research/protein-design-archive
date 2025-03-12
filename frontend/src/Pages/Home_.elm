@@ -193,7 +193,38 @@ update shared msg model =
                 UpdateFilters key newFilter ->
                     let
                         newDesignFilters =
-                            Dict.insert key newFilter model.designFiltersCached
+                            case newFilter of
+                                ContainsTextParsed "" ->
+                                    Dict.remove key model.designFiltersCached
+
+                                DateStart "" ->
+                                    Dict.remove key model.designFiltersCached
+
+                                DateEnd "" ->
+                                    Dict.remove key model.designFiltersCached
+
+                                SimilaritySequence val ->
+                                    if abs (val - 1000.0) < 0.001 then
+                                        Dict.remove key model.designFiltersCached
+
+                                    else
+                                        Dict.insert key newFilter model.designFiltersCached
+
+                                SimilarityStructure val ->
+                                    if abs (val - 100.0) < 0.001 then
+                                        Dict.remove key model.designFiltersCached
+
+                                    else
+                                        Dict.insert key newFilter model.designFiltersCached
+
+                                SimilaritySequenceExclusion False ->
+                                    Dict.remove key model.designFiltersCached
+
+                                SimilarityStructureExclusion False ->
+                                    Dict.remove key model.designFiltersCached
+
+                                _ ->
+                                    Dict.insert key newFilter model.designFiltersCached
 
                         newUrl =
                             encodeFilters newDesignFilters
