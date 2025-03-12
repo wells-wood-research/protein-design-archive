@@ -66,14 +66,14 @@ defaultKeys :
     , voteRemove : String
     }
 defaultKeys =
-    { dateStartKey = "deposition-date-start"
-    , dateEndKey = "deposition-date-end"
+    { dateStartKey = "deposition-date-after"
+    , dateEndKey = "deposition-date-before"
     , searchTextKey = "search-text-string"
     , searchTextParsedKey = "search-text-parsed"
-    , similaritySequenceKey = "similarity-sequence-bit"
-    , similarityStructureKey = "similarity-structure-lddt"
-    , similaritySequenceExclusionKey = "similarity-exclude-uncomputed-sequence"
-    , similarityStructureExclusionKey = "similarity-exclude-uncomputed-structure"
+    , similaritySequenceKey = "sim-seq-bit-lt"
+    , similarityStructureKey = "sim-struct-lddt-lt"
+    , similaritySequenceExclusionKey = "sim-excl-uncomp-seq"
+    , similarityStructureExclusionKey = "sim-excl-uncomp-struct"
     , classificationMinimalKey = "design-classification-minimal"
     , classificationRationalKey = "design-classification-rational"
     , classificationEngineeredKey = "design-classification-engineered"
@@ -130,13 +130,13 @@ checkboxDict =
 encodeFilters : Dict String DesignFilter -> String
 encodeFilters filters =
     filters
-        |> Dict.map (\key value -> Url.Builder.string key (toString value))
+        |> Dict.map (\key value -> Url.Builder.string key (valueToString value))
         |> Dict.values
         |> absolute [ "search" ]
 
 
-toString : DesignFilter -> String
-toString filter =
+valueToString : DesignFilter -> String
+valueToString filter =
     case filter of
         ContainsTextParsed string ->
             string
@@ -147,35 +147,32 @@ toString filter =
         DateEnd endDate ->
             endDate
 
+        SimilaritySequence threshold ->
+            String.fromFloat threshold
+
+        SimilarityStructure threshold ->
+            String.fromFloat <| (toFloat (round threshold) / 100.0)
+
+        Vote vote ->
+            boolToString vote
+
+        SimilaritySequenceExclusion isTicked ->
+            boolToString isTicked
+
+        SimilarityStructureExclusion isTicked ->
+            boolToString isTicked
+
         DesignClass classification ->
             classificationToString classification
 
-        Vote vote ->
-            if vote then
-                "keep"
 
-            else
-                "remove"
+boolToString : Bool -> String
+boolToString value =
+    if value then
+        "True"
 
-        SimilaritySequence threshold ->
-            "sequence similarity below " ++ String.fromFloat threshold
-
-        SimilarityStructure threshold ->
-            "structure similarity below " ++ String.fromFloat threshold
-
-        SimilaritySequenceExclusion isTicked ->
-            if isTicked then
-                "exclude uncomputed sequence"
-
-            else
-                "include uncomputed sequence"
-
-        SimilarityStructureExclusion isTicked ->
-            if isTicked then
-                "exclude uncomputed structure"
-
-            else
-                "include uncomputed structure"
+    else
+        "False"
 
 
 toDesignFilter : String -> DesignFilter
@@ -214,7 +211,7 @@ toDesignFilter key =
 
 keyToLabel : String -> String
 keyToLabel label =
-    toString <| toDesignFilter label
+    valueToString <| toDesignFilter label
 
 
 defaultStartDate : Date
