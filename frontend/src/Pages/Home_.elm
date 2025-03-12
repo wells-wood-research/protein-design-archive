@@ -62,7 +62,6 @@ type alias Model =
     , mScreenWidthF : Maybe Float
     , mScreenHeightF : Maybe Float
     , dataDownload : RemoteData Http.Error String
-    , searchString : String
     , route : String
     }
 
@@ -78,7 +77,6 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , mScreenWidthF = mSharedScreenWidthF
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
-      , searchString = ""
       , route = "empty-url"
       }
     , Effect.batch
@@ -200,25 +198,13 @@ update shared msg model =
                         newUrl =
                             encodeFilters newDesignFilters
                     in
-                    case newFilter of
-                        ContainsTextParsed string ->
-                            ( { model
-                                | designFiltersCached = newDesignFilters
-                                , renderPlotState = AwaitingRender model.replotTime
-                                , searchString = string
-                                , route = newUrl
-                              }
-                            , Effect.none
-                            )
-
-                        _ ->
-                            ( { model
-                                | designFiltersCached = newDesignFilters
-                                , renderPlotState = AwaitingRender model.replotTime
-                                , route = newUrl
-                              }
-                            , Effect.none
-                            )
+                    ( { model
+                        | designFiltersCached = newDesignFilters
+                        , renderPlotState = AwaitingRender model.replotTime
+                        , route = newUrl
+                      }
+                    , Effect.none
+                    )
 
                 AddAllSelected ->
                     let
@@ -530,12 +516,25 @@ searchIcon =
 
 searchInput : Model -> Element Msg
 searchInput model =
+    let
+        searchString =
+            Dict.get defaultKeys.searchTextParsedKey model.designFiltersCached
+                |> Maybe.andThen
+                    (\val ->
+                        case val of
+                            ContainsTextParsed st ->
+                                Just st
+
+                            _ ->
+                                Nothing
+                    )
+    in
     Input.text
         (Style.monospacedFont
             ++ [ width <| fillPortion 6 ]
         )
         { onChange = \string -> UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed string)
-        , text = model.searchString
+        , text = searchString |> Maybe.withDefault ""
         , placeholder =
             Just <|
                 Input.placeholder []
