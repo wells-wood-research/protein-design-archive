@@ -29,7 +29,6 @@ type DesignFilter
     | SimilarityStructure Float
     | SimilaritySequenceExclusion Bool
     | SimilarityStructureExclusion Bool
-    | DesignClass Classification
     | Vote Bool
 
 
@@ -45,26 +44,6 @@ defaultKeys :
     , similarityStructureKey : String
     , similaritySequenceExclusionKey : String
     , similarityStructureExclusionKey : String
-    , classificationMinimalKey : String
-    , classificationRationalKey : String
-    , classificationEngineeredKey : String
-    , classificationPhysKey : String
-    , classificationDeepLearningKey : String
-    , classificationConsensusKey : String
-    , classificationOtherKey : String
-    , keywordSyntheticKey : String
-    , keywordDeNovoKey : String
-    , keywordNovelKey : String
-    , keywordDesignedKey : String
-    , keywordProteinBindingKey : String
-    , keywordMetalBindingKey : String
-    , keywordTranscriptionKey : String
-    , keywordGrowthKey : String
-    , keywordStructuralKey : String
-    , keywordAlphaHelicalBundleKey : String
-    , keywordBetaBetaAlphaKey : String
-    , keywordCoiledCoilKey : String
-    , keywordUnknownFunctionKey : String
     , voteKeep : String
     }
 defaultKeys =
@@ -75,55 +54,8 @@ defaultKeys =
     , similarityStructureKey = "sim-struct-lddt-lt"
     , similaritySequenceExclusionKey = "sim-excl-uncomp-seq"
     , similarityStructureExclusionKey = "sim-excl-uncomp-struct"
-    , classificationMinimalKey = "design-classification-minimal"
-    , classificationRationalKey = "design-classification-rational"
-    , classificationEngineeredKey = "design-classification-engineered"
-    , classificationPhysKey = "design-classification-comp-phys"
-    , classificationDeepLearningKey = "design-classification-comp-dl"
-    , classificationConsensusKey = "design-classification-consensus"
-    , classificationOtherKey = "design-classification-other"
-    , keywordSyntheticKey = "design-keyword-synthetic"
-    , keywordDeNovoKey = "design-keyword-de-novo"
-    , keywordNovelKey = "design-keyword-novel"
-    , keywordDesignedKey = "design-keyword-designed"
-    , keywordProteinBindingKey = "design-keyword-protein-binding"
-    , keywordMetalBindingKey = "design-keyword-metal-binding"
-    , keywordTranscriptionKey = "design-keyword-transcription"
-    , keywordGrowthKey = "design-keyword-growth"
-    , keywordStructuralKey = "design-keyword-structural"
-    , keywordAlphaHelicalBundleKey = "design-keyword-alpha-helical-bundle"
-    , keywordBetaBetaAlphaKey = "design-keyword-beta-beta-alpha"
-    , keywordCoiledCoilKey = "design-keyword-coiled-coil"
-    , keywordUnknownFunctionKey = "design-keyword-unknown"
     , voteKeep = "vote-keep"
     }
-
-
-checkboxDict : Dict String Bool
-checkboxDict =
-    Dict.fromList
-        [ ( defaultKeys.classificationMinimalKey, False )
-        , ( defaultKeys.classificationRationalKey, False )
-        , ( defaultKeys.classificationEngineeredKey, False )
-        , ( defaultKeys.classificationPhysKey, False )
-        , ( defaultKeys.classificationDeepLearningKey, False )
-        , ( defaultKeys.classificationConsensusKey, False )
-        , ( defaultKeys.classificationOtherKey, False )
-        , ( defaultKeys.keywordSyntheticKey, False )
-        , ( defaultKeys.keywordDeNovoKey, False )
-        , ( defaultKeys.keywordNovelKey, False )
-        , ( defaultKeys.keywordDesignedKey, False )
-        , ( defaultKeys.keywordProteinBindingKey, False )
-        , ( defaultKeys.keywordMetalBindingKey, False )
-        , ( defaultKeys.keywordTranscriptionKey, False )
-        , ( defaultKeys.keywordGrowthKey, False )
-        , ( defaultKeys.keywordStructuralKey, False )
-        , ( defaultKeys.keywordAlphaHelicalBundleKey, False )
-        , ( defaultKeys.keywordBetaBetaAlphaKey, False )
-        , ( defaultKeys.keywordCoiledCoilKey, False )
-        , ( defaultKeys.keywordUnknownFunctionKey, False )
-        , ( defaultKeys.voteKeep, False )
-        ]
 
 
 encodeFiltersToUrl : Dict String DesignFilter -> String
@@ -239,9 +171,6 @@ valueToString filter =
         SimilarityStructureExclusion isTicked ->
             boolToString isTicked
 
-        _ ->
-            "ERROR_INVALID_FILTER"
-
 
 stringToValue : String -> String -> DesignFilter
 stringToValue key value =
@@ -321,45 +250,6 @@ stringToBool value =
             Nothing
 
 
-toDesignFilter : String -> DesignFilter
-toDesignFilter key =
-    case key of
-        "design-classification-minimal" ->
-            DesignClass Minimal
-
-        "design-classification-rational" ->
-            DesignClass Rational
-
-        "design-classification-engineered" ->
-            DesignClass Engineered
-
-        "design-classification-comp-phys" ->
-            DesignClass Phys
-
-        "design-classification-comp-dl" ->
-            DesignClass DeepLearning
-
-        "design-classification-consensus" ->
-            DesignClass Consensus
-
-        "design-classification-other" ->
-            DesignClass Other
-
-        "vote-keep" ->
-            Vote True
-
-        "vote-remove" ->
-            Vote False
-
-        _ ->
-            ContainsTextParsed ""
-
-
-keyToLabel : String -> String
-keyToLabel label =
-    valueToString <| toDesignFilter label
-
-
 defaultStartDate : Date
 defaultStartDate =
     Date.fromCalendarDate 1900 Jan 1
@@ -368,29 +258,6 @@ defaultStartDate =
 defaultEndDate : Date
 defaultEndDate =
     Date.fromCalendarDate 2100 Dec 31
-
-
-removeHyphenFromIsoDate : String -> String
-removeHyphenFromIsoDate string =
-    if String.right 1 string /= "-" then
-        string
-
-    else
-        String.dropRight 1 string
-
-
-isValidIsoDate : String -> Bool
-isValidIsoDate string =
-    let
-        phrase =
-            removeHyphenFromIsoDate string
-    in
-    case Date.fromIsoString phrase of
-        Err _ ->
-            False
-
-        Ok _ ->
-            True
 
 
 getFirstAndLastDate : List ProteinDesign -> { firstDate : Date, lastDate : Date }
