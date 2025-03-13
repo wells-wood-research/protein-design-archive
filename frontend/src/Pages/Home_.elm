@@ -2,15 +2,15 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import AppError exposing (AppError(..))
 import Browser.Dom
-import Browser.Events
-import Browser.Navigation as Nav
 import Components.Title
 import Date
 import DesignFilter
     exposing
         ( DesignFilter(..)
+        , decodeUrlToFilters
         , defaultKeys
-        , encodeFilters
+        , encodeFiltersToUrl
+        , queryStringToPairs
         )
 import Dict exposing (Dict)
 import Effect exposing (Effect)
@@ -41,13 +41,26 @@ import View exposing (View)
 
 
 page : Shared.Model -> Route () -> Page Model Msg
-page shared _ =
+page shared route =
+    let
+        initialFilters =
+            case route.path of
+                Route.Path.Home_ ->
+                    decodeUrlToFilters (Url.toString route.url)
+
+                _ ->
+                    Dict.empty
+
+        onUrlChange { to } =
+            UrlChanged (Url.toString to.url)
+    in
     Page.new
-        { init = \() -> init shared.mScreenWidthF shared.mScreenHeightF
+        { init = \() -> init shared.mScreenWidthF shared.mScreenHeightF |> Tuple.mapFirst (\model -> { model | designFiltersCached = initialFilters })
         , update = update shared
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view shared.mScreenWidthF
         }
+        |> Page.withOnUrlChanged onUrlChange
 
 
 
@@ -64,6 +77,7 @@ type alias Model =
     , mScreenWidthF : Maybe Float
     , mScreenHeightF : Maybe Float
     , dataDownload : RemoteData Http.Error String
+    , decodedUrl : Dict String DesignFilter
     }
 
 
@@ -78,6 +92,7 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , mScreenWidthF = mSharedScreenWidthF
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
+      , decodedUrl = Dict.empty
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -112,6 +127,7 @@ type Msg
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
+    | UrlChanged String
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
@@ -227,17 +243,30 @@ update shared msg model =
                                     Dict.insert key newFilter model.designFiltersCached
 
                         newUrl =
-                            encodeFilters newDesignFilters
+                            encodeFiltersToUrl newDesignFilters
+
+                        route =
+                            { path = Route.Path.Home_
+                            , query = Dict.fromList (queryStringToPairs newUrl)
+                            , hash = Nothing
+                            }
                     in
                     ( { model
                         | designFiltersCached = newDesignFilters
                         , renderPlotState = AwaitingRender model.replotTime
+                        , decodedUrl = decodeUrlToFilters newUrl
                       }
                     , Effect.pushRoute
-                        { path = Route.Path.Home_
-                        , query = Dict.singleton "url" newUrl
-                        , hash = Nothing
-                        }
+                        route
+                    )
+
+                UrlChanged urlString ->
+                    let
+                        newFilters =
+                            decodeUrlToFilters urlString
+                    in
+                    ( { model | designFiltersCached = newFilters, decodedUrl = newFilters }
+                    , Effect.none
                     )
 
                 AddAllSelected ->
@@ -358,7 +387,7 @@ subscriptions model =
             Time.every 100 RenderWhenReady
 
         _ ->
-            Browser.Events.onResize (\width height -> WindowResizes width height)
+            Sub.none
 
 
 
@@ -552,7 +581,7 @@ searchInput : Model -> Element Msg
 searchInput model =
     let
         searchString =
-            Dict.get defaultKeys.searchTextParsedKey model.designFiltersCached
+            Dict.get defaultKeys.searchTextKey model.designFiltersCached
                 |> Maybe.andThen
                     (\val ->
                         case val of
@@ -567,7 +596,7 @@ searchInput model =
         (Style.monospacedFont
             ++ [ width <| fillPortion 6 ]
         )
-        { onChange = \string -> UpdateFilters defaultKeys.searchTextParsedKey (ContainsTextParsed string)
+        { onChange = \string -> UpdateFilters defaultKeys.searchTextKey (ContainsTextParsed string)
         , text = searchString |> Maybe.withDefault ""
         , placeholder =
             Just <|

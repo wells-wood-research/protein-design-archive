@@ -2,19 +2,23 @@ module DesignFilter exposing (..)
 
 import Date exposing (Date, Unit(..))
 import Dict exposing (Dict)
+import File.Download exposing (url)
 import Json.Decode exposing (string)
-import List exposing (filter)
+import List exposing (filter, filterMap)
 import ProteinDesign
     exposing
         ( Classification(..)
         , ProteinDesign
         , ProteinDesignStub
         , Tag(..)
-        , classificationToString
         , stubSearchableText
         )
 import Time exposing (Month(..))
-import Url.Builder exposing (relative)
+import Url
+import Url.Builder
+import Url.Parser exposing ((</>), (<?>), Parser, s)
+import Url.Parser.Query as Query
+import Vega exposing (icThresholds)
 
 
 type DesignFilter
@@ -37,7 +41,6 @@ defaultKeys :
     { dateStartKey : String
     , dateEndKey : String
     , searchTextKey : String
-    , searchTextParsedKey : String
     , similaritySequenceKey : String
     , similarityStructureKey : String
     , similaritySequenceExclusionKey : String
@@ -63,13 +66,11 @@ defaultKeys :
     , keywordCoiledCoilKey : String
     , keywordUnknownFunctionKey : String
     , voteKeep : String
-    , voteRemove : String
     }
 defaultKeys =
     { dateStartKey = "deposition-date-after"
     , dateEndKey = "deposition-date-before"
-    , searchTextKey = "search-text-string"
-    , searchTextParsedKey = "search-text-parsed"
+    , searchTextKey = "search-text"
     , similaritySequenceKey = "sim-seq-bit-lt"
     , similarityStructureKey = "sim-struct-lddt-lt"
     , similaritySequenceExclusionKey = "sim-excl-uncomp-seq"
@@ -95,7 +96,6 @@ defaultKeys =
     , keywordCoiledCoilKey = "design-keyword-coiled-coil"
     , keywordUnknownFunctionKey = "design-keyword-unknown"
     , voteKeep = "vote-keep"
-    , voteRemove = "vote-remove"
     }
 
 
@@ -123,16 +123,75 @@ checkboxDict =
         , ( defaultKeys.keywordCoiledCoilKey, False )
         , ( defaultKeys.keywordUnknownFunctionKey, False )
         , ( defaultKeys.voteKeep, False )
-        , ( defaultKeys.voteRemove, False )
         ]
 
 
-encodeFilters : Dict String DesignFilter -> String
-encodeFilters filters =
+encodeFiltersToUrl : Dict String DesignFilter -> String
+encodeFiltersToUrl filters =
     filters
         |> Dict.map (\key value -> Url.Builder.string key (valueToString value))
         |> Dict.values
-        |> relative [ "search" ]
+        |> Url.Builder.toQuery
+
+
+queryStringToPairs : String -> List ( String, String )
+queryStringToPairs queryString =
+    if String.startsWith "?" queryString then
+        String.dropLeft 1 queryString
+            |> String.split "&"
+            |> List.filterMap
+                (\pair ->
+                    case String.split "=" pair of
+                        [ key, value ] ->
+                            Just ( key, value )
+
+                        _ ->
+                            Nothing
+                )
+
+    else
+        []
+
+
+queryParser : Query.Parser (Dict String DesignFilter)
+queryParser =
+    Query.map7
+        (\dateAfter dateBefore text simSeq simStruct exclSeq exclStruct ->
+            Dict.fromList
+                (List.filterMap identity
+                    [ Maybe.map (\v -> ( "deposition-date-after", DateStart v )) dateAfter
+                    , Maybe.map (\v -> ( "deposition-date-before", DateEnd v )) dateBefore
+                    , Maybe.map (\v -> ( "search-text", ContainsTextParsed v )) text
+                    , Maybe.map (\v -> ( "sim-seq-bit-lt", SimilaritySequence v )) simSeq
+                    , Maybe.map (\v -> ( "sim-struct-lddt-lt", SimilarityStructure v )) simStruct
+                    , Maybe.map (\v -> ( "sim-excl-uncomp-seq", SimilaritySequenceExclusion v )) exclSeq
+                    , Maybe.map (\v -> ( "sim-excl-uncomp-struct", SimilarityStructureExclusion v )) exclStruct
+                    ]
+                )
+        )
+        (Query.string "deposition-date-after")
+        (Query.string "deposition-date-before")
+        (Query.string "search-text")
+        (Query.custom "sim-seq-bit-lt" (List.head << List.filterMap String.toFloat))
+        (Query.custom "sim-struct-lddt-lt" (List.head << List.filterMap String.toFloat))
+        (Query.custom "sim-excl-uncomp-seq" (Just << List.any (\s -> stringToBool s == Just True)))
+        (Query.custom "sim-excl-uncomp-struct" (Just << List.any (\s -> stringToBool s == Just True)))
+
+
+urlParser : Parser (Dict String DesignFilter -> a) a
+urlParser =
+    Url.Parser.top <?> queryParser
+
+
+decodeUrlToFilters : String -> Dict String DesignFilter
+decodeUrlToFilters urlString =
+    case Url.fromString <| urlString of
+        Nothing ->
+            Dict.singleton "no-url" (Vote False)
+
+        Just url ->
+            Url.Parser.parse urlParser url
+                |> Maybe.withDefault (Dict.singleton "broken-url" (Vote True))
 
 
 valueToString : DesignFilter -> String
@@ -162,8 +221,64 @@ valueToString filter =
         SimilarityStructureExclusion isTicked ->
             boolToString isTicked
 
-        DesignClass classification ->
-            classificationToString classification
+        _ ->
+            "ERROR_INVALID_FILTER"
+
+
+stringToValue : String -> String -> DesignFilter
+stringToValue key value =
+    case key of
+        "search-text" ->
+            ContainsTextParsed value
+
+        "deposition-date-after" ->
+            DateStart value
+
+        "deposition-date-before" ->
+            DateEnd value
+
+        "sim-seq-bit-lt" ->
+            case String.toFloat value of
+                Just threshold ->
+                    SimilaritySequence threshold
+
+                _ ->
+                    SimilaritySequence 1000.0
+
+        "sim-struct-lddt-lt" ->
+            case String.toFloat value of
+                Just threshold ->
+                    SimilarityStructure <| threshold * 100.0
+
+                _ ->
+                    SimilarityStructure 100.0
+
+        "vote-keep" ->
+            case stringToBool value of
+                Just bool ->
+                    Vote bool
+
+                _ ->
+                    Vote False
+
+        "sim-excl-uncomp-seq" ->
+            case stringToBool value of
+                Just bool ->
+                    SimilaritySequenceExclusion bool
+
+                _ ->
+                    SimilaritySequenceExclusion False
+
+        "sim-excl-uncomp-struct" ->
+            case stringToBool value of
+                Just bool ->
+                    SimilarityStructureExclusion bool
+
+                _ ->
+                    SimilarityStructureExclusion False
+
+        _ ->
+            ContainsTextParsed value
 
 
 boolToString : Bool -> String
@@ -173,6 +288,19 @@ boolToString value =
 
     else
         "False"
+
+
+stringToBool : String -> Maybe Bool
+stringToBool value =
+    case String.toLower value of
+        "true" ->
+            Just True
+
+        "false" ->
+            Just False
+
+        _ ->
+            Nothing
 
 
 toDesignFilter : String -> DesignFilter
