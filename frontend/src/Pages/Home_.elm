@@ -833,7 +833,7 @@ dateStartField model =
                     )
     in
     row [ alignLeft, width fill ]
-        [ text " after: "
+        [ text "after: "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
@@ -902,7 +902,7 @@ dateEndField model =
                     )
     in
     row [ alignLeft, width fill ]
-        [ text " before: "
+        [ text "before: "
         , el [ paddingXY 5 0 ]
             (Input.text
                 [ width <| px 150
