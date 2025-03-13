@@ -2,23 +2,18 @@ module DesignFilter exposing (..)
 
 import Date exposing (Date, Unit(..))
 import Dict exposing (Dict)
-import File.Download exposing (url)
-import Json.Decode exposing (string)
-import List exposing (filter, filterMap)
+import List
 import ProteinDesign
     exposing
-        ( Classification(..)
-        , ProteinDesign
+        ( ProteinDesign
         , ProteinDesignStub
-        , Tag(..)
         , stubSearchableText
         )
 import Time exposing (Month(..))
-import Url exposing (Url)
+import Url
 import Url.Builder
-import Url.Parser exposing ((</>), (<?>), Parser, s)
+import Url.Parser exposing ((<?>), Parser)
 import Url.Parser.Query as Query
-import Vega exposing (icThresholds)
 
 
 type DesignFilter
@@ -134,7 +129,7 @@ urlParser =
     Url.Parser.top <?> queryParser
 
 
-decodeUrlToFilters : Url -> Dict String DesignFilter
+decodeUrlToFilters : Url.Url -> Dict String DesignFilter
 decodeUrlToFilters url =
     Url.Parser.parse urlParser url
         |> Maybe.withDefault Dict.empty
