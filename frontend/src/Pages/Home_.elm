@@ -245,10 +245,18 @@ update shared msg model =
                             , query = Dict.fromList (encodeQueryStringToPairs newUrl)
                             , hash = Nothing
                             }
+
+                        toRender =
+                            case model.renderPlotState of
+                                Rendered ->
+                                    AwaitingRender model.replotTime
+
+                                _ ->
+                                    model.renderPlotState
                     in
                     ( { model
                         | designFiltersCached = newDesignFilters
-                        , renderPlotState = AwaitingRender model.replotTime
+                        , renderPlotState = toRender
                       }
                     , Effect.pushRoute route
                     )
@@ -257,9 +265,18 @@ update shared msg model =
                     let
                         newDesignFilters =
                             decodeUrlToFilters url
+
+                        toRender =
+                            case model.renderPlotState of
+                                Rendered ->
+                                    AwaitingRender model.replotTime
+
+                                _ ->
+                                    model.renderPlotState
                     in
                     ( { model
                         | designFiltersCached = newDesignFilters
+                        , renderPlotState = toRender
                       }
                     , Effect.none
                     )

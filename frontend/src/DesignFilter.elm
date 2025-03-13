@@ -110,8 +110,8 @@ queryParser =
         (Query.string "search-text")
         (Query.custom "sim-seq-bit-lt" (List.head << List.filterMap String.toFloat))
         (Query.custom "sim-struct-lddt-lt" (List.head << List.filterMap String.toFloat))
-        (Query.custom "sim-excl-uncomp-seq" (Just << List.any (\s -> stringToBool s == Just True)))
-        (Query.custom "sim-excl-uncomp-struct" (Just << List.any (\s -> stringToBool s == Just True)))
+        (Query.custom "sim-excl-uncomp-seq" (List.head << List.filterMap (\s -> stringToBool s)))
+        (Query.custom "sim-excl-uncomp-struct" (List.head << List.filterMap (\s -> stringToBool s)))
 
 
 urlParser : Parser (Dict String DesignFilter -> a) a
@@ -141,7 +141,7 @@ valueToString filter =
             String.fromFloat threshold
 
         SimilarityStructure threshold ->
-            String.fromFloat <| (toFloat (round threshold) / 100.0)
+            String.fromFloat <| toFloat (round threshold)
 
         Vote vote ->
             boolToString vote
