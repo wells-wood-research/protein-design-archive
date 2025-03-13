@@ -134,6 +134,14 @@ encodeFiltersToUrl filters =
         |> Url.Builder.toQuery
 
 
+decodeUrlTextTwice : String -> String
+decodeUrlTextTwice input =
+    input
+        |> Url.percentDecode
+        |> Maybe.andThen Url.percentDecode
+        |> Maybe.withDefault input
+
+
 queryStringToPairs : String -> List ( String, String )
 queryStringToPairs queryString =
     if String.startsWith "?" queryString then
@@ -161,7 +169,18 @@ queryParser =
                 (List.filterMap identity
                     [ Maybe.map (\v -> ( "deposition-date-after", DateStart v )) dateAfter
                     , Maybe.map (\v -> ( "deposition-date-before", DateEnd v )) dateBefore
-                    , Maybe.map (\v -> ( "search-text", ContainsTextParsed v )) text
+                    , Maybe.map
+                        (\v ->
+                            let
+                                decodedText =
+                                    String.replace "NOT" "&&!!"
+                                        << String.replace "AND" "&&"
+                                        << String.replace "OR" "||"
+                                        << decodeUrlTextTwice
+                            in
+                            ( "search-text", ContainsTextParsed (decodedText v) )
+                        )
+                        text
                     , Maybe.map (\v -> ( "sim-seq-bit-lt", SimilaritySequence v )) simSeq
                     , Maybe.map (\v -> ( "sim-struct-lddt-lt", SimilarityStructure v )) simStruct
                     , Maybe.map (\v -> ( "sim-excl-uncomp-seq", SimilaritySequenceExclusion v )) exclSeq
@@ -186,7 +205,7 @@ urlParser =
 decodeUrlToFilters : Url -> Dict String DesignFilter
 decodeUrlToFilters url =
     Url.Parser.parse urlParser url
-        |> Maybe.withDefault (Dict.singleton "broken-url" (Vote True))
+        |> Maybe.withDefault Dict.empty
 
 
 valueToString : DesignFilter -> String
@@ -194,6 +213,10 @@ valueToString filter =
     case filter of
         ContainsTextParsed string ->
             string
+                |> String.replace "&&!!" "NOT"
+                |> String.replace "&&" "AND"
+                |> String.replace "||" "OR"
+                |> Url.percentEncode
 
         DateStart startDate ->
             startDate
