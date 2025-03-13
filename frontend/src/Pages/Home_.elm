@@ -44,15 +44,10 @@ page : Shared.Model -> Route () -> Page Model Msg
 page shared route =
     let
         initialFilters =
-            case route.path of
-                Route.Path.Home_ ->
-                    decodeUrlToFilters (Url.toString route.url)
-
-                _ ->
-                    Dict.empty
+            decodeUrlToFilters route.url
 
         onUrlChange { to } =
-            UrlChanged (Url.toString to.url)
+            UrlChanged to.url
     in
     Page.new
         { init = \() -> init shared.mScreenWidthF shared.mScreenHeightF |> Tuple.mapFirst (\model -> { model | designFiltersCached = initialFilters })
@@ -88,7 +83,7 @@ init mSharedScreenWidthF mSharedScreenHeightF =
       , designFilters = Dict.empty
       , designFiltersCached = Dict.empty
       , replotTime = 3
-      , renderPlotState = WillRender
+      , renderPlotState = AwaitingRender 0
       , mScreenWidthF = mSharedScreenWidthF
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
@@ -127,7 +122,7 @@ type Msg
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
-    | UrlChanged String
+    | UrlChanged Url
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
@@ -254,18 +249,19 @@ update shared msg model =
                     ( { model
                         | designFiltersCached = newDesignFilters
                         , renderPlotState = AwaitingRender model.replotTime
-                        , decodedUrl = decodeUrlToFilters newUrl
                       }
-                    , Effect.pushRoute
-                        route
+                    , Effect.pushRoute route
                     )
 
-                UrlChanged urlString ->
+                UrlChanged url ->
                     let
-                        newFilters =
-                            decodeUrlToFilters urlString
+                        newDesignFilters =
+                            decodeUrlToFilters url
                     in
-                    ( { model | designFiltersCached = newFilters, decodedUrl = newFilters }
+                    ( { model
+                        | designFiltersCached = newDesignFilters
+                        , renderPlotState = AwaitingRender model.replotTime
+                      }
                     , Effect.none
                     )
 

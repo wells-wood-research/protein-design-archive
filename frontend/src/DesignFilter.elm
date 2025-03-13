@@ -14,7 +14,7 @@ import ProteinDesign
         , stubSearchableText
         )
 import Time exposing (Month(..))
-import Url
+import Url exposing (Url)
 import Url.Builder
 import Url.Parser exposing ((</>), (<?>), Parser, s)
 import Url.Parser.Query as Query
@@ -183,15 +183,10 @@ urlParser =
     Url.Parser.top <?> queryParser
 
 
-decodeUrlToFilters : String -> Dict String DesignFilter
-decodeUrlToFilters urlString =
-    case Url.fromString <| urlString of
-        Nothing ->
-            Dict.singleton "no-url" (Vote False)
-
-        Just url ->
-            Url.Parser.parse urlParser url
-                |> Maybe.withDefault (Dict.singleton "broken-url" (Vote True))
+decodeUrlToFilters : Url -> Dict String DesignFilter
+decodeUrlToFilters url =
+    Url.Parser.parse urlParser url
+        |> Maybe.withDefault (Dict.singleton "broken-url" (Vote True))
 
 
 valueToString : DesignFilter -> String
