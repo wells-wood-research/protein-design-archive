@@ -237,12 +237,12 @@ update shared msg model =
                                 _ ->
                                     Dict.insert key newFilter model.designFiltersCached
 
-                        newUrl =
-                            encodeFiltersToUrl newDesignFilters
+                        newUrlQuery =
+                            Dict.fromList <| encodeQueryStringToPairs <| encodeFiltersToUrl newDesignFilters
 
                         route =
                             { path = Route.Path.Home_
-                            , query = Dict.fromList (encodeQueryStringToPairs newUrl)
+                            , query = newUrlQuery
                             , hash = Nothing
                             }
 
