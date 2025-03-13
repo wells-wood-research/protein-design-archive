@@ -27,10 +27,6 @@ type DesignFilter
     | Vote Bool
 
 
-
---| DesignTag Tag
-
-
 defaultKeys :
     { dateStartKey : String
     , dateEndKey : String
@@ -61,16 +57,8 @@ encodeFiltersToUrl filters =
         |> Url.Builder.toQuery
 
 
-decodeUrlTextTwice : String -> String
-decodeUrlTextTwice input =
-    input
-        |> Url.percentDecode
-        |> Maybe.andThen Url.percentDecode
-        |> Maybe.withDefault input
-
-
-queryStringToPairs : String -> List ( String, String )
-queryStringToPairs queryString =
+encodeQueryStringToPairs : String -> List ( String, String )
+encodeQueryStringToPairs queryString =
     if String.startsWith "?" queryString then
         String.dropLeft 1 queryString
             |> String.split "&"
@@ -91,7 +79,7 @@ queryStringToPairs queryString =
 queryParser : Query.Parser (Dict String DesignFilter)
 queryParser =
     Query.map7
-        (\dateAfter dateBefore text simSeq simStruct exclSeq exclStruct ->
+        (\dateAfter dateBefore searchText simSeq simStruct exclSeq exclStruct ->
             Dict.fromList
                 (List.filterMap identity
                     [ Maybe.map (\v -> ( "deposition-date-after", DateStart v )) dateAfter
@@ -100,14 +88,16 @@ queryParser =
                         (\v ->
                             let
                                 decodedText =
-                                    String.replace "NOT" "&&!!"
-                                        << String.replace "AND" "&&"
-                                        << String.replace "OR" "||"
-                                        << decodeUrlTextTwice
+                                    case Url.percentDecode v of
+                                        Just string ->
+                                            string
+
+                                        _ ->
+                                            v
                             in
-                            ( "search-text", ContainsTextParsed (decodedText v) )
+                            ( "search-text", ContainsTextParsed decodedText )
                         )
-                        text
+                        searchText
                     , Maybe.map (\v -> ( "sim-seq-bit-lt", SimilaritySequence v )) simSeq
                     , Maybe.map (\v -> ( "sim-struct-lddt-lt", SimilarityStructure v )) simStruct
                     , Maybe.map (\v -> ( "sim-excl-uncomp-seq", SimilaritySequenceExclusion v )) exclSeq
@@ -140,10 +130,6 @@ valueToString filter =
     case filter of
         ContainsTextParsed string ->
             string
-                |> String.replace "&&!!" "NOT"
-                |> String.replace "&&" "AND"
-                |> String.replace "||" "OR"
-                |> Url.percentEncode
 
         DateStart startDate ->
             startDate
@@ -308,57 +294,57 @@ parseStringToConditions : String -> Dict String (List (List String))
 parseStringToConditions searchString =
     let
         conditionsList =
-            List.map String.trim <| String.split "&&" searchString
+            List.map String.trim <| String.split "AND" searchString
 
         updateDict condition dict =
-            if String.contains "!!" condition then
+            if String.contains "NOT" condition then
                 let
                     splitConditions =
-                        if String.contains "||" condition then
-                            List.map String.trim (String.split "||" condition)
+                        if String.contains "OR" condition then
+                            List.map String.trim (String.split "OR" condition)
 
                         else
-                            [ String.trim <| String.replace "!!" "" condition ]
+                            [ String.trim <| String.replace "NOT" "" condition ]
 
                     updatedList =
-                        case Dict.get "!!" dict of
+                        case Dict.get "NOT" dict of
                             Just list ->
                                 list ++ [ splitConditions ]
 
                             Nothing ->
                                 [ splitConditions ]
                 in
-                Dict.insert "!!" updatedList dict
+                Dict.insert "NOT" updatedList dict
 
-            else if String.contains "||" condition then
+            else if String.contains "OR" condition then
                 let
                     splitConditions =
-                        String.split "||" condition
+                        String.split "OR" condition
                             |> List.map String.trim
 
                     updatedList =
-                        case Dict.get "||" dict of
+                        case Dict.get "OR" dict of
                             Just list ->
                                 list ++ [ splitConditions ]
 
                             Nothing ->
                                 [ splitConditions ]
                 in
-                Dict.insert "||" updatedList dict
+                Dict.insert "OR" updatedList dict
 
             else
                 let
                     updatedList =
-                        case Dict.get "&&" dict of
+                        case Dict.get "AND" dict of
                             Just list ->
                                 list ++ [ [ condition ] ]
 
                             Nothing ->
                                 [ [ condition ] ]
                 in
-                Dict.insert "&&" updatedList dict
+                Dict.insert "AND" updatedList dict
     in
-    List.foldl updateDict (Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]) conditionsList
+    List.foldl updateDict (Dict.fromList [ ( "AND", [] ), ( "OR", [] ), ( "NOT", [] ) ]) conditionsList
 
 
 stubMeetsAllFilters : List DesignFilter -> ProteinDesignStub -> Maybe ProteinDesignStub
@@ -382,7 +368,7 @@ stubMeetsOneFilter design filter =
                     parseStringToConditions string
 
                 andConditions =
-                    case Dict.get "&&" searchDict of
+                    case Dict.get "AND" searchDict of
                         Just listOfListsOfConditions ->
                             List.concatMap identity listOfListsOfConditions
 
@@ -390,7 +376,7 @@ stubMeetsOneFilter design filter =
                             []
 
                 notConditions =
-                    case Dict.get "!!" searchDict of
+                    case Dict.get "NOT" searchDict of
                         Just listOfListsOfConditions ->
                             List.concatMap identity listOfListsOfConditions
 
@@ -398,7 +384,7 @@ stubMeetsOneFilter design filter =
                             []
 
                 orConditions =
-                    Maybe.withDefault [] (Dict.get "||" searchDict)
+                    Maybe.withDefault [] (Dict.get "OR" searchDict)
 
                 searchableText =
                     stubSearchableText design

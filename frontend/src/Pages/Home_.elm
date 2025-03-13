@@ -10,7 +10,7 @@ import DesignFilter
         , decodeUrlToFilters
         , defaultKeys
         , encodeFiltersToUrl
-        , queryStringToPairs
+        , encodeQueryStringToPairs
         )
 import Dict exposing (Dict)
 import Effect exposing (Effect)
@@ -242,7 +242,7 @@ update shared msg model =
 
                         route =
                             { path = Route.Path.Home_
-                            , query = Dict.fromList (queryStringToPairs newUrl)
+                            , query = Dict.fromList (encodeQueryStringToPairs newUrl)
                             , hash = Nothing
                             }
                     in
@@ -260,7 +260,6 @@ update shared msg model =
                     in
                     ( { model
                         | designFiltersCached = newDesignFilters
-                        , renderPlotState = AwaitingRender model.replotTime
                       }
                     , Effect.none
                     )
@@ -597,7 +596,7 @@ searchInput model =
         , placeholder =
             Just <|
                 Input.placeholder []
-                    (text "Enter search phrase here e.g. Woolfson && coiled-coil || coiled coil &&!! 4-helix")
+                    (text "Enter search phrase here e.g. Woolfson AND coiled-coil AND OR coiled coil AND NOT 4-helix")
         , label = Input.labelHidden "Filter Designs Search Box"
         }
 
