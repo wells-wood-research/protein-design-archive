@@ -45,9 +45,6 @@ page shared route =
     let
         initialFilters =
             decodeUrlToFilters route.url
-
-        onUrlChange { to } =
-            UrlChanged to.url
     in
     Page.new
         { init = \() -> init shared.mScreenWidthF shared.mScreenHeightF |> Tuple.mapFirst (\model -> { model | designFiltersCached = initialFilters })
@@ -55,7 +52,6 @@ page shared route =
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view shared.mScreenWidthF
         }
-        |> Page.withOnUrlChanged onUrlChange
 
 
 
@@ -122,7 +118,6 @@ type Msg
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
-    | UrlChanged Url
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
@@ -259,26 +254,6 @@ update shared msg model =
                         , renderPlotState = toRender
                       }
                     , Effect.pushRoute route
-                    )
-
-                UrlChanged url ->
-                    let
-                        newDesignFilters =
-                            decodeUrlToFilters url
-
-                        toRender =
-                            case model.renderPlotState of
-                                Rendered ->
-                                    AwaitingRender model.replotTime
-
-                                _ ->
-                                    model.renderPlotState
-                    in
-                    ( { model
-                        | designFiltersCached = newDesignFilters
-                        , renderPlotState = toRender
-                      }
-                    , Effect.none
                     )
 
                 AddAllSelected ->
