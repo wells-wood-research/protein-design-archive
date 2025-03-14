@@ -587,7 +587,7 @@ searchInput model =
         , placeholder =
             Just <|
                 Input.placeholder []
-                    (text "Enter search phrase here e.g. Woolfson AND coiled-coil AND OR coiled coil AND NOT 4-helix")
+                    (text "Enter search phrase here e.g. Woolfson AND coiled-coil OR coiled coil AND NOT 4-helix OR 6-helix")
         , label = Input.labelHidden "Filter Designs Search Box"
         }
 
