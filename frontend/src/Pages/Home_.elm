@@ -10,7 +10,6 @@ import DesignFilter
         , decodeUrlToFilters
         , defaultKeys
         , encodeFiltersToUrl
-        , encodeQueryStringToPairs
         )
 import Dict exposing (Dict)
 import Effect exposing (Effect)
@@ -233,7 +232,7 @@ update shared msg model =
                                     Dict.insert key newFilter model.designFiltersCached
 
                         newUrlQuery =
-                            Dict.fromList <| encodeQueryStringToPairs <| encodeFiltersToUrl newDesignFilters
+                            encodeFiltersToUrl newDesignFilters
 
                         route =
                             { path = Route.Path.Home_

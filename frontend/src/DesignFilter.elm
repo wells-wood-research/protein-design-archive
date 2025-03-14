@@ -11,7 +11,6 @@ import ProteinDesign
         )
 import Time exposing (Month(..))
 import Url
-import Url.Builder
 import Url.Parser exposing ((<?>), Parser)
 import Url.Parser.Query as Query
 
@@ -49,31 +48,9 @@ defaultKeys =
     }
 
 
-encodeFiltersToUrl : Dict String DesignFilter -> String
+encodeFiltersToUrl : Dict String DesignFilter -> Dict String String
 encodeFiltersToUrl filters =
-    filters
-        |> Dict.map (\key value -> Url.Builder.string key (valueToString value))
-        |> Dict.values
-        |> Url.Builder.toQuery
-
-
-encodeQueryStringToPairs : String -> List ( String, String )
-encodeQueryStringToPairs queryString =
-    if String.startsWith "?" queryString then
-        String.dropLeft 1 queryString
-            |> String.split "&"
-            |> List.filterMap
-                (\pair ->
-                    case String.split "=" pair of
-                        [ key, value ] ->
-                            Just ( key, value )
-
-                        _ ->
-                            Nothing
-                )
-
-    else
-        []
+    Dict.map (\_ value -> valueToString value) filters
 
 
 queryParser : Query.Parser (Dict String DesignFilter)
