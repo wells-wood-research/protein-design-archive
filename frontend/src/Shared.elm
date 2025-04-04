@@ -48,7 +48,12 @@ type alias Model =
 
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init _ _ =
-    ( { designs = NotAsked, errors = [], designsToDownload = Set.empty, mScreenWidthF = Nothing, mScreenHeightF = Nothing }
+    ( { designs = NotAsked
+      , errors = []
+      , designsToDownload = Set.empty
+      , mScreenWidthF = Nothing
+      , mScreenHeightF = Nothing
+      }
     , Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
     )
 
