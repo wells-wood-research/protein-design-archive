@@ -93,7 +93,7 @@ queryParser =
 
 urlParser : Parser (Dict String DesignFilter -> a) a
 urlParser =
-    Url.Parser.top <?> queryParser
+    Url.Parser.s "pda" <?> queryParser
 
 
 decodeUrlToFilters : Url.Url -> Dict String DesignFilter
