@@ -2,210 +2,210 @@ module DesignFilter exposing (..)
 
 import Date exposing (Date, Unit(..))
 import Dict exposing (Dict)
-import Json.Decode exposing (string)
-import List exposing (filter)
+import List
 import ProteinDesign
     exposing
-        ( Classification(..)
-        , ProteinDesign
+        ( ProteinDesign
         , ProteinDesignStub
-        , Tag(..)
-        , classificationToString
         , stubSearchableText
         )
 import Time exposing (Month(..))
+import Url
+import Url.Parser exposing ((<?>), Parser)
+import Url.Parser.Query as Query
 
 
 type DesignFilter
     = ContainsTextParsed String
-    | DateStart Date.Date
-    | DateEnd Date.Date
+    | DateStart String
+    | DateEnd String
     | SimilaritySequence Float
     | SimilarityStructure Float
     | SimilaritySequenceExclusion Bool
     | SimilarityStructureExclusion Bool
-    | DesignClass Classification
     | Vote Bool
-
-
-
---| DesignTag Tag
 
 
 defaultKeys :
     { dateStartKey : String
     , dateEndKey : String
     , searchTextKey : String
-    , searchTextParsedKey : String
     , similaritySequenceKey : String
     , similarityStructureKey : String
     , similaritySequenceExclusionKey : String
     , similarityStructureExclusionKey : String
-    , classificationMinimalKey : String
-    , classificationRationalKey : String
-    , classificationEngineeredKey : String
-    , classificationPhysKey : String
-    , classificationDeepLearningKey : String
-    , classificationConsensusKey : String
-    , classificationOtherKey : String
-    , keywordSyntheticKey : String
-    , keywordDeNovoKey : String
-    , keywordNovelKey : String
-    , keywordDesignedKey : String
-    , keywordProteinBindingKey : String
-    , keywordMetalBindingKey : String
-    , keywordTranscriptionKey : String
-    , keywordGrowthKey : String
-    , keywordStructuralKey : String
-    , keywordAlphaHelicalBundleKey : String
-    , keywordBetaBetaAlphaKey : String
-    , keywordCoiledCoilKey : String
-    , keywordUnknownFunctionKey : String
     , voteKeep : String
-    , voteRemove : String
     }
 defaultKeys =
-    { dateStartKey = "deposition-date-start"
-    , dateEndKey = "deposition-date-end"
-    , searchTextKey = "search-text-string"
-    , searchTextParsedKey = "search-text-parsed"
-    , similaritySequenceKey = "similarity-sequence-bit"
-    , similarityStructureKey = "similarity-structure-lddt"
-    , similaritySequenceExclusionKey = "similarity-exclude-uncomputed-sequence"
-    , similarityStructureExclusionKey = "similarity-exclude-uncomputed-structure"
-    , classificationMinimalKey = "design-classification-minimal"
-    , classificationRationalKey = "design-classification-rational"
-    , classificationEngineeredKey = "design-classification-engineered"
-    , classificationPhysKey = "design-classification-comp-phys"
-    , classificationDeepLearningKey = "design-classification-comp-dl"
-    , classificationConsensusKey = "design-classification-consensus"
-    , classificationOtherKey = "design-classification-other"
-    , keywordSyntheticKey = "design-keyword-synthetic"
-    , keywordDeNovoKey = "design-keyword-de-novo"
-    , keywordNovelKey = "design-keyword-novel"
-    , keywordDesignedKey = "design-keyword-designed"
-    , keywordProteinBindingKey = "design-keyword-protein-binding"
-    , keywordMetalBindingKey = "design-keyword-metal-binding"
-    , keywordTranscriptionKey = "design-keyword-transcription"
-    , keywordGrowthKey = "design-keyword-growth"
-    , keywordStructuralKey = "design-keyword-structural"
-    , keywordAlphaHelicalBundleKey = "design-keyword-alpha-helical-bundle"
-    , keywordBetaBetaAlphaKey = "design-keyword-beta-beta-alpha"
-    , keywordCoiledCoilKey = "design-keyword-coiled-coil"
-    , keywordUnknownFunctionKey = "design-keyword-unknown"
+    { dateStartKey = "deposition-date-after"
+    , dateEndKey = "deposition-date-before"
+    , searchTextKey = "search-text"
+    , similaritySequenceKey = "sim-seq-bit-lt"
+    , similarityStructureKey = "sim-struct-lddt-lt"
+    , similaritySequenceExclusionKey = "sim-excl-uncomp-seq"
+    , similarityStructureExclusionKey = "sim-excl-uncomp-struct"
     , voteKeep = "vote-keep"
-    , voteRemove = "vote-remove"
     }
 
 
-checkboxDict : Dict String Bool
-checkboxDict =
-    Dict.fromList
-        [ ( defaultKeys.classificationMinimalKey, False )
-        , ( defaultKeys.classificationRationalKey, False )
-        , ( defaultKeys.classificationEngineeredKey, False )
-        , ( defaultKeys.classificationPhysKey, False )
-        , ( defaultKeys.classificationDeepLearningKey, False )
-        , ( defaultKeys.classificationConsensusKey, False )
-        , ( defaultKeys.classificationOtherKey, False )
-        , ( defaultKeys.keywordSyntheticKey, False )
-        , ( defaultKeys.keywordDeNovoKey, False )
-        , ( defaultKeys.keywordNovelKey, False )
-        , ( defaultKeys.keywordDesignedKey, False )
-        , ( defaultKeys.keywordProteinBindingKey, False )
-        , ( defaultKeys.keywordMetalBindingKey, False )
-        , ( defaultKeys.keywordTranscriptionKey, False )
-        , ( defaultKeys.keywordGrowthKey, False )
-        , ( defaultKeys.keywordStructuralKey, False )
-        , ( defaultKeys.keywordAlphaHelicalBundleKey, False )
-        , ( defaultKeys.keywordBetaBetaAlphaKey, False )
-        , ( defaultKeys.keywordCoiledCoilKey, False )
-        , ( defaultKeys.keywordUnknownFunctionKey, False )
-        , ( defaultKeys.voteKeep, False )
-        , ( defaultKeys.voteRemove, False )
-        ]
+encodeFiltersToUrl : Dict String DesignFilter -> Dict String String
+encodeFiltersToUrl filters =
+    Dict.map (\_ value -> valueToString value) filters
 
 
-toString : DesignFilter -> String
-toString filter =
+queryParser : Query.Parser (Dict String DesignFilter)
+queryParser =
+    Query.map7
+        (\dateAfter dateBefore searchText simSeq simStruct exclSeq exclStruct ->
+            Dict.fromList
+                (List.filterMap identity
+                    [ Maybe.map (\v -> ( "deposition-date-after", DateStart v )) dateAfter
+                    , Maybe.map (\v -> ( "deposition-date-before", DateEnd v )) dateBefore
+                    , Maybe.map
+                        (\v ->
+                            let
+                                decodedText =
+                                    case Url.percentDecode v of
+                                        Just string ->
+                                            string
+
+                                        _ ->
+                                            v
+                            in
+                            ( "search-text", ContainsTextParsed decodedText )
+                        )
+                        searchText
+                    , Maybe.map (\v -> ( "sim-seq-bit-lt", SimilaritySequence v )) simSeq
+                    , Maybe.map (\v -> ( "sim-struct-lddt-lt", SimilarityStructure v )) simStruct
+                    , Maybe.map (\v -> ( "sim-excl-uncomp-seq", SimilaritySequenceExclusion v )) exclSeq
+                    , Maybe.map (\v -> ( "sim-excl-uncomp-struct", SimilarityStructureExclusion v )) exclStruct
+                    ]
+                )
+        )
+        (Query.string "deposition-date-after")
+        (Query.string "deposition-date-before")
+        (Query.string "search-text")
+        (Query.custom "sim-seq-bit-lt" (List.head << List.filterMap String.toFloat))
+        (Query.custom "sim-struct-lddt-lt" (List.head << List.filterMap String.toFloat))
+        (Query.custom "sim-excl-uncomp-seq" (List.head << List.filterMap (\s -> stringToBool s)))
+        (Query.custom "sim-excl-uncomp-struct" (List.head << List.filterMap (\s -> stringToBool s)))
+
+
+urlParser : Parser (Dict String DesignFilter -> a) a
+urlParser =
+    Url.Parser.top <?> queryParser
+
+
+decodeUrlToFilters : Url.Url -> Dict String DesignFilter
+decodeUrlToFilters url =
+    Url.Parser.parse urlParser url
+        |> Maybe.withDefault Dict.empty
+
+
+valueToString : DesignFilter -> String
+valueToString filter =
     case filter of
-        ContainsTextParsed _ ->
-            "complicated_search_string"
+        ContainsTextParsed string ->
+            string
 
         DateStart startDate ->
-            Date.toIsoString startDate
+            startDate
 
         DateEnd endDate ->
-            Date.toIsoString endDate
-
-        DesignClass classification ->
-            classificationToString classification
-
-        Vote vote ->
-            if vote then
-                "keep"
-
-            else
-                "remove"
+            endDate
 
         SimilaritySequence threshold ->
-            "sequence similarity below " ++ String.fromFloat threshold
+            String.fromFloat threshold
 
         SimilarityStructure threshold ->
-            "structure similarity below " ++ String.fromFloat threshold
+            String.fromFloat <| toFloat (round threshold)
+
+        Vote vote ->
+            boolToString vote
 
         SimilaritySequenceExclusion isTicked ->
-            if isTicked then
-                "exclude uncomputed sequence"
-
-            else
-                "include uncomputed sequence"
+            boolToString isTicked
 
         SimilarityStructureExclusion isTicked ->
-            if isTicked then
-                "exclude uncomputed structure"
-
-            else
-                "include uncomputed structure"
+            boolToString isTicked
 
 
-toDesignFilter : String -> DesignFilter
-toDesignFilter key =
+stringToValue : String -> String -> DesignFilter
+stringToValue key value =
     case key of
-        "design-classification-minimal" ->
-            DesignClass Minimal
+        "search-text" ->
+            ContainsTextParsed value
 
-        "design-classification-rational" ->
-            DesignClass Rational
+        "deposition-date-after" ->
+            DateStart value
 
-        "design-classification-engineered" ->
-            DesignClass Engineered
+        "deposition-date-before" ->
+            DateEnd value
 
-        "design-classification-comp-phys" ->
-            DesignClass Phys
+        "sim-seq-bit-lt" ->
+            case String.toFloat value of
+                Just threshold ->
+                    SimilaritySequence threshold
 
-        "design-classification-comp-dl" ->
-            DesignClass DeepLearning
+                _ ->
+                    SimilaritySequence 1000.0
 
-        "design-classification-consensus" ->
-            DesignClass Consensus
+        "sim-struct-lddt-lt" ->
+            case String.toFloat value of
+                Just threshold ->
+                    SimilarityStructure <| threshold * 100.0
 
-        "design-classification-other" ->
-            DesignClass Other
+                _ ->
+                    SimilarityStructure 100.0
 
         "vote-keep" ->
-            Vote True
+            case stringToBool value of
+                Just bool ->
+                    Vote bool
 
-        "vote-remove" ->
-            Vote False
+                _ ->
+                    Vote False
+
+        "sim-excl-uncomp-seq" ->
+            case stringToBool value of
+                Just bool ->
+                    SimilaritySequenceExclusion bool
+
+                _ ->
+                    SimilaritySequenceExclusion False
+
+        "sim-excl-uncomp-struct" ->
+            case stringToBool value of
+                Just bool ->
+                    SimilarityStructureExclusion bool
+
+                _ ->
+                    SimilarityStructureExclusion False
 
         _ ->
-            ContainsTextParsed ""
+            ContainsTextParsed value
 
 
-keyToLabel : String -> String
-keyToLabel label =
-    toString <| toDesignFilter label
+boolToString : Bool -> String
+boolToString value =
+    if value then
+        "True"
+
+    else
+        "False"
+
+
+stringToBool : String -> Maybe Bool
+stringToBool value =
+    case String.toLower value of
+        "true" ->
+            Just True
+
+        "false" ->
+            Just False
+
+        _ ->
+            Nothing
 
 
 defaultStartDate : Date
@@ -216,29 +216,6 @@ defaultStartDate =
 defaultEndDate : Date
 defaultEndDate =
     Date.fromCalendarDate 2100 Dec 31
-
-
-removeHyphenFromIsoDate : String -> String
-removeHyphenFromIsoDate string =
-    if String.right 1 string /= "-" then
-        string
-
-    else
-        String.dropRight 1 string
-
-
-isValidIsoDate : String -> Bool
-isValidIsoDate string =
-    let
-        phrase =
-            removeHyphenFromIsoDate string
-    in
-    case Date.fromIsoString phrase of
-        Err _ ->
-            False
-
-        Ok _ ->
-            True
 
 
 getFirstAndLastDate : List ProteinDesign -> { firstDate : Date, lastDate : Date }
@@ -294,57 +271,57 @@ parseStringToConditions : String -> Dict String (List (List String))
 parseStringToConditions searchString =
     let
         conditionsList =
-            List.map String.trim <| String.split "&&" searchString
+            List.map String.trim <| String.split "AND" searchString
 
         updateDict condition dict =
-            if String.contains "!!" condition then
+            if String.contains "NOT" condition then
                 let
                     splitConditions =
-                        if String.contains "||" condition then
-                            List.map String.trim (String.split "||" condition)
+                        if String.contains "OR" condition then
+                            List.map String.trim (String.split "OR" condition)
 
                         else
-                            [ String.trim <| String.replace "!!" "" condition ]
+                            [ String.trim <| String.replace "NOT" "" condition ]
 
                     updatedList =
-                        case Dict.get "!!" dict of
+                        case Dict.get "NOT" dict of
                             Just list ->
                                 list ++ [ splitConditions ]
 
                             Nothing ->
                                 [ splitConditions ]
                 in
-                Dict.insert "!!" updatedList dict
+                Dict.insert "NOT" updatedList dict
 
-            else if String.contains "||" condition then
+            else if String.contains "OR" condition then
                 let
                     splitConditions =
-                        String.split "||" condition
+                        String.split "OR" condition
                             |> List.map String.trim
 
                     updatedList =
-                        case Dict.get "||" dict of
+                        case Dict.get "OR" dict of
                             Just list ->
                                 list ++ [ splitConditions ]
 
                             Nothing ->
                                 [ splitConditions ]
                 in
-                Dict.insert "||" updatedList dict
+                Dict.insert "OR" updatedList dict
 
             else
                 let
                     updatedList =
-                        case Dict.get "&&" dict of
+                        case Dict.get "AND" dict of
                             Just list ->
                                 list ++ [ [ condition ] ]
 
                             Nothing ->
                                 [ [ condition ] ]
                 in
-                Dict.insert "&&" updatedList dict
+                Dict.insert "AND" updatedList dict
     in
-    List.foldl updateDict (Dict.fromList [ ( "&&", [] ), ( "||", [] ), ( "!!", [] ) ]) conditionsList
+    List.foldl updateDict (Dict.fromList [ ( "AND", [] ), ( "OR", [] ), ( "NOT", [] ) ]) conditionsList
 
 
 stubMeetsAllFilters : List DesignFilter -> ProteinDesignStub -> Maybe ProteinDesignStub
@@ -368,7 +345,7 @@ stubMeetsOneFilter design filter =
                     parseStringToConditions string
 
                 andConditions =
-                    case Dict.get "&&" searchDict of
+                    case Dict.get "AND" searchDict of
                         Just listOfListsOfConditions ->
                             List.concatMap identity listOfListsOfConditions
 
@@ -376,7 +353,7 @@ stubMeetsOneFilter design filter =
                             []
 
                 notConditions =
-                    case Dict.get "!!" searchDict of
+                    case Dict.get "NOT" searchDict of
                         Just listOfListsOfConditions ->
                             List.concatMap identity listOfListsOfConditions
 
@@ -384,7 +361,7 @@ stubMeetsOneFilter design filter =
                             []
 
                 orConditions =
-                    Maybe.withDefault [] (Dict.get "||" searchDict)
+                    Maybe.withDefault [] (Dict.get "OR" searchDict)
 
                 searchableText =
                     stubSearchableText design
@@ -399,19 +376,29 @@ stubMeetsOneFilter design filter =
             else
                 False
 
-        DateStart startDate ->
-            if Date.compare startDate design.release_date == LT then
-                True
+        DateStart startDateString ->
+            case Date.fromIsoString startDateString of
+                Err _ ->
+                    True
 
-            else
-                False
+                Ok startDate ->
+                    if Date.compare startDate design.release_date == LT then
+                        True
 
-        DateEnd endDate ->
-            if Date.compare endDate design.release_date == GT then
-                True
+                    else
+                        False
 
-            else
-                False
+        DateEnd endDateString ->
+            case Date.fromIsoString endDateString of
+                Err _ ->
+                    True
+
+                Ok endDate ->
+                    if Date.compare endDate design.release_date == GT then
+                        True
+
+                    else
+                        False
 
         SimilaritySequence sim ->
             if sim == 1000.0 || design.seq_max_sim_natural.similarity <= sim then
