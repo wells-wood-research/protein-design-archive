@@ -235,7 +235,7 @@ citationArea columnWidth =
                                 (columnWidth - 30)
                         )
                     ]
-                    [ text "bioRxiv 2024.09.05.611465" ]
+                    [ text "Nature Biotechnology (2025)" ]
                 , row
                     [ spacing 5 ]
                     [ text "doi: "
@@ -243,8 +243,8 @@ citationArea columnWidth =
                         [ Font.color <| rgb255 104 176 171
                         , Font.underline
                         ]
-                        { url = "https://doi.org/10.1101/2024.09.05.611465"
-                        , label = text "https://doi.org/10.1101/2024.09.05.611465"
+                        { url = "https://rdcu.be/ekeAH"
+                        , label = text "https://doi.org/10.1038/s41587-025-02607-x"
                         }
                     ]
                 ]
