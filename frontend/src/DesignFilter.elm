@@ -420,7 +420,7 @@ stubMeetsOneFilter design filter =
 
         SimilaritySequenceExclusion isTicked ->
             if isTicked then
-                if design.seq_max_sim_natural.partner == "" then
+                if design.seq_max_sim_designed.partner == "" then
                     False
 
                 else
@@ -431,7 +431,7 @@ stubMeetsOneFilter design filter =
 
         SimilarityStructureExclusion isTicked ->
             if isTicked then
-                if design.struct_max_sim_natural.partner == "" then
+                if design.struct_max_sim_designed.partner == "" then
                     False
 
                 else
