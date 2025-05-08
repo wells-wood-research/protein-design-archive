@@ -61,6 +61,8 @@ type alias ProteinDesignStub =
     , publication : String
     , seq_max_sim_natural : Related
     , struct_max_sim_natural : Related
+    , seq_max_sim_designed : Related
+    , struct_max_sim_designed : Related
     }
 
 
@@ -347,6 +349,8 @@ rawDesignStubDecoder =
         |> required "publication" Decode.string
         |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
         |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
 
 
 downloadDesignDecoder : Decoder ProteinDesignDownload

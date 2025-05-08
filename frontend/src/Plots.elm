@@ -8,6 +8,7 @@ import Html
 import Html.Attributes as HAtt
 import ProteinDesign exposing (ProteinDesign, ProteinDesignStub)
 import Time exposing (Month(..))
+import Urls
 import Vega exposing (..)
 
 
@@ -87,7 +88,7 @@ timelinePlotDesigns widthF designs =
                                 |> vStrs
                             )
                         << dataColumn "href"
-                            (List.map (\d -> "/pda/designs/" ++ d.pdb) designs
+                            (List.map (\d -> Urls.internalRelatedLink ++ d.pdb) designs
                                 |> vStrs
                             )
             in
@@ -194,7 +195,7 @@ timelinePlotStubs widthF heightF designs =
                                 |> vStrs
                             )
                         << dataColumn "href"
-                            (List.map (\d -> "designs/" ++ d.pdb) designs
+                            (List.map (\d -> Urls.internalRelatedLink ++ d.pdb) designs
                                 |> vStrs
                             )
             in
