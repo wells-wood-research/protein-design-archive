@@ -12,8 +12,8 @@ If you find The PDA useful in your work, please cite as:
 ```
 The Protein Design Archive (PDA): insights from 40 years of protein design
 Marta Chronowska, Michael J. Stam, Derek N. Woolfson, Luigi F. Di Costanzo, Christopher W. Wood
-bioRxiv 2024.09.05.611465
-doi: https://doi.org/10.1101/2024.09.05.611465
+Nature Biotechnology (2025)
+https://doi.org/10.1038/s41587-025-02607-x
 ```
 
 ## Website details

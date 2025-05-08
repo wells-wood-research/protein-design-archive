@@ -207,10 +207,12 @@ citationArea columnWidth =
                         |> maximum
                             columnWidth
                     )
+                , height <| px 110
                 , scrollbarX
                 ]
                 [ paragraph
                     [ Font.alignLeft
+                    , Font.bold
                     , width
                         (fill
                             |> maximum
@@ -227,26 +229,20 @@ citationArea columnWidth =
                         )
                     ]
                     [ text "Marta Chronowska, Michael J. Stam, Derek N. Woolfson, Luigi F. Di Costanzo, Christopher W. Wood" ]
-                , paragraph
-                    [ Font.alignLeft
-                    , width
-                        (fill
-                            |> maximum
-                                (columnWidth - 30)
-                        )
-                    ]
-                    [ text "bioRxiv 2024.09.05.611465" ]
                 , row
                     [ spacing 5 ]
-                    [ text "doi: "
-                    , newTabLink
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url = "https://doi.org/10.1101/2024.09.05.611465"
-                        , label = text "https://doi.org/10.1101/2024.09.05.611465"
-                        }
+                    [ paragraph
+                        [ Font.alignLeft, Font.italic ]
+                        [ text "Nature Biotechnology " ]
+                    , text "(2025)"
                     ]
+                , newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url = "https://rdcu.be/ekeAH"
+                    , label = text "https://doi.org/10.1038/s41587-025-02607-x"
+                    }
                 ]
             ]
         ]
