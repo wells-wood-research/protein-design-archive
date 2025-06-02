@@ -864,7 +864,7 @@ designDetailsFromProteinDesign proteinDesign =
     , { header = "Sequence related designs (bits)"
       , property =
             if List.isEmpty proteinDesign.seq_thr_sim_designed then
-                if proteinDesign.seq_max_sim_designed == defaultRelated then
+                if proteinDesign.seq_max_sim_designed == defaultRelated || proteinDesign.seq_max_sim_designed.partner == proteinDesign.pdb then
                     text "-"
 
                 else
@@ -894,7 +894,7 @@ designDetailsFromProteinDesign proteinDesign =
     , { header = "Structure related designs (LDDT)"
       , property =
             if List.isEmpty proteinDesign.struct_thr_sim_designed then
-                if proteinDesign.struct_max_sim_designed == defaultRelated then
+                if proteinDesign.struct_max_sim_designed == defaultRelated || proteinDesign.struct_max_sim_designed.partner == proteinDesign.pdb then
                     text "-"
 
                 else
