@@ -1,8 +1,9 @@
 module Shared.Msg exposing (Msg(..))
 
 import Browser.Dom
+import Dict exposing (Dict)
 import Http
-import ProteinDesign exposing (ProteinDesign)
+import ProteinDesign exposing (ProteinDesign, ProteinDesignStub)
 
 
 {-| Normally, this value would live in "Shared.elm"
@@ -14,6 +15,7 @@ own file, so they can be imported by `Effect.elm`
 -}
 type Msg
     = DesignsDataReceived (Result Http.Error (List ProteinDesign))
+    | SaveDesignStubs (Dict String ProteinDesignStub)
     | AddDesignsToDownload (List String)
     | RemoveDesignsFromDownload (List String)
     | WindowResizes Int Int

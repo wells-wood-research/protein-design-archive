@@ -6,7 +6,7 @@ port module Effect exposing
     , pushRoutePath, replaceRoutePath
     , loadExternalUrl, back
     , map, toCmd
-    , addDesignsToDownload, downloadFile, removeDesignsFromDownload, renderVegaPlot, resetViewport, resizeShared
+    , addDesignsToDownload, downloadFile, removeDesignsFromDownload, renderVegaPlot, resetViewport, resizeShared, saveDesignStubs
     )
 
 {-|
@@ -27,10 +27,9 @@ port module Effect exposing
 import Browser.Dom as Dom
 import Browser.Navigation
 import Dict exposing (Dict)
-import File exposing (File)
 import File.Download as Download
 import Plots exposing (PlotData)
-import ProteinDesign exposing (DownloadFileType)
+import ProteinDesign exposing (DownloadFileType, ProteinDesignStub)
 import Route
 import Route.Path
 import Shared.Model
@@ -171,6 +170,15 @@ resetViewport msg =
 resizeShared : Int -> Int -> Effect msg
 resizeShared width height =
     ResizeShared width height
+
+
+
+-- CACHE
+
+
+saveDesignStubs : Dict String ProteinDesignStub -> Effect msg
+saveDesignStubs stubs =
+    SendSharedMsg (Shared.Msg.SaveDesignStubs stubs)
 
 
 

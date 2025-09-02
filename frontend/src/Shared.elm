@@ -49,6 +49,7 @@ type alias Model =
 init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init _ _ =
     ( { designs = NotAsked
+      , designStubs = Nothing
       , errors = []
       , designsToDownload = Set.empty
       , mScreenWidthF = Nothing
@@ -77,6 +78,11 @@ update _ msg model =
                         |> Dict.fromList
             in
             ( { model | designs = Success designs }
+            , Effect.none
+            )
+
+        SaveDesignStubs designStubs ->
+            ( { model | designStubs = Just designStubs }
             , Effect.none
             )
 

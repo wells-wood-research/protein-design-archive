@@ -46,7 +46,7 @@ page shared route =
             decodeUrlToFilters route.url
     in
     Page.new
-        { init = \() -> init shared.mScreenWidthF shared.mScreenHeightF |> Tuple.mapFirst (\model -> { model | designFiltersCached = initialFilters })
+        { init = \() -> init shared.designStubs shared.mScreenWidthF shared.mScreenHeightF |> Tuple.mapFirst (\model -> { model | designFiltersCached = initialFilters })
         , update = update shared
         , subscriptions = subscriptions
         , view = view shared >> Components.Title.view shared.mScreenWidthF
@@ -71,9 +71,15 @@ type alias Model =
     }
 
 
-init : Maybe Float -> Maybe Float -> ( Model, Effect Msg )
-init mSharedScreenWidthF mSharedScreenHeightF =
-    ( { designStubs = Loading
+init : Maybe (Dict String ProteinDesignStub) -> Maybe Float -> Maybe Float -> ( Model, Effect Msg )
+init mDesignStubs mSharedScreenWidthF mSharedScreenHeightF =
+    ( { designStubs =
+            case mDesignStubs of
+                Nothing ->
+                    Loading
+
+                Just stubs ->
+                    Success stubs
       , errors = []
       , designFilters = Dict.empty
       , designFiltersCached = Dict.empty
@@ -87,7 +93,12 @@ init mSharedScreenWidthF mSharedScreenHeightF =
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
         , Effect.resetViewport ViewportReset
-        , Effect.sendCmd (getData Urls.allDesignStubs)
+        , case mDesignStubs of
+            Nothing ->
+                Effect.sendCmd (getData Urls.allDesignStubs)
+
+            Just _ ->
+                Effect.none
         ]
     )
 
@@ -150,7 +161,10 @@ update shared msg model =
                             getScreenWidthFloat model.mScreenHeightF
                     in
                     ( { model | designStubs = Success designs }
-                    , Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth plotHeight filteredDesignStubs)
+                    , Effect.batch
+                        [ Effect.renderVegaPlot (Plots.timelinePlotStubs plotWidth plotHeight filteredDesignStubs)
+                        , Effect.saveDesignStubs designs
+                        ]
                     )
 
                 DesignsDataReceived (Err e) ->
