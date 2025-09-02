@@ -6,7 +6,7 @@ import AppError exposing (AppError)
 import Dict exposing (Dict)
 import Element exposing (..)
 import Http
-import ProteinDesign exposing (ProteinDesign)
+import ProteinDesign exposing (ProteinDesign, ProteinDesignStub)
 import RemoteData exposing (RemoteData)
 import Set exposing (Set)
 
@@ -20,6 +20,7 @@ own file, so they can be imported by `Effect.elm`
 -}
 type alias Model =
     { designs : RemoteData Http.Error (Dict String ProteinDesign)
+    , designStubs : Maybe (Dict String ProteinDesignStub)
     , errors : List AppError
     , designsToDownload : Set String
     , mScreenWidthF : Maybe Float
