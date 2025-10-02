@@ -6,6 +6,8 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Html
+import Html.Attributes as Hatt
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as JsonEncode exposing (..)
@@ -793,10 +795,8 @@ designCard widthDesignCard design =
                     [ Border.width 2
                     , Border.color <| rgb255 220 220 220
                     ]
-                    (image
-                        [ width <| px 50
-                        ]
-                        { src = design.picture_path, description = "Image of design " ++ design.pdb }
+                    (Html.img [ Hatt.src design.picture_path, Hatt.attribute "loading" "lazy", Hatt.style "width" "50px" ] []
+                        |> html
                     )
                 , column
                     [ padding 2
