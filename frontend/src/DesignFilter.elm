@@ -24,6 +24,7 @@ type DesignFilter
     | SimilaritySequenceExclusion Bool
     | SimilarityStructureExclusion Bool
     | Vote Bool
+    | CathArch String Bool
 
 
 defaultKeys :
@@ -35,6 +36,7 @@ defaultKeys :
     , similaritySequenceExclusionKey : String
     , similarityStructureExclusionKey : String
     , voteKeep : String
+    , cathArchKey : String
     }
 defaultKeys =
     { dateStartKey = "deposition-date-after"
@@ -45,6 +47,7 @@ defaultKeys =
     , similaritySequenceExclusionKey = "sim-excl-uncomp-seq"
     , similarityStructureExclusionKey = "sim-excl-uncomp-struct"
     , voteKeep = "vote-keep"
+    , cathArchKey = "cath-arch"
     }
 
 
@@ -128,6 +131,9 @@ valueToString filter =
 
         SimilarityStructureExclusion isTicked ->
             boolToString isTicked
+
+        CathArch name isTicked ->
+            name ++ boolToString isTicked
 
 
 stringToValue : String -> String -> DesignFilter
@@ -437,6 +443,12 @@ stubMeetsOneFilter design filter =
                 else
                     True
 
+            else
+                True
+
+        CathArch cathCode isTicked ->
+            if isTicked then
+                List.any (\c -> c.code == cathCode) design.cath_arch
             else
                 True
 
