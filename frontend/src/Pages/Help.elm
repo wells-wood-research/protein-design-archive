@@ -452,6 +452,11 @@ filteringArea columnWidth =
                 , paragraph [ Font.bold ] [ text <| "by similarity" ]
                 , paragraph [ width fill ] [ text <| " can be performed with or without entries that do not have any related partners calculated (either due to an error, such as being too short, or because of their novelty) - to exclude, one needs to manually tick the checkbox next to the threshold slider. Filters are combined when multiple are defined simultaneously." ]
                 ]
+            , paragraph [ width fill ]
+                [ paragraph [ width fill ] [ text <| " You can now also filter by " ]
+                , paragraph [ Font.bold ] [ text <| "CATH classes and architectures " ]
+                , paragraph [ width fill ] [ text <| "thanks to labels computed with Merizo-search [3]. Simply press on the horizontal bar representing a CATH class to uncover checkboxes for CATH architectures. CATH filters are evaluated as OR (all designs matching at leats one of the selected filters evaluate to True)." ]
+                ]
             ]
         ]
 
@@ -585,6 +590,25 @@ referencesArea columnWidth =
                 ]
                 { url = "https://doi.org/10.1038/s41587-023-01773-0"
                 , label = text "https://doi.org/10.1038/s41587-023-01773-0"
+                }
+            ]
+        , paragraph
+            (Style.monospacedFont
+                ++ [ Font.justify
+                   , Font.size 14
+                   , width (fill |> maximum columnWidth)
+                   ]
+            )
+            [ paragraph [ width fill ] [ text <| "[3]" ]
+            , paragraph [ Font.italic, width fill ] [ text <| " Foldclass and Merizo-search: scalable structural similarity search for single- and multi-domain proteins using geometric learning" ]
+            , paragraph [ width fill ] [ text <| ". Kandathil, S.M., Lau, A.M. et al." ]
+            , paragraph [ width fill ] [ text <| ", Bioinformatics 41(5), btaf277 (2025) " ]
+            , newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url = "https://doi.org/10.1093/bioinformatics/btaf277"
+                , label = text "https://doi.org/10.1093/bioinformatics/btaf277"
                 }
             ]
         ]
