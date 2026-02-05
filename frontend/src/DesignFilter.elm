@@ -330,9 +330,59 @@ parseStringToConditions searchString =
     List.foldl updateDict (Dict.fromList [ ( "AND", [] ), ( "OR", [] ), ( "NOT", [] ) ]) conditionsList
 
 
+meetsOtherFilters : ProteinDesignStub -> List DesignFilter -> Bool
+meetsOtherFilters design filters =
+    List.all (stubMeetsOneFilter design) filters
+
+
+meetsCathArchFilters : ProteinDesignStub -> List DesignFilter -> Bool
+meetsCathArchFilters design cathArchFilters =
+    let
+        activeCathCodes =
+            cathArchFilters
+                |> List.filterMap
+                    (\filter ->
+                        case filter of
+                            CathArch code True ->
+                                Just code
+
+                            _ ->
+                                Nothing
+                    )
+    in
+    case activeCathCodes of
+        [] ->
+            True
+
+        codes ->
+            List.any
+                (\cath ->
+                    List.member cath.code codes
+                )
+                design.cath_arch
+
+
+isCathArch : DesignFilter -> Bool
+isCathArch filter =
+    case filter of
+        CathArch _ _ ->
+            True
+
+        _ ->
+            False
+
+
 stubMeetsAllFilters : List DesignFilter -> ProteinDesignStub -> Maybe ProteinDesignStub
 stubMeetsAllFilters filters design =
-    List.all (\f -> stubMeetsOneFilter design f) filters
+    let
+        cathArchFilters =
+            List.filter isCathArch filters
+
+        otherFilters =
+            List.filter (not << isCathArch) filters
+    in
+    meetsOtherFilters design otherFilters
+        && meetsCathArchFilters design cathArchFilters
         |> (\allFiltersMet ->
                 if allFiltersMet then
                     Just design
@@ -449,6 +499,7 @@ stubMeetsOneFilter design filter =
         CathArch cathCode isTicked ->
             if isTicked then
                 List.any (\c -> c.code == cathCode) design.cath_arch
+
             else
                 True
 
