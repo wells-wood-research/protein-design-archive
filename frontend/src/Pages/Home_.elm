@@ -877,7 +877,7 @@ unassignedCathButton model =
                 _ ->
                     False
     in
-    Input.checkbox [ paddingXY 3 0, alignTop ]
+    Input.checkbox [ paddingXY 18 0, alignTop ]
         { onChange =
             \checked ->
                 UpdateFilters
