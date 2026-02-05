@@ -877,7 +877,7 @@ unassignedCathButton model =
                 _ ->
                     False
     in
-    Input.checkbox []
+    Input.checkbox [ paddingXY 3 0, alignTop ]
         { onChange =
             \checked ->
                 UpdateFilters
@@ -886,8 +886,15 @@ unassignedCathButton model =
         , icon = Input.defaultCheckbox
         , checked = isChecked
         , label =
-            Input.labelRight []
-                (text "Show designs without CATH classification")
+            Input.labelRight
+                [ centerY
+                , width fill
+                , paddingXY 5 0
+                ]
+                (paragraph
+                    Style.monospacedFont
+                    [ text <| "unknown CATH classification" ]
+                )
         }
 
 

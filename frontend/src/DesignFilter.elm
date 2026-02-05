@@ -366,61 +366,78 @@ meetsOtherFilters design filters =
     List.all (stubMeetsOneFilter design) filters
 
 
-meetsCathArchFilters : ProteinDesignStub -> List DesignFilter -> Bool
-meetsCathArchFilters design cathArchFilters =
+meetsCathFilters : ProteinDesignStub -> List DesignFilter -> Bool
+meetsCathFilters design allFilters =
     let
-        activeCathCodes =
-            cathArchFilters
-                |> List.filterMap
-                    (\filter ->
-                        case filter of
-                            CathArch code True ->
-                                Just code
+        cathFilters =
+            List.filter isCathRelatedFilter allFilters
 
-                            _ ->
-                                Nothing
-                    )
+        activeConditions =
+            List.filterMap activeCathCondition cathFilters
     in
-    case activeCathCodes of
+    case activeConditions of
         [] ->
             True
 
-        codes ->
-            List.any
-                (\cath ->
-                    List.member cath.code codes
-                )
-                design.cath_arch
+        conditions ->
+            List.any (conditionMatches design) conditions
 
 
-isCathArch : DesignFilter -> Bool
-isCathArch filter =
-    case filter of
+isCathRelatedFilter : DesignFilter -> Bool
+isCathRelatedFilter f =
+    case f of
         CathArch _ _ ->
+            True
+
+        CathUnassigned _ ->
             True
 
         _ ->
             False
 
 
+type alias CathCondition =
+    ProteinDesignStub -> Bool
+
+
+activeCathCondition : DesignFilter -> Maybe CathCondition
+activeCathCondition f =
+    case f of
+        CathArch code True ->
+            Just (\design -> List.any (\c -> c.code == code) design.cath_arch)
+
+        CathArch _ False ->
+            Nothing
+
+        CathUnassigned True ->
+            Just (\design -> List.isEmpty design.cath_arch)
+
+        CathUnassigned False ->
+            Nothing
+
+        _ ->
+            Nothing
+
+
+conditionMatches : ProteinDesignStub -> CathCondition -> Bool
+conditionMatches design cond =
+    cond design
+
+
 stubMeetsAllFilters : List DesignFilter -> ProteinDesignStub -> Maybe ProteinDesignStub
 stubMeetsAllFilters filters design =
     let
-        cathArchFilters =
-            List.filter isCathArch filters
+        cathFilters =
+            List.filter isCathRelatedFilter filters
 
         otherFilters =
-            List.filter (not << isCathArch) filters
+            List.filter (not << isCathRelatedFilter) filters
     in
-    meetsOtherFilters design otherFilters
-        && meetsCathArchFilters design cathArchFilters
-        |> (\allFiltersMet ->
-                if allFiltersMet then
-                    Just design
+    if meetsOtherFilters design otherFilters && meetsCathFilters design cathFilters then
+        Just design
 
-                else
-                    Nothing
-           )
+    else
+        Nothing
 
 
 stubMeetsOneFilter : ProteinDesignStub -> DesignFilter -> Bool
