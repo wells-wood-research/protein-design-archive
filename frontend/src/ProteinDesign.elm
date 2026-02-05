@@ -46,9 +46,9 @@ type alias ProteinDesign =
     , seq_max_sim_natural : Related
     , struct_max_sim_designed : Related
     , struct_max_sim_natural : Related
-    , cath_full: List Cath
-    , cath_class: List Cath
-    , cath_arch: List Cath
+    , cath_full : List Cath
+    , cath_class : List Cath
+    , cath_arch : List Cath
     , review_comment : List String
     }
 
@@ -66,9 +66,9 @@ type alias ProteinDesignStub =
     , struct_max_sim_natural : Related
     , seq_max_sim_designed : Related
     , struct_max_sim_designed : Related
-    , cath_full: List Cath
-    , cath_class: List Cath
-    , cath_arch: List Cath
+    , cath_full : List Cath
+    , cath_class : List Cath
+    , cath_arch : List Cath
     }
 
 
@@ -105,10 +105,12 @@ type alias Related =
     , partner : String
     }
 
+
 type alias Cath =
     { code : String
     , name : String
     }
+
 
 type alias CathClassGroup =
     { classCode : String
@@ -116,11 +118,13 @@ type alias CathClassGroup =
     , archs : List Cath
     }
 
+
 defaultRelated : Related
 defaultRelated =
     { similarity = 0.0
     , partner = ""
     }
+
 
 defaultCath : Cath
 defaultCath =
@@ -129,8 +133,8 @@ defaultCath =
     }
 
 
-emptyArrayAsDefaultRelated: Decoder Related
-emptyArrayAsDefaultRelated=
+emptyArrayAsDefaultRelated : Decoder Related
+emptyArrayAsDefaultRelated =
     Decode.oneOf
         [ Decode.list Decode.value
             |> Decode.andThen
@@ -144,8 +148,9 @@ emptyArrayAsDefaultRelated=
         , Decode.null defaultRelated
         ]
 
-emptyArrayAsDefaultCath: Decoder Cath
-emptyArrayAsDefaultCath=
+
+emptyArrayAsDefaultCath : Decoder Cath
+emptyArrayAsDefaultCath =
     Decode.oneOf
         [ Decode.list Decode.value
             |> Decode.andThen
@@ -366,13 +371,13 @@ rawDesignDecoder =
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
-        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "cath_full" (Decode.list cathDecoder)
-        |> required "cath_class" (Decode.list cathDecoder)
-        |> required "cath_arch" (Decode.list cathDecoder)
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "cath_full" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "cath_class" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "cath_arch" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
         |> required "review_comment" (Decode.list Decode.string)
 
 
@@ -387,14 +392,14 @@ rawDesignStubDecoder =
         |> required "keywords" (Decode.list Decode.string)
         |> required "release_date" dateDecoder
         |> required "publication" Decode.string
-        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "cath_full" (Decode.list cathDecoder)
-        |> required "cath_class" (Decode.list cathDecoder)
-        |> required "cath_arch" (Decode.list cathDecoder)
-        
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "cath_full" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "cath_class" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "cath_arch" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+
 
 downloadDesignDecoder : Decoder ProteinDesignDownload
 downloadDesignDecoder =
@@ -418,10 +423,10 @@ downloadDesignDecoder =
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
-        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
-        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated])
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
         |> required "review_comment" (Decode.list Decode.string)
 
 
@@ -430,6 +435,7 @@ relatedDecoder =
     Decode.succeed Related
         |> required "sim" Decode.float
         |> required "partner" Decode.string
+
 
 cathDecoder : Decoder Cath
 cathDecoder =
@@ -605,12 +611,14 @@ relatedToString related =
     else
         related.partner ++ "(" ++ String.fromFloat related.similarity ++ ")"
 
+
 cathClassCode : Cath -> String
 cathClassCode cath =
     cath.code
         |> String.split "."
         |> List.head
         |> Maybe.withDefault ""
+
 
 chainToString : Chain -> String
 chainToString chain =
@@ -822,6 +830,7 @@ tagToString tag =
 
         CoiledCoil ->
             "coiled-coil"
+
 
 {-| A simple view that shows basic data about a design. Used for lists etc.
 -}
