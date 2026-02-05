@@ -171,6 +171,12 @@ groupCathArchsByClass classes archs =
             )
 
 
+hasNoCath : ProteinDesign -> Bool
+hasNoCath design =
+    List.isEmpty design.cath_class
+        && List.isEmpty design.cath_arch
+
+
 defaultRelated : Related
 defaultRelated =
     { similarity = 0.0

@@ -24,7 +24,7 @@ import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (Cath, CathClassGroup, DownloadFileType(..), ProteinDesignStub, cathClassCode, csvStringFromProteinDesignDownload, downloadDesignDecoder, groupCathArchsByClass, jsonStringFromProteinDesignDownload, uniqueCathArchs, uniqueCathClasses)
+import ProteinDesign exposing (Cath, CathClassGroup, DownloadFileType(..), ProteinDesignStub, csvStringFromProteinDesignDownload, downloadDesignDecoder, groupCathArchsByClass, jsonStringFromProteinDesignDownload, uniqueCathArchs, uniqueCathClasses)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Route.Path
@@ -813,6 +813,7 @@ cathFilteringArea model designs =
             , text "Tick to filter by fold (CATH):"
             ]
             :: List.map (cathClassBar model) groups
+            ++ [ el [ paddingXY 10 10 ] (unassignedCathButton model) ]
         )
 
 
@@ -863,6 +864,31 @@ cathClassBar model group =
           else
             none
         ]
+
+
+unassignedCathButton : Model -> Element Msg
+unassignedCathButton model =
+    let
+        isChecked =
+            case Dict.get defaultKeys.cathUnassignedKey model.designFiltersCached of
+                Just (DesignFilter.CathUnassigned True) ->
+                    True
+
+                _ ->
+                    False
+    in
+    Input.checkbox []
+        { onChange =
+            \checked ->
+                UpdateFilters
+                    defaultKeys.cathUnassignedKey
+                    (DesignFilter.CathUnassigned checked)
+        , icon = Input.defaultCheckbox
+        , checked = isChecked
+        , label =
+            Input.labelRight []
+                (text "Show designs without CATH classification")
+        }
 
 
 includeAllCathArchButton : Model -> CathClassGroup -> Element Msg
