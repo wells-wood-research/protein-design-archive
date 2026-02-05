@@ -394,7 +394,7 @@ relatedProteinsArea columnWidth =
                 [ Font.color <| rgb255 104 176 171
                 , Font.underline
                 ]
-                { url = "https://www.nature.com/articles/nbt.3988"
+                { url = "https://github.com/soedinglab/mmseqs2"
                 , label = text <| "MMseqs2"
                 }
             , text <| " [1] (for sequence) and "
@@ -402,7 +402,7 @@ relatedProteinsArea columnWidth =
                 [ Font.color <| rgb255 104 176 171
                 , Font.underline
                 ]
-                { url = "https://www.nature.com/articles/s41587-023-01773-0"
+                { url = "https://github.com/steineggerlab/foldseek"
                 , label = text <| "Foldseek"
                 }
             , text <| " [2] (for structure) analysis as being similar to the currently viewed design. In the context of this analysis, "
