@@ -119,6 +119,58 @@ type alias CathClassGroup =
     }
 
 
+uniqueCathClasses : List ProteinDesignStub -> List Cath
+uniqueCathClasses designs =
+    designs
+        |> List.concatMap .cath_class
+        |> List.foldl
+            (\c acc ->
+                if List.any (\a -> a.code == c.code) acc then
+                    acc
+
+                else
+                    c :: acc
+            )
+            []
+        |> List.sortBy .code
+
+
+uniqueCathArchs : List ProteinDesignStub -> List Cath
+uniqueCathArchs designs =
+    designs
+        |> List.concatMap .cath_arch
+        |> List.foldl
+            (\arch acc ->
+                if List.any (\a -> a.code == arch.code) acc then
+                    acc
+
+                else
+                    arch :: acc
+            )
+            []
+        |> List.sortBy .code
+
+
+groupCathArchsByClass :
+    List Cath
+    -> List Cath
+    -> List CathClassGroup
+groupCathArchsByClass classes archs =
+    classes
+        |> List.map
+            (\cls ->
+                { classCode = cls.code
+                , className = cls.name
+                , archs =
+                    archs
+                        |> List.filter
+                            (\arch ->
+                                cathClassCode arch == cls.code
+                            )
+                }
+            )
+
+
 defaultRelated : Related
 defaultRelated =
     { similarity = 0.0
