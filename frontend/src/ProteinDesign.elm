@@ -669,6 +669,15 @@ refToString reference =
         ]
 
 
+cathToString : Cath -> String
+cathToString cath =
+    if cath.code == "" then
+        ""
+
+    else
+        cath.code ++ " — " ++ cath.name
+
+
 cathCodeToString : Cath -> String
 cathCodeToString cath =
     if cath.code == "" then
@@ -1003,6 +1012,18 @@ designDetailsFromProteinDesign proteinDesign =
 
             else
                 text <| proteinDesign.subtitle
+      }
+    , { header = "CATH"
+      , property =
+            if List.isEmpty proteinDesign.cath_arch then
+                text "unknown"
+
+            else
+                column [ width fill ] <|
+                    (List.map (\cath -> text <| cathToString cath) <|
+                        List.sortBy .code <|
+                            proteinDesign.cath_arch
+                    )
       }
     , { header = "Sequence related designs (bits)"
       , property =
