@@ -20,12 +20,11 @@ import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
 import Get exposing (getScreenWidthFloat, getScreenWidthInt)
-import Html.Events
 import Http
 import Json.Decode
 import Page exposing (Page)
 import Plots exposing (RenderPlotState(..))
-import ProteinDesign exposing (Cath, CathClassGroup, DownloadFileType(..), ProteinDesignStub, cathClassCode, csvStringFromProteinDesignDownload, downloadDesignDecoder, jsonStringFromProteinDesignDownload)
+import ProteinDesign exposing (Cath, CathClassGroup, DownloadFileType(..), ProteinDesignStub, cathClassCode, csvStringFromProteinDesignDownload, downloadDesignDecoder, groupCathArchsByClass, jsonStringFromProteinDesignDownload, uniqueCathArchs, uniqueCathClasses)
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Route.Path
@@ -121,6 +120,7 @@ type Msg
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
     | ToggleCathClass String
+    | ToggleCathArchGroup String (List Cath)
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
@@ -209,6 +209,58 @@ update shared msg model =
                                 Set.insert classCode model.expandedCathClasses
                       }
                     , Effect.none
+                    )
+
+                ToggleCathArchGroup _ archs ->
+                    let
+                        anySelected =
+                            archs
+                                |> List.all
+                                    (\arch ->
+                                        case Dict.get ("cath_arch_" ++ arch.code) model.designFiltersCached of
+                                            Just (DesignFilter.CathArch _ True) ->
+                                                True
+
+                                            _ ->
+                                                False
+                                    )
+
+                        newValue =
+                            not anySelected
+
+                        updatedFilters =
+                            archs
+                                |> List.foldl
+                                    (\arch acc ->
+                                        Dict.insert
+                                            ("cath_arch_" ++ arch.code)
+                                            (DesignFilter.CathArch arch.code newValue)
+                                            acc
+                                    )
+                                    model.designFiltersCached
+
+                        newUrlQuery =
+                            encodeFiltersToUrl updatedFilters
+
+                        route =
+                            { path = Route.Path.Home_
+                            , query = newUrlQuery
+                            , hash = Nothing
+                            }
+
+                        toRender =
+                            case model.renderPlotState of
+                                Rendered ->
+                                    AwaitingRender model.replotTime
+
+                                _ ->
+                                    model.renderPlotState
+                    in
+                    ( { model
+                        | designFiltersCached = updatedFilters
+                        , renderPlotState = toRender
+                      }
+                    , Effect.pushRoute route
                     )
 
                 UpdateFilters key newFilter ->
@@ -764,58 +816,6 @@ cathFilteringArea model designs =
         )
 
 
-uniqueCathClasses : List ProteinDesignStub -> List Cath
-uniqueCathClasses designs =
-    designs
-        |> List.concatMap .cath_class
-        |> List.foldl
-            (\c acc ->
-                if List.any (\a -> a.code == c.code) acc then
-                    acc
-
-                else
-                    c :: acc
-            )
-            []
-        |> List.sortBy .code
-
-
-uniqueCathArchs : List ProteinDesignStub -> List Cath
-uniqueCathArchs designs =
-    designs
-        |> List.concatMap .cath_arch
-        |> List.foldl
-            (\arch acc ->
-                if List.any (\a -> a.code == arch.code) acc then
-                    acc
-
-                else
-                    arch :: acc
-            )
-            []
-        |> List.sortBy .code
-
-
-groupCathArchsByClass :
-    List Cath
-    -> List Cath
-    -> List CathClassGroup
-groupCathArchsByClass classes archs =
-    classes
-        |> List.map
-            (\cls ->
-                { classCode = cls.code
-                , className = cls.name
-                , archs =
-                    archs
-                        |> List.filter
-                            (\arch ->
-                                cathClassCode arch == cls.code
-                            )
-                }
-            )
-
-
 cathClassBar : Model -> CathClassGroup -> Element Msg
 cathClassBar model group =
     let
@@ -856,11 +856,44 @@ cathClassBar model group =
                     }
                 , spacing 6
                 ]
-                (List.map (cathButton model) group.archs)
+                (includeAllCathArchButton model group
+                    :: List.map (cathButton model) group.archs
+                )
 
           else
             none
         ]
+
+
+includeAllCathArchButton : Model -> CathClassGroup -> Element Msg
+includeAllCathArchButton model group =
+    let
+        isChecked =
+            group.archs
+                |> List.all
+                    (\arch ->
+                        case Dict.get ("cath_arch_" ++ arch.code) model.designFiltersCached of
+                            Just (DesignFilter.CathArch _ True) ->
+                                True
+
+                            _ ->
+                                False
+                    )
+    in
+    Input.checkbox
+        [ paddingXY 3 10, alignTop ]
+        { onChange =
+            \_ ->
+                ToggleCathArchGroup group.classCode group.archs
+        , icon = Input.defaultCheckbox
+        , checked = isChecked
+        , label =
+            Input.labelRight
+                [ centerY, width fill, paddingXY 5 0 ]
+                (paragraph Style.monospacedFont
+                    [ text "Include all architectures in this class" ]
+                )
+        }
 
 
 cathButton : Model -> Cath -> Element Msg
