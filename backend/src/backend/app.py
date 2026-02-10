@@ -52,7 +52,10 @@ def get_all_design_stubs():
         "seq_max_sim_natural": 1,
         "struct_max_sim_natural": 1,
         "seq_max_sim_designed": 1,
-        "struct_max_sim_designed": 1
+        "struct_max_sim_designed": 1,
+        "cath_full": 1,
+        "cath_class": 1,
+        "cath_arch": 1,
     }
     designs = list(DESIGNS.find({}, projection=projection))
     return designs

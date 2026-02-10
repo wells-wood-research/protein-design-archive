@@ -23,7 +23,8 @@ type DesignFilter
     | SimilarityStructure Float
     | SimilaritySequenceExclusion Bool
     | SimilarityStructureExclusion Bool
-    | Vote Bool
+    | CathArch String Bool
+    | CathUnassigned Bool
 
 
 defaultKeys :
@@ -34,7 +35,8 @@ defaultKeys :
     , similarityStructureKey : String
     , similaritySequenceExclusionKey : String
     , similarityStructureExclusionKey : String
-    , voteKeep : String
+    , cathArchKey : String
+    , cathUnassignedKey : String
     }
 defaultKeys =
     { dateStartKey = "deposition-date-after"
@@ -44,7 +46,8 @@ defaultKeys =
     , similarityStructureKey = "sim-struct-lddt-lt"
     , similaritySequenceExclusionKey = "sim-excl-uncomp-seq"
     , similarityStructureExclusionKey = "sim-excl-uncomp-struct"
-    , voteKeep = "vote-keep"
+    , cathArchKey = "cath-arch"
+    , cathUnassignedKey = "cath-unassigned"
     }
 
 
@@ -53,42 +56,70 @@ encodeFiltersToUrl filters =
     Dict.map (\_ value -> valueToString value) filters
 
 
+parseCathArchList : String -> List DesignFilter
+parseCathArchList value =
+    value
+        |> String.split ","
+        |> List.map String.trim
+        |> List.filter (not << String.isEmpty)
+        |> List.map (\code -> CathArch code True)
+
+
 queryParser : Query.Parser (Dict String DesignFilter)
 queryParser =
-    Query.map7
-        (\dateAfter dateBefore searchText simSeq simStruct exclSeq exclStruct ->
-            Dict.fromList
-                (List.filterMap identity
-                    [ Maybe.map (\v -> ( "deposition-date-after", DateStart v )) dateAfter
-                    , Maybe.map (\v -> ( "deposition-date-before", DateEnd v )) dateBefore
-                    , Maybe.map
-                        (\v ->
-                            let
-                                decodedText =
-                                    case Url.percentDecode v of
-                                        Just string ->
-                                            string
+    Query.map8
+        (\dateAfter dateBefore searchText simSeq simStruct exclSeq exclStruct cathUnassigned ->
+            \cathArchRaw ->
+                let
+                    base =
+                        Dict.fromList <|
+                            List.filterMap identity
+                                [ Maybe.map (\v -> ( defaultKeys.dateStartKey, DateStart v )) dateAfter
+                                , Maybe.map (\v -> ( defaultKeys.dateEndKey, DateEnd v )) dateBefore
+                                , Maybe.map
+                                    (\v ->
+                                        let
+                                            decoded =
+                                                Maybe.withDefault v (Url.percentDecode v)
+                                        in
+                                        ( defaultKeys.searchTextKey, ContainsTextParsed decoded )
+                                    )
+                                    searchText
+                                , Maybe.map (\v -> ( defaultKeys.similaritySequenceKey, SimilaritySequence v )) simSeq
+                                , Maybe.map (\v -> ( defaultKeys.similarityStructureKey, SimilarityStructure v )) simStruct
+                                , Maybe.map (\v -> ( defaultKeys.similaritySequenceExclusionKey, SimilaritySequenceExclusion v )) exclSeq
+                                , Maybe.map (\v -> ( defaultKeys.similarityStructureExclusionKey, SimilarityStructureExclusion v )) exclStruct
+                                , Maybe.map (\v -> ( defaultKeys.cathUnassignedKey, CathUnassigned v )) cathUnassigned
+                                ]
 
-                                        _ ->
-                                            v
-                            in
-                            ( "search-text", ContainsTextParsed decodedText )
-                        )
-                        searchText
-                    , Maybe.map (\v -> ( "sim-seq-bit-lt", SimilaritySequence v )) simSeq
-                    , Maybe.map (\v -> ( "sim-struct-lddt-lt", SimilarityStructure v )) simStruct
-                    , Maybe.map (\v -> ( "sim-excl-uncomp-seq", SimilaritySequenceExclusion v )) exclSeq
-                    , Maybe.map (\v -> ( "sim-excl-uncomp-struct", SimilarityStructureExclusion v )) exclStruct
-                    ]
-                )
+                    cathArchDict =
+                        cathArchRaw
+                            |> Maybe.withDefault ""
+                            |> parseCathArchList
+                            |> List.indexedMap
+                                (\i filter ->
+                                    ( defaultKeys.cathArchKey ++ "-" ++ String.fromInt i
+                                    , filter
+                                    )
+                                )
+                            |> Dict.fromList
+                in
+                Dict.union base cathArchDict
         )
-        (Query.string "deposition-date-after")
-        (Query.string "deposition-date-before")
-        (Query.string "search-text")
-        (Query.custom "sim-seq-bit-lt" (List.head << List.filterMap String.toFloat))
-        (Query.custom "sim-struct-lddt-lt" (List.head << List.filterMap String.toFloat))
-        (Query.custom "sim-excl-uncomp-seq" (List.head << List.filterMap (\s -> stringToBool s)))
-        (Query.custom "sim-excl-uncomp-struct" (List.head << List.filterMap (\s -> stringToBool s)))
+        (Query.string defaultKeys.dateStartKey)
+        (Query.string defaultKeys.dateEndKey)
+        (Query.string defaultKeys.searchTextKey)
+        (Query.custom defaultKeys.similaritySequenceKey (List.head << List.filterMap String.toFloat))
+        (Query.custom defaultKeys.similarityStructureKey (List.head << List.filterMap String.toFloat))
+        (Query.custom defaultKeys.similaritySequenceExclusionKey (List.head << List.filterMap stringToBool))
+        (Query.custom defaultKeys.similarityStructureExclusionKey (List.head << List.filterMap stringToBool))
+        (Query.custom defaultKeys.cathUnassignedKey (List.head << List.filterMap stringToBool))
+        |> apply (Query.string defaultKeys.cathArchKey)
+
+
+apply : Query.Parser a -> Query.Parser (a -> b) -> Query.Parser b
+apply argParser funcParser =
+    Query.map2 (<|) funcParser argParser
 
 
 urlParser : Parser (Dict String DesignFilter -> a) a
@@ -120,13 +151,16 @@ valueToString filter =
         SimilarityStructure threshold ->
             String.fromFloat <| toFloat (round threshold)
 
-        Vote vote ->
-            boolToString vote
-
         SimilaritySequenceExclusion isTicked ->
             boolToString isTicked
 
         SimilarityStructureExclusion isTicked ->
+            boolToString isTicked
+
+        CathArch name isTicked ->
+            name ++ boolToString isTicked
+
+        CathUnassigned isTicked ->
             boolToString isTicked
 
 
@@ -158,14 +192,6 @@ stringToValue key value =
                 _ ->
                     SimilarityStructure 100.0
 
-        "vote-keep" ->
-            case stringToBool value of
-                Just bool ->
-                    Vote bool
-
-                _ ->
-                    Vote False
-
         "sim-excl-uncomp-seq" ->
             case stringToBool value of
                 Just bool ->
@@ -181,6 +207,17 @@ stringToValue key value =
 
                 _ ->
                     SimilarityStructureExclusion False
+
+        "cath-arch" ->
+            CathArch value True
+
+        "cath-unassigned" ->
+            case stringToBool value of
+                Just bool ->
+                    CathUnassigned bool
+
+                _ ->
+                    CathUnassigned False
 
         _ ->
             ContainsTextParsed value
@@ -324,16 +361,83 @@ parseStringToConditions searchString =
     List.foldl updateDict (Dict.fromList [ ( "AND", [] ), ( "OR", [] ), ( "NOT", [] ) ]) conditionsList
 
 
+meetsOtherFilters : ProteinDesignStub -> List DesignFilter -> Bool
+meetsOtherFilters design filters =
+    List.all (stubMeetsOneFilter design) filters
+
+
+meetsCathFilters : ProteinDesignStub -> List DesignFilter -> Bool
+meetsCathFilters design allFilters =
+    let
+        cathFilters =
+            List.filter isCathRelatedFilter allFilters
+
+        activeConditions =
+            List.filterMap activeCathCondition cathFilters
+    in
+    case activeConditions of
+        [] ->
+            True
+
+        conditions ->
+            List.any (conditionMatches design) conditions
+
+
+isCathRelatedFilter : DesignFilter -> Bool
+isCathRelatedFilter f =
+    case f of
+        CathArch _ _ ->
+            True
+
+        CathUnassigned _ ->
+            True
+
+        _ ->
+            False
+
+
+type alias CathCondition =
+    ProteinDesignStub -> Bool
+
+
+activeCathCondition : DesignFilter -> Maybe CathCondition
+activeCathCondition f =
+    case f of
+        CathArch code True ->
+            Just (\design -> List.any (\c -> c.code == code) design.cath_arch)
+
+        CathArch _ False ->
+            Nothing
+
+        CathUnassigned True ->
+            Just (\design -> List.isEmpty design.cath_arch)
+
+        CathUnassigned False ->
+            Nothing
+
+        _ ->
+            Nothing
+
+
+conditionMatches : ProteinDesignStub -> CathCondition -> Bool
+conditionMatches design cond =
+    cond design
+
+
 stubMeetsAllFilters : List DesignFilter -> ProteinDesignStub -> Maybe ProteinDesignStub
 stubMeetsAllFilters filters design =
-    List.all (\f -> stubMeetsOneFilter design f) filters
-        |> (\allFiltersMet ->
-                if allFiltersMet then
-                    Just design
+    let
+        cathFilters =
+            List.filter isCathRelatedFilter filters
 
-                else
-                    Nothing
-           )
+        otherFilters =
+            List.filter (not << isCathRelatedFilter) filters
+    in
+    if meetsOtherFilters design otherFilters && meetsCathFilters design cathFilters then
+        Just design
+
+    else
+        Nothing
 
 
 stubMeetsOneFilter : ProteinDesignStub -> DesignFilter -> Bool
@@ -440,5 +544,16 @@ stubMeetsOneFilter design filter =
             else
                 True
 
-        _ ->
-            True
+        CathArch cathCode isTicked ->
+            if isTicked then
+                List.any (\c -> c.code == cathCode) design.cath_arch
+
+            else
+                True
+
+        CathUnassigned isTicked ->
+            if isTicked then
+                List.isEmpty design.cath_arch
+
+            else
+                True
