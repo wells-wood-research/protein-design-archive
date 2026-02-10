@@ -257,7 +257,7 @@ update shared msg model =
                             encodeFiltersToUrl updatedFilters
 
                         route =
-                            { path = Route.Path.Home_
+                            { path = Route.Path.Pda
                             , query = newUrlQuery
                             , hash = Nothing
                             }
