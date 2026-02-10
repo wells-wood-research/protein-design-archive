@@ -48,6 +48,9 @@ type alias ProteinDesign =
     , seq_max_sim_natural : Related
     , struct_max_sim_designed : Related
     , struct_max_sim_natural : Related
+    , cath_full : List Cath
+    , cath_class : List Cath
+    , cath_arch : List Cath
     , review_comment : List String
     }
 
@@ -65,6 +68,9 @@ type alias ProteinDesignStub =
     , struct_max_sim_natural : Related
     , seq_max_sim_designed : Related
     , struct_max_sim_designed : Related
+    , cath_full : List Cath
+    , cath_class : List Cath
+    , cath_arch : List Cath
     }
 
 
@@ -92,6 +98,7 @@ type alias ProteinDesignDownload =
     , seq_max_sim_natural : Related
     , struct_max_sim_designed : Related
     , struct_max_sim_natural : Related
+    , cath_full : List Cath
     , review_comment : List String
     }
 
@@ -102,6 +109,71 @@ type alias Related =
     }
 
 
+type alias Cath =
+    { code : String
+    , name : String
+    }
+
+
+type alias CathClassGroup =
+    { classCode : String
+    , className : String
+    , archs : List Cath
+    }
+
+
+uniqueCathClasses : List ProteinDesignStub -> List Cath
+uniqueCathClasses designs =
+    designs
+        |> List.concatMap .cath_class
+        |> List.foldl
+            (\c acc ->
+                if List.any (\a -> a.code == c.code) acc then
+                    acc
+
+                else
+                    c :: acc
+            )
+            []
+        |> List.sortBy .code
+
+
+uniqueCathArchs : List ProteinDesignStub -> List Cath
+uniqueCathArchs designs =
+    designs
+        |> List.concatMap .cath_arch
+        |> List.foldl
+            (\arch acc ->
+                if List.any (\a -> a.code == arch.code) acc then
+                    acc
+
+                else
+                    arch :: acc
+            )
+            []
+        |> List.sortBy .code
+
+
+groupCathArchsByClass :
+    List Cath
+    -> List Cath
+    -> List CathClassGroup
+groupCathArchsByClass classes archs =
+    classes
+        |> List.map
+            (\cls ->
+                { classCode = cls.code
+                , className = cls.name
+                , archs =
+                    archs
+                        |> List.filter
+                            (\arch ->
+                                cathClassCode arch == cls.code
+                            )
+                }
+            )
+
+
 defaultRelated : Related
 defaultRelated =
     { similarity = 0.0
@@ -109,8 +181,15 @@ defaultRelated =
     }
 
 
-emptyArrayAsDefault : Decoder Related
-emptyArrayAsDefault =
+defaultCath : Cath
+defaultCath =
+    { code = "0"
+    , name = "unknown"
+    }
+
+
+emptyArrayAsDefaultRelated : Decoder Related
+emptyArrayAsDefaultRelated =
     Decode.oneOf
         [ Decode.list Decode.value
             |> Decode.andThen
@@ -122,6 +201,22 @@ emptyArrayAsDefault =
                         Decode.fail "Expected an empty array."
                 )
         , Decode.null defaultRelated
+        ]
+
+
+emptyArrayAsDefaultCath : Decoder Cath
+emptyArrayAsDefaultCath =
+    Decode.oneOf
+        [ Decode.list Decode.value
+            |> Decode.andThen
+                (\val ->
+                    if List.isEmpty val then
+                        Decode.succeed defaultCath
+
+                    else
+                        Decode.fail "Expected an empty array."
+                )
+        , Decode.null defaultCath
         ]
 
 
@@ -247,6 +342,7 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "highest_sequence_related_natural_protein", relatedToString proteinDesign.seq_max_sim_natural )
     , ( "highest_structure_related_design", relatedToString proteinDesign.struct_max_sim_designed )
     , ( "highest_structure_related_natural_protein", relatedToString proteinDesign.struct_max_sim_natural )
+    , ( "cath_full", String.join ";" <| List.map (\cath -> cathCodeToString cath) proteinDesign.cath_full )
     , ( "data_curation_comments", String.join ";" proteinDesign.review_comment )
     ]
 
@@ -293,6 +389,7 @@ jsonValueFromProteinDesignDownload proteinDesign =
         , ( "highest_sequence_related_natural_protein", relatedEncoder proteinDesign.seq_max_sim_natural )
         , ( "highest_structure_related_design", relatedEncoder proteinDesign.struct_max_sim_designed )
         , ( "highest_structure_related_natural_protein", relatedEncoder proteinDesign.struct_max_sim_natural )
+        , ( "cath_full", JsonEncode.list cathEncoder proteinDesign.cath_full )
         , ( "data_curation_comments", JsonEncode.list JsonEncode.string proteinDesign.review_comment )
         ]
 
@@ -331,10 +428,13 @@ rawDesignDecoder =
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
-        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "cath_full" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "cath_class" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "cath_arch" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
         |> required "review_comment" (Decode.list Decode.string)
 
 
@@ -349,10 +449,13 @@ rawDesignStubDecoder =
         |> required "keywords" (Decode.list Decode.string)
         |> required "release_date" dateDecoder
         |> required "publication" Decode.string
-        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "cath_full" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "cath_class" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "cath_arch" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
 
 
 downloadDesignDecoder : Decoder ProteinDesignDownload
@@ -377,10 +480,11 @@ downloadDesignDecoder =
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_natural" (Decode.list relatedDecoder)
-        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
-        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefault ])
+        |> required "seq_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "seq_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_designed" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "struct_max_sim_natural" (Decode.oneOf [ relatedDecoder, emptyArrayAsDefaultRelated ])
+        |> required "cath_full" (Decode.list cathDecoder)
         |> required "review_comment" (Decode.list Decode.string)
 
 
@@ -389,6 +493,13 @@ relatedDecoder =
     Decode.succeed Related
         |> required "sim" Decode.float
         |> required "partner" Decode.string
+
+
+cathDecoder : Decoder Cath
+cathDecoder =
+    Decode.succeed Cath
+        |> required "code" Decode.string
+        |> required "name" Decode.string
 
 
 classificationDecoder : Decoder Classification
@@ -488,6 +599,14 @@ referenceEncoder reference =
         ]
 
 
+cathEncoder : Cath -> JsonEncode.Value
+cathEncoder cath =
+    JsonEncode.object
+        [ ( "code", JsonEncode.string cath.code )
+        , ( "name", JsonEncode.string cath.name )
+        ]
+
+
 relatedEncoder : Related -> JsonEncode.Value
 relatedEncoder related =
     JsonEncode.object
@@ -518,8 +637,8 @@ designSearchableText proteinDesign =
     , String.join " " proteinDesign.exptl_method
     , proteinDesign.synthesis_comment
     , xtalToString proteinDesign.crystal_structure
-    , String.join " " <| List.map relatedToString proteinDesign.seq_thr_sim_natural
-    , String.join " " <| List.map relatedToString proteinDesign.struct_thr_sim_natural
+    , String.join " " <| List.map cathCodeToString proteinDesign.cath_full
+    , String.join " " <| List.map cathNameToString proteinDesign.cath_full
     ]
         |> String.join "\n"
         |> String.toLower
@@ -534,6 +653,8 @@ stubSearchableText proteinDesign =
     , String.join " " proteinDesign.keywords
     , Date.toIsoString proteinDesign.release_date
     , proteinDesign.publication
+    , String.join " " <| List.map cathCodeToString proteinDesign.cath_full
+    , String.join " " <| List.map cathNameToString proteinDesign.cath_full
     ]
         |> String.join "\n"
         |> String.toLower
@@ -550,6 +671,33 @@ refToString reference =
         ]
 
 
+cathToString : Cath -> String
+cathToString cath =
+    if cath.code == "" then
+        ""
+
+    else
+        cath.code ++ " — " ++ cath.name
+
+
+cathCodeToString : Cath -> String
+cathCodeToString cath =
+    if cath.code == "" then
+        ""
+
+    else
+        cath.code
+
+
+cathNameToString : Cath -> String
+cathNameToString cath =
+    if cath.name == "" then
+        ""
+
+    else
+        cath.name
+
+
 relatedToString : Related -> String
 relatedToString related =
     if related.partner == "" then
@@ -557,6 +705,14 @@ relatedToString related =
 
     else
         related.partner ++ "(" ++ String.fromFloat related.similarity ++ ")"
+
+
+cathClassCode : Cath -> String
+cathClassCode cath =
+    cath.code
+        |> String.split "."
+        |> List.head
+        |> Maybe.withDefault ""
 
 
 chainToString : Chain -> String
@@ -771,10 +927,6 @@ tagToString tag =
             "coiled-coil"
 
 
-
--- {{{ Views
-
-
 {-| A simple view that shows basic data about a design. Used for lists etc.
 -}
 designCard : Element.Length -> ProteinDesignStub -> Element msg
@@ -860,6 +1012,18 @@ designDetailsFromProteinDesign proteinDesign =
 
             else
                 text <| proteinDesign.subtitle
+      }
+    , { header = "CATH"
+      , property =
+            if List.isEmpty proteinDesign.cath_arch then
+                text "unknown"
+
+            else
+                column [ width fill ] <|
+                    (List.map (\cath -> text <| cathToString cath) <|
+                        List.sortBy .code <|
+                            proteinDesign.cath_arch
+                    )
       }
     , { header = "Sequence related designs (bits)"
       , property =

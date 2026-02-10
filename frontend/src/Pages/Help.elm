@@ -357,9 +357,19 @@ websiteStructureArea columnWidth =
             , paragraph [ width fill ]
                 [ paragraph [ width fill ] [ text <| "The " ]
                 , paragraph [ width fill, Font.bold ] [ text <| "Design Details page" ]
-                , paragraph [ width fill ] [ text <| " is self-explanatory. It provides information about a design, such as publication and basic experimental facts, interactive 3D structure, chain and sequence details, and a description, that is the abstract of the primary publication associated with this design. One element might merit elaborating on, that is " ]
-                , paragraph [ width fill, Font.bold ] [ text <| "related proteins" ]
-                , paragraph [ width fill ] [ text <| ". This is described in detail below." ]
+                , paragraph [ width fill ]
+                    [ text <| " is self-explanatory. It provides information about a design, such as publication and basic experimental facts, interactive 3D structure, chain and sequence details, and a description, that is the abstract of the primary publication associated with this design. CATH labels are computed with "
+                    , newTabLink
+                        [ Font.color <| rgb255 104 176 171
+                        , Font.underline
+                        ]
+                        { url = "https://github.com/psipred/merizo_search?tab=readme-ov-file"
+                        , label = text <| "Merizo-search"
+                        }
+                    , paragraph [ width fill ] [ text <| " [1]. One element that might merit further elaborating on, " ]
+                    , paragraph [ width fill, Font.bold ] [ text <| "related proteins" ]
+                    , paragraph [ width fill ] [ text <| ", is described in detail below." ]
+                    ]
                 ]
             ]
         ]
@@ -384,7 +394,7 @@ relatedProteinsArea columnWidth =
                 [ Font.color <| rgb255 104 176 171
                 , Font.underline
                 ]
-                { url = "https://www.nature.com/articles/nbt.3988"
+                { url = "https://github.com/soedinglab/mmseqs2"
                 , label = text <| "MMseqs2"
                 }
             , text <| " [1] (for sequence) and "
@@ -392,7 +402,7 @@ relatedProteinsArea columnWidth =
                 [ Font.color <| rgb255 104 176 171
                 , Font.underline
                 ]
-                { url = "https://www.nature.com/articles/s41587-023-01773-0"
+                { url = "https://github.com/steineggerlab/foldseek"
                 , label = text <| "Foldseek"
                 }
             , text <| " [2] (for structure) analysis as being similar to the currently viewed design. In the context of this analysis, "
@@ -451,6 +461,11 @@ filteringArea columnWidth =
                 [ paragraph [ width fill ] [ text <| " Filtering " ]
                 , paragraph [ Font.bold ] [ text <| "by similarity" ]
                 , paragraph [ width fill ] [ text <| " can be performed with or without entries that do not have any related partners calculated (either due to an error, such as being too short, or because of their novelty) - to exclude, one needs to manually tick the checkbox next to the threshold slider. Filters are combined when multiple are defined simultaneously." ]
+                ]
+            , paragraph [ width fill ]
+                [ paragraph [ width fill ] [ text <| " You can now also filter by " ]
+                , paragraph [ Font.bold ] [ text <| "CATH classes and architectures " ]
+                , paragraph [ width fill ] [ text <| "thanks to labels computed with Merizo-search [1]. Simply press on the horizontal bar representing a CATH class to uncover checkboxes for CATH architectures. CATH filters are evaluated as OR (all designs matching at leats one of the selected filters evaluate to True)." ]
                 ]
             ]
         ]
@@ -557,6 +572,25 @@ referencesArea columnWidth =
                    ]
             )
             [ paragraph [ width fill ] [ text <| "[1]" ]
+            , paragraph [ Font.italic, width fill ] [ text <| " Fast and accurate protein structure search with Foldseek" ]
+            , paragraph [ width fill ] [ text <| ". van Kempen, M., Kim, S.S., Tumescheit, C. et al." ]
+            , paragraph [ width fill ] [ text <| ", Nat Biotechnol 42, 243–246 (2024) " ]
+            , newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url = "https://doi.org/10.1038/s41587-023-01773-0"
+                , label = text "https://doi.org/10.1038/s41587-023-01773-0"
+                }
+            ]
+        , paragraph
+            (Style.monospacedFont
+                ++ [ Font.justify
+                   , Font.size 14
+                   , width (fill |> maximum columnWidth)
+                   ]
+            )
+            [ paragraph [ width fill ] [ text <| "[2]" ]
             , paragraph [ Font.italic, width fill ] [ text <| " MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets" ]
             , paragraph [ width fill ] [ text <| ". Steinegger, M., Söding, J." ]
             , paragraph [ width fill ] [ text <| ", Nat Biotechnol 35, 1026–1028 (2017) " ]
@@ -575,7 +609,7 @@ referencesArea columnWidth =
                    , width (fill |> maximum columnWidth)
                    ]
             )
-            [ paragraph [ width fill ] [ text <| "[2]" ]
+            [ paragraph [ width fill ] [ text <| "[3]" ]
             , paragraph [ Font.italic, width fill ] [ text <| " Fast and accurate protein structure search with Foldseek" ]
             , paragraph [ width fill ] [ text <| ". van Kempen, M., Kim, S.S., Tumescheit, C. et al." ]
             , paragraph [ width fill ] [ text <| ", Nat Biotechnol 42, 243–246 (2024) " ]
