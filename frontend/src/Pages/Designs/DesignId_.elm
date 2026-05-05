@@ -550,19 +550,28 @@ flattenEnergy d =
         |> List.concatMap (\( k, lst ) -> List.map (\( sk, v ) -> ( k ++ "." ++ sk, v )) lst)
 
 
-renderKeyValueTable : List ( String, Float ) -> Int -> Element Msg
-renderKeyValueTable kvs tableWidth =
+renderKeyValueMaybeTable : List ( String, Maybe Float ) -> Int -> Element Msg
+renderKeyValueMaybeTable kvs tableWidth =
+    let
+        format mv =
+            case mv of
+                Just f ->
+                    String.fromFloat f
+
+                Nothing ->
+                    "-"
+    in
     table
         [ width <| fillPortion 2 ]
         { data = kvs
         , columns =
             [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Property" ]
               , width = px (tableWidth // 2)
-              , view = \( k, v ) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text k ] ]
+              , view = \( k, mv ) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text k ] ]
               }
             , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
               , width = px (tableWidth * 4 // 5)
-              , view = \( k, v ) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2)), height fill, scrollbarX, paddingXY 10 10 ] [ text <| String.fromFloat v ] ]
+              , view = \( k, mv ) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2)), height fill, scrollbarX, paddingXY 10 10 ] [ text <| format mv ] ]
               }
             ]
         }
@@ -775,9 +784,17 @@ tabContent model proteinDesign tableWidth contentHeight =
             [ "Sequence related designs (bits)", "Sequence related proteins (bits)", "Structure related designs (LDDT)", "Structure related proteins (LDDT)" ]
 
         -- helper to convert simple kv pairs into DesignDetails entries
-        kvToDetail ( k, v ) =
+        maybeFloatToString mv =
+            case mv of
+                Just f ->
+                    String.fromFloat f
+
+                Nothing ->
+                    "-"
+
+        kvToDetail ( k, mv ) =
             { header = k
-            , property = paragraph Style.monospacedFont [ text <| String.fromFloat v ]
+            , property = paragraph Style.monospacedFont [ text <| maybeFloatToString mv ]
             }
     in
     case model.activeTab of
@@ -787,19 +804,24 @@ tabContent model proteinDesign tableWidth contentHeight =
         GeneralTab ->
             let
                 numResiduesF =
-                    Maybe.withDefault 0.0 proteinDesign.physicochem.num_residues
+                    proteinDesign.physicochem.num_residues
 
                 massF =
-                    Maybe.withDefault proteinDesign.formula_weight proteinDesign.physicochem.mass
+                    case proteinDesign.physicochem.mass of
+                        Just f ->
+                            Just f
+
+                        Nothing ->
+                            Just proteinDesign.formula_weight
 
                 chargeF =
-                    Maybe.withDefault 0.0 proteinDesign.physicochem.charge
+                    proteinDesign.physicochem.charge
 
                 pIF =
-                    Maybe.withDefault 0.0 proteinDesign.physicochem.isoelectric_point
+                    proteinDesign.physicochem.isoelectric_point
 
                 packingF =
-                    Maybe.withDefault 0.0 proteinDesign.physicochem.packing_density
+                    proteinDesign.physicochem.packing_density
 
                 physRows =
                     [ ( "Number of residues", numResiduesF )
@@ -820,19 +842,19 @@ tabContent model proteinDesign tableWidth contentHeight =
         Solubility ->
             let
                 hyd =
-                    Maybe.withDefault 0.0 proteinDesign.physicochem.hydrophobic_fitness
+                    proteinDesign.physicochem.hydrophobic_fitness
 
                 sol_total =
-                    Maybe.withDefault 0.0 (Maybe.map .total proteinDesign.physicochem.solubility)
+                    Maybe.map .total proteinDesign.physicochem.solubility
 
                 sol_avg =
-                    Maybe.withDefault 0.0 (Maybe.map .avg proteinDesign.physicochem.solubility)
+                    Maybe.map .avg proteinDesign.physicochem.solubility
 
                 sol_min =
-                    Maybe.withDefault 0.0 (Maybe.map .min proteinDesign.physicochem.solubility)
+                    Maybe.map .min proteinDesign.physicochem.solubility
 
                 sol_max =
-                    Maybe.withDefault 0.0 (Maybe.map .max proteinDesign.physicochem.solubility)
+                    Maybe.map .max proteinDesign.physicochem.solubility
 
                 solDetails =
                     [ ( "Hydrophobic fitness", hyd ), ( "Total aggregation propensity", sol_total ), ( "Average aggregation propensity", sol_avg ), ( "Minimum aggregation propensity", sol_min ), ( "Maximum aggregation propensity", sol_max ) ]
@@ -1067,7 +1089,7 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
                 else
                     (screenWidth * 2) // 3
           in
-          renderKeyValueTable (flattenEnergy proteinDesign.physicochem.energy)
+          renderKeyValueMaybeTable (List.map (\(k,v) -> ( k, Just v )) (flattenEnergy proteinDesign.physicochem.energy))
             tableWidth
         , paragraph
             Style.h2Font
