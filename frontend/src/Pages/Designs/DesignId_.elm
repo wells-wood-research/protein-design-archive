@@ -391,8 +391,7 @@ designDetailsView shared model proteinDesign screenWidth screenHeight =
             ++ Style.bodyFont
         )
         [ designDetailsHeader "Design Details" "/designs/" proteinDesign screenWidth
-        , downloadArea shared proteinDesign.pdb screenWidth
-        , designDetailsBody model proteinDesign screenWidth screenHeight
+        , designDetailsBody shared model proteinDesign screenWidth screenHeight
         ]
 
 
@@ -415,35 +414,18 @@ downloadButton widthButton buttonAttributes onPressCmd textLabel =
 
 
 downloadArea : Shared.Model -> String -> Int -> Element Msg
-downloadArea shared designId screenWidth =
+downloadArea shared designId areaWidth =
     let
         widthButton =
-            if screenWidth < 600 then
-                Element.fill |> maximum (screenWidth - 10)
-
-            else
-                Element.px 200
+            Element.px (areaWidth // 3)
 
         buttonAttributes =
-            if screenWidth < 600 then
-                [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
-                , Border.color <| rgb255 220 220 220
-                ]
-
-            else
-                [ centerX
-                , Font.center
-                ]
-
-        elementType =
-            if screenWidth < 600 then
-                column
-
-            else
-                row
+            [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
+            , Border.color <| rgb255 220 220 220
+            ]
     in
-    elementType
-        [ width (fill |> maximum screenWidth)
+    row
+        [ width (fill |> maximum areaWidth)
         , Font.bold
         , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
         , Border.color <| rgb255 220 220 220
@@ -796,8 +778,8 @@ renderSecondaryStructureHtml kvs tableWidth =
     Html.node "div" [] segments
 
 
-tabContent : Model -> ProteinDesign -> Int -> Int -> Int -> Int -> Element Msg
-tabContent model proteinDesign screenWidth screenHeight tableWidth contentHeight =
+tabContent : Model -> ProteinDesign -> Int -> Int -> Element Msg
+tabContent model proteinDesign tableWidth contentHeight =
     let
         designDetailsList =
             ProteinDesign.designDetailsFromProteinDesign proteinDesign
@@ -1152,20 +1134,23 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
         ]
 
 
-designDetailsBody : Model -> ProteinDesign -> Int -> Int -> Element Msg
-designDetailsBody model proteinDesign screenWidth screenHeight =
+designDetailsBody : Shared.Model -> Model -> ProteinDesign -> Int -> Int -> Element Msg
+designDetailsBody shared model proteinDesign screenWidth screenHeight =
     let
         -- reserve a little padding space from the available height
         topAreaHeight =
-            max 220 (screenHeight - 120)
+            max 220 (screenHeight - 100)
 
         -- table width should match the previous logic used elsewhere
         tableWidth =
             if screenWidth < 900 then
-                screenWidth - 40
+                screenWidth - 60
 
             else
-                (screenWidth * 2) // 3
+                (screenWidth * 2) // 3 - 60
+
+        pictureWidth =
+            screenWidth - tableWidth - 60
 
         cardPadding =
             16
@@ -1182,17 +1167,36 @@ designDetailsBody model proteinDesign screenWidth screenHeight =
                , centerX
                ]
         )
-        [ -- card: tabs + their content
-          column
-            [ width (px tableWidth)
-            , Background.color <| rgb255 250 250 250
-            , Border.rounded 8
-            , Border.width 1
-            , Border.color <| rgb255 220 220 220
-            , paddingXY cardPadding cardPadding
-            ]
-            [ tabBar model.activeTab screenWidth
-            , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (tabContent model proteinDesign screenWidth screenHeight tableWidth contentHeight)
+        [ row [ spacing 10 ]
+            [ column
+                [ width (px tableWidth)
+                , Background.color <| rgb255 250 250 250
+                , Border.rounded 8
+                , Border.width 1
+                , Border.color <| rgb255 220 220 220
+                , paddingXY cardPadding cardPadding
+                ]
+                [ tabBar model.activeTab screenWidth
+                , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (tabContent model proteinDesign tableWidth contentHeight)
+                ]
+            , column []
+                [ el
+                    [ padding 2
+                    , Border.width 2
+                    , Border.color <| rgb255 220 220 220
+                    , Border.rounded 3
+                    , alignTop
+                    , centerX
+                    , width (fillPortion 1 |> maximum pictureWidth)
+                    ]
+                    (image
+                        [ width (fill |> minimum 200) ]
+                        { src = proteinDesign.picture_path
+                        , description = "Structure of " ++ proteinDesign.pdb
+                        }
+                    )
+                , downloadArea shared proteinDesign.pdb pictureWidth
+                ]
             ]
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         , designDetailsBodySequence proteinDesign screenWidth
