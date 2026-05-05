@@ -49,7 +49,7 @@ page shared route =
 
 type Tab
     = Publication
-    | StructureTab
+    | GeneralTab
     | Similarity
     | Solubility
 
@@ -384,13 +384,12 @@ designDetailsView : Shared.Model -> Model -> ProteinDesign -> Int -> Int -> Elem
 designDetailsView shared model proteinDesign screenWidth screenHeight =
     column
         ([ centerX
-         , width (fill |> maximum screenWidth)
+         , width (fill |> minimum screenWidth)
          , height fill
-         , paddingXY 0 0
          ]
             ++ Style.bodyFont
         )
-        [ designDetailsHeader "Design Details" "/designs/" proteinDesign screenWidth
+        [ designDetailsHeader proteinDesign.pdb "/designs/" proteinDesign screenWidth
         , designDetailsBody shared model proteinDesign screenWidth screenHeight
         ]
 
@@ -418,41 +417,31 @@ downloadArea shared designId areaWidth =
     let
         widthButton =
             Element.px (areaWidth // 3)
-
-        buttonAttributes =
-            [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
-            , Border.color <| rgb255 220 220 220
-            ]
     in
     row
         [ width (fill |> maximum areaWidth)
         , Font.bold
-        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+        , Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
         , Border.color <| rgb255 220 220 220
         , centerX
         ]
-        [ downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download CSV")
-        , downloadButton widthButton buttonAttributes (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download JSON")
+        [ downloadButton widthButton [] (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download CSV")
+        , downloadButton widthButton [] (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download JSON")
         , if Set.member designId shared.designsToDownload then
-            downloadButton widthButton buttonAttributes (Just RemoveFromDownloadList) (text "Remove from download")
+            downloadButton widthButton [] (Just RemoveFromDownloadList) (text "Remove from download")
 
           else
-            downloadButton widthButton buttonAttributes (Just AddToDownloadList) (text "Add to download list")
+            downloadButton widthButton [] (Just AddToDownloadList) (text "Add to download list")
         ]
 
 
 designDetailsHeader : String -> String -> ProteinDesign -> Int -> Element msg
-designDetailsHeader title path { previous_design, next_design } screenWidth =
-    row
-        [ width (fill |> maximum screenWidth) ]
-        [ row
-            [ centerX
-            , spacing 30
-            , paddingXY 0 30
-            ]
-            [ link
+designDetailsHeader pdbCode path design screenWidth =
+    let
+        leftNav =
+            link
                 []
-                { url = path ++ previous_design
+                { url = path ++ design.previous_design
                 , label =
                     el []
                         (html <|
@@ -462,12 +451,10 @@ designDetailsHeader title path { previous_design, next_design } screenWidth =
                                         FeatherIcons.arrowLeftCircle
                         )
                 }
-            , paragraph
-                (Style.h2Font ++ [ Font.center ])
-                [ text title ]
-            , link
-                []
-                { url = path ++ next_design
+
+        rightNavAndBadge =
+            link []
+                { url = path ++ design.next_design
                 , label =
                     el []
                         (html <|
@@ -477,7 +464,17 @@ designDetailsHeader title path { previous_design, next_design } screenWidth =
                                         FeatherIcons.arrowRightCircle
                         )
                 }
-            ]
+    in
+    row
+        [ width (fill |> maximum screenWidth)
+        , paddingXY 20 10
+        , centerY
+        ]
+        [ leftNav
+        , paragraph
+            (Style.monospacedFont ++ [ Font.size 28, Font.center ])
+            [ text <| pdbCode ]
+        , rightNavAndBadge
         ]
 
 
@@ -522,9 +519,9 @@ tabBar activeTab screenWidth =
         , alignLeft
         ]
         [ buttonFor Publication "Publication"
-        , buttonFor StructureTab "Structure"
-        , buttonFor Similarity "Similarity"
+        , buttonFor GeneralTab "General"
         , buttonFor Solubility "Solubility"
+        , buttonFor Similarity "Similarity"
         ]
 
 
@@ -544,25 +541,6 @@ detailsTable detailsList tableWidth =
               }
             ]
         }
-
-
-designDetailsBodyTable : ProteinDesign -> Int -> Element Msg
-designDetailsBodyTable proteinDesign screenWidth =
-    let
-        limitingScreenSize =
-            900
-
-        elPadding =
-            40
-
-        tableWidth =
-            if screenWidth < limitingScreenSize then
-                screenWidth - elPadding
-
-            else
-                (screenWidth * 2) // 3
-    in
-    detailsTable (ProteinDesign.designDetailsFromProteinDesign proteinDesign) tableWidth
 
 
 flattenEnergy : Dict.Dict String (List ( String, Float )) -> List ( String, Float )
@@ -806,7 +784,7 @@ tabContent model proteinDesign tableWidth contentHeight =
         Publication ->
             el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable (select publicationHeaders) tableWidth)
 
-        StructureTab ->
+        GeneralTab ->
             let
                 numResiduesF =
                     Maybe.withDefault 0.0 proteinDesign.physicochem.num_residues
@@ -839,9 +817,6 @@ tabContent model proteinDesign tableWidth contentHeight =
             in
             el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable combined tableWidth)
 
-        Similarity ->
-            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable (select similarityHeaders) tableWidth)
-
         Solubility ->
             let
                 hyd =
@@ -865,12 +840,15 @@ tabContent model proteinDesign tableWidth contentHeight =
             in
             el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable solDetails tableWidth)
 
+        Similarity ->
+            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable (select similarityHeaders) tableWidth)
+
 
 designDetailsBodyStructure : ProteinDesign -> Int -> Int -> Element Msg
 designDetailsBodyStructure proteinDesign screenWidth screenHeight =
     let
         picHeight =
-            screenHeight // 2
+            round <| toFloat screenHeight * 0.7
     in
     column
         [ width fill
@@ -1162,7 +1140,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
     column
         (Style.bodyFont
             ++ [ width (fill |> maximum screenWidth)
-               , paddingXY 30 20
+               , paddingXY 30 0
                , spacing 30
                , centerX
                ]
@@ -1175,6 +1153,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                 , Border.width 1
                 , Border.color <| rgb255 220 220 220
                 , paddingXY cardPadding cardPadding
+                , alignTop
                 ]
                 [ tabBar model.activeTab screenWidth
                 , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (tabContent model proteinDesign tableWidth contentHeight)
@@ -1182,9 +1161,9 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
             , column []
                 [ el
                     [ padding 2
-                    , Border.width 2
+                    , Border.width 1
                     , Border.color <| rgb255 220 220 220
-                    , Border.rounded 3
+                    , Border.rounded 8
                     , alignTop
                     , centerX
                     , width (fillPortion 1 |> maximum pictureWidth)
