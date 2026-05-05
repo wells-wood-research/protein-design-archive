@@ -49,6 +49,7 @@ type alias ProteinDesign =
     , cath_full : List Cath
     , cath_class : List Cath
     , cath_arch : List Cath
+    , physicochemical_properties : JsonEncode.Value
     , review_comment : List String
     }
 
@@ -88,6 +89,7 @@ type alias ProteinDesignDownload =
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
+    , physicochemical_properties : JsonEncode.Value
     , seq_thr_sim_designed : List Related
     , seq_thr_sim_natural : List Related
     , struct_thr_sim_designed : List Related
@@ -322,6 +324,7 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "classification", classificationToString proteinDesign.classification )
     , ( "chains", String.join "|" (List.map chainToString proteinDesign.chains) )
     , ( "formula_weight", fromFloat proteinDesign.formula_weight )
+    , ( "physicochemical_properties", JsonEncode.encode 0 proteinDesign.physicochemical_properties )
     , ( "symmetry", proteinDesign.symmetry )
     , ( "crystal_structure(a|b|c|alpha|beta|gamma)", xtalToString proteinDesign.crystal_structure )
     , ( "exptl_method", String.join "|" proteinDesign.exptl_method )
@@ -368,6 +371,7 @@ jsonValueFromProteinDesignDownload proteinDesign =
         , ( "release_date", JsonEncode.string <| Date.toIsoString proteinDesign.release_date )
         , ( "classification", JsonEncode.string <| classificationToString proteinDesign.classification )
         , ( "chains", JsonEncode.list chainEncoder proteinDesign.chains )
+        , ( "physicochemical_properties", proteinDesign.physicochemical_properties )
         , ( "formula_weight", JsonEncode.float proteinDesign.formula_weight )
         , ( "exptl_method", JsonEncode.string <| String.join "" proteinDesign.exptl_method )
         , ( "symmetry", JsonEncode.string proteinDesign.symmetry )
@@ -433,6 +437,7 @@ rawDesignDecoder =
         |> required "cath_full" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
         |> required "cath_class" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
         |> required "cath_arch" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "physicochemical_properties" Decode.value
         |> required "review_comment" (Decode.list Decode.string)
 
 
@@ -474,6 +479,7 @@ downloadDesignDecoder =
         |> required "exptl_method" (Decode.list Decode.string)
         |> required "formula_weight" Decode.float
         |> required "synthesis_comment" Decode.string
+        |> required "physicochemical_properties" Decode.value
         |> required "seq_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)

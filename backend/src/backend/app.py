@@ -56,6 +56,7 @@ def get_all_design_stubs():
         "cath_full": 1,
         "cath_class": 1,
         "cath_arch": 1,
+        "physicochemical_properties": 1,
     }
     designs = list(DESIGNS.find({}, projection=projection))
     return designs
