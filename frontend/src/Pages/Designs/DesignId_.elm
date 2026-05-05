@@ -23,11 +23,13 @@ import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromPro
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set
+import Dict
 import Shared
 import Style
 import Task
 import Time
 import Urls
+import String
 import View exposing (View)
 
 
@@ -45,6 +47,9 @@ page shared route =
 -- INIT
 
 
+type Tab = Publication | StructureTab | Similarity | Solubility
+
+
 type alias Model =
     { designId : String
     , design : RemoteData Http.Error ProteinDesign
@@ -54,6 +59,7 @@ type alias Model =
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , dataDownload : RemoteData Http.Error String
+    , activeTab : Tab
     }
 
 
@@ -67,6 +73,7 @@ init mSharedScreenWidthF mSharedScreenHeightF designId =
       , mScreenWidthF = mSharedScreenWidthF
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
+      , activeTab = Publication
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -100,6 +107,7 @@ type Msg
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
+    | SelectTab Tab
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -244,6 +252,9 @@ update msg model =
                         Err _ ->
                             ( model, Effect.none )
 
+                SelectTab tab ->
+                    ( { model | activeTab = tab }, Effect.none )
+
                 _ ->
                     ( model, Effect.none )
 
@@ -361,12 +372,12 @@ details shared model =
                     ]
 
             Success design ->
-                designDetailsView shared design screenWidth screenHeight
+                designDetailsView shared model design screenWidth screenHeight
         ]
 
 
-designDetailsView : Shared.Model -> ProteinDesign -> Int -> Int -> Element Msg
-designDetailsView shared proteinDesign screenWidth screenHeight =
+designDetailsView : Shared.Model -> Model -> ProteinDesign -> Int -> Int -> Element Msg
+designDetailsView shared model proteinDesign screenWidth screenHeight =
     column
         ([ centerX
          , width (fill |> maximum screenWidth)
@@ -377,7 +388,7 @@ designDetailsView shared proteinDesign screenWidth screenHeight =
         )
         [ designDetailsHeader "Design Details" "/designs/" proteinDesign screenWidth
         , downloadArea shared proteinDesign.pdb screenWidth
-        , designDetailsBody proteinDesign screenWidth screenHeight
+        , designDetailsBody model proteinDesign screenWidth screenHeight
         ]
 
 
@@ -484,111 +495,197 @@ designDetailsHeader title path { previous_design, next_design } screenWidth =
         ]
 
 
-designDetailsBodyTable : ProteinDesign -> Int -> Element msg
+tabBar : Tab -> Element Msg
+tabBar activeTab =
+    let
+        buttonFor tab label =
+            let
+                isActive = tab == activeTab
+                attrs =
+                    [ paddingXY 8 12
+                    , Border.width 1
+                    , Border.color (if isActive then rgb255 104 176 171 else rgb255 220 220 220)
+                    , Border.rounded 3
+                    , Font.bold
+                    , Font.size 14
+                    , Element.mouseOver [ Background.color <| rgb255 245 245 245 ]
+                    ]
+            in
+            Input.button attrs { onPress = Just (SelectTab tab), label = text label }
+    in
+    row [ spacing 8, centerX, width fill ]
+        [ buttonFor Publication "Publication"
+        , buttonFor StructureTab "Structure"
+        , buttonFor Similarity "Similarity"
+        , buttonFor Solubility "Solubility"
+        ]
+
+
+detailsTable : List (ProteinDesign.DesignDetails Msg) -> Int -> Element Msg
+detailsTable detailsList tableWidth =
+    table
+        [ width <| fillPortion 2 ]
+        { data = detailsList
+        , columns =
+            [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Attribute" ]
+              , width = px (tableWidth // 5)
+              , view = \category -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 5 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text category.header ] ]
+              }
+            , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
+              , width = px (tableWidth * 4 // 5)
+              , view = \detail -> paragraph Style.monospacedFont [ column [ width (px (tableWidth * 4 // 5)), height fill, scrollbarX, paddingXY 10 10 ] [ detail.property ] ]
+              }
+            ]
+        }
+
+
+designDetailsBodyTable : ProteinDesign -> Int -> Element Msg
 designDetailsBodyTable proteinDesign screenWidth =
     let
-        limitingScreenSize =
-            900
-
-        elPadding =
-            40
-
-        tableWidth =
-            if screenWidth < limitingScreenSize then
-                screenWidth - elPadding
-
-            else
-                (screenWidth * 2) // 3
-
-        pictureWidth =
-            if screenWidth < limitingScreenSize then
-                screenWidth - elPadding
-
-            else
-                screenWidth - tableWidth - elPadding
-
-        elementType =
-            if screenWidth < limitingScreenSize then
-                column
-
-            else
-                row
+        limitingScreenSize = 900
+        elPadding = 40
+        tableWidth = if screenWidth < limitingScreenSize then screenWidth - elPadding else (screenWidth * 2) // 3
     in
-    elementType
-        [ width fill
-        , spacing 10
-        , Font.justify
-        ]
-        [ table
-            [ width <| fillPortion 2
+    detailsTable (ProteinDesign.designDetailsFromProteinDesign proteinDesign) tableWidth
+
+
+getFloatFieldFromPhys : String -> ProteinDesign -> Float
+getFloatFieldFromPhys fieldName proteinDesign =
+    case Json.Decode.decodeValue (Json.Decode.field fieldName Json.Decode.float) proteinDesign.physicochemical_properties of
+        Ok f ->
+            f
+
+        Err _ ->
+            0.0
+
+getMaybeFloatFieldFromPhys : String -> ProteinDesign -> Maybe Float
+getMaybeFloatFieldFromPhys fieldName proteinDesign =
+    case Json.Decode.decodeValue (Json.Decode.field fieldName Json.Decode.float) proteinDesign.physicochemical_properties of
+        Ok f ->
+            Just f
+
+        Err _ ->
+            Nothing
+
+getDictFloatFieldFromPhys : String -> ProteinDesign -> List ( String, Float )
+getDictFloatFieldFromPhys fieldName proteinDesign =
+    case Json.Decode.decodeValue (Json.Decode.field fieldName (Json.Decode.dict Json.Decode.float)) proteinDesign.physicochemical_properties of
+        Ok dict ->
+            Dict.toList dict
+
+        Err _ ->
+            []
+
+renderKeyValueTable : List ( String, Float ) -> Int -> Element Msg
+renderKeyValueTable kvs tableWidth =
+    table
+        [ width <| fillPortion 2 ]
+        { data = kvs
+        , columns =
+            [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Property" ]
+              , width = px (tableWidth // 2)
+              , view = \(k,v) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text k ] ]
+              }
+            , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
+              , width = px (tableWidth * 4 // 5)
+              , view = \(k,v) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2)), height fill, scrollbarX, paddingXY 10 10 ] [ text <| String.fromFloat v ] ]
+              }
             ]
-            { data = designDetailsFromProteinDesign proteinDesign
-            , columns =
-                [ { header =
-                        paragraph
-                            [ Font.bold
-                            , paddingXY 5 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Attribute" ]
-                  , width = px (tableWidth // 5)
-                  , view =
-                        \category ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (px (tableWidth // 5 - 20))
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 5 10
-                                    ]
-                                    [ text category.header ]
-                                ]
-                  }
-                , { header =
-                        paragraph
-                            [ Font.bold
-                            , paddingXY 10 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Value" ]
-                  , width = px (tableWidth * 4 // 5)
-                  , view =
-                        \detail ->
-                            paragraph
-                                Style.monospacedFont
-                                [ column
-                                    [ width (px (tableWidth * 4 // 5))
-                                    , height fill
-                                    , scrollbarX
-                                    , paddingXY 10 10
-                                    ]
-                                    [ detail.property ]
-                                ]
-                  }
+        }
+
+
+tabContent : Model -> ProteinDesign -> Int -> Int -> Element Msg
+tabContent model proteinDesign screenWidth screenHeight =
+    let
+        limitingScreenSize = 900
+        elPadding = 40
+        tableWidth = if screenWidth < limitingScreenSize then screenWidth - elPadding else (screenWidth * 2) // 3
+        designDetailsList = ProteinDesign.designDetailsFromProteinDesign proteinDesign
+        select headers = List.filter (\d -> List.member d.header headers) designDetailsList
+        publicationHeaders = [ "PDB code", "Release date", "Subtitle", "Authors", "Publication", "Reference link", "Tags" ]
+        structureHeaders = [ "CATH", "Symmetry group", "Experimental charact. method", "Synthesis comment", "Formula weight" ]
+        similarityHeaders = [ "Sequence related designs (bits)", "Sequence related proteins (bits)", "Structure related designs (LDDT)", "Structure related proteins (LDDT)" ]
+    in
+    case model.activeTab of
+        Publication ->
+            detailsTable (select publicationHeaders) tableWidth
+
+        StructureTab ->
+            let
+                numResiduesStr =
+                    case getMaybeFloatFieldFromPhys "num_residues" proteinDesign of
+                        Just f ->
+                            String.fromFloat f
+
+                        Nothing ->
+                            "-"
+
+                massOrFW =
+                    case getMaybeFloatFieldFromPhys "mass" proteinDesign of
+                        Just f ->
+                            String.fromFloat f ++ " Da"
+
+                        Nothing ->
+                            String.fromFloat proteinDesign.formula_weight ++ " Da"
+
+                chargeStr =
+                    case getMaybeFloatFieldFromPhys "charge" proteinDesign of
+                        Just f ->
+                            String.fromFloat f
+
+                        Nothing ->
+                            "-"
+
+                pIStr =
+                    case getMaybeFloatFieldFromPhys "isoelectric_point" proteinDesign of
+                        Just f ->
+                            String.fromFloat f
+
+                        Nothing ->
+                            "-"
+
+                packingStr =
+                    case getMaybeFloatFieldFromPhys "packing_density" proteinDesign of
+                        Just f ->
+                            String.fromFloat f
+
+                        Nothing ->
+                            "-"
+
+                numResiduesF = Maybe.withDefault 0.0 (getMaybeFloatFieldFromPhys "num_residues" proteinDesign)
+                massF = Maybe.withDefault proteinDesign.formula_weight (getMaybeFloatFieldFromPhys "mass" proteinDesign)
+                chargeF = Maybe.withDefault 0.0 (getMaybeFloatFieldFromPhys "charge" proteinDesign)
+                pIF = Maybe.withDefault 0.0 (getMaybeFloatFieldFromPhys "isoelectric_point" proteinDesign)
+                packingF = Maybe.withDefault 0.0 (getMaybeFloatFieldFromPhys "packing_density" proteinDesign)
+
+                physRows =
+                    [ ( "num_residues", numResiduesF )
+                    , ( "mass", massF )
+                    , ( "charge", chargeF )
+                    , ( "isoelectric_point", pIF )
+                    , ( "packing_density", packingF )
+                    ]
+            in
+            column [ spacing 12 ]
+                [ detailsTable (select structureHeaders) tableWidth
+                , renderKeyValueTable physRows tableWidth
                 ]
-            }
-        , el
-            [ padding 2
-            , Border.width 2
-            , Border.color <| rgb255 220 220 220
-            , Border.rounded 3
-            , alignTop
-            , centerX
-            , width (fillPortion 1 |> maximum pictureWidth)
-            ]
-            (image
-                [ width (fill |> minimum 200) ]
-                { src = proteinDesign.picture_path
-                , description = "Structure of " ++ proteinDesign.pdb
-                }
-            )
-        ]
+
+        Similarity ->
+            detailsTable (select similarityHeaders) tableWidth
+
+        Solubility ->
+            let
+                hyd = getFloatFieldFromPhys "hydrophobic_fitness" proteinDesign
+                sol = getFloatFieldFromPhys "solubility" proteinDesign
+            in
+            renderKeyValueTable [ ( "hydrophobic_fitness", hyd ), ( "solubility", sol ) ] tableWidth
 
 
-designDetailsBodyStructure : ProteinDesign -> Int -> Int -> Element msg
+
+
+
+designDetailsBodyStructure : ProteinDesign -> Int -> Int -> Element Msg
 designDetailsBodyStructure proteinDesign screenWidth screenHeight =
     let
         picHeight =
@@ -631,7 +728,7 @@ designDetailsBodyStructure proteinDesign screenWidth screenHeight =
         ]
 
 
-designDetailsBodySequence : ProteinDesign -> Int -> Element msg
+designDetailsBodySequence : ProteinDesign -> Int -> Element Msg
 designDetailsBodySequence proteinDesign screenWidth =
     let
         elPadding =
@@ -764,7 +861,7 @@ designDetailsBodySequence proteinDesign screenWidth =
         ]
 
 
-designDetailsBodyParagraphs : ProteinDesign -> Int -> Element msg
+designDetailsBodyParagraphs : ProteinDesign -> Int -> Element Msg
 designDetailsBodyParagraphs proteinDesign screenWidth =
     column
         [ width fill
@@ -810,11 +907,26 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
                     )
                     proteinDesign.review_comment
             )
+        , paragraph Style.h2Font [ text "Amino acid composition" ]
+        , let
+              tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
+          in
+          renderKeyValueTable (getDictFloatFieldFromPhys "aa_composition" proteinDesign) tableWidth
+        , paragraph Style.h2Font [ text "Secondary structure composition" ]
+        , let
+              tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
+          in
+          renderKeyValueTable (getDictFloatFieldFromPhys "ss_composition" proteinDesign) tableWidth
+        , paragraph Style.h2Font [ text "Energy" ]
+        , let
+              tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
+          in
+          renderKeyValueTable (getDictFloatFieldFromPhys "energy" proteinDesign) tableWidth
         ]
 
 
-designDetailsBody : ProteinDesign -> Int -> Int -> Element msg
-designDetailsBody proteinDesign screenWidth screenHeight =
+designDetailsBody : Model -> ProteinDesign -> Int -> Int -> Element Msg
+designDetailsBody model proteinDesign screenWidth screenHeight =
     column
         (Style.bodyFont
             ++ [ width (fill |> maximum screenWidth)
@@ -823,7 +935,8 @@ designDetailsBody proteinDesign screenWidth screenHeight =
                , centerX
                ]
         )
-        [ designDetailsBodyTable proteinDesign screenWidth
+        [ tabBar model.activeTab
+        , tabContent model proteinDesign screenWidth screenHeight
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         , designDetailsBodySequence proteinDesign screenWidth
         , designDetailsBodyParagraphs proteinDesign screenWidth
