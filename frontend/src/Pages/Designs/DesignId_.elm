@@ -594,6 +594,128 @@ renderKeyValueTable kvs tableWidth =
         }
 
 
+-- Amino acid & secondary structure visualization (HTML fragments)
+
+renderAminoAcidHtml : List ( String, Float ) -> Int -> Html.Html Msg
+renderAminoAcidHtml kvs tableWidth =
+    let
+        -- Amino acid metadata: full name, three-letter code, property group
+        aaMeta =
+            Dict.fromList
+                [ ( "A", ( "Alanine", "Ala", "hydrophobic" ))
+                , ( "R", ( "Arginine", "Arg", "basic" ))
+                , ( "N", ( "Asparagine", "Asn", "polar" ))
+                , ( "D", ( "Aspartic acid", "Asp", "acidic" ))
+                , ( "C", ( "Cysteine", "Cys", "special" ))
+                , ( "E", ( "Glutamic acid", "Glu", "acidic" ))
+                , ( "Q", ( "Glutamine", "Gln", "polar" ))
+                , ( "G", ( "Glycine", "Gly", "special" ))
+                , ( "H", ( "Histidine", "His", "basic" ))
+                , ( "I", ( "Isoleucine", "Ile", "hydrophobic" ))
+                , ( "L", ( "Leucine", "Leu", "hydrophobic" ))
+                , ( "K", ( "Lysine", "Lys", "basic" ))
+                , ( "M", ( "Methionine", "Met", "hydrophobic" ))
+                , ( "F", ( "Phenylalanine", "Phe", "hydrophobic" ))
+                , ( "P", ( "Proline", "Pro", "special" ))
+                , ( "S", ( "Serine", "Ser", "polar" ))
+                , ( "T", ( "Threonine", "Thr", "polar" ))
+                , ( "W", ( "Tryptophan", "Trp", "hydrophobic" ))
+                , ( "Y", ( "Tyrosine", "Tyr", "polar" ))
+                , ( "V", ( "Valine", "Val", "hydrophobic" ))
+                ]
+
+        propColor =
+            Dict.fromList
+                [ ( "hydrophobic", "#1f77b4" )
+                , ( "polar", "#2ca02c" )
+                , ( "acidic", "#d62728" )
+                , ( "basic", "#9467bd" )
+                , ( "special", "#8c564b" )
+                ]
+
+        -- normalize: if sums to ~1, multiply by 100
+        total = kvs |> List.map Tuple.second |> List.sum
+        multiplier = if total <= 1.01 then 100.0 else 1.0
+
+        enriched =
+            kvs
+                |> List.map (\tuple ->
+                    let
+                        aa = String.toUpper (Tuple.first tuple)
+                        v = Tuple.second tuple * multiplier
+                        (name, three, prop) = Dict.get aa aaMeta |> Maybe.withDefault ("Unknown", "Xxx", "special")
+                        color = Dict.get prop propColor |> Maybe.withDefault "#777777"
+                        rec = { name = name, three = three, prop = prop, color = color, v = v }
+                    in
+                    ( aa, rec )
+                   )
+                |> List.sortBy (\(aa, rec) -> -rec.v)
+
+        -- build rows as Html
+        rowFor (aa, rec) =
+            let
+                name = rec.name
+                three = rec.three
+                prop = rec.prop
+                color = rec.color
+                v = rec.v
+                barMaxPx = toFloat (tableWidth - 160)
+                barPx = String.fromInt (Basics.round (barMaxPx * (v / 100.0))) ++ "px"
+                pctText = String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
+                titleAttr = name ++ " (" ++ three ++ ") " ++ aa ++ ": " ++ pctText
+                barStyle = "background-color: " ++ color ++ "; height:20px; width:" ++ barPx ++ "; border-radius:3px;"
+            in
+            Html.node "div"
+                [ HAtt.style "display" "flex", HAtt.style "align-items" "center", HAtt.style "margin" "6px 0", HAtt.title titleAttr ]
+                [ Html.node "div" [ HAtt.style "width" "120px", HAtt.style "font-family" "monospace" ] [ Html.text (aa ++ " (" ++ three ++ ")") ]
+                , Html.node "div" [ HAtt.style "background-color" "#eee", HAtt.style "width" (String.fromInt (tableWidth - 160) ++ "px"), HAtt.style "padding" "4px", HAtt.style "border-radius" "3px" ]
+                    [ Html.node "div" [ HAtt.style "position" "relative" ]
+                        [ Html.node "div" [ HAtt.attribute "style" barStyle ] []
+                        , Html.node "div" [ HAtt.style "position" "absolute", HAtt.style "left" "8px", HAtt.style "top" "0px", HAtt.style "height" "20px", HAtt.style "line-height" "20px", HAtt.style "color" "white", HAtt.style "font-weight" "bold" ] [ Html.text pctText ]
+                        ]
+                    ]
+                ]
+
+    in
+    Html.node "div" [] (List.map rowFor enriched)
+
+
+renderSecondaryStructureHtml : List ( String, Float ) -> Int -> Html.Html Msg
+renderSecondaryStructureHtml kvs tableWidth =
+    let
+        -- structure color mapping
+        colorFor s =
+            case s of
+                "alpha_helix" -> "#1f77b4"
+                "beta_strand" -> "#ff7f0e"
+                "beta_bridge" -> "#2ca02c"
+                "3_10_helix" -> "#d62728"
+                "pi_helix" -> "#9467bd"
+                "turn" -> "#8c564b"
+                "bend" -> "#e377c2"
+                _ -> "#7f7f7f"
+
+        total = kvs |> List.map Tuple.second |> List.sum
+        multiplier = if total <= 1.01 then 100.0 else 1.0
+
+        enriched = List.map (\tuple -> (Tuple.first tuple, Tuple.second tuple * multiplier)) kvs
+
+        segments =
+            enriched
+                |> List.map (\(name, v) ->
+                    let
+                        px = String.fromInt (Basics.round (toFloat tableWidth * (v / 100.0))) ++ "px"
+                        titleAttr = name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
+                        color = colorFor name
+                    in
+                    Html.node "div" [ HAtt.style "display" "inline-block", HAtt.style "height" "30px", HAtt.style "width" px, HAtt.style "background-color" color, HAtt.title titleAttr ] []
+                   )
+
+    in
+    Html.node "div" [] segments
+
+
+
 tabContent : Model -> ProteinDesign -> Int -> Int -> Element Msg
 tabContent model proteinDesign screenWidth screenHeight =
     let
@@ -910,13 +1032,19 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
         , paragraph Style.h2Font [ text "Amino acid composition" ]
         , let
               tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
+              aaData = getDictFloatFieldFromPhys "aa_composition" proteinDesign
           in
-          renderKeyValueTable (getDictFloatFieldFromPhys "aa_composition" proteinDesign) tableWidth
+          html <|
+            Html.node "div" [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
+                [ renderAminoAcidHtml aaData tableWidth |> Html.map identity ]
         , paragraph Style.h2Font [ text "Secondary structure composition" ]
         , let
               tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
+              ssData = getDictFloatFieldFromPhys "ss_composition" proteinDesign
           in
-          renderKeyValueTable (getDictFloatFieldFromPhys "ss_composition" proteinDesign) tableWidth
+          html <|
+            Html.node "div" [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
+                [ renderSecondaryStructureHtml ssData tableWidth |> Html.map identity ]
         , paragraph Style.h2Font [ text "Energy" ]
         , let
               tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
