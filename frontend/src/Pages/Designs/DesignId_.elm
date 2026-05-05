@@ -4,6 +4,7 @@ import AppError exposing (AppError(..))
 import Browser.Dom
 import Browser.Events
 import Components.Title
+import Dict
 import Effect exposing (Effect)
 import Element exposing (..)
 import Element.Background as Background
@@ -23,13 +24,12 @@ import ProteinDesign exposing (DownloadFileType, ProteinDesign, csvStringFromPro
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import Set
-import Dict
 import Shared
+import String
 import Style
 import Task
 import Time
 import Urls
-import String
 import View exposing (View)
 
 
@@ -47,7 +47,11 @@ page shared route =
 -- INIT
 
 
-type Tab = Publication | StructureTab | Similarity | Solubility
+type Tab
+    = Publication
+    | StructureTab
+    | Similarity
+    | Solubility
 
 
 type alias Model =
@@ -495,25 +499,46 @@ designDetailsHeader title path { previous_design, next_design } screenWidth =
         ]
 
 
-tabBar : Tab -> Element Msg
-tabBar activeTab =
+tabBar : Tab -> Int -> Element Msg
+tabBar activeTab screenWidth =
     let
+        widthButton =
+            if screenWidth < 600 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 200
+
+        buttonAttributesBase =
+            [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
+            , Border.width 0
+            , Element.mouseOver [ Background.color <| rgb255 220 220 220 ]
+            , Border.color <| rgb255 220 220 220
+            , padding 10
+            ]
+
         buttonFor tab label =
             let
-                isActive = tab == activeTab
+                isActive =
+                    tab == activeTab
+
                 attrs =
-                    [ paddingXY 8 12
-                    , Border.width 1
-                    , Border.color (if isActive then rgb255 104 176 171 else rgb255 220 220 220)
-                    , Border.rounded 3
-                    , Font.bold
-                    , Font.size 14
-                    , Element.mouseOver [ Background.color <| rgb255 245 245 245 ]
-                    ]
+                    (Style.h3Font ++ buttonAttributesBase)
+                        ++ [ if isActive then
+                                Background.color <| rgb255 220 220 220
+
+                             else
+                                Background.color <| rgb255 250 250 250
+                           ]
             in
-            Input.button attrs { onPress = Just (SelectTab tab), label = text label }
+            downloadButton widthButton attrs (Just (SelectTab tab)) (text label)
     in
-    row [ spacing 8, centerX, width fill ]
+    row
+        [ width fill
+        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+        , Border.color <| rgb255 220 220 220
+        , alignLeft
+        ]
         [ buttonFor Publication "Publication"
         , buttonFor StructureTab "Structure"
         , buttonFor Similarity "Similarity"
@@ -542,39 +567,28 @@ detailsTable detailsList tableWidth =
 designDetailsBodyTable : ProteinDesign -> Int -> Element Msg
 designDetailsBodyTable proteinDesign screenWidth =
     let
-        limitingScreenSize = 900
-        elPadding = 40
-        tableWidth = if screenWidth < limitingScreenSize then screenWidth - elPadding else (screenWidth * 2) // 3
+        limitingScreenSize =
+            900
+
+        elPadding =
+            40
+
+        tableWidth =
+            if screenWidth < limitingScreenSize then
+                screenWidth - elPadding
+
+            else
+                (screenWidth * 2) // 3
     in
     detailsTable (ProteinDesign.designDetailsFromProteinDesign proteinDesign) tableWidth
 
 
-getFloatFieldFromPhys : String -> ProteinDesign -> Float
-getFloatFieldFromPhys fieldName proteinDesign =
-    case Json.Decode.decodeValue (Json.Decode.field fieldName Json.Decode.float) proteinDesign.physicochemical_properties of
-        Ok f ->
-            f
+flattenEnergy : Dict.Dict String (List ( String, Float )) -> List ( String, Float )
+flattenEnergy d =
+    d
+        |> Dict.toList
+        |> List.concatMap (\( k, lst ) -> List.map (\( sk, v ) -> ( k ++ "." ++ sk, v )) lst)
 
-        Err _ ->
-            0.0
-
-getMaybeFloatFieldFromPhys : String -> ProteinDesign -> Maybe Float
-getMaybeFloatFieldFromPhys fieldName proteinDesign =
-    case Json.Decode.decodeValue (Json.Decode.field fieldName Json.Decode.float) proteinDesign.physicochemical_properties of
-        Ok f ->
-            Just f
-
-        Err _ ->
-            Nothing
-
-getDictFloatFieldFromPhys : String -> ProteinDesign -> List ( String, Float )
-getDictFloatFieldFromPhys fieldName proteinDesign =
-    case Json.Decode.decodeValue (Json.Decode.field fieldName (Json.Decode.dict Json.Decode.float)) proteinDesign.physicochemical_properties of
-        Ok dict ->
-            Dict.toList dict
-
-        Err _ ->
-            []
 
 renderKeyValueTable : List ( String, Float ) -> Int -> Element Msg
 renderKeyValueTable kvs tableWidth =
@@ -584,17 +598,19 @@ renderKeyValueTable kvs tableWidth =
         , columns =
             [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Property" ]
               , width = px (tableWidth // 2)
-              , view = \(k,v) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text k ] ]
+              , view = \( k, v ) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text k ] ]
               }
             , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
               , width = px (tableWidth * 4 // 5)
-              , view = \(k,v) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2)), height fill, scrollbarX, paddingXY 10 10 ] [ text <| String.fromFloat v ] ]
+              , view = \( k, v ) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2)), height fill, scrollbarX, paddingXY 10 10 ] [ text <| String.fromFloat v ] ]
               }
             ]
         }
 
 
+
 -- Amino acid & secondary structure visualization (HTML fragments)
+
 
 renderAminoAcidHtml : List ( String, Float ) -> Int -> Html.Html Msg
 renderAminoAcidHtml kvs tableWidth =
@@ -602,26 +618,26 @@ renderAminoAcidHtml kvs tableWidth =
         -- Amino acid metadata: full name, three-letter code, property group
         aaMeta =
             Dict.fromList
-                [ ( "A", ( "Alanine", "Ala", "hydrophobic" ))
-                , ( "R", ( "Arginine", "Arg", "basic" ))
-                , ( "N", ( "Asparagine", "Asn", "polar" ))
-                , ( "D", ( "Aspartic acid", "Asp", "acidic" ))
-                , ( "C", ( "Cysteine", "Cys", "special" ))
-                , ( "E", ( "Glutamic acid", "Glu", "acidic" ))
-                , ( "Q", ( "Glutamine", "Gln", "polar" ))
-                , ( "G", ( "Glycine", "Gly", "special" ))
-                , ( "H", ( "Histidine", "His", "basic" ))
-                , ( "I", ( "Isoleucine", "Ile", "hydrophobic" ))
-                , ( "L", ( "Leucine", "Leu", "hydrophobic" ))
-                , ( "K", ( "Lysine", "Lys", "basic" ))
-                , ( "M", ( "Methionine", "Met", "hydrophobic" ))
-                , ( "F", ( "Phenylalanine", "Phe", "hydrophobic" ))
-                , ( "P", ( "Proline", "Pro", "special" ))
-                , ( "S", ( "Serine", "Ser", "polar" ))
-                , ( "T", ( "Threonine", "Thr", "polar" ))
-                , ( "W", ( "Tryptophan", "Trp", "hydrophobic" ))
-                , ( "Y", ( "Tyrosine", "Tyr", "polar" ))
-                , ( "V", ( "Valine", "Val", "hydrophobic" ))
+                [ ( "A", ( "Alanine", "Ala", "hydrophobic" ) )
+                , ( "R", ( "Arginine", "Arg", "basic" ) )
+                , ( "N", ( "Asparagine", "Asn", "polar" ) )
+                , ( "D", ( "Aspartic acid", "Asp", "acidic" ) )
+                , ( "C", ( "Cysteine", "Cys", "special" ) )
+                , ( "E", ( "Glutamic acid", "Glu", "acidic" ) )
+                , ( "Q", ( "Glutamine", "Gln", "polar" ) )
+                , ( "G", ( "Glycine", "Gly", "special" ) )
+                , ( "H", ( "Histidine", "His", "basic" ) )
+                , ( "I", ( "Isoleucine", "Ile", "hydrophobic" ) )
+                , ( "L", ( "Leucine", "Leu", "hydrophobic" ) )
+                , ( "K", ( "Lysine", "Lys", "basic" ) )
+                , ( "M", ( "Methionine", "Met", "hydrophobic" ) )
+                , ( "F", ( "Phenylalanine", "Phe", "hydrophobic" ) )
+                , ( "P", ( "Proline", "Pro", "special" ) )
+                , ( "S", ( "Serine", "Ser", "polar" ) )
+                , ( "T", ( "Threonine", "Thr", "polar" ) )
+                , ( "W", ( "Tryptophan", "Trp", "hydrophobic" ) )
+                , ( "Y", ( "Tyrosine", "Tyr", "polar" ) )
+                , ( "V", ( "Valine", "Val", "hydrophobic" ) )
                 ]
 
         propColor =
@@ -634,48 +650,85 @@ renderAminoAcidHtml kvs tableWidth =
                 ]
 
         -- normalize: if sums to ~1, multiply by 100
-        total = kvs |> List.map Tuple.second |> List.sum
-        multiplier = if total <= 1.01 then 100.0 else 1.0
+        total =
+            kvs |> List.map Tuple.second |> List.sum
+
+        multiplier =
+            if total <= 1.01 then
+                100.0
+
+            else
+                1.0
 
         enriched =
             kvs
-                |> List.map (\tuple ->
-                    let
-                        aa = String.toUpper (Tuple.first tuple)
-                        v = Tuple.second tuple * multiplier
-                        (name, three, prop) = Dict.get aa aaMeta |> Maybe.withDefault ("Unknown", "Xxx", "special")
-                        color = Dict.get prop propColor |> Maybe.withDefault "#777777"
-                        rec = { name = name, three = three, prop = prop, color = color, v = v }
-                    in
-                    ( aa, rec )
-                   )
-                |> List.sortBy (\(aa, rec) -> -rec.v)
+                |> List.map
+                    (\tuple ->
+                        let
+                            aa =
+                                String.toUpper (Tuple.first tuple)
+
+                            v =
+                                Tuple.second tuple * multiplier
+
+                            ( name, three, prop ) =
+                                Dict.get aa aaMeta |> Maybe.withDefault ( "Unknown", "Xxx", "special" )
+
+                            color =
+                                Dict.get prop propColor |> Maybe.withDefault "#777777"
+
+                            rec =
+                                { name = name, three = three, prop = prop, color = color, v = v }
+                        in
+                        ( aa, rec )
+                    )
+                |> List.sortBy (\( aa, rec ) -> -rec.v)
 
         -- build rows as Html
-        rowFor (aa, rec) =
+        rowFor ( aa, rec ) =
             let
-                name = rec.name
-                three = rec.three
-                prop = rec.prop
-                color = rec.color
-                v = rec.v
-                barMaxPx = toFloat (tableWidth - 160)
-                barPx = String.fromInt (Basics.round (barMaxPx * (v / 100.0))) ++ "px"
-                pctText = String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
-                titleAttr = name ++ " (" ++ three ++ ") " ++ aa ++ ": " ++ pctText
-                barStyle = "background-color: " ++ color ++ "; height:20px; width:" ++ barPx ++ "; border-radius:3px;"
+                name =
+                    rec.name
+
+                three =
+                    rec.three
+
+                prop =
+                    rec.prop
+
+                color =
+                    rec.color
+
+                v =
+                    rec.v
+
+                barMaxPx =
+                    toFloat (tableWidth - 160)
+
+                barPx =
+                    String.fromInt (Basics.round (barMaxPx * (v / 100.0))) ++ "px"
+
+                pctText =
+                    String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
+
+                titleAttr =
+                    name ++ " (" ++ three ++ ") " ++ aa ++ ": " ++ pctText
+
+                barStyle =
+                    "background-color: " ++ color ++ "; height:20px; width:" ++ barPx ++ "; border-radius:3px;"
             in
             Html.node "div"
                 [ HAtt.style "display" "flex", HAtt.style "align-items" "center", HAtt.style "margin" "6px 0", HAtt.title titleAttr ]
                 [ Html.node "div" [ HAtt.style "width" "120px", HAtt.style "font-family" "monospace" ] [ Html.text (aa ++ " (" ++ three ++ ")") ]
-                , Html.node "div" [ HAtt.style "background-color" "#eee", HAtt.style "width" (String.fromInt (tableWidth - 160) ++ "px"), HAtt.style "padding" "4px", HAtt.style "border-radius" "3px" ]
-                    [ Html.node "div" [ HAtt.style "position" "relative" ]
+                , Html.node "div"
+                    [ HAtt.style "background-color" "#eee", HAtt.style "width" (String.fromInt (tableWidth - 160) ++ "px"), HAtt.style "padding" "4px", HAtt.style "border-radius" "3px" ]
+                    [ Html.node "div"
+                        [ HAtt.style "position" "relative" ]
                         [ Html.node "div" [ HAtt.attribute "style" barStyle ] []
                         , Html.node "div" [ HAtt.style "position" "absolute", HAtt.style "left" "8px", HAtt.style "top" "0px", HAtt.style "height" "20px", HAtt.style "line-height" "20px", HAtt.style "color" "white", HAtt.style "font-weight" "bold" ] [ Html.text pctText ]
                         ]
                     ]
                 ]
-
     in
     Html.node "div" [] (List.map rowFor enriched)
 
@@ -686,125 +739,149 @@ renderSecondaryStructureHtml kvs tableWidth =
         -- structure color mapping
         colorFor s =
             case s of
-                "alpha_helix" -> "#1f77b4"
-                "beta_strand" -> "#ff7f0e"
-                "beta_bridge" -> "#2ca02c"
-                "3_10_helix" -> "#d62728"
-                "pi_helix" -> "#9467bd"
-                "turn" -> "#8c564b"
-                "bend" -> "#e377c2"
-                _ -> "#7f7f7f"
+                "alpha_helix" ->
+                    "#1f77b4"
 
-        total = kvs |> List.map Tuple.second |> List.sum
-        multiplier = if total <= 1.01 then 100.0 else 1.0
+                "beta_strand" ->
+                    "#ff7f0e"
 
-        enriched = List.map (\tuple -> (Tuple.first tuple, Tuple.second tuple * multiplier)) kvs
+                "beta_bridge" ->
+                    "#2ca02c"
+
+                "3_10_helix" ->
+                    "#d62728"
+
+                "pi_helix" ->
+                    "#9467bd"
+
+                "turn" ->
+                    "#8c564b"
+
+                "bend" ->
+                    "#e377c2"
+
+                _ ->
+                    "#7f7f7f"
+
+        total =
+            kvs |> List.map Tuple.second |> List.sum
+
+        multiplier =
+            if total <= 1.01 then
+                100.0
+
+            else
+                1.0
+
+        enriched =
+            List.map (\tuple -> ( Tuple.first tuple, Tuple.second tuple * multiplier )) kvs
 
         segments =
             enriched
-                |> List.map (\(name, v) ->
-                    let
-                        px = String.fromInt (Basics.round (toFloat tableWidth * (v / 100.0))) ++ "px"
-                        titleAttr = name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
-                        color = colorFor name
-                    in
-                    Html.node "div" [ HAtt.style "display" "inline-block", HAtt.style "height" "30px", HAtt.style "width" px, HAtt.style "background-color" color, HAtt.title titleAttr ] []
-                   )
+                |> List.map
+                    (\( name, v ) ->
+                        let
+                            px =
+                                String.fromInt (Basics.round (toFloat tableWidth * (v / 100.0))) ++ "px"
 
+                            titleAttr =
+                                name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
+
+                            color =
+                                colorFor name
+                        in
+                        Html.node "div" [ HAtt.style "display" "inline-block", HAtt.style "height" "30px", HAtt.style "width" px, HAtt.style "background-color" color, HAtt.title titleAttr ] []
+                    )
     in
     Html.node "div" [] segments
 
 
-
-tabContent : Model -> ProteinDesign -> Int -> Int -> Element Msg
-tabContent model proteinDesign screenWidth screenHeight =
+tabContent : Model -> ProteinDesign -> Int -> Int -> Int -> Int -> Element Msg
+tabContent model proteinDesign screenWidth screenHeight tableWidth contentHeight =
     let
-        limitingScreenSize = 900
-        elPadding = 40
-        tableWidth = if screenWidth < limitingScreenSize then screenWidth - elPadding else (screenWidth * 2) // 3
-        designDetailsList = ProteinDesign.designDetailsFromProteinDesign proteinDesign
-        select headers = List.filter (\d -> List.member d.header headers) designDetailsList
-        publicationHeaders = [ "PDB code", "Release date", "Subtitle", "Authors", "Publication", "Reference link", "Tags" ]
-        structureHeaders = [ "CATH", "Symmetry group", "Experimental charact. method", "Synthesis comment", "Formula weight" ]
-        similarityHeaders = [ "Sequence related designs (bits)", "Sequence related proteins (bits)", "Structure related designs (LDDT)", "Structure related proteins (LDDT)" ]
+        designDetailsList =
+            ProteinDesign.designDetailsFromProteinDesign proteinDesign
+
+        select headers =
+            List.filter (\d -> List.member d.header headers) designDetailsList
+
+        publicationHeaders =
+            [ "PDB code", "Release date", "Subtitle", "Authors", "Publication", "Reference link", "Tags", "Experimental charact. method", "Synthesis comment" ]
+
+        structureHeaders =
+            [ "CATH", "Symmetry group" ]
+
+        similarityHeaders =
+            [ "Sequence related designs (bits)", "Sequence related proteins (bits)", "Structure related designs (LDDT)", "Structure related proteins (LDDT)" ]
+
+        -- helper to convert simple kv pairs into DesignDetails entries
+        kvToDetail ( k, v ) =
+            { header = k
+            , property = paragraph Style.monospacedFont [ text <| String.fromFloat v ]
+            }
     in
     case model.activeTab of
         Publication ->
-            detailsTable (select publicationHeaders) tableWidth
+            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable (select publicationHeaders) tableWidth)
 
         StructureTab ->
             let
-                numResiduesStr =
-                    case getMaybeFloatFieldFromPhys "num_residues" proteinDesign of
-                        Just f ->
-                            String.fromFloat f
+                numResiduesF =
+                    Maybe.withDefault 0.0 proteinDesign.physicochem.num_residues
 
-                        Nothing ->
-                            "-"
+                massF =
+                    Maybe.withDefault proteinDesign.formula_weight proteinDesign.physicochem.mass
 
-                massOrFW =
-                    case getMaybeFloatFieldFromPhys "mass" proteinDesign of
-                        Just f ->
-                            String.fromFloat f ++ " Da"
+                chargeF =
+                    Maybe.withDefault 0.0 proteinDesign.physicochem.charge
 
-                        Nothing ->
-                            String.fromFloat proteinDesign.formula_weight ++ " Da"
+                pIF =
+                    Maybe.withDefault 0.0 proteinDesign.physicochem.isoelectric_point
 
-                chargeStr =
-                    case getMaybeFloatFieldFromPhys "charge" proteinDesign of
-                        Just f ->
-                            String.fromFloat f
-
-                        Nothing ->
-                            "-"
-
-                pIStr =
-                    case getMaybeFloatFieldFromPhys "isoelectric_point" proteinDesign of
-                        Just f ->
-                            String.fromFloat f
-
-                        Nothing ->
-                            "-"
-
-                packingStr =
-                    case getMaybeFloatFieldFromPhys "packing_density" proteinDesign of
-                        Just f ->
-                            String.fromFloat f
-
-                        Nothing ->
-                            "-"
-
-                numResiduesF = Maybe.withDefault 0.0 (getMaybeFloatFieldFromPhys "num_residues" proteinDesign)
-                massF = Maybe.withDefault proteinDesign.formula_weight (getMaybeFloatFieldFromPhys "mass" proteinDesign)
-                chargeF = Maybe.withDefault 0.0 (getMaybeFloatFieldFromPhys "charge" proteinDesign)
-                pIF = Maybe.withDefault 0.0 (getMaybeFloatFieldFromPhys "isoelectric_point" proteinDesign)
-                packingF = Maybe.withDefault 0.0 (getMaybeFloatFieldFromPhys "packing_density" proteinDesign)
+                packingF =
+                    Maybe.withDefault 0.0 proteinDesign.physicochem.packing_density
 
                 physRows =
-                    [ ( "num_residues", numResiduesF )
-                    , ( "mass", massF )
-                    , ( "charge", chargeF )
-                    , ( "isoelectric_point", pIF )
-                    , ( "packing_density", packingF )
+                    [ ( "Number of residues", numResiduesF )
+                    , ( "Mass (Da)", massF )
+                    , ( "Charge", chargeF )
+                    , ( "Isoelectric_point", pIF )
+                    , ( "Packing density", packingF )
                     ]
+
+                physDetails =
+                    List.map kvToDetail physRows
+
+                combined =
+                    physDetails ++ select structureHeaders
             in
-            column [ spacing 12 ]
-                [ detailsTable (select structureHeaders) tableWidth
-                , renderKeyValueTable physRows tableWidth
-                ]
+            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable combined tableWidth)
 
         Similarity ->
-            detailsTable (select similarityHeaders) tableWidth
+            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable (select similarityHeaders) tableWidth)
 
         Solubility ->
             let
-                hyd = getFloatFieldFromPhys "hydrophobic_fitness" proteinDesign
-                sol = getFloatFieldFromPhys "solubility" proteinDesign
+                hyd =
+                    Maybe.withDefault 0.0 proteinDesign.physicochem.hydrophobic_fitness
+
+                sol_total =
+                    Maybe.withDefault 0.0 (Maybe.map .total proteinDesign.physicochem.solubility)
+
+                sol_avg =
+                    Maybe.withDefault 0.0 (Maybe.map .avg proteinDesign.physicochem.solubility)
+
+                sol_min =
+                    Maybe.withDefault 0.0 (Maybe.map .min proteinDesign.physicochem.solubility)
+
+                sol_max =
+                    Maybe.withDefault 0.0 (Maybe.map .max proteinDesign.physicochem.solubility)
+
+                solDetails =
+                    [ ( "Hydrophobic fitness", hyd ), ( "Total aggregation propensity", sol_total ), ( "Average aggregation propensity", sol_avg ), ( "Minimum aggregation propensity", sol_min ), ( "Maximum aggregation propensity", sol_max ) ]
+                        |> List.map kvToDetail
             in
-            renderKeyValueTable [ ( "hydrophobic_fitness", hyd ), ( "solubility", sol ) ] tableWidth
-
-
-
+            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable solDetails tableWidth)
 
 
 designDetailsBodyStructure : ProteinDesign -> Int -> Int -> Element Msg
@@ -989,7 +1066,50 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
         [ width fill
         , spacing 20
         ]
-        [ paragraph
+        [ paragraph Style.h2Font [ text "Amino acid composition" ]
+        , let
+            tableWidth =
+                if screenWidth < 900 then
+                    screenWidth - 40
+
+                else
+                    (screenWidth * 2) // 3
+
+            aaData =
+                proteinDesign.physicochem.aa_composition
+          in
+          html <|
+            Html.node "div"
+                [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
+                [ renderAminoAcidHtml aaData tableWidth |> Html.map identity ]
+        , paragraph Style.h2Font [ text "Secondary structure composition" ]
+        , let
+            tableWidth =
+                if screenWidth < 900 then
+                    screenWidth - 40
+
+                else
+                    (screenWidth * 2) // 3
+
+            ssData =
+                proteinDesign.physicochem.ss_composition
+          in
+          html <|
+            Html.node "div"
+                [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
+                [ renderSecondaryStructureHtml ssData tableWidth |> Html.map identity ]
+        , paragraph Style.h2Font [ text "Energy" ]
+        , let
+            tableWidth =
+                if screenWidth < 900 then
+                    screenWidth - 40
+
+                else
+                    (screenWidth * 2) // 3
+          in
+          renderKeyValueTable (flattenEnergy proteinDesign.physicochem.energy)
+            tableWidth
+        , paragraph
             Style.h2Font
             [ text "Description"
             ]
@@ -1029,32 +1149,31 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
                     )
                     proteinDesign.review_comment
             )
-        , paragraph Style.h2Font [ text "Amino acid composition" ]
-        , let
-              tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
-              aaData = getDictFloatFieldFromPhys "aa_composition" proteinDesign
-          in
-          html <|
-            Html.node "div" [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
-                [ renderAminoAcidHtml aaData tableWidth |> Html.map identity ]
-        , paragraph Style.h2Font [ text "Secondary structure composition" ]
-        , let
-              tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
-              ssData = getDictFloatFieldFromPhys "ss_composition" proteinDesign
-          in
-          html <|
-            Html.node "div" [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
-                [ renderSecondaryStructureHtml ssData tableWidth |> Html.map identity ]
-        , paragraph Style.h2Font [ text "Energy" ]
-        , let
-              tableWidth = if screenWidth < 900 then screenWidth - 40 else (screenWidth * 2) // 3
-          in
-          renderKeyValueTable (getDictFloatFieldFromPhys "energy" proteinDesign) tableWidth
         ]
 
 
 designDetailsBody : Model -> ProteinDesign -> Int -> Int -> Element Msg
 designDetailsBody model proteinDesign screenWidth screenHeight =
+    let
+        -- reserve a little padding space from the available height
+        topAreaHeight =
+            max 220 (screenHeight - 120)
+
+        -- table width should match the previous logic used elsewhere
+        tableWidth =
+            if screenWidth < 900 then
+                screenWidth - 40
+
+            else
+                (screenWidth * 2) // 3
+
+        cardPadding =
+            16
+
+        -- height available for the tab content inside the card (subtract tabbar + paddings)
+        contentHeight =
+            max 120 (topAreaHeight - 80)
+    in
     column
         (Style.bodyFont
             ++ [ width (fill |> maximum screenWidth)
@@ -1063,8 +1182,18 @@ designDetailsBody model proteinDesign screenWidth screenHeight =
                , centerX
                ]
         )
-        [ tabBar model.activeTab
-        , tabContent model proteinDesign screenWidth screenHeight
+        [ -- card: tabs + their content
+          column
+            [ width (px tableWidth)
+            , Background.color <| rgb255 250 250 250
+            , Border.rounded 8
+            , Border.width 1
+            , Border.color <| rgb255 220 220 220
+            , paddingXY cardPadding cardPadding
+            ]
+            [ tabBar model.activeTab screenWidth
+            , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (tabContent model proteinDesign screenWidth screenHeight tableWidth contentHeight)
+            ]
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         , designDetailsBodySequence proteinDesign screenWidth
         , designDetailsBodyParagraphs proteinDesign screenWidth
