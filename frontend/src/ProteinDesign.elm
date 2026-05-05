@@ -721,10 +721,10 @@ xtalDecoder =
 solubilityDecoder : Decoder Solubility
 solubilityDecoder =
     Decode.succeed Solubility
-        |> required "aggrescan3d_total_value" Decode.float
-        |> required "aggrescan3d_avg_value" Decode.float
-        |> required "aggrescan3d_min_value" Decode.float
-        |> required "aggrescan3d_max_value" Decode.float
+        |> required "total_value" Decode.float
+        |> required "avg_value" Decode.float
+        |> required "min_value" Decode.float
+        |> required "max_value" Decode.float
 
 
 dsspDecoder : Decoder Dssp
