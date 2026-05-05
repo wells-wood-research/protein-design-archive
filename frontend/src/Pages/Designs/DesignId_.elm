@@ -1082,18 +1082,23 @@ designDetailsBodyParagraphs proteinDesign screenWidth =
             [ proteinDesign.abstract
                 |> text
             ]
-        , paragraph
-            Style.h2Font
-            [ text "Curation comments"
-            ]
+        , if List.all (\comment -> comment == "") proteinDesign.review_comment then
+            text ""
+
+          else
+            paragraph
+                Style.h2Font
+                [ text "Curation comments"
+                ]
         , column
             (Style.monospacedFont
                 ++ [ Font.justify
                    , width (fill |> maximum screenWidth)
                    , spacing 10
+                   , paddingEach { bottom = 20, left = 0, right = 0, top = 0 }
                    ]
             )
-            (if proteinDesign.review_comment == [ "" ] then
+            (if List.all (\comment -> comment == "") proteinDesign.review_comment then
                 [ text "" ]
 
              else
