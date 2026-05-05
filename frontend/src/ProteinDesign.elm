@@ -2,6 +2,7 @@ module ProteinDesign exposing (..)
 
 import Csv.Encode as CsvEncode
 import Date exposing (Date, Unit(..))
+import Dict
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -49,7 +50,7 @@ type alias ProteinDesign =
     , cath_full : List Cath
     , cath_class : List Cath
     , cath_arch : List Cath
-    , physicochemical_properties : JsonEncode.Value
+    , physicochem : Physicochemical
     , review_comment : List String
     }
 
@@ -89,7 +90,7 @@ type alias ProteinDesignDownload =
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
-    , physicochemical_properties : JsonEncode.Value
+    , physicochem : Physicochemical
     , seq_thr_sim_designed : List Related
     , seq_thr_sim_natural : List Related
     , struct_thr_sim_designed : List Related
@@ -296,6 +297,159 @@ type alias Xtal =
     }
 
 
+type alias Solubility =
+    { total : Float
+    , avg : Float
+    , min : Float
+    , max : Float
+    }
+
+
+type alias Dssp =
+    { full_seq : String
+    , dssp_seq : String
+    }
+
+
+
+-- Physicochemical properties
+
+
+type alias Physicochemical =
+    { num_residues : Maybe Float
+    , mass : Maybe Float
+    , charge : Maybe Float
+    , isoelectric_point : Maybe Float
+    , packing_density : Maybe Float
+    , hydrophobic_fitness : Maybe Float
+    , solubility : Maybe Solubility
+    , dssp : Maybe Dssp
+    , aa_composition : List ( String, Float )
+    , ss_composition : List ( String, Float )
+    , energy : Dict.Dict String (List ( String, Float ))
+    }
+
+
+dictNullableToListDecoder : Decoder (List ( String, Float ))
+dictNullableToListDecoder =
+    Decode.dict (Decode.nullable Decode.float)
+        |> Decode.map
+            (Dict.toList
+                >> List.filterMap
+                    (\( k, mv ) ->
+                        case mv of
+                            Just v ->
+                                Just ( k, v )
+
+                            Nothing ->
+                                Nothing
+                    )
+            )
+
+
+energyInnerDecoder : Decoder (List ( String, Float ))
+energyInnerDecoder =
+    Decode.oneOf
+        [ Decode.float
+            |> Decode.map (\f -> [ ( "value", f ) ])
+        , Decode.dict (Decode.nullable Decode.float)
+            |> Decode.map
+                (\d ->
+                    d
+                        |> Dict.toList
+                        |> List.filterMap
+                            (\( k, mv ) ->
+                                case mv of
+                                    Just v ->
+                                        Just ( k, v )
+
+                                    Nothing ->
+                                        Nothing
+                            )
+                )
+        ]
+
+
+energyDecoder : Decoder (Dict.Dict String (List ( String, Float )))
+energyDecoder =
+    Decode.dict energyInnerDecoder
+
+
+physicochemicalDecoder : Decoder Physicochemical
+physicochemicalDecoder =
+    Decode.succeed Physicochemical
+        |> optional "num_residues" (Decode.maybe Decode.float) Nothing
+        |> optional "mass" (Decode.maybe Decode.float) Nothing
+        |> optional "charge" (Decode.maybe Decode.float) Nothing
+        |> optional "isoelectric_point" (Decode.maybe Decode.float) Nothing
+        |> optional "packing_density" (Decode.maybe Decode.float) Nothing
+        |> optional "hydrophobic_fitness" (Decode.maybe Decode.float) Nothing
+        |> optional "solubility" (Decode.maybe solubilityDecoder) Nothing
+        |> optional "dssp" (Decode.maybe dsspDecoder) Nothing
+        |> optional "aa_composition" dictNullableToListDecoder []
+        |> optional "ss_composition" dictNullableToListDecoder []
+        |> optional "energy" energyDecoder Dict.empty
+
+
+maybeFloatToJson : Maybe Float -> JsonEncode.Value
+maybeFloatToJson mf =
+    case mf of
+        Nothing ->
+            JsonEncode.null
+
+        Just f ->
+            JsonEncode.float f
+
+
+listToObject : List ( String, Float ) -> JsonEncode.Value
+listToObject kvs =
+    JsonEncode.object (List.map (\( k, v ) -> ( k, JsonEncode.float v )) kvs)
+
+
+nestedDictToValue : Dict.Dict String (List ( String, Float )) -> JsonEncode.Value
+nestedDictToValue d =
+    JsonEncode.object
+        (Dict.toList d
+            |> List.map
+                (\( k, lst ) ->
+                    ( k
+                    , JsonEncode.object (List.map (\( sk, sv ) -> ( sk, JsonEncode.float sv )) lst)
+                    )
+                )
+        )
+
+
+physicochemicalEncoder : Physicochemical -> JsonEncode.Value
+physicochemicalEncoder p =
+    JsonEncode.object
+        [ ( "num_residues", maybeFloatToJson p.num_residues )
+        , ( "mass", maybeFloatToJson p.mass )
+        , ( "charge", maybeFloatToJson p.charge )
+        , ( "isoelectric_point", maybeFloatToJson p.isoelectric_point )
+        , ( "packing_density", maybeFloatToJson p.packing_density )
+        , ( "hydrophobic_fitness", maybeFloatToJson p.hydrophobic_fitness )
+        , ( "solubility"
+          , case p.solubility of
+                Nothing ->
+                    JsonEncode.null
+
+                Just s ->
+                    solubilityEncoder s
+          )
+        , ( "dssp"
+          , case p.dssp of
+                Nothing ->
+                    JsonEncode.null
+
+                Just d ->
+                    dsspEncoder d
+          )
+        , ( "aa_composition", listToObject p.aa_composition )
+        , ( "ss_composition", listToObject p.ss_composition )
+        , ( "energy", nestedDictToValue p.energy )
+        ]
+
+
 type alias DesignDetails msg =
     { header : String
     , property : Element msg
@@ -324,7 +478,7 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "classification", classificationToString proteinDesign.classification )
     , ( "chains", String.join "|" (List.map chainToString proteinDesign.chains) )
     , ( "formula_weight", fromFloat proteinDesign.formula_weight )
-    , ( "physicochemical_properties", JsonEncode.encode 0 proteinDesign.physicochemical_properties )
+    , ( "physicochemical_properties", JsonEncode.encode 0 (physicochemicalEncoder proteinDesign.physicochem) )
     , ( "symmetry", proteinDesign.symmetry )
     , ( "crystal_structure(a|b|c|alpha|beta|gamma)", xtalToString proteinDesign.crystal_structure )
     , ( "exptl_method", String.join "|" proteinDesign.exptl_method )
@@ -371,7 +525,7 @@ jsonValueFromProteinDesignDownload proteinDesign =
         , ( "release_date", JsonEncode.string <| Date.toIsoString proteinDesign.release_date )
         , ( "classification", JsonEncode.string <| classificationToString proteinDesign.classification )
         , ( "chains", JsonEncode.list chainEncoder proteinDesign.chains )
-        , ( "physicochemical_properties", proteinDesign.physicochemical_properties )
+        , ( "physicochemical_properties", physicochemicalEncoder proteinDesign.physicochem )
         , ( "formula_weight", JsonEncode.float proteinDesign.formula_weight )
         , ( "exptl_method", JsonEncode.string <| String.join "" proteinDesign.exptl_method )
         , ( "symmetry", JsonEncode.string proteinDesign.symmetry )
@@ -437,7 +591,7 @@ rawDesignDecoder =
         |> required "cath_full" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
         |> required "cath_class" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
         |> required "cath_arch" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
-        |> required "physicochemical_properties" Decode.value
+        |> required "physicochemical_properties" physicochemicalDecoder
         |> required "review_comment" (Decode.list Decode.string)
 
 
@@ -479,7 +633,7 @@ downloadDesignDecoder =
         |> required "exptl_method" (Decode.list Decode.string)
         |> required "formula_weight" Decode.float
         |> required "synthesis_comment" Decode.string
-        |> required "physicochemical_properties" Decode.value
+        |> required "physicochemical_properties" physicochemicalDecoder
         |> required "seq_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
@@ -564,6 +718,22 @@ xtalDecoder =
         |> required "angle_g" Decode.string
 
 
+solubilityDecoder : Decoder Solubility
+solubilityDecoder =
+    Decode.succeed Solubility
+        |> required "aggrescan3d_total_value" Decode.float
+        |> required "aggrescan3d_avg_value" Decode.float
+        |> required "aggrescan3d_min_value" Decode.float
+        |> required "aggrescan3d_max_value" Decode.float
+
+
+dsspDecoder : Decoder Dssp
+dsspDecoder =
+    Decode.succeed Dssp
+        |> required "full_sequence" Decode.string
+        |> required "dssp_sequence" Decode.string
+
+
 chainEncoder : Chain -> JsonEncode.Value
 chainEncoder chain =
     JsonEncode.object
@@ -581,6 +751,24 @@ xtalEncoder xtal =
         , ( "angle_alpha", JsonEncode.string xtal.angle_a )
         , ( "angle_beta", JsonEncode.string xtal.angle_b )
         , ( "angle_gamma", JsonEncode.string xtal.angle_g )
+        ]
+
+
+solubilityEncoder : Solubility -> JsonEncode.Value
+solubilityEncoder sol =
+    JsonEncode.object
+        [ ( "aggrescan3d_total_value", JsonEncode.float sol.total )
+        , ( "aggrescan3d_avg_value", JsonEncode.float sol.avg )
+        , ( "aggrescan3d_min_value", JsonEncode.float sol.min )
+        , ( "aggrescan3d_max_value", JsonEncode.float sol.max )
+        ]
+
+
+dsspEncoder : Dssp -> JsonEncode.Value
+dsspEncoder dssp =
+    JsonEncode.object
+        [ ( "full_sequence", JsonEncode.string dssp.full_seq )
+        , ( "dssp_sequence", JsonEncode.string dssp.dssp_seq )
         ]
 
 
