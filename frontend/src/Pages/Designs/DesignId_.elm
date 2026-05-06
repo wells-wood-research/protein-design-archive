@@ -557,7 +557,7 @@ energyTabBar activeTab screenWidth =
                 Element.fill |> maximum (screenWidth - 10)
 
             else
-                Element.px 200
+                Element.fillPortion 1
 
         buttonAttributesBase =
             [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
@@ -584,10 +584,10 @@ energyTabBar activeTab screenWidth =
             downloadButton widthButton attrs (Just (SelectEnergyTab tab)) (text label)
     in
     row
-        [ width (fill |> maximum screenWidth)
+        [ width fill
         , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
         , Border.color <| rgb255 220 220 220
-        , spaceEvenly
+        , alignLeft
         ]
         [ buttonFor Rosetta "Rosetta"
         , buttonFor EvoEF2 "EvoEF2"
@@ -599,7 +599,7 @@ energyTabBar activeTab screenWidth =
 detailsTable : List (ProteinDesign.DesignDetails Msg) -> Int -> Element Msg
 detailsTable detailsList tableWidth =
     table
-        [ width (fill |> maximum (tableWidth - 100)) ]
+        [ width (px tableWidth) ]
         { data = detailsList
         , columns =
             [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Attribute" ]
@@ -1162,24 +1162,28 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
         [ width fill
         , spacing 20
         ]
-        [ if List.length aaData == 0 then
-            text ""
+        [ column []
+            [ if List.length aaData == 0 then
+                text ""
 
-          else
-            paragraph Style.h2Font [ text "Amino acid composition" ]
-        , html <|
-            Html.node "div"
-                [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
-                [ renderAminoAcidHtml aaData tableWidth |> Html.map identity ]
-        , if List.length ssData == 0 then
-            text ""
+              else
+                paragraph Style.h2Font [ text "Amino acid composition" ]
+            , html <|
+                Html.node "div"
+                    [ HAtt.style "width" (String.fromInt tableWidth ++ "px"), HAtt.style "padding-top" "20px" ]
+                    [ renderAminoAcidHtml aaData tableWidth |> Html.map identity ]
+            ]
+        , column []
+            [ if List.length ssData == 0 then
+                text ""
 
-          else
-            paragraph Style.h2Font [ text "Secondary structure composition" ]
-        , html <|
-            Html.node "div"
-                [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
-                [ renderSecondaryStructureHtml ssData tableWidth |> Html.map identity ]
+              else
+                paragraph Style.h2Font [ text "Secondary structure composition" ]
+            , html <|
+                Html.node "div"
+                    [ HAtt.style "width" (String.fromInt tableWidth ++ "px"), HAtt.style "padding-top" "20px" ]
+                    [ renderSecondaryStructureHtml ssData tableWidth |> Html.map identity ]
+            ]
         , paragraph Style.h2Font
             [ text "Energy" ]
         , column

@@ -400,6 +400,97 @@ dictNullableToListDecoder =
             )
 
 
+-- Amino acid composition decoder: backend provides keys like "composition_ALA" -> map to single-letter code
+threeToOne : Dict.Dict String String
+threeToOne =
+    Dict.fromList
+        [ ( "ALA", "A" )
+        , ( "ARG", "R" )
+        , ( "ASN", "N" )
+        , ( "ASP", "D" )
+        , ( "CYS", "C" )
+        , ( "GLN", "Q" )
+        , ( "GLU", "E" )
+        , ( "GLY", "G" )
+        , ( "HIS", "H" )
+        , ( "ILE", "I" )
+        , ( "LEU", "L" )
+        , ( "LYS", "K" )
+        , ( "MET", "M" )
+        , ( "PHE", "F" )
+        , ( "PRO", "P" )
+        , ( "SER", "S" )
+        , ( "THR", "T" )
+        , ( "TRP", "W" )
+        , ( "TYR", "Y" )
+        , ( "VAL", "V" )
+        , ( "UNK", "X" )
+        ]
+
+
+aaCompositionDecoder : Decoder (List ( String, Float ))
+aaCompositionDecoder =
+    Decode.dict (Decode.nullable Decode.float)
+        |> Decode.map
+            (Dict.toList
+                >> List.filterMap
+                    (\( k, mv ) ->
+                        case mv of
+                            Just v ->
+                                let
+                                    -- strip prefix
+                                    suffix =
+                                        String.split "_" k |> List.reverse |> List.head |> Maybe.withDefault k
+
+                                    code =
+                                        Dict.get (String.toUpper suffix) threeToOne |> Maybe.withDefault (String.toUpper suffix)
+                                in
+                                Just ( code, v )
+
+                            Nothing ->
+                                Nothing
+                    )
+            )
+
+
+-- Secondary structure composition decoder: strip "ss_prop_" prefix and normalise some names
+normaliseSs : String -> String
+normaliseSs s =
+    case s of
+        "hbonded_turn" ->
+            "turn"
+
+        other ->
+            other
+
+
+ssCompositionDecoder : Decoder (List ( String, Float ))
+ssCompositionDecoder =
+    Decode.dict (Decode.nullable Decode.float)
+        |> Decode.map
+            (Dict.toList
+                >> List.filterMap
+                    (\( k, mv ) ->
+                        case mv of
+                            Just v ->
+                                let
+                                    suffix =
+                                        if String.startsWith "ss_prop_" k then
+                                            String.dropLeft (String.length "ss_prop_") k
+
+                                        else
+                                            k
+
+                                    name = normaliseSs suffix
+                                in
+                                Just ( name, v )
+
+                            Nothing ->
+                                Nothing
+                    )
+            )
+
+
 -- decoders for energy subtypes: strict object shapes expected from backend
 
 budeDecoder : Decoder Bude
@@ -471,8 +562,8 @@ physicochemicalDecoder =
         |> optional "hydrophobic_fitness" (Decode.maybe Decode.float) Nothing
         |> optional "solubility" (Decode.maybe solubilityDecoder) Nothing
         |> optional "dssp" (Decode.maybe dsspDecoder) Nothing
-        |> optional "aa_composition" dictNullableToListDecoder []
-        |> optional "ss_composition" dictNullableToListDecoder []
+        |> optional "aa_composition" aaCompositionDecoder []
+        |> optional "ss_composition" ssCompositionDecoder []
         |> optional "energy" energyDecoder { bude = Nothing, dfire2 = Nothing, evoef2 = Nothing, rosetta = Nothing }
 
 
