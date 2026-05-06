@@ -425,37 +425,34 @@ downloadButton widthButton buttonAttributes onPressCmd textLabel =
         }
 
 
-downloadArea : Shared.Model -> String -> Int -> Element Msg
-downloadArea shared designId areaWidth =
+downloadArea : Shared.Model -> String -> String -> Element Msg
+downloadArea shared designId layoutMode =
     let
         elementType =
-            if areaWidth > 400 then
-                row
+            case layoutMode of
+                "wide-row" ->
+                    row
 
-            else
-                column
+                "mid-row" ->
+                    column
 
-        widthButton =
-            if areaWidth > 900 then
-                Element.px (areaWidth // 3)
-
-            else
-                Element.fill |> maximum (areaWidth - 10)
+                _ ->
+                    row
     in
     elementType
-        [ width (fill |> maximum areaWidth)
+        [ width fill
         , Font.bold
         , Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
         , Border.color <| rgb255 220 220 220
         , centerX
         ]
-        [ downloadButton widthButton [] (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download CSV")
-        , downloadButton widthButton [] (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download JSON")
+        [ downloadButton fill [] (Just <| RequestSelectedDesignData ProteinDesign.Csv) (text "Download CSV")
+        , downloadButton fill [] (Just <| RequestSelectedDesignData ProteinDesign.Json) (text "Download JSON")
         , if Set.member designId shared.designsToDownload then
-            downloadButton widthButton [] (Just RemoveFromDownloadList) (text "Remove from download")
+            downloadButton fill [] (Just RemoveFromDownloadList) (text "Remove from download")
 
           else
-            downloadButton widthButton [] (Just AddToDownloadList) (text "Add to download list")
+            downloadButton fill [] (Just AddToDownloadList) (text "Add to download list")
         ]
 
 
@@ -503,14 +500,10 @@ designDetailsHeader pdbCode path design screenWidth =
 
 
 detailsTabBar : DetailsTab -> Int -> Element Msg
-detailsTabBar activeTab screenWidth =
+detailsTabBar activeTab tableWidth =
     let
         widthButton =
-            if screenWidth < 900 then
-                Element.fill |> maximum (screenWidth - 10)
-
-            else
-                px ((((screenWidth * 2) // 3) - 60) // 3)
+            px ((tableWidth // 4) - 10)
 
         buttonAttributesBase =
             [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
@@ -550,14 +543,10 @@ detailsTabBar activeTab screenWidth =
 
 
 energyTabBar : EnergyTab -> Int -> Element Msg
-energyTabBar activeTab screenWidth =
+energyTabBar activeTab tableWidth =
     let
         widthButton =
-            if screenWidth < 600 then
-                Element.fill |> maximum (screenWidth - 10)
-
-            else
-                Element.fillPortion 1
+            px ((tableWidth // 4) - 10)
 
         buttonAttributesBase =
             [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
@@ -1298,12 +1287,12 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
     let
         -- reserve a little padding space from the available height
         topAreaHeight =
-            max 220 (screenHeight - 100)
+            max 220 screenHeight
 
         -- table width should match the previous logic used elsewhere
         tableWidth =
             if screenWidth > 1200 then
-                screenWidth * 4 // 5
+                screenWidth * 2 // 3
 
             else if screenWidth < 900 then
                 screenWidth - 60
@@ -1311,23 +1300,30 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
             else
                 (screenWidth * 2) // 3 - 60
 
-        pictureWidth =
+        rightWidth =
             if screenWidth < 900 then
                 screenWidth - 60
 
             else
                 screenWidth - tableWidth - 60
 
-        -- height available for the tab content inside the card (subtract tabbar + paddings)
-        contentHeight =
-            min 400 (topAreaHeight - 40)
+        -- unified height for BOTH table and image column
+        sharedHeight =
+            min 600 topAreaHeight
 
-        elementType =
-            if screenWidth < 900 then
-                column
+        -- subtract tab bar height (~48px) to keep scroll area correct
+        contentHeight =
+            sharedHeight - 60
+
+        layoutMode =
+            if screenWidth > 1450 then
+                "wide-row"
+
+            else if screenWidth > 900 then
+                "mid-row"
 
             else
-                row
+                "stacked"
     in
     column
         (Style.bodyFont
@@ -1337,9 +1333,17 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                , centerX
                ]
         )
-        [ elementType [ width fill, spacing 10 ]
+        [ (case layoutMode of
+            "stacked" ->
+                column
+
+            _ ->
+                row
+          )
+            [ width fill, spacing 10 ]
             [ column
                 [ width <| px tableWidth
+                , height <| px sharedHeight
                 , Background.color <| rgb255 250 250 250
                 , Border.rounded 8
                 , Border.width 1
@@ -1350,22 +1354,35 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                 [ detailsTabBar model.activeDetailsTab tableWidth
                 , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (detailsTabContent model proteinDesign tableWidth contentHeight)
                 ]
-            , column [ alignTop ]
+            , column
+                [ alignTop
+                , height <| px sharedHeight
+                , width <| px rightWidth
+                ]
                 [ el
                     [ padding 2
                     , Border.width 1
                     , Border.color <| rgb255 220 220 220
                     , Border.rounded 8
-                    , alignTop
-                    , width <| px pictureWidth
+                    , width fill
+                    , height fill
+                    , Background.color <| rgb255 255 255 255
                     ]
                     (image
-                        [ width (fill |> minimum 200), alignTop ]
+                        [ centerX
+                        , centerY
+                        , width (fill |> maximum (min rightWidth 500))
+                        , height (fill |> maximum (min contentHeight 500))
+                        ]
                         { src = proteinDesign.picture_path
                         , description = "Structure of " ++ proteinDesign.pdb
                         }
                     )
-                , downloadArea shared proteinDesign.pdb pictureWidth
+                , el
+                    [ height shrink
+                    , width fill
+                    ]
+                    (downloadArea shared proteinDesign.pdb layoutMode)
                 ]
             ]
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
