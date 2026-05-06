@@ -573,9 +573,10 @@ energyTabBar activeTab screenWidth =
             downloadButton widthButton attrs (Just (SelectEnergyTab tab)) (text label)
     in
     row
-        [ width fill
+        [ width (fill |> maximum screenWidth)
         , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
         , Border.color <| rgb255 220 220 220
+        , spaceEvenly
         ]
         [ buttonFor Rosetta "Rosetta"
         , buttonFor EvoEF2 "EvoEF2"
@@ -946,16 +947,16 @@ energyTabContent model proteinDesign tableWidth =
     in
     case model.activeEnergyTab of
         Rosetta ->
-            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs rosettaPairs) tableWidth)
+            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs rosettaPairs) (tableWidth - 40))
 
         EvoEF2 ->
-            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs evoef2Pairs) tableWidth)
+            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs evoef2Pairs) (tableWidth - 40))
 
         BUDE ->
-            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs budePairs) tableWidth)
+            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs budePairs) (tableWidth - 40))
 
         DFIRE2 ->
-            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs dfire2Pairs) tableWidth)
+            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs dfire2Pairs) (tableWidth - 40))
 
 
 designDetailsBodyStructure : ProteinDesign -> Int -> Int -> Element Msg
@@ -1138,7 +1139,7 @@ designDetailsBodyParagraphs : Model -> ProteinDesign -> Int -> Element Msg
 designDetailsBodyParagraphs model proteinDesign screenWidth =
     let
         tableWidth =
-            screenWidth - 40
+            screenWidth - 60
 
         aaData =
             proteinDesign.physicochem.aa_composition
@@ -1171,7 +1172,7 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
         , paragraph Style.h2Font
             [ text "Energy" ]
         , column
-            [ width fill
+            [ width <| px tableWidth
             , Background.color <| rgb255 250 250 250
             , Border.rounded 8
             , Border.width 1
@@ -1179,7 +1180,7 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
             , paddingXY 20 20
             , alignTop
             ]
-            [ energyTabBar model.activeEnergyTab screenWidth
+            [ energyTabBar model.activeEnergyTab tableWidth
             , el [ width fill, paddingXY 0 4 ] (energyTabContent model proteinDesign tableWidth)
             ]
         , paragraph
@@ -1270,7 +1271,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                 , paddingXY 20 20
                 , alignTop
                 ]
-                [ detailsTabBar model.activeDetailsTab screenWidth
+                [ detailsTabBar model.activeDetailsTab tableWidth
                 , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (detailsTabContent model proteinDesign tableWidth contentHeight)
                 ]
             , column []
