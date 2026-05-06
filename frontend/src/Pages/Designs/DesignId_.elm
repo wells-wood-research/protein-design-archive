@@ -1262,7 +1262,10 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
 
         -- table width should match the previous logic used elsewhere
         tableWidth =
-            if screenWidth < 900 then
+            if screenWidth > 1200 then
+                screenWidth * 4 // 5
+
+            else if screenWidth < 900 then
                 screenWidth - 60
 
             else
@@ -1277,7 +1280,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
 
         -- height available for the tab content inside the card (subtract tabbar + paddings)
         contentHeight =
-            max 120 (topAreaHeight - 40)
+            min 400 (topAreaHeight - 40)
 
         elementType =
             if screenWidth < 900 then
@@ -1307,18 +1310,17 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                 [ detailsTabBar model.activeDetailsTab tableWidth
                 , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (detailsTabContent model proteinDesign tableWidth contentHeight)
                 ]
-            , column []
+            , column [ alignTop ]
                 [ el
                     [ padding 2
                     , Border.width 1
                     , Border.color <| rgb255 220 220 220
                     , Border.rounded 8
                     , alignTop
-                    , centerX
                     , width <| px pictureWidth
                     ]
                     (image
-                        [ width (fill |> minimum 200) ]
+                        [ width (fill |> minimum 200), alignTop ]
                         { src = proteinDesign.picture_path
                         , description = "Structure of " ++ proteinDesign.pdb
                         }
