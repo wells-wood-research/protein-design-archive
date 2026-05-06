@@ -315,6 +315,59 @@ type alias Dssp =
 -- Physicochemical properties
 
 
+type alias Bude =
+    { budeff_total : Maybe Float
+    , budeff_steric : Maybe Float
+    , budeff_desolvation : Maybe Float
+    , budeff_charge : Maybe Float
+    }
+
+
+type alias Dfire2 =
+    { dfire2_total : Maybe Float
+    }
+
+
+type alias Evoef2 =
+    { evoef2_total : Maybe Float
+    , evoef2_ref_total : Maybe Float
+    , evoef2_intraR_total : Maybe Float
+    , evoef2_interS_total : Maybe Float
+    , evoef2_interD_total : Maybe Float
+    }
+
+
+type alias RosettaEnergy =
+    { rosetta_total : Maybe Float
+    , rosetta_vdw_atr : Maybe Float
+    , rosetta_vdw_rep : Maybe Float
+    , rosetta_vdw_intra_rep : Maybe Float
+    , rosetta_electrostatics : Maybe Float
+    , rosetta_solvation_isotropic : Maybe Float
+    , rosetta_solvation_anisotropic_polar_atoms : Maybe Float
+    , rosetta_solvation_isotropic_iR : Maybe Float
+    , rosetta_hbond_lr_bb : Maybe Float
+    , rosetta_hbond_sr_bb : Maybe Float
+    , rosetta_hbond_bb_sc : Maybe Float
+    , rosetta_hbond_sc : Maybe Float
+    , rosetta_disulfides : Maybe Float
+    , rosetta_backbone_torsion_preference : Maybe Float
+    , rosetta_aa_propensity : Maybe Float
+    , rosetta_dunbrack_rotamer : Maybe Float
+    , rosetta_omega : Maybe Float
+    , rosetta_pro_close : Maybe Float
+    , rosetta_yhh_planarity : Maybe Float
+    }
+
+
+type alias Energy =
+    { bude : Maybe Bude
+    , dfire2 : Maybe Dfire2
+    , evoef2 : Maybe Evoef2
+    , rosetta : Maybe RosettaEnergy
+    }
+
+
 type alias Physicochemical =
     { num_residues : Maybe Float
     , mass : Maybe Float
@@ -326,7 +379,7 @@ type alias Physicochemical =
     , dssp : Maybe Dssp
     , aa_composition : List ( String, Float )
     , ss_composition : List ( String, Float )
-    , energy : Dict.Dict String (List ( String, Float ))
+    , energy : Energy
     }
 
 
@@ -347,32 +400,64 @@ dictNullableToListDecoder =
             )
 
 
-energyInnerDecoder : Decoder (List ( String, Float ))
-energyInnerDecoder =
-    Decode.oneOf
-        [ Decode.float
-            |> Decode.map (\f -> [ ( "value", f ) ])
-        , Decode.dict (Decode.nullable Decode.float)
-            |> Decode.map
-                (\d ->
-                    d
-                        |> Dict.toList
-                        |> List.filterMap
-                            (\( k, mv ) ->
-                                case mv of
-                                    Just v ->
-                                        Just ( k, v )
+-- decoders for energy subtypes: strict object shapes expected from backend
 
-                                    Nothing ->
-                                        Nothing
-                            )
-                )
-        ]
+budeDecoder : Decoder Bude
+budeDecoder =
+    Decode.succeed Bude
+        |> optional "budeff_total" (Decode.maybe Decode.float) Nothing
+        |> optional "budeff_steric" (Decode.maybe Decode.float) Nothing
+        |> optional "budeff_desolvation" (Decode.maybe Decode.float) Nothing
+        |> optional "budeff_charge" (Decode.maybe Decode.float) Nothing
 
 
-energyDecoder : Decoder (Dict.Dict String (List ( String, Float )))
+dfire2Decoder : Decoder Dfire2
+dfire2Decoder =
+    Decode.succeed Dfire2
+        |> optional "dfire2_total" (Decode.maybe Decode.float) Nothing
+
+
+evoef2Decoder : Decoder Evoef2
+evoef2Decoder =
+    Decode.succeed Evoef2
+        |> optional "evoef2_total" (Decode.maybe Decode.float) Nothing
+        |> optional "evoef2_ref_total" (Decode.maybe Decode.float) Nothing
+        |> optional "evoef2_intraR_total" (Decode.maybe Decode.float) Nothing
+        |> optional "evoef2_interS_total" (Decode.maybe Decode.float) Nothing
+        |> optional "evoef2_interD_total" (Decode.maybe Decode.float) Nothing
+
+
+rosettaDecoder : Decoder RosettaEnergy
+rosettaDecoder =
+    Decode.succeed RosettaEnergy
+        |> optional "rosetta_total" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_vdw_atr" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_vdw_rep" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_vdw_intra_rep" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_electrostatics" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_solvation_isotropic" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_solvation_anisotropic_polar_atoms" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_solvation_isotropic_iR" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_hbond_lr_bb" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_hbond_sr_bb" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_hbond_bb_sc" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_hbond_sc" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_disulfides" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_backbone_torsion_preference" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_aa_propensity" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_dunbrack_rotamer" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_omega" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_pro_close" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_yhh_planarity" (Decode.maybe Decode.float) Nothing
+
+
+energyDecoder : Decoder Energy
 energyDecoder =
-    Decode.dict energyInnerDecoder
+    Decode.succeed Energy
+        |> optional "budeff" (Decode.maybe budeDecoder) Nothing
+        |> optional "dfire2" (Decode.maybe dfire2Decoder) Nothing
+        |> optional "evoef2" (Decode.maybe evoef2Decoder) Nothing
+        |> optional "rosetta" (Decode.maybe rosettaDecoder) Nothing
 
 
 physicochemicalDecoder : Decoder Physicochemical
@@ -388,7 +473,7 @@ physicochemicalDecoder =
         |> optional "dssp" (Decode.maybe dsspDecoder) Nothing
         |> optional "aa_composition" dictNullableToListDecoder []
         |> optional "ss_composition" dictNullableToListDecoder []
-        |> optional "energy" energyDecoder Dict.empty
+        |> optional "energy" energyDecoder { bude = Nothing, dfire2 = Nothing, evoef2 = Nothing, rosetta = Nothing }
 
 
 maybeFloatToJson : Maybe Float -> JsonEncode.Value
@@ -406,16 +491,89 @@ listToObject kvs =
     JsonEncode.object (List.map (\( k, v ) -> ( k, JsonEncode.float v )) kvs)
 
 
-nestedDictToValue : Dict.Dict String (List ( String, Float )) -> JsonEncode.Value
-nestedDictToValue d =
+budeEncoder : Bude -> JsonEncode.Value
+budeEncoder b =
     JsonEncode.object
-        (Dict.toList d
-            |> List.map
-                (\( k, lst ) ->
-                    ( k
-                    , JsonEncode.object (List.map (\( sk, sv ) -> ( sk, JsonEncode.float sv )) lst)
-                    )
-                )
+        [ ( "budeff_total", maybeFloatToJson b.budeff_total )
+        , ( "budeff_steric", maybeFloatToJson b.budeff_steric )
+        , ( "budeff_desolvation", maybeFloatToJson b.budeff_desolvation )
+        , ( "budeff_charge", maybeFloatToJson b.budeff_charge )
+        ]
+
+
+dfire2Encoder : Dfire2 -> JsonEncode.Value
+dfire2Encoder d =
+    JsonEncode.object [ ( "dfire2_total", maybeFloatToJson d.dfire2_total ) ]
+
+
+evoef2Encoder : Evoef2 -> JsonEncode.Value
+evoef2Encoder e =
+    JsonEncode.object
+        [ ( "evoef2_total", maybeFloatToJson e.evoef2_total )
+        , ( "evoef2_ref_total", maybeFloatToJson e.evoef2_ref_total )
+        , ( "evoef2_intraR_total", maybeFloatToJson e.evoef2_intraR_total )
+        , ( "evoef2_interS_total", maybeFloatToJson e.evoef2_interS_total )
+        , ( "evoef2_interD_total", maybeFloatToJson e.evoef2_interD_total )
+        ]
+
+
+rosettaEncoder : RosettaEnergy -> JsonEncode.Value
+rosettaEncoder r =
+    JsonEncode.object
+        [ ( "rosetta_total", maybeFloatToJson r.rosetta_total )
+        , ( "rosetta_vdw_atr", maybeFloatToJson r.rosetta_vdw_atr )
+        , ( "rosetta_vdw_rep", maybeFloatToJson r.rosetta_vdw_rep )
+        , ( "rosetta_vdw_intra_rep", maybeFloatToJson r.rosetta_vdw_intra_rep )
+        , ( "rosetta_electrostatics", maybeFloatToJson r.rosetta_electrostatics )
+        , ( "rosetta_solvation_isotropic", maybeFloatToJson r.rosetta_solvation_isotropic )
+        , ( "rosetta_solvation_anisotropic_polar_atoms", maybeFloatToJson r.rosetta_solvation_anisotropic_polar_atoms )
+        , ( "rosetta_solvation_isotropic_iR", maybeFloatToJson r.rosetta_solvation_isotropic_iR )
+        , ( "rosetta_hbond_lr_bb", maybeFloatToJson r.rosetta_hbond_lr_bb )
+        , ( "rosetta_hbond_sr_bb", maybeFloatToJson r.rosetta_hbond_sr_bb )
+        , ( "rosetta_hbond_bb_sc", maybeFloatToJson r.rosetta_hbond_bb_sc )
+        , ( "rosetta_hbond_sc", maybeFloatToJson r.rosetta_hbond_sc )
+        , ( "rosetta_disulfides", maybeFloatToJson r.rosetta_disulfides )
+        , ( "rosetta_backbone_torsion_preference", maybeFloatToJson r.rosetta_backbone_torsion_preference )
+        , ( "rosetta_aa_propensity", maybeFloatToJson r.rosetta_aa_propensity )
+        , ( "rosetta_dunbrack_rotamer", maybeFloatToJson r.rosetta_dunbrack_rotamer )
+        , ( "rosetta_omega", maybeFloatToJson r.rosetta_omega )
+        , ( "rosetta_pro_close", maybeFloatToJson r.rosetta_pro_close )
+        , ( "rosetta_yhh_planarity", maybeFloatToJson r.rosetta_yhh_planarity )
+        ]
+
+
+energyEncoder : Energy -> JsonEncode.Value
+energyEncoder e =
+    JsonEncode.object
+        (List.filterMap identity
+            [ case e.bude of
+                Nothing ->
+                    Nothing
+
+                Just b ->
+                    Just ( "budeff", budeEncoder b )
+
+            , case e.dfire2 of
+                Nothing ->
+                    Nothing
+
+                Just d ->
+                    Just ( "dfire2", dfire2Encoder d )
+
+            , case e.evoef2 of
+                Nothing ->
+                    Nothing
+
+                Just ev ->
+                    Just ( "evoef2", evoef2Encoder ev )
+
+            , case e.rosetta of
+                Nothing ->
+                    Nothing
+
+                Just r ->
+                    Just ( "rosetta", rosettaEncoder r )
+            ]
         )
 
 
@@ -446,7 +604,7 @@ physicochemicalEncoder p =
           )
         , ( "aa_composition", listToObject p.aa_composition )
         , ( "ss_composition", listToObject p.ss_composition )
-        , ( "energy", nestedDictToValue p.energy )
+        , ( "energy", energyEncoder p.energy )
         ]
 
 

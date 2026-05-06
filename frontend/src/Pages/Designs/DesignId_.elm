@@ -47,11 +47,18 @@ page shared route =
 -- INIT
 
 
-type Tab
+type DetailsTab
     = Publication
     | GeneralTab
     | Similarity
     | Solubility
+
+
+type EnergyTab
+    = BUDE
+    | DFIRE2
+    | EvoEF2
+    | Rosetta
 
 
 type alias Model =
@@ -63,7 +70,8 @@ type alias Model =
     , replotTime : Int
     , renderPlotState : RenderPlotState
     , dataDownload : RemoteData Http.Error String
-    , activeTab : Tab
+    , activeDetailsTab : DetailsTab
+    , activeEnergyTab : EnergyTab
     }
 
 
@@ -77,7 +85,8 @@ init mSharedScreenWidthF mSharedScreenHeightF designId =
       , mScreenWidthF = mSharedScreenWidthF
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
-      , activeTab = Publication
+      , activeDetailsTab = Publication
+      , activeEnergyTab = BUDE
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -111,7 +120,8 @@ type Msg
     | WindowResizes Int Int
     | ViewportResult (Result Browser.Dom.Error Browser.Dom.Viewport)
     | ViewportReset
-    | SelectTab Tab
+    | SelectDetailsTab DetailsTab
+    | SelectEnergyTab EnergyTab
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -256,8 +266,11 @@ update msg model =
                         Err _ ->
                             ( model, Effect.none )
 
-                SelectTab tab ->
-                    ( { model | activeTab = tab }, Effect.none )
+                SelectDetailsTab tab ->
+                    ( { model | activeDetailsTab = tab }, Effect.none )
+
+                SelectEnergyTab tab ->
+                    ( { model | activeEnergyTab = tab }, Effect.none )
 
                 _ ->
                     ( model, Effect.none )
@@ -478,8 +491,8 @@ designDetailsHeader pdbCode path design screenWidth =
         ]
 
 
-tabBar : Tab -> Int -> Element Msg
-tabBar activeTab screenWidth =
+detailsTabBar : DetailsTab -> Int -> Element Msg
+detailsTabBar activeTab screenWidth =
     let
         widthButton =
             if screenWidth < 600 then
@@ -510,7 +523,7 @@ tabBar activeTab screenWidth =
                                 Background.color <| rgb255 250 250 250
                            ]
             in
-            downloadButton widthButton attrs (Just (SelectTab tab)) (text label)
+            downloadButton widthButton attrs (Just (SelectDetailsTab tab)) (text label)
     in
     row
         [ width fill
@@ -525,10 +538,56 @@ tabBar activeTab screenWidth =
         ]
 
 
+energyTabBar : EnergyTab -> Int -> Element Msg
+energyTabBar activeTab screenWidth =
+    let
+        widthButton =
+            if screenWidth < 600 then
+                Element.fill |> maximum (screenWidth - 10)
+
+            else
+                Element.px 200
+
+        buttonAttributesBase =
+            [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
+            , Border.width 0
+            , Element.mouseOver [ Background.color <| rgb255 220 220 220 ]
+            , Border.color <| rgb255 220 220 220
+            , padding 10
+            ]
+
+        buttonFor tab label =
+            let
+                isActive =
+                    tab == activeTab
+
+                attrs =
+                    (Style.h3Font ++ buttonAttributesBase)
+                        ++ [ if isActive then
+                                Background.color <| rgb255 220 220 220
+
+                             else
+                                Background.color <| rgb255 250 250 250
+                           ]
+            in
+            downloadButton widthButton attrs (Just (SelectEnergyTab tab)) (text label)
+    in
+    row
+        [ width fill
+        , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+        , Border.color <| rgb255 220 220 220
+        ]
+        [ buttonFor Rosetta "Rosetta"
+        , buttonFor EvoEF2 "EvoEF2"
+        , buttonFor DFIRE2 "DFIRE2"
+        , buttonFor BUDE "BUDE"
+        ]
+
+
 detailsTable : List (ProteinDesign.DesignDetails Msg) -> Int -> Element Msg
 detailsTable detailsList tableWidth =
     table
-        [ width <| fillPortion 2 ]
+        [ width (fill |> maximum (tableWidth - 100)) ]
         { data = detailsList
         , columns =
             [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Attribute" ]
@@ -538,40 +597,6 @@ detailsTable detailsList tableWidth =
             , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
               , width = px (tableWidth * 4 // 5)
               , view = \detail -> paragraph Style.monospacedFont [ column [ width (px (tableWidth * 4 // 5)), height fill, scrollbarX, paddingXY 10 10 ] [ detail.property ] ]
-              }
-            ]
-        }
-
-
-flattenEnergy : Dict.Dict String (List ( String, Float )) -> List ( String, Float )
-flattenEnergy d =
-    d
-        |> Dict.toList
-        |> List.concatMap (\( k, lst ) -> List.map (\( sk, v ) -> ( k ++ "." ++ sk, v )) lst)
-
-
-renderKeyValueMaybeTable : List ( String, Maybe Float ) -> Int -> Element Msg
-renderKeyValueMaybeTable kvs tableWidth =
-    let
-        format mv =
-            case mv of
-                Just f ->
-                    String.fromFloat f
-
-                Nothing ->
-                    "-"
-    in
-    table
-        [ width <| fillPortion 2 ]
-        { data = kvs
-        , columns =
-            [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Property" ]
-              , width = px (tableWidth // 2)
-              , view = \( k, mv ) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text k ] ]
-              }
-            , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
-              , width = px (tableWidth * 4 // 5)
-              , view = \( k, mv ) -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 2)), height fill, scrollbarX, paddingXY 10 10 ] [ text <| format mv ] ]
               }
             ]
         }
@@ -765,8 +790,8 @@ renderSecondaryStructureHtml kvs tableWidth =
     Html.node "div" [] segments
 
 
-tabContent : Model -> ProteinDesign -> Int -> Int -> Element Msg
-tabContent model proteinDesign tableWidth contentHeight =
+detailsTabContent : Model -> ProteinDesign -> Int -> Int -> Element Msg
+detailsTabContent model proteinDesign tableWidth contentHeight =
     let
         designDetailsList =
             ProteinDesign.designDetailsFromProteinDesign proteinDesign
@@ -797,7 +822,7 @@ tabContent model proteinDesign tableWidth contentHeight =
             , property = paragraph Style.monospacedFont [ text <| maybeFloatToString mv ]
             }
     in
-    case model.activeTab of
+    case model.activeDetailsTab of
         Publication ->
             el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable (select publicationHeaders) tableWidth)
 
@@ -864,6 +889,73 @@ tabContent model proteinDesign tableWidth contentHeight =
 
         Similarity ->
             el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable (select similarityHeaders) tableWidth)
+
+
+energyTabContent : Model -> ProteinDesign -> Int -> Element Msg
+energyTabContent model proteinDesign tableWidth =
+    let
+        -- helper to convert simple kv pairs into DesignDetails entries
+        maybeFloatToString mv =
+            case mv of
+                Just f ->
+                    String.fromFloat f
+
+                Nothing ->
+                    "-"
+
+        kvToDetail ( k, mv ) =
+            { header = k
+            , property = paragraph Style.monospacedFont [ text <| maybeFloatToString mv ]
+            }
+
+        -- build metric pairs from the decoded Energy record
+        budePairs =
+            case proteinDesign.physicochem.energy.bude of
+                Nothing ->
+                    [ ( "Total", Nothing ), ( "Steric", Nothing ), ( "Desolvation", Nothing ), ( "Charge", Nothing ) ]
+
+                Just b ->
+                    [ ( "Total", b.budeff_total ), ( "Steric", b.budeff_steric ), ( "Desolvation", b.budeff_desolvation ), ( "Charge", b.budeff_charge ) ]
+
+        dfire2Pairs =
+            case proteinDesign.physicochem.energy.dfire2 of
+                Nothing ->
+                    [ ( "Total", Nothing ) ]
+
+                Just d ->
+                    [ ( "Total", d.dfire2_total ) ]
+
+        evoef2Pairs =
+            case proteinDesign.physicochem.energy.evoef2 of
+                Nothing ->
+                    [ ( "Total", Nothing ), ( "Reference", Nothing ), ( "Intra Residue", Nothing ), ( "Inter Residue (Same Chain)", Nothing ), ( "Inter Residue (Different Chains)", Nothing ) ]
+
+                Just e ->
+                    [ ( "Total", e.evoef2_total ), ( "Reference", e.evoef2_ref_total ), ( "Intra Residue", e.evoef2_intraR_total ), ( "Inter Residue (Same Chain)", e.evoef2_interS_total ), ( "Inter Residue (Different Chains)", e.evoef2_interD_total ) ]
+
+        rosettaPairs =
+            case proteinDesign.physicochem.energy.rosetta of
+                Nothing ->
+                    [ ( "Total", Nothing ), ( "vdW (Attractive)", Nothing ), ( "vdW (Repulsive)", Nothing ), ( "vdW (Repulsive, Intra Residue)", Nothing ), ( "Electrostatics", Nothing ), ( "Solvation (Isotropic)", Nothing ), ( "Solvation (Anisotropic, Polar Atoms)", Nothing ), ( "Solvation (Isotropic, Intra Residue)", Nothing ), ( "Hydrogen Bonding (Long Range, Backbone)", Nothing ), ( "Hydrogen Bonding (Short Range, Backbone)", Nothing ), ( "Hydrogen Bonding (Backbone-Sidechain)", Nothing ), ( "Hydrogen Bonding (Sidechain-Sidechain)", Nothing ), ( "Disulfide Bridges", Nothing ), ( "Backbone Torsion Preference", Nothing ), ( "Amino Acid Propensity", Nothing ), ( "Dunbrack Rotamer", Nothing ), ( "Omega Penalty", Nothing ), ( "Open Proline Penalty", Nothing ), ( "Tyrosine χ3 Dihedral Angle Penalty", Nothing ) ]
+
+                Just r ->
+                    [ ( "Total", r.rosetta_total ), ( "vdW (Attractive)", r.rosetta_vdw_atr ), ( "vdW (Repulsive)", r.rosetta_vdw_rep ), ( "vdW (Repulsive, Intra Residue)", r.rosetta_vdw_intra_rep ), ( "Electrostatics", r.rosetta_electrostatics ), ( "Solvation (Isotropic)", r.rosetta_solvation_isotropic ), ( "Solvation (Anisotropic, Polar Atoms)", r.rosetta_solvation_anisotropic_polar_atoms ), ( "Solvation (Isotropic, Intra Residue)", r.rosetta_solvation_isotropic_iR ), ( "Hydrogen Bonding (Long Range, Backbone)", r.rosetta_hbond_lr_bb ), ( "Hydrogen Bonding (Short Range, Backbone)", r.rosetta_hbond_sr_bb ), ( "Hydrogen Bonding (Backbone-Sidechain)", r.rosetta_hbond_bb_sc ), ( "Hydrogen Bonding (Sidechain-Sidechain)", r.rosetta_hbond_sc ), ( "Disulfide Bridges", r.rosetta_disulfides ), ( "Backbone Torsion Preference", r.rosetta_backbone_torsion_preference ), ( "Amino Acid Propensity", r.rosetta_aa_propensity ), ( "Dunbrack Rotamer", r.rosetta_dunbrack_rotamer ), ( "Omega Penalty", r.rosetta_omega ), ( "Open Proline Penalty", r.rosetta_pro_close ), ( "Tyrosine χ3 Dihedral Angle Penalty", r.rosetta_yhh_planarity ) ]
+
+        buildDetailsFromPairs pairs =
+            List.map kvToDetail pairs
+    in
+    case model.activeEnergyTab of
+        Rosetta ->
+            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs rosettaPairs) tableWidth)
+
+        EvoEF2 ->
+            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs evoef2Pairs) tableWidth)
+
+        BUDE ->
+            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs budePairs) tableWidth)
+
+        DFIRE2 ->
+            el [ width (px tableWidth) ] (detailsTable (buildDetailsFromPairs dfire2Pairs) tableWidth)
 
 
 designDetailsBodyStructure : ProteinDesign -> Int -> Int -> Element Msg
@@ -1042,55 +1134,54 @@ designDetailsBodySequence proteinDesign screenWidth =
         ]
 
 
-designDetailsBodyParagraphs : ProteinDesign -> Int -> Element Msg
-designDetailsBodyParagraphs proteinDesign screenWidth =
+designDetailsBodyParagraphs : Model -> ProteinDesign -> Int -> Element Msg
+designDetailsBodyParagraphs model proteinDesign screenWidth =
+    let
+        tableWidth =
+            screenWidth - 40
+
+        aaData =
+            proteinDesign.physicochem.aa_composition
+
+        ssData =
+            proteinDesign.physicochem.ss_composition
+    in
     column
         [ width fill
         , spacing 20
         ]
-        [ paragraph Style.h2Font [ text "Amino acid composition" ]
-        , let
-            tableWidth =
-                if screenWidth < 900 then
-                    screenWidth - 40
+        [ if List.length aaData == 0 then
+            text ""
 
-                else
-                    (screenWidth * 2) // 3
-
-            aaData =
-                proteinDesign.physicochem.aa_composition
-          in
-          html <|
+          else
+            paragraph Style.h2Font [ text "Amino acid composition" ]
+        , html <|
             Html.node "div"
                 [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
                 [ renderAminoAcidHtml aaData tableWidth |> Html.map identity ]
-        , paragraph Style.h2Font [ text "Secondary structure composition" ]
-        , let
-            tableWidth =
-                if screenWidth < 900 then
-                    screenWidth - 40
+        , if List.length ssData == 0 then
+            text ""
 
-                else
-                    (screenWidth * 2) // 3
-
-            ssData =
-                proteinDesign.physicochem.ss_composition
-          in
-          html <|
+          else
+            paragraph Style.h2Font [ text "Secondary structure composition" ]
+        , html <|
             Html.node "div"
                 [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
                 [ renderSecondaryStructureHtml ssData tableWidth |> Html.map identity ]
-        , paragraph Style.h2Font [ text "Energy" ]
-        , let
-            tableWidth =
-                if screenWidth < 900 then
-                    screenWidth - 40
-
-                else
-                    (screenWidth * 2) // 3
-          in
-          renderKeyValueMaybeTable (List.map (\(k,v) -> ( k, Just v )) (flattenEnergy proteinDesign.physicochem.energy))
-            tableWidth
+        , paragraph Style.h2Font
+            [ text "Energy" ]
+        , column
+            [ width fill
+            , Background.color <| rgb255 250 250 250
+            , Border.rounded 8
+            , Border.width 1
+            , Border.color <| rgb255 220 220 220
+            , paddingXY 20 20
+            , alignTop
+            ]
+            [ energyTabBar model.activeEnergyTab screenWidth
+            , el [ width fill, paddingXY 0 4 ] (energyTabContent model proteinDesign tableWidth)
+            ]
         , paragraph
             Style.h2Font
             [ text "Description"
@@ -1157,9 +1248,6 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
         pictureWidth =
             screenWidth - tableWidth - 60
 
-        cardPadding =
-            16
-
         -- height available for the tab content inside the card (subtract tabbar + paddings)
         contentHeight =
             max 120 (topAreaHeight - 80)
@@ -1179,11 +1267,11 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                 , Border.rounded 8
                 , Border.width 1
                 , Border.color <| rgb255 220 220 220
-                , paddingXY cardPadding cardPadding
+                , paddingXY 20 20
                 , alignTop
                 ]
-                [ tabBar model.activeTab screenWidth
-                , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (tabContent model proteinDesign tableWidth contentHeight)
+                [ detailsTabBar model.activeDetailsTab screenWidth
+                , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (detailsTabContent model proteinDesign tableWidth contentHeight)
                 ]
             , column []
                 [ el
@@ -1206,5 +1294,5 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
             ]
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         , designDetailsBodySequence proteinDesign screenWidth
-        , designDetailsBodyParagraphs proteinDesign screenWidth
+        , designDetailsBodyParagraphs model proteinDesign screenWidth
         ]
