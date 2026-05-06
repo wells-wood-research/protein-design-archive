@@ -1270,7 +1270,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
 
         -- height available for the tab content inside the card (subtract tabbar + paddings)
         contentHeight =
-            max 120 (topAreaHeight - 80)
+            max 120 (topAreaHeight - 40)
 
         elementType =
             if screenWidth < 900 then
