@@ -1140,8 +1140,8 @@ designDetailsBodySequence proteinDesign screenWidth =
         ]
 
 
-designDetailsBodyParagraphs : Model -> ProteinDesign -> Int -> Element Msg
-designDetailsBodyParagraphs model proteinDesign screenWidth =
+designDetailsBodyComposition : Model -> ProteinDesign -> Int -> Element Msg
+designDetailsBodyComposition model proteinDesign screenWidth =
     let
         isWide =
             screenWidth > 860
@@ -1232,7 +1232,13 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
     column
         [ width fill, spacing 20 ]
         [ compositionLayout
-        , if List.all (\comment -> comment == "") proteinDesign.review_comment then
+        ]
+
+
+designDetailsBodyCuration : ProteinDesign -> Int -> Element Msg
+designDetailsBodyCuration proteinDesign screenWidth =
+    column []
+        [ if List.all (\comment -> comment == "") proteinDesign.review_comment then
             text ""
 
           else
@@ -1372,6 +1378,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
         )
         [ designDetailsBodyTop shared model proteinDesign layoutMode leftWidth rightWidth contentHeight
         , designDetailsBodySequence proteinDesign screenWidth
-        , designDetailsBodyParagraphs model proteinDesign screenWidth
+        , designDetailsBodyComposition model proteinDesign screenWidth
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
+        , designDetailsBodyCuration proteinDesign screenWidth
         ]
