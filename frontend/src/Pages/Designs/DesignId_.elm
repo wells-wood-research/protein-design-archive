@@ -728,10 +728,13 @@ renderAminoAcidHtml kvs tableWidth =
     Html.node "div" [] (List.map rowFor enriched)
 
 
-renderSecondaryStructureHtml : List ( String, Float ) -> Int -> Html.Html Msg
-renderSecondaryStructureHtml kvs tableWidth =
+renderSecondaryStructureHtml : List ( String, Float ) -> Float -> Int -> Bool -> Html.Html Msg
+renderSecondaryStructureHtml kvs barHeight barWidth forceVertical =
     let
-        -- structure color mapping
+        -- Determine vertical mode either from explicit flag or fallback threshold
+        isVertical =
+            forceVertical || (barWidth > 450)
+
         colorFor s =
             case s of
                 "alpha_helix" ->
@@ -771,64 +774,123 @@ renderSecondaryStructureHtml kvs tableWidth =
         enriched =
             List.map (\tuple -> ( Tuple.first tuple, Tuple.second tuple * multiplier )) kvs
 
+        -- Build segments either as vertically stacked blocks (width = barWidth px) or horizontal blocks (height fixed)
         segments =
-            enriched
-                |> List.filter (\( name, v ) -> v > 0)
-                |> List.sortBy (\( _, v ) -> -v)
-                |> List.map
-                    (\( name, v ) ->
-                        let
-                            px =
-                                String.fromInt (Basics.round (toFloat tableWidth * (v / 100.0))) ++ "px"
+            if isVertical then
+                enriched
+                    |> List.filter (\( _, v ) -> v > 0)
+                    |> List.sortBy (\( _, v ) -> -v)
+                    |> List.map
+                        (\( name, v ) ->
+                            let
+                                heightPx =
+                                    String.fromInt (Basics.round (barHeight * (v / 100.0))) ++ "px"
 
-                            titleAttr =
-                                name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
+                                titleAttr =
+                                    name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
 
-                            color =
-                                colorFor name
+                                color =
+                                    colorFor name
 
-                            -- short readable label
-                            label =
-                                case name of
-                                    "alpha_helix" ->
-                                        "Helix"
+                                label =
+                                    case name of
+                                        "alpha_helix" ->
+                                            "Helix"
 
-                                    "beta_strand" ->
-                                        "Strand"
+                                        "beta_strand" ->
+                                            "Strand"
 
-                                    "beta_bridge" ->
-                                        "Bridge"
+                                        "beta_bridge" ->
+                                            "Bridge"
 
-                                    "3_10_helix" ->
-                                        "3_10"
+                                        "3_10_helix" ->
+                                            "3_10"
 
-                                    "pi_helix" ->
-                                        "pi"
+                                        "pi_helix" ->
+                                            "pi"
 
-                                    "turn" ->
-                                        "Turn"
+                                        "turn" ->
+                                            "Turn"
 
-                                    "bend" ->
-                                        "Bend"
+                                        "bend" ->
+                                            "Bend"
 
-                                    "loop" ->
-                                        "Loop"
+                                        "loop" ->
+                                            "Loop"
 
-                                    other ->
-                                        other
+                                        other ->
+                                            other
 
-                            styleAttr =
-                                "display:inline-block; height:30px; width:" ++ px ++ "; background-color:" ++ color ++ "; position:relative; overflow:hidden;"
+                                styleAttr =
+                                    "display:block; width:" ++ String.fromInt barWidth ++ "px; height:" ++ heightPx ++ "; background-color:" ++ color ++ "; position:relative; overflow:hidden;"
 
-                            innerStyle =
-                                "display:flex; align-items:center; justify-content:center; height:30px; color:white; font-weight:bold; font-size:12px; text-shadow:0 0 3px rgba(0,0,0,0.6); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; width:100%; padding:0 6px; box-sizing:border-box;"
-                        in
-                        Html.node "div"
-                            [ HAtt.attribute "style" styleAttr, HAtt.title titleAttr, HAtt.style "border-radius" "3px" ]
-                            [ Html.node "div" [ HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
-                    )
+                                innerStyle =
+                                    "display:flex; align-items:center; justify-content:center; height:100%; color:white; font-weight:bold; font-size:11px; text-shadow:0 0 3px rgba(0,0,0,0.6); overflow:hidden;"
+                            in
+                            Html.node "div"
+                                [ HAtt.attribute "style" styleAttr, HAtt.title titleAttr ]
+                                [ Html.node "div" [ HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
+                        )
+
+            else
+                enriched
+                    |> List.filter (\( _, v ) -> v > 0)
+                    |> List.sortBy (\( _, v ) -> -v)
+                    |> List.map
+                        (\( name, v ) ->
+                            let
+                                widthPx =
+                                    String.fromInt (Basics.round (toFloat barWidth * (v / 100.0))) ++ "px"
+
+                                titleAttr =
+                                    name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
+
+                                color =
+                                    colorFor name
+
+                                label =
+                                    case name of
+                                        "alpha_helix" ->
+                                            "Helix"
+
+                                        "beta_strand" ->
+                                            "Strand"
+
+                                        "beta_bridge" ->
+                                            "Bridge"
+
+                                        "3_10_helix" ->
+                                            "3_10"
+
+                                        "pi_helix" ->
+                                            "pi"
+
+                                        "turn" ->
+                                            "Turn"
+
+                                        "bend" ->
+                                            "Bend"
+
+                                        "loop" ->
+                                            "Loop"
+
+                                        other ->
+                                            other
+
+                                styleAttr =
+                                    "display:inline-block; height:30px; width:" ++ widthPx ++ "; background-color:" ++ color ++ "; position:relative; overflow:hidden;"
+
+                                innerStyle =
+                                    "display:flex; align-items:center; justify-content:center; height:100%; color:white; font-weight:bold; font-size:11px; text-shadow:0 0 3px rgba(0,0,0,0.6); overflow:hidden;"
+                            in
+                            Html.node "div"
+                                [ HAtt.attribute "style" styleAttr, HAtt.title titleAttr ]
+                                [ Html.node "div" [ HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
+                        )
     in
-    Html.node "div" [] segments
+    Html.node "div"
+        [ HAtt.style "border-radius" "4px", HAtt.style "overflow" "hidden" ]
+        segments
 
 
 detailsTabContent : Model -> ProteinDesign -> Int -> Int -> Element Msg
@@ -1119,53 +1181,106 @@ designDetailsBodySequence proteinDesign screenWidth =
 designDetailsBodyParagraphs : Model -> ProteinDesign -> Int -> Element Msg
 designDetailsBodyParagraphs model proteinDesign screenWidth =
     let
+        isWide =
+            screenWidth > 700
+
+        -- If wide, we split width between AA list and the vertical SS bar
         tableWidth =
-            screenWidth - 60
+            if isWide then
+                screenWidth - 150
+
+            else
+                screenWidth - 60
 
         aaData =
             proteinDesign.physicochem.aa_composition
 
         ssData =
             proteinDesign.physicochem.ss_composition
+
+        -- Helper to render AA/SS sections with smart width and stacking decisions
+        aaHeaderText =
+            "Amino acid composition"
+
+        ssHeaderText =
+            "2° structure composition"
+
+        charPx =
+            9
+
+        aaHeaderPx =
+            (String.length aaHeaderText * charPx) + 128
+
+        ssHeaderPx =
+            (String.length ssHeaderText * charPx) + 128
+
+        gapPx =
+            40
+
+        aaRows =
+            List.length aaData
+
+        aaHeightPx =
+            max 180 (aaRows * 32 + 40)
+
+        -- Decide whether headers can sit side-by-side without wrapping
+        canSideBySide =
+            isWide && (tableWidth >= (aaHeaderPx + ssHeaderPx + gapPx))
+
+        -- If side-by-side, allocate secondary structure column just enough for its header,
+        -- and let AA fill the remaining space. If not side-by-side, stack SS below AA.
+        ( aaPxWidth, ssPxWidth, ssIsVertical ) =
+            if canSideBySide then
+                ( tableWidth - ssHeaderPx, ssHeaderPx, True )
+
+            else
+                ( tableWidth, min tableWidth ssHeaderPx, False )
+
+        aaSection =
+            column [ width (px aaPxWidth), alignTop, height <| px aaHeightPx ]
+                [ if List.length aaData == 0 then
+                    text ""
+
+                  else
+                    paragraph (Style.h2Font ++ [ width (px aaPxWidth), htmlAttribute (HAtt.style "white-space" "nowrap") ]) [ text aaHeaderText ]
+                , el [ width (px aaPxWidth), height fill, paddingXY 0 12 ] (html <| renderAminoAcidHtml aaData aaPxWidth)
+                ]
+
+        -- Helper to render SS section; header width limited to ssPxWidth so it won't wrap
+        ssSection =
+            column [ alignTop, spacing 4, width (px ssPxWidth), height <| px aaHeightPx ]
+                [ if List.length ssData == 0 then
+                    text ""
+
+                  else
+                    paragraph (Style.h2Font ++ [ width (px ssPxWidth), htmlAttribute (HAtt.style "white-space" "nowrap") ]) [ text ssHeaderText ]
+
+                -- Match stacked bar width to header width; pass ssIsVertical flag so renderer knows orientation
+                , el [ centerX, width (px ssPxWidth), height fill, paddingXY 0 12 ] (html <| renderSecondaryStructureHtml ssData (toFloat aaHeightPx) ssPxWidth ssIsVertical)
+                ]
+
+        -- Dynamic layout container: row when side-by-side, column when stacked
+        compositionLayout =
+            if isWide then
+                row [ width fill, spacing 40, alignTop, paddingXY 0 20 ] [ aaSection, ssSection ]
+
+            else
+                column [ width fill, spacing 30, paddingXY 0 20 ] [ aaSection, ssSection ]
     in
     column
-        [ width fill
-        ]
-        [ column []
-            [ if List.length aaData == 0 then
-                text ""
-
-              else
-                paragraph Style.h2Font [ text "Amino acid composition" ]
-            , html <|
-                Html.node "div"
-                    [ HAtt.style "width" (String.fromInt tableWidth ++ "px"), HAtt.style "padding-top" "20px" ]
-                    [ renderAminoAcidHtml aaData tableWidth |> Html.map identity ]
-            ]
-        , column []
-            [ if List.length ssData == 0 then
-                text ""
-
-              else
-                paragraph (paddingXY 0 20 :: Style.h2Font) [ text "Secondary structure composition" ]
-            , html <|
-                Html.node "div"
-                    [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
-                    [ renderSecondaryStructureHtml ssData tableWidth |> Html.map identity ]
-            ]
-        , paragraph (paddingXY 0 20 :: Style.h2Font)
-            [ text "Energy" ]
+        [ width fill, spacing 20 ]
+        [ compositionLayout
+        , paragraph (paddingXY 0 20 :: Style.h2Font) [ text "Energy" ]
         , column
-            [ width <| px tableWidth
+            [ width <| px (screenWidth - 60)
             , Background.color <| rgb255 250 250 250
             , Border.rounded 8
             , Border.width 1
             , Border.color <| rgb255 220 220 220
             , paddingXY 20 20
-            , alignTop
             ]
-            [ energyTabBar model.activeEnergyTab tableWidth
-            , el [ width fill, paddingXY 0 4 ] (energyTabContent model proteinDesign tableWidth)
+            [ energyTabBar model.activeEnergyTab (screenWidth - 60)
+            , el [ width fill, paddingXY 0 4 ] (energyTabContent model proteinDesign (screenWidth - 60))
             ]
         , if proteinDesign.abstract == "No description found." then
             text ""
@@ -1326,7 +1441,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                     (downloadArea shared proteinDesign.pdb layoutMode)
                 ]
             ]
-        , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         , designDetailsBodySequence proteinDesign screenWidth
         , designDetailsBodyParagraphs model proteinDesign screenWidth
+        , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         ]
