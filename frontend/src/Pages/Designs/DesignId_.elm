@@ -86,7 +86,7 @@ init mSharedScreenWidthF mSharedScreenHeightF designId =
       , mScreenHeightF = mSharedScreenHeightF
       , dataDownload = NotAsked
       , activeDetailsTab = Publication
-      , activeEnergyTab = BUDE
+      , activeEnergyTab = Rosetta
       }
     , Effect.batch
         [ Effect.sendCmd (Task.attempt ViewportResult Browser.Dom.getViewport)
@@ -1160,7 +1160,6 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
     in
     column
         [ width fill
-        , spacing 20
         ]
         [ column []
             [ if List.length aaData == 0 then
@@ -1178,13 +1177,13 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
                 text ""
 
               else
-                paragraph Style.h2Font [ text "Secondary structure composition" ]
+                paragraph (paddingXY 0 20 :: Style.h2Font) [ text "Secondary structure composition" ]
             , html <|
                 Html.node "div"
-                    [ HAtt.style "width" (String.fromInt tableWidth ++ "px"), HAtt.style "padding-top" "20px" ]
+                    [ HAtt.style "width" (String.fromInt tableWidth ++ "px") ]
                     [ renderSecondaryStructureHtml ssData tableWidth |> Html.map identity ]
             ]
-        , paragraph Style.h2Font
+        , paragraph (paddingXY 0 20 :: Style.h2Font)
             [ text "Energy" ]
         , column
             [ width <| px tableWidth
@@ -1198,25 +1197,33 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
             [ energyTabBar model.activeEnergyTab tableWidth
             , el [ width fill, paddingXY 0 4 ] (energyTabContent model proteinDesign tableWidth)
             ]
-        , paragraph
-            Style.h2Font
-            [ text "Description"
-            ]
-        , paragraph
-            (Style.monospacedFont
-                ++ [ Font.justify
-                   , width (fill |> maximum screenWidth)
-                   ]
-            )
-            [ proteinDesign.abstract
-                |> text
-            ]
+        , if proteinDesign.abstract == "No description found." then
+            text ""
+
+          else
+            paragraph
+                (paddingXY 0 20 :: Style.h2Font)
+                [ text "Description"
+                ]
+        , if proteinDesign.abstract == "No description found." then
+            text ""
+
+          else
+            paragraph
+                (Style.monospacedFont
+                    ++ [ Font.justify
+                       , width (fill |> maximum screenWidth)
+                       ]
+                )
+                [ proteinDesign.abstract
+                    |> text
+                ]
         , if List.all (\comment -> comment == "") proteinDesign.review_comment then
             text ""
 
           else
             paragraph
-                Style.h2Font
+                (paddingXY 0 20 :: Style.h2Font)
                 [ text "Curation comments"
                 ]
         , column
