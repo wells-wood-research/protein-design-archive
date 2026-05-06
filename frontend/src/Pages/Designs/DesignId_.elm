@@ -729,37 +729,37 @@ renderAminoAcidHtml kvs tableWidth =
 
 
 renderSecondaryStructureHtml : List ( String, Float ) -> Float -> Int -> Bool -> Html.Html Msg
-renderSecondaryStructureHtml kvs barHeight barWidth forceVertical =
+renderSecondaryStructureHtml kvs barHeight barWidth isVertical =
     let
-        -- Determine vertical mode either from explicit flag or fallback threshold
-        isVertical =
-            forceVertical || (barWidth > 450)
-
-        colorFor s =
-            case s of
+        -- 1. Centralized Metadata
+        infoFor name =
+            case name of
                 "alpha_helix" ->
-                    "#1f77b4"
+                    ( "#1f77b4", "Helix" )
 
                 "beta_strand" ->
-                    "#ff7f0e"
+                    ( "#ff7f0e", "Strand" )
 
                 "beta_bridge" ->
-                    "#2ca02c"
+                    ( "#2ca02c", "Bridge" )
 
                 "3_10_helix" ->
-                    "#d62728"
+                    ( "#d62728", "3_10" )
 
                 "pi_helix" ->
-                    "#9467bd"
+                    ( "#9467bd", "pi" )
 
                 "turn" ->
-                    "#8c564b"
+                    ( "#8c564b", "Turn" )
 
                 "bend" ->
-                    "#e377c2"
+                    ( "#e377c2", "Bend" )
+
+                "loop" ->
+                    ( "#7f7f7f", "Loop" )
 
                 _ ->
-                    "#7f7f7f"
+                    ( "#7f7f7f", name )
 
         total =
             kvs |> List.map Tuple.second |> List.sum
@@ -771,122 +771,52 @@ renderSecondaryStructureHtml kvs barHeight barWidth forceVertical =
             else
                 1.0
 
-        enriched =
-            List.map (\tuple -> ( Tuple.first tuple, Tuple.second tuple * multiplier )) kvs
+        renderSegment ( name, rawValue ) =
+            let
+                v =
+                    rawValue * multiplier
 
-        -- Build segments either as vertically stacked blocks (width = barWidth px) or horizontal blocks (height fixed)
+                ( color, label ) =
+                    infoFor name
+
+                -- Calculate dimensions based on orientation
+                dimStyle =
+                    if isVertical then
+                        [ ( "display", "block" )
+                        , ( "width", String.fromInt barWidth ++ "px" )
+                        , ( "height", String.fromInt (Basics.round (barHeight * (v / 100.0))) ++ "px" )
+                        ]
+
+                    else
+                        [ ( "display", "inline-block" )
+                        , ( "height", "100px" )
+                        , ( "width", String.fromInt (Basics.round (toFloat barWidth * (v / 100.0))) ++ "px" )
+                        ]
+
+                styleAttr =
+                    dimStyle
+                        ++ [ ( "background-color", color )
+                           , ( "position", "relative" )
+                           , ( "overflow", "hidden" )
+                           ]
+                        |> List.map (\( k, val ) -> k ++ ":" ++ val)
+                        |> String.join ";"
+
+                innerStyle =
+                    "display:flex; align-items:center; justify-content:center; height:100%; color:white; font-weight:bold; font-size:18px; text-shadow:0 0 3px rgba(0,0,0,0.6); overflow:hidden;"
+
+                titleAttr =
+                    name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
+            in
+            Html.node "div"
+                [ HAtt.attribute "style" styleAttr, HAtt.title titleAttr ]
+                [ Html.node "div" [ HAtt.style "display" "flex", HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
+
         segments =
-            if isVertical then
-                enriched
-                    |> List.filter (\( _, v ) -> v > 0)
-                    |> List.sortBy (\( _, v ) -> -v)
-                    |> List.map
-                        (\( name, v ) ->
-                            let
-                                heightPx =
-                                    String.fromInt (Basics.round (barHeight * (v / 100.0))) ++ "px"
-
-                                titleAttr =
-                                    name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
-
-                                color =
-                                    colorFor name
-
-                                label =
-                                    case name of
-                                        "alpha_helix" ->
-                                            "Helix"
-
-                                        "beta_strand" ->
-                                            "Strand"
-
-                                        "beta_bridge" ->
-                                            "Bridge"
-
-                                        "3_10_helix" ->
-                                            "3_10"
-
-                                        "pi_helix" ->
-                                            "pi"
-
-                                        "turn" ->
-                                            "Turn"
-
-                                        "bend" ->
-                                            "Bend"
-
-                                        "loop" ->
-                                            "Loop"
-
-                                        other ->
-                                            other
-
-                                styleAttr =
-                                    "display:block; width:" ++ String.fromInt barWidth ++ "px; height:" ++ heightPx ++ "; background-color:" ++ color ++ "; position:relative; overflow:hidden;"
-
-                                innerStyle =
-                                    "display:flex; align-items:center; justify-content:center; height:100%; color:white; font-weight:bold; font-size:11px; text-shadow:0 0 3px rgba(0,0,0,0.6); overflow:hidden;"
-                            in
-                            Html.node "div"
-                                [ HAtt.attribute "style" styleAttr, HAtt.title titleAttr ]
-                                [ Html.node "div" [ HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
-                        )
-
-            else
-                enriched
-                    |> List.filter (\( _, v ) -> v > 0)
-                    |> List.sortBy (\( _, v ) -> -v)
-                    |> List.map
-                        (\( name, v ) ->
-                            let
-                                widthPx =
-                                    String.fromInt (Basics.round (toFloat barWidth * (v / 100.0))) ++ "px"
-
-                                titleAttr =
-                                    name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
-
-                                color =
-                                    colorFor name
-
-                                label =
-                                    case name of
-                                        "alpha_helix" ->
-                                            "Helix"
-
-                                        "beta_strand" ->
-                                            "Strand"
-
-                                        "beta_bridge" ->
-                                            "Bridge"
-
-                                        "3_10_helix" ->
-                                            "3_10"
-
-                                        "pi_helix" ->
-                                            "pi"
-
-                                        "turn" ->
-                                            "Turn"
-
-                                        "bend" ->
-                                            "Bend"
-
-                                        "loop" ->
-                                            "Loop"
-
-                                        other ->
-                                            other
-
-                                styleAttr =
-                                    "display:inline-block; height:30px; width:" ++ widthPx ++ "; background-color:" ++ color ++ "; position:relative; overflow:hidden;"
-
-                                innerStyle =
-                                    "display:flex; align-items:center; justify-content:center; height:100%; color:white; font-weight:bold; font-size:11px; text-shadow:0 0 3px rgba(0,0,0,0.6); overflow:hidden;"
-                            in
-                            Html.node "div"
-                                [ HAtt.attribute "style" styleAttr, HAtt.title titleAttr ]
-                                [ Html.node "div" [ HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
-                        )
+            kvs
+                |> List.filter (\( _, v ) -> v > 0)
+                |> List.sortBy (\( _, v ) -> -v)
+                |> List.map renderSegment
     in
     Html.node "div"
         [ HAtt.style "border-radius" "4px", HAtt.style "overflow" "hidden" ]
@@ -1182,7 +1112,7 @@ designDetailsBodyParagraphs : Model -> ProteinDesign -> Int -> Element Msg
 designDetailsBodyParagraphs model proteinDesign screenWidth =
     let
         isWide =
-            screenWidth > 700
+            screenWidth > 860
 
         -- If wide, we split width between AA list and the vertical SS bar
         tableWidth =
@@ -1234,7 +1164,7 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
                 ( tableWidth - ssHeaderPx, ssHeaderPx, True )
 
             else
-                ( tableWidth, min tableWidth ssHeaderPx, False )
+                ( tableWidth, tableWidth, False )
 
         aaSection =
             column [ width (px aaPxWidth), alignTop, height <| px aaHeightPx ]
@@ -1243,12 +1173,12 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
 
                   else
                     paragraph (Style.h2Font ++ [ width (px aaPxWidth), htmlAttribute (HAtt.style "white-space" "nowrap") ]) [ text aaHeaderText ]
-                , el [ width (px aaPxWidth), height fill, paddingXY 0 12 ] (html <| renderAminoAcidHtml aaData aaPxWidth)
+                , el [ width (px aaPxWidth), height fill, paddingXY 0 20 ] (html <| renderAminoAcidHtml aaData aaPxWidth)
                 ]
 
         -- Helper to render SS section; header width limited to ssPxWidth so it won't wrap
         ssSection =
-            column [ alignTop, spacing 4, width (px ssPxWidth), height <| px aaHeightPx ]
+            column [ alignTop, spacing 4, width (px ssPxWidth) ]
                 [ if List.length ssData == 0 then
                     text ""
 
@@ -1256,7 +1186,7 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
                     paragraph (Style.h2Font ++ [ width (px ssPxWidth), htmlAttribute (HAtt.style "white-space" "nowrap") ]) [ text ssHeaderText ]
 
                 -- Match stacked bar width to header width; pass ssIsVertical flag so renderer knows orientation
-                , el [ centerX, width (px ssPxWidth), height fill, paddingXY 0 12 ] (html <| renderSecondaryStructureHtml ssData (toFloat aaHeightPx) ssPxWidth ssIsVertical)
+                , el [ centerX, width (px ssPxWidth), height fill, paddingXY 0 20 ] (html <| renderSecondaryStructureHtml ssData (toFloat aaHeightPx) ssPxWidth ssIsVertical)
                 ]
 
         -- Dynamic layout container: row when side-by-side, column when stacked
@@ -1265,12 +1195,12 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
                 row [ width fill, spacing 40, alignTop, paddingXY 0 20 ] [ aaSection, ssSection ]
 
             else
-                column [ width fill, spacing 30, paddingXY 0 20 ] [ aaSection, ssSection ]
+                column [ width fill, spacing 80, paddingEach { top = 0, bottom = 20, left = 0, right = 0 } ] [ aaSection, ssSection ]
     in
     column
         [ width fill, spacing 20 ]
         [ compositionLayout
-        , paragraph (paddingXY 0 20 :: Style.h2Font) [ text "Energy" ]
+        , paragraph (paddingEach { top = 0, bottom = 20, left = 0, right = 0 } :: Style.h2Font) [ text "Energy" ]
         , column
             [ width <| px (screenWidth - 60)
             , Background.color <| rgb255 250 250 250
