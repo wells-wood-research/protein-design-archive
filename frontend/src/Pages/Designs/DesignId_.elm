@@ -1045,130 +1045,71 @@ designDetailsBodyStructure proteinDesign screenWidth screenHeight =
 designDetailsBodySequence : ProteinDesign -> Int -> Element Msg
 designDetailsBodySequence proteinDesign screenWidth =
     let
-        elPadding =
-            10
+        -- We calculate relative percentages to ensure columns share the space
+        -- but we use px limits to ensure they are readable.
+        totalPadding =
+            60
 
-        narrowColumnWidth =
-            screenWidth // 10 - elPadding
+        tableWidth =
+            screenWidth - totalPadding
 
-        wideColumnWidth =
-            screenWidth - 4 * (narrowColumnWidth + elPadding)
+        narrowWidth =
+            max (tableWidth // 10) 80
+
+        wideWidth =
+            tableWidth - (4 * narrowWidth)
+
+        columnStyles =
+            Style.monospacedFont
+                ++ [ height fill
+                   , scrollbarX -- Restores your horizontal scroll per cell
+                   , paddingXY 15 10
+                   , width (px narrowWidth)
+                   ]
+
+        headerStyle =
+            [ Font.bold
+            , paddingXY 15 10
+            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
+            , Border.color <| rgb255 220 220 220
+            ]
     in
-    column [ spacing 20 ]
+    column
+        [ spacing 20
+        , width fill
+        , centerX
+
+        -- This ensures the entire Sequence block doesn't push the page wide
+        , htmlAttribute (HAtt.style "max-width" "calc(100vw - 60px)")
+        ]
         [ paragraph
             Style.h2Font
-            [ text "Sequence"
-            ]
+            [ text "Sequence" ]
         , table
-            [ padding 2
-            , width fill
+            [ width fill
+            , spacing 0
             ]
             { data = proteinDesign.chains
             , columns =
-                [ { header =
-                        wrappedRow
-                            [ Font.bold
-                            , paddingXY 5 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Chain ID" ]
-                  , width = px narrowColumnWidth
-                  , view =
-                        \chain ->
-                            wrappedRow
-                                (Style.monospacedFont
-                                    ++ [ width (fill |> maximum narrowColumnWidth)
-                                       , height fill
-                                       , scrollbarX
-                                       , paddingXY 5 10
-                                       ]
-                                )
-                                [ text chain.chain_id ]
+                [ { header = el headerStyle (text "Chain ID")
+                  , width = px narrowWidth
+                  , view = \chain -> el columnStyles (text chain.chain_id)
                   }
-                , { header =
-                        wrappedRow
-                            [ Font.bold
-                            , paddingXY 5 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Type" ]
-                  , width = px narrowColumnWidth
-                  , view =
-                        \chain ->
-                            wrappedRow
-                                (Style.monospacedFont
-                                    ++ [ width (fill |> maximum narrowColumnWidth)
-                                       , height fill
-                                       , scrollbarX
-                                       , paddingXY 5 10
-                                       ]
-                                )
-                                [ text chain.chain_type ]
+                , { header = el headerStyle (text "Type")
+                  , width = px narrowWidth
+                  , view = \chain -> el columnStyles (text chain.chain_type)
                   }
-                , { header =
-                        wrappedRow
-                            [ Font.bold
-                            , paddingXY 5 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Source" ]
-                  , width = px narrowColumnWidth
-                  , view =
-                        \chain ->
-                            wrappedRow
-                                (Style.monospacedFont
-                                    ++ [ width (fill |> maximum narrowColumnWidth)
-                                       , height fill
-                                       , scrollbarX
-                                       , paddingXY 5 10
-                                       ]
-                                )
-                                [ text <| String.toLower chain.chain_source ]
+                , { header = el headerStyle (text "Source")
+                  , width = px narrowWidth
+                  , view = \chain -> el columnStyles (text <| String.toLower chain.chain_source)
                   }
-                , { header =
-                        wrappedRow
-                            [ Font.bold
-                            , paddingXY 10 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Sequence" ]
-                  , width = px wideColumnWidth
-                  , view =
-                        \chain ->
-                            wrappedRow
-                                (Style.monospacedFont
-                                    ++ [ width (fill |> maximum wideColumnWidth)
-                                       , height fill
-                                       , scrollbarX
-                                       , paddingXY 5 10
-                                       ]
-                                )
-                                [ text chain.chain_seq_unnat ]
+                , { header = el headerStyle (text "Sequence")
+                  , width = px wideWidth
+                  , view = \chain -> el columnStyles (text chain.chain_seq_unnat)
                   }
-                , { header =
-                        wrappedRow
-                            [ Font.bold
-                            , paddingXY 5 10
-                            , Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }
-                            , Border.color <| rgb255 220 220 220
-                            ]
-                            [ text "Length" ]
-                  , width = px narrowColumnWidth
-                  , view =
-                        \chain ->
-                            wrappedRow
-                                (Style.monospacedFont
-                                    ++ [ width (fill |> maximum narrowColumnWidth)
-                                       , height fill
-                                       , scrollbarX
-                                       , paddingXY 5 10
-                                       ]
-                                )
-                                [ text <| String.fromInt chain.chain_length ]
+                , { header = el headerStyle (text "Length")
+                  , width = px narrowWidth
+                  , view = \chain -> el columnStyles (text <| String.fromInt chain.chain_length)
                   }
                 ]
             }
