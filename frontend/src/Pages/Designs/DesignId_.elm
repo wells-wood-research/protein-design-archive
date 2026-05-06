@@ -33,6 +33,20 @@ import Urls
 import View exposing (View)
 
 
+
+-- Spacing used between main sections with H2 headers
+
+
+sectionSpacing : Int
+sectionSpacing =
+    20
+
+
+buttonSpacing : Int
+buttonSpacing =
+    10
+
+
 page : Shared.Model -> Route { designId : String } -> Page Model Msg
 page shared route =
     Page.new
@@ -490,7 +504,7 @@ designDetailsHeader pdbCode path design screenWidth =
     in
     row
         [ width (fill |> maximum screenWidth)
-        , paddingXY 20 10
+        , paddingXY sectionSpacing sectionSpacing
         , centerY
         ]
         [ leftNav
@@ -513,7 +527,7 @@ detailsTabBar activeTab tableWidth =
         buttonAttributesBase =
             [ Border.width 0
             , Element.mouseOver [ Background.color <| rgb255 220 220 220 ]
-            , padding 10
+            , padding buttonSpacing
             ]
 
         buttonFor tab label =
@@ -558,7 +572,7 @@ energyTabBar activeTab tableWidth =
             , Border.width 0
             , Element.mouseOver [ Background.color <| rgb255 220 220 220 ]
             , Border.color <| rgb255 220 220 220
-            , padding 10
+            , padding buttonSpacing
             ]
 
         buttonFor tab label =
@@ -596,13 +610,13 @@ detailsTable detailsList tableWidth =
         [ width (fill |> maximum (tableWidth - 200)) ]
         { data = detailsList
         , columns =
-            [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Attribute" ]
+            [ { header = paragraph [ Font.bold, paddingXY buttonSpacing buttonSpacing, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Attribute" ]
               , width = px (tableWidth // 4)
-              , view = \category -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 5 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text category.header ] ]
+              , view = \category -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 5 - 20)), height fill, scrollbarX, paddingXY buttonSpacing buttonSpacing ] [ text category.header ] ]
               }
-            , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
+            , { header = paragraph [ Font.bold, paddingXY buttonSpacing buttonSpacing, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
               , width = px (tableWidth * 3 // 4)
-              , view = \detail -> paragraph Style.monospacedFont [ column [ width (px (tableWidth * 4 // 5 - 200)), height fill, scrollbarX, paddingXY 10 10 ] [ detail.property ] ]
+              , view = \detail -> paragraph Style.monospacedFont [ column [ width (px (tableWidth * 4 // 5 - 200)), height fill, scrollbarX, paddingXY buttonSpacing buttonSpacing ] [ detail.property ] ]
               }
             ]
         }
@@ -725,43 +739,55 @@ renderAminoAcidHtml kvs tableWidth =
                     [ Html.node "div"
                         [ HAtt.style "position" "relative" ]
                         [ Html.node "div" [ HAtt.attribute "style" barStyle ] []
-                        , Html.node "div" [ HAtt.style "position" "absolute", HAtt.style "left" "8px", HAtt.style "top" "0px", HAtt.style "height" "20px", HAtt.style "line-height" "20px", HAtt.style "color" "white", HAtt.style "font-weight" "bold" ] [ Html.text pctText ]
+                        , Html.node "div"
+                            [ HAtt.style "position" "absolute"
+                            , HAtt.style "right" "4px"
+                            , HAtt.style "top" "2px"
+                            , HAtt.style "padding" "0 6px"
+                            , HAtt.style "height" "16px"
+                            , HAtt.style "line-height" "16px"
+                            , HAtt.style "background-color" "rgba(255, 255, 255, 0.7)"
+                            , HAtt.style "font-weight" "bold"
+                            , HAtt.style "font-size" "11px"
+                            , HAtt.style "border-radius" "10px"
+                            ]
+                            [ Html.text pctText ]
                         ]
                     ]
                 ]
     in
-    Html.node "div" [] (List.map rowFor enriched)
+    Html.node "div" [ HAtt.style "height" "100%", HAtt.style "overflow-y" "auto" ] (List.map rowFor enriched)
 
 
-renderSecondaryStructureHtml : List ( String, Float ) -> Float -> Int -> Bool -> Html.Html Msg
-renderSecondaryStructureHtml kvs barHeight barWidth isVertical =
+renderSecondaryStructureHtml : List ( String, Float ) -> Int -> Bool -> Html.Html Msg
+renderSecondaryStructureHtml kvs barWidth isVertical =
     let
         -- 1. Centralized Metadata
         infoFor name =
             case name of
                 "alpha_helix" ->
-                    ( "#1f77b4", "Helix" )
+                    ( "#1f77b4", "α helix" )
 
                 "beta_strand" ->
-                    ( "#ff7f0e", "Strand" )
+                    ( "#ff7f0e", "β strand" )
 
                 "beta_bridge" ->
-                    ( "#2ca02c", "Bridge" )
+                    ( "#2ca02c", "β bridge" )
 
                 "3_10_helix" ->
-                    ( "#d62728", "3_10" )
+                    ( "#d62728", "3 10 helix" )
 
                 "pi_helix" ->
-                    ( "#9467bd", "pi" )
+                    ( "#9467bd", "π-helix" )
 
                 "turn" ->
-                    ( "#8c564b", "Turn" )
+                    ( "#8c564b", "turn" )
 
                 "bend" ->
-                    ( "#e377c2", "Bend" )
+                    ( "#e377c2", "bend" )
 
                 "loop" ->
-                    ( "#7f7f7f", "Loop" )
+                    ( "#7f7f7f", "loop" )
 
                 _ ->
                     ( "#7f7f7f", name )
@@ -784,38 +810,59 @@ renderSecondaryStructureHtml kvs barHeight barWidth isVertical =
                 ( color, label ) =
                     infoFor name
 
-                -- Calculate dimensions based on orientation
+                -- DIMENSION LOGIC FIX:
                 dimStyle =
                     if isVertical then
-                        [ ( "display", "block" )
+                        [ ( "flex", String.fromFloat v )
                         , ( "width", String.fromInt barWidth ++ "px" )
-                        , ( "height", String.fromInt (Basics.round (barHeight * (v / 100.0))) ++ "px" )
                         ]
 
                     else
-                        [ ( "display", "inline-block" )
-                        , ( "height", "100px" )
-                        , ( "width", String.fromInt (Basics.round (toFloat barWidth * (v / 100.0))) ++ "px" )
+                        [ ( "height", "100%" ) -- Fill the horizontal bar height
+                        , ( "width", String.fromFloat v ++ "%" ) -- Width based on percentage
                         ]
 
                 styleAttr =
                     dimStyle
                         ++ [ ( "background-color", color )
                            , ( "position", "relative" )
+                           , ( "display", "flex" )
+                           , ( "align-items", "center" )
+                           , ( "justify-content", "center" )
                            , ( "overflow", "hidden" )
                            ]
                         |> List.map (\( k, val ) -> k ++ ":" ++ val)
                         |> String.join ";"
 
+                rotationStyle =
+                    if isVertical then
+                        []
+
+                    else
+                        [ ( "transform", "rotate(-90deg)" )
+                        , ( "white-space", "nowrap" )
+                        , ( "display", "block" )
+                        ]
+
                 innerStyle =
-                    "display:flex; align-items:center; justify-content:center; height:100%; color:white; font-weight:bold; font-size:18px; text-shadow:0 0 3px rgba(0,0,0,0.6); overflow:hidden;"
+                    [ ( "color", "white" )
+                    , ( "font-size", "18px" )
+                    , ( "font-weight", "bold" ) -- Optional: makes it pop more
+                    , ( "white-space", "nowrap" )
+                    , ( "text-shadow", "0 0 4px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,1)" )
+                    , ( "font-family", "monospace" )
+                    , ( "pointer-events", "none" ) -- Ensures the title tooltip works through the label
+                    ]
+                        ++ rotationStyle
+                        |> List.map (\( k, val ) -> k ++ ":" ++ val)
+                        |> String.join ";"
 
                 titleAttr =
                     name ++ ": " ++ String.fromFloat (toFloat (Basics.round (v * 100.0)) / 100.0) ++ "%"
             in
             Html.node "div"
                 [ HAtt.attribute "style" styleAttr, HAtt.title titleAttr ]
-                [ Html.node "div" [ HAtt.style "display" "flex", HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
+                [ Html.node "div" [ HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
 
         segments =
             kvs
@@ -824,7 +871,21 @@ renderSecondaryStructureHtml kvs barHeight barWidth isVertical =
                 |> List.map renderSegment
     in
     Html.node "div"
-        [ HAtt.style "border-radius" "4px", HAtt.style "overflow" "hidden" ]
+        [ HAtt.style "display" "flex"
+
+        -- FLEX DIRECTION FIX:
+        , HAtt.style "flex-direction"
+            (if isVertical then
+                "column"
+
+             else
+                "row"
+            )
+        , HAtt.style "height" "100%"
+        , HAtt.style "width" "100%"
+        , HAtt.style "border-radius" "4px"
+        , HAtt.style "overflow" "hidden"
+        ]
         segments
 
 
@@ -945,7 +1006,7 @@ detailsTabContent model proteinDesign tableWidth contentHeight =
                     column [ width fill, spacing 10, paddingXY 0 4 ]
                         [ paragraph
                             (Style.monospacedFont
-                                ++ [ paddingXY 20 20
+                                ++ [ paddingXY sectionSpacing sectionSpacing
                                    , width (fill |> maximum (tableWidth - 50))
                                    ]
                             )
@@ -1027,24 +1088,14 @@ designDetailsBodyStructure : ProteinDesign -> Int -> Int -> Element Msg
 designDetailsBodyStructure proteinDesign screenWidth screenHeight =
     let
         picHeight =
-            round <| toFloat screenHeight * 0.7
+            round <| toFloat screenHeight * 0.95
     in
     column
         [ width fill
-        , spacing 20
         ]
-        [ column
-            [ width (fill |> maximum screenWidth)
-            , spacing 20
-            ]
-            [ column
-                Style.h2Font
-                [ text "Structure"
-                ]
-            ]
+        [ paragraph (Style.h2Font ++ [ paddingXY 0 sectionSpacing ]) [ text "Structure" ]
         , column
-            [ spacing 20
-            , centerX
+            [ centerX
             ]
             [ Keyed.el
                 [ width (fill |> maximum screenWidth)
@@ -1099,19 +1150,14 @@ designDetailsBodySequence proteinDesign screenWidth =
             ]
     in
     column
-        [ spacing 20
-        , width fill
+        [ width fill
         , centerX
-
-        -- This ensures the entire Sequence block doesn't push the page wide
-        , htmlAttribute (HAtt.style "max-width" "calc(100vw - 60px)")
         ]
         [ paragraph
-            Style.h2Font
+            (Style.h2Font ++ [ paddingXY 0 sectionSpacing ])
             [ text "Sequence" ]
         , table
             [ width fill
-            , spacing 0
             ]
             { data = proteinDesign.chains
             , columns =
@@ -1140,13 +1186,12 @@ designDetailsBodySequence proteinDesign screenWidth =
         ]
 
 
-designDetailsBodyComposition : Model -> ProteinDesign -> Int -> Element Msg
-designDetailsBodyComposition model proteinDesign screenWidth =
+designDetailsBodyComposition : ProteinDesign -> Int -> Element Msg
+designDetailsBodyComposition proteinDesign screenWidth =
     let
         isWide =
             screenWidth > 860
 
-        -- If wide, we split width between AA list and the vertical SS bar
         tableWidth =
             if isWide then
                 screenWidth - 150
@@ -1160,13 +1205,22 @@ designDetailsBodyComposition model proteinDesign screenWidth =
         ssData =
             proteinDesign.physicochem.ss_composition
 
-        -- Helper to render AA/SS sections with smart width and stacking decisions
         aaHeaderText =
             "Amino acid composition"
 
         ssHeaderText =
             "2° structure composition"
 
+        headerHeight =
+            36
+
+        aaRows =
+            List.length aaData
+
+        aaHeightPx =
+            max 180 (aaRows * 36 + headerHeight + (sectionSpacing * 2))
+
+        -- Logic parameters for the layout
         charPx =
             9
 
@@ -1179,60 +1233,67 @@ designDetailsBodyComposition model proteinDesign screenWidth =
         gapPx =
             40
 
-        aaRows =
-            List.length aaData
-
-        aaHeightPx =
-            max 180 (aaRows * 32 + 40)
-
-        -- Decide whether headers can sit side-by-side without wrapping
         canSideBySide =
             isWide && (tableWidth >= (aaHeaderPx + ssHeaderPx + gapPx))
 
-        -- If side-by-side, allocate secondary structure column just enough for its header,
-        -- and let AA fill the remaining space. If not side-by-side, stack SS below AA.
-        ( aaPxWidth, ssPxWidth, ssIsVertical ) =
+        -- Switched from a 4-item tuple to a Record to satisfy the compiler
+        layout =
             if canSideBySide then
-                ( tableWidth - ssHeaderPx, ssHeaderPx, True )
+                { aaWidth = tableWidth - ssHeaderPx
+                , ssWidth = ssHeaderPx
+                , ssHeight = px aaHeightPx
+                , isVertical = True
+                }
 
             else
-                ( tableWidth, tableWidth, False )
+                { aaWidth = tableWidth
+                , ssWidth = tableWidth
+                , ssHeight = shrink -- In column mode, don't force AA height on SS
+                , isVertical = False
+                }
 
         aaSection =
-            column [ width (px aaPxWidth), alignTop, height <| px aaHeightPx ]
-                [ if List.length aaData == 0 then
+            column [ width (px layout.aaWidth), alignTop, height (px aaHeightPx) ]
+                [ if List.isEmpty aaData then
                     text ""
 
                   else
-                    paragraph (Style.h2Font ++ [ width (px aaPxWidth), htmlAttribute (HAtt.style "white-space" "nowrap") ]) [ text aaHeaderText ]
-                , el [ width (px aaPxWidth), height fill, paddingXY 0 20 ] (html <| renderAminoAcidHtml aaData aaPxWidth)
+                    paragraph (Style.h2Font ++ [ paddingXY 0 sectionSpacing, width (px layout.aaWidth) ]) [ text aaHeaderText ]
+                , el [ width (px layout.aaWidth), paddingXY 0 sectionSpacing, height fill ]
+                    (html <| renderAminoAcidHtml aaData layout.aaWidth)
                 ]
 
-        -- Helper to render SS section; header width limited to ssPxWidth so it won't wrap
         ssSection =
-            column [ alignTop, spacing 4, width (px ssPxWidth) ]
-                [ if List.length ssData == 0 then
+            column [ alignTop, spacing 4, width (px layout.ssWidth), height layout.ssHeight ]
+                [ if List.isEmpty ssData then
                     text ""
 
                   else
-                    paragraph (Style.h2Font ++ [ width (px ssPxWidth), htmlAttribute (HAtt.style "white-space" "nowrap") ]) [ text ssHeaderText ]
+                    paragraph (Style.h2Font ++ [ paddingXY 0 sectionSpacing, width (px layout.ssWidth) ]) [ text ssHeaderText ]
+                , el
+                    [ width (px layout.ssWidth)
 
-                -- Match stacked bar width to header width; pass ssIsVertical flag so renderer knows orientation
-                , el [ centerX, width (px ssPxWidth), height fill, paddingXY 0 20 ] (html <| renderSecondaryStructureHtml ssData (toFloat aaHeightPx) ssPxWidth ssIsVertical)
+                    -- If horizontal (column layout), limit height to 60px
+                    , height
+                        (if layout.isVertical then
+                            fill
+
+                         else
+                            px 200
+                        )
+                    , paddingXY 0 sectionSpacing
+                    ]
+                    (html <| renderSecondaryStructureHtml ssData layout.ssWidth layout.isVertical)
                 ]
 
-        -- Dynamic layout container: row when side-by-side, column when stacked
         compositionLayout =
-            if isWide then
-                row [ width fill, spacing 40, alignTop, paddingXY 0 20 ] [ aaSection, ssSection ]
+            if canSideBySide then
+                row [ width fill, spacing 40, alignTop ] [ aaSection, ssSection ]
 
             else
-                column [ width fill, spacing 80, paddingEach { top = 0, bottom = 20, left = 0, right = 0 } ] [ aaSection, ssSection ]
+                column [ width fill, spacing 20 ] [ aaSection, ssSection ]
     in
-    column
-        [ width fill, spacing 20 ]
-        [ compositionLayout
-        ]
+    column [ width fill, paddingXY 0 sectionSpacing ] [ compositionLayout ]
 
 
 designDetailsBodyCuration : ProteinDesign -> Int -> Element Msg
@@ -1243,7 +1304,7 @@ designDetailsBodyCuration proteinDesign screenWidth =
 
           else
             paragraph
-                (paddingXY 0 20 :: Style.h2Font)
+                (paddingXY 0 sectionSpacing :: Style.h2Font)
                 [ text "Curation comments"
                 ]
         , column
@@ -1251,7 +1312,7 @@ designDetailsBodyCuration proteinDesign screenWidth =
                 ++ [ Font.justify
                    , width (fill |> maximum screenWidth)
                    , spacing 10
-                   , paddingEach { bottom = 20, left = 0, right = 0, top = 0 }
+                   , paddingXY 0 sectionSpacing
                    ]
             )
             (if List.all (\comment -> comment == "") proteinDesign.review_comment then
@@ -1372,13 +1433,12 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
         (Style.bodyFont
             ++ [ width (fill |> maximum screenWidth)
                , paddingXY 30 0
-               , spacing 30
                , centerX
                ]
         )
         [ designDetailsBodyTop shared model proteinDesign layoutMode leftWidth rightWidth contentHeight
         , designDetailsBodySequence proteinDesign screenWidth
-        , designDetailsBodyComposition model proteinDesign screenWidth
+        , designDetailsBodyComposition proteinDesign screenWidth
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         , designDetailsBodyCuration proteinDesign screenWidth
         ]
