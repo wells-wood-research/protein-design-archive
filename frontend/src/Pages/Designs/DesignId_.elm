@@ -428,10 +428,21 @@ downloadButton widthButton buttonAttributes onPressCmd textLabel =
 downloadArea : Shared.Model -> String -> Int -> Element Msg
 downloadArea shared designId areaWidth =
     let
+        elementType =
+            if areaWidth > 400 then
+                row
+
+            else
+                column
+
         widthButton =
-            Element.px (areaWidth // 3)
+            if areaWidth > 900 then
+                Element.px (areaWidth // 3)
+
+            else
+                Element.fill |> maximum (areaWidth - 10)
     in
-    row
+    elementType
         [ width (fill |> maximum areaWidth)
         , Font.bold
         , Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
@@ -495,11 +506,11 @@ detailsTabBar : DetailsTab -> Int -> Element Msg
 detailsTabBar activeTab screenWidth =
     let
         widthButton =
-            if screenWidth < 600 then
+            if screenWidth < 900 then
                 Element.fill |> maximum (screenWidth - 10)
 
             else
-                Element.px 200
+                px ((((screenWidth * 2) // 3) - 60) // 3)
 
         buttonAttributesBase =
             [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
@@ -1247,11 +1258,22 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                 (screenWidth * 2) // 3 - 60
 
         pictureWidth =
-            screenWidth - tableWidth - 60
+            if screenWidth < 900 then
+                screenWidth - 60
+
+            else
+                screenWidth - tableWidth - 60
 
         -- height available for the tab content inside the card (subtract tabbar + paddings)
         contentHeight =
             max 120 (topAreaHeight - 80)
+
+        elementType =
+            if screenWidth < 900 then
+                column
+
+            else
+                row
     in
     column
         (Style.bodyFont
@@ -1261,9 +1283,9 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                , centerX
                ]
         )
-        [ row [ spacing 10 ]
+        [ elementType [ width fill, spacing 10 ]
             [ column
-                [ width (px tableWidth)
+                [ width <| px tableWidth
                 , Background.color <| rgb255 250 250 250
                 , Border.rounded 8
                 , Border.width 1
@@ -1282,7 +1304,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                     , Border.rounded 8
                     , alignTop
                     , centerX
-                    , width (fillPortion 1 |> maximum pictureWidth)
+                    , width <| px pictureWidth
                     ]
                     (image
                         [ width (fill |> minimum 200) ]
