@@ -727,7 +727,7 @@ renderAminoAcidHtml kvs tableWidth =
                 [ HAtt.style "display" "flex", HAtt.style "align-items" "center", HAtt.style "margin" "6px 0", HAtt.title titleAttr ]
                 [ Html.node "div" [ HAtt.style "width" "120px", HAtt.style "font-family" "monospace" ] [ Html.text (aa ++ " (" ++ three ++ ")") ]
                 , Html.node "div"
-                    [ HAtt.style "background-color" "#eee", HAtt.style "width" (String.fromInt (tableWidth - 160) ++ "px"), HAtt.style "padding" "4px", HAtt.style "border-radius" "3px" ]
+                    [ HAtt.style "background-color" "#eee", HAtt.style "width" (String.fromInt tableWidth ++ "px"), HAtt.style "padding" "4px", HAtt.style "border-radius" "3px" ]
                     [ Html.node "div"
                         [ HAtt.style "position" "relative" ]
                         [ Html.node "div" [ HAtt.attribute "style" barStyle ] []
@@ -784,6 +784,8 @@ renderSecondaryStructureHtml kvs tableWidth =
 
         segments =
             enriched
+                |> List.filter (\( name, v ) -> v > 0)
+                |> List.sortBy (\( _, v ) -> -v)
                 |> List.map
                     (\( name, v ) ->
                         let
@@ -795,8 +797,46 @@ renderSecondaryStructureHtml kvs tableWidth =
 
                             color =
                                 colorFor name
+
+                            -- short readable label
+                            label =
+                                case name of
+                                    "alpha_helix" ->
+                                        "Helix"
+
+                                    "beta_strand" ->
+                                        "Strand"
+
+                                    "beta_bridge" ->
+                                        "Bridge"
+
+                                    "3_10_helix" ->
+                                        "3_10"
+
+                                    "pi_helix" ->
+                                        "pi"
+
+                                    "turn" ->
+                                        "Turn"
+
+                                    "bend" ->
+                                        "Bend"
+
+                                    "loop" ->
+                                        "Loop"
+
+                                    other ->
+                                        other
+
+                            styleAttr =
+                                "display:inline-block; height:30px; width:" ++ px ++ "; background-color:" ++ color ++ "; position:relative; overflow:hidden;"
+
+                            innerStyle =
+                                "display:flex; align-items:center; justify-content:center; height:30px; color:white; font-weight:bold; font-size:12px; text-shadow:0 0 3px rgba(0,0,0,0.6); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; width:100%; padding:0 6px; box-sizing:border-box;"
                         in
-                        Html.node "div" [ HAtt.style "display" "inline-block", HAtt.style "height" "30px", HAtt.style "width" px, HAtt.style "background-color" color, HAtt.title titleAttr ] []
+                        Html.node "div"
+                            [ HAtt.attribute "style" styleAttr, HAtt.title titleAttr, HAtt.style "border-radius" "3px" ]
+                            [ Html.node "div" [ HAtt.attribute "style" innerStyle ] [ Html.text label ] ]
                     )
     in
     Html.node "div" [] segments
