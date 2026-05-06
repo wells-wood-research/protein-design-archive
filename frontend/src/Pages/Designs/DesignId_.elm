@@ -593,7 +593,7 @@ energyTabBar activeTab tableWidth =
 detailsTable : List (ProteinDesign.DesignDetails Msg) -> Int -> Element Msg
 detailsTable detailsList tableWidth =
     table
-        [ width (px tableWidth) ]
+        [ width (fill |> maximum (tableWidth - 200)) ]
         { data = detailsList
         , columns =
             [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Attribute" ]
@@ -602,7 +602,7 @@ detailsTable detailsList tableWidth =
               }
             , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
               , width = px (tableWidth * 3 // 4)
-              , view = \detail -> paragraph Style.monospacedFont [ column [ width (px (tableWidth * 4 // 5)), height fill, scrollbarX, paddingXY 10 10 ] [ detail.property ] ]
+              , view = \detail -> paragraph Style.monospacedFont [ column [ width (px (tableWidth * 4 // 5 - 200)), height fill, scrollbarX, paddingXY 10 10 ] [ detail.property ] ]
               }
             ]
         }
@@ -943,11 +943,10 @@ detailsTabContent model proteinDesign tableWidth contentHeight =
 
                  else
                     column [ width fill, spacing 10, paddingXY 0 4 ]
-                        [ paragraph (paddingXY 0 20 :: Style.h2Font) [ text "Description" ]
-                        , paragraph
+                        [ paragraph
                             (Style.monospacedFont
-                                ++ [ Font.justify
-                                   , width (fill |> maximum tableWidth)
+                                ++ [ paddingXY 20 20
+                                   , width (fill |> maximum (tableWidth - 50))
                                    ]
                             )
                             [ proteinDesign.abstract
@@ -1289,7 +1288,7 @@ designDetailsBodyTop shared model proteinDesign layoutMode leftWidth rightWidth 
             , alignTop
             ]
             [ detailsTabBar model.activeDetailsTab leftWidth
-            , el [ width fill, height <| px (contentHeight - 60), scrollbarY, paddingXY 0 4 ] (detailsTabContent model proteinDesign leftWidth (contentHeight - 60))
+            , el [ width fill, height <| px (contentHeight - 60), paddingXY 0 4, htmlAttribute (HAtt.style "overflow-y" "auto"), htmlAttribute (HAtt.style "overflow-x" "hidden") ] (detailsTabContent model proteinDesign leftWidth (contentHeight - 60))
             ]
         , column
             [ alignTop
