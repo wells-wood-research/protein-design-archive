@@ -52,6 +52,8 @@ type DetailsTab
     | GeneralTab
     | Similarity
     | Solubility
+    | Energy
+    | Description
 
 
 type EnergyTab
@@ -502,14 +504,15 @@ designDetailsHeader pdbCode path design screenWidth =
 detailsTabBar : DetailsTab -> Int -> Element Msg
 detailsTabBar activeTab tableWidth =
     let
+        numTabs =
+            6
+
         widthButton =
-            px ((tableWidth // 4) - 10)
+            px ((tableWidth // numTabs) - 10)
 
         buttonAttributesBase =
-            [ Border.widthEach { bottom = 1, top = 1, left = 0, right = 0 }
-            , Border.width 0
+            [ Border.width 0
             , Element.mouseOver [ Background.color <| rgb255 220 220 220 ]
-            , Border.color <| rgb255 220 220 220
             , padding 10
             ]
 
@@ -539,6 +542,8 @@ detailsTabBar activeTab tableWidth =
         , buttonFor GeneralTab "General"
         , buttonFor Solubility "Solubility"
         , buttonFor Similarity "Similarity"
+        , buttonFor Energy "Energy"
+        , buttonFor Description "Description"
         ]
 
 
@@ -592,11 +597,11 @@ detailsTable detailsList tableWidth =
         { data = detailsList
         , columns =
             [ { header = paragraph [ Font.bold, paddingXY 5 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Attribute" ]
-              , width = px (tableWidth // 5)
+              , width = px (tableWidth // 4)
               , view = \category -> paragraph Style.monospacedFont [ column [ width (px (tableWidth // 5 - 20)), height fill, scrollbarX, paddingXY 5 10 ] [ text category.header ] ]
               }
             , { header = paragraph [ Font.bold, paddingXY 10 10, Border.widthEach { bottom = 2, top = 2, left = 0, right = 0 }, Border.color <| rgb255 220 220 220 ] [ text "Value" ]
-              , width = px (tableWidth * 4 // 5)
+              , width = px (tableWidth * 3 // 4)
               , view = \detail -> paragraph Style.monospacedFont [ column [ width (px (tableWidth * 4 // 5)), height fill, scrollbarX, paddingXY 10 10 ] [ detail.property ] ]
               }
             ]
@@ -923,6 +928,34 @@ detailsTabContent model proteinDesign tableWidth contentHeight =
         Similarity ->
             el [ width (px tableWidth), height <| px contentHeight, scrollbarY ] (detailsTable (select similarityHeaders) tableWidth)
 
+        Energy ->
+            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ]
+                (column [ width fill ]
+                    [ el [ width fill ] (energyTabBar model.activeEnergyTab tableWidth)
+                    , el [ width fill, paddingXY 0 4 ] (energyTabContent model proteinDesign tableWidth)
+                    ]
+                )
+
+        Description ->
+            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ]
+                (if proteinDesign.abstract == "No description found." then
+                    column [ width fill ] [ text "" ]
+
+                 else
+                    column [ width fill, spacing 10, paddingXY 0 4 ]
+                        [ paragraph (paddingXY 0 20 :: Style.h2Font) [ text "Description" ]
+                        , paragraph
+                            (Style.monospacedFont
+                                ++ [ Font.justify
+                                   , width (fill |> maximum tableWidth)
+                                   ]
+                            )
+                            [ proteinDesign.abstract
+                                |> text
+                            ]
+                        ]
+                )
+
 
 energyTabContent : Model -> ProteinDesign -> Int -> Element Msg
 energyTabContent model proteinDesign tableWidth =
@@ -1054,7 +1087,7 @@ designDetailsBodySequence proteinDesign screenWidth =
         columnStyles =
             Style.monospacedFont
                 ++ [ height fill
-                   , scrollbarX -- Restores your horizontal scroll per cell
+                   , scrollbarX
                    , paddingXY 15 10
                    , width (px narrowWidth)
                    ]
@@ -1200,39 +1233,6 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
     column
         [ width fill, spacing 20 ]
         [ compositionLayout
-        , paragraph (paddingEach { top = 0, bottom = 20, left = 0, right = 0 } :: Style.h2Font) [ text "Energy" ]
-        , column
-            [ width <| px (screenWidth - 60)
-            , Background.color <| rgb255 250 250 250
-            , Border.rounded 8
-            , Border.width 1
-            , Border.color <| rgb255 220 220 220
-            , paddingXY 20 20
-            ]
-            [ energyTabBar model.activeEnergyTab (screenWidth - 60)
-            , el [ width fill, paddingXY 0 4 ] (energyTabContent model proteinDesign (screenWidth - 60))
-            ]
-        , if proteinDesign.abstract == "No description found." then
-            text ""
-
-          else
-            paragraph
-                (paddingXY 0 20 :: Style.h2Font)
-                [ text "Description"
-                ]
-        , if proteinDesign.abstract == "No description found." then
-            text ""
-
-          else
-            paragraph
-                (Style.monospacedFont
-                    ++ [ Font.justify
-                       , width (fill |> maximum screenWidth)
-                       ]
-                )
-                [ proteinDesign.abstract
-                    |> text
-                ]
         , if List.all (\comment -> comment == "") proteinDesign.review_comment then
             text ""
 
@@ -1268,6 +1268,62 @@ designDetailsBodyParagraphs model proteinDesign screenWidth =
         ]
 
 
+designDetailsBodyTop : Shared.Model -> Model -> ProteinDesign -> String -> Int -> Int -> Int -> Element Msg
+designDetailsBodyTop shared model proteinDesign layoutMode leftWidth rightWidth contentHeight =
+    (case layoutMode of
+        "stacked" ->
+            column
+
+        _ ->
+            row
+    )
+        [ width fill, spacing 10 ]
+        [ column
+            [ width <| px leftWidth
+            , height <| px contentHeight
+            , Background.color <| rgb255 250 250 250
+            , Border.rounded 8
+            , Border.width 1
+            , Border.color <| rgb255 220 220 220
+            , paddingXY 20 20
+            , alignTop
+            ]
+            [ detailsTabBar model.activeDetailsTab leftWidth
+            , el [ width fill, height <| px (contentHeight - 60), scrollbarY, paddingXY 0 4 ] (detailsTabContent model proteinDesign leftWidth (contentHeight - 60))
+            ]
+        , column
+            [ alignTop
+            , height <| px contentHeight
+            , width <| px rightWidth
+            ]
+            [ el
+                [ padding 2
+                , Border.width 1
+                , Border.color <| rgb255 220 220 220
+                , Border.rounded 8
+                , width fill
+                , height fill
+                , Background.color <| rgb255 255 255 255
+                ]
+                (image
+                    [ centerX
+                    , centerY
+                    , width (fill |> maximum (min rightWidth 500))
+                    , height (fill |> maximum (min (contentHeight - 60) 500))
+                    ]
+                    { src = proteinDesign.picture_path
+                    , description = "Structure of " ++ proteinDesign.pdb
+                    }
+                )
+            , el
+                [ height shrink
+                , width fill
+                ]
+                (downloadArea shared proteinDesign.pdb layoutMode)
+            ]
+        ]
+
+
 designDetailsBody : Shared.Model -> Model -> ProteinDesign -> Int -> Int -> Element Msg
 designDetailsBody shared model proteinDesign screenWidth screenHeight =
     let
@@ -1276,7 +1332,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
             max 220 screenHeight
 
         -- table width should match the previous logic used elsewhere
-        tableWidth =
+        leftWidth =
             if screenWidth > 1200 then
                 screenWidth * 2 // 3
 
@@ -1291,15 +1347,11 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                 screenWidth - 60
 
             else
-                screenWidth - tableWidth - 60
+                screenWidth - leftWidth - 60
 
         -- unified height for BOTH table and image column
-        sharedHeight =
-            min 600 topAreaHeight
-
-        -- subtract tab bar height (~48px) to keep scroll area correct
         contentHeight =
-            sharedHeight - 60
+            min 600 topAreaHeight
 
         layoutMode =
             if screenWidth > 1450 then
@@ -1319,58 +1371,7 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
                , centerX
                ]
         )
-        [ (case layoutMode of
-            "stacked" ->
-                column
-
-            _ ->
-                row
-          )
-            [ width fill, spacing 10 ]
-            [ column
-                [ width <| px tableWidth
-                , height <| px sharedHeight
-                , Background.color <| rgb255 250 250 250
-                , Border.rounded 8
-                , Border.width 1
-                , Border.color <| rgb255 220 220 220
-                , paddingXY 20 20
-                , alignTop
-                ]
-                [ detailsTabBar model.activeDetailsTab tableWidth
-                , el [ width fill, height <| px contentHeight, scrollbarY, paddingXY 0 4 ] (detailsTabContent model proteinDesign tableWidth contentHeight)
-                ]
-            , column
-                [ alignTop
-                , height <| px sharedHeight
-                , width <| px rightWidth
-                ]
-                [ el
-                    [ padding 2
-                    , Border.width 1
-                    , Border.color <| rgb255 220 220 220
-                    , Border.rounded 8
-                    , width fill
-                    , height fill
-                    , Background.color <| rgb255 255 255 255
-                    ]
-                    (image
-                        [ centerX
-                        , centerY
-                        , width (fill |> maximum (min rightWidth 500))
-                        , height (fill |> maximum (min contentHeight 500))
-                        ]
-                        { src = proteinDesign.picture_path
-                        , description = "Structure of " ++ proteinDesign.pdb
-                        }
-                    )
-                , el
-                    [ height shrink
-                    , width fill
-                    ]
-                    (downloadArea shared proteinDesign.pdb layoutMode)
-                ]
-            ]
+        [ designDetailsBodyTop shared model proteinDesign layoutMode leftWidth rightWidth contentHeight
         , designDetailsBodySequence proteinDesign screenWidth
         , designDetailsBodyParagraphs model proteinDesign screenWidth
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
