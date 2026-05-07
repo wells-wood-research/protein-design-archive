@@ -998,23 +998,15 @@ detailsTabContent model proteinDesign tableWidth contentHeight =
                 )
 
         Description ->
-            el [ width (px tableWidth), height <| px contentHeight, scrollbarY ]
-                (if proteinDesign.abstract == "No description found." then
-                    column [ width fill ] [ text "" ]
-
-                 else
-                    column [ width fill, spacing 10, paddingXY 0 4 ]
-                        [ paragraph
-                            (Style.monospacedFont
-                                ++ [ paddingXY sectionSpacing sectionSpacing
-                                   , width (fill |> maximum (tableWidth - 50))
-                                   ]
-                            )
-                            [ proteinDesign.abstract
-                                |> text
-                            ]
-                        ]
+            paragraph
+                (Style.monospacedFont
+                    ++ [ paddingXY sectionSpacing sectionSpacing
+                       , width (fill |> maximum (tableWidth - 50))
+                       ]
                 )
+                [ proteinDesign.abstract
+                    |> text
+                ]
 
 
 energyTabContent : Model -> ProteinDesign -> Int -> Element Msg
