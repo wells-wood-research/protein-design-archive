@@ -27,7 +27,6 @@ port module Effect exposing
 import Browser.Dom as Dom
 import Browser.Navigation
 import Dict exposing (Dict)
-import File exposing (File)
 import File.Download as Download
 import Plots exposing (PlotData)
 import ProteinDesign exposing (DownloadFileType)

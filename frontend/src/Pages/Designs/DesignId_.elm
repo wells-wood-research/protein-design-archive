@@ -1188,7 +1188,7 @@ renderAminoAcidHtml kvs tableWidth =
                         in
                         ( aa, rec )
                     )
-                |> List.sortBy (\( aa, rec ) -> -rec.v)
+                |> List.sortBy (\( _, rec ) -> -rec.v)
 
         -- build rows as Html
         rowFor ( aa, rec ) =
