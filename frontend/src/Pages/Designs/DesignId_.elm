@@ -1241,7 +1241,7 @@ designDetailsBodyComposition proteinDesign screenWidth =
             if canSideBySide then
                 { aaWidth = tableWidth - ssHeaderPx
                 , ssWidth = ssHeaderPx
-                , ssHeight = px aaHeightPx
+                , ssHeight = px (aaHeightPx - 10)
                 , isVertical = True
                 }
 
