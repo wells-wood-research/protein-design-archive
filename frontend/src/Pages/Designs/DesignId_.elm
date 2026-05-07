@@ -660,7 +660,7 @@ renderAminoAcidHtml kvs tableWidth =
                 , ( "polar", "#2ca02c" )
                 , ( "acidic", "#d62728" )
                 , ( "basic", "#9467bd" )
-                , ( "special", "#8c564b" )
+                , ( "special", "#ff7f0e" )
                 ]
 
         -- normalize: if sums to ~1, multiply by 100
@@ -775,16 +775,16 @@ renderSecondaryStructureHtml kvs barWidth isVertical =
                     ( "#2ca02c", "β bridge" )
 
                 "3_10_helix" ->
-                    ( "#d62728", "3 10 helix" )
+                    ( "#78add2", "3 10 helix" )
 
                 "pi_helix" ->
-                    ( "#9467bd", "π-helix" )
+                    ( "#b5e2fa", "π-helix" )
 
                 "turn" ->
-                    ( "#8c564b", "turn" )
+                    ( "#9467bd", "turn" )
 
                 "bend" ->
-                    ( "#e377c2", "bend" )
+                    ( "#d62728", "bend" )
 
                 "loop" ->
                     ( "#7f7f7f", "loop" )
