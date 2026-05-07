@@ -177,7 +177,7 @@ citationArea : Int -> Element msg
 citationArea columnWidth =
     column
         [ width <| px columnWidth
-        , spacing 10
+        , spacing 20
         ]
         [ paragraph
             Style.h2Font
@@ -190,6 +190,7 @@ citationArea columnWidth =
                         (fill
                             |> maximum columnWidth
                         )
+                   , spacing 20
                    ]
             )
             [ paragraph
@@ -200,7 +201,7 @@ citationArea columnWidth =
                 ]
                 [ text <| "If you find The PDA useful in your work, please cite as:" ]
             , column
-                [ spacing 5
+                [ spacing 20
                 , paddingXY 30 10
                 , width
                     (fill
@@ -230,7 +231,7 @@ citationArea columnWidth =
                     ]
                     [ text "Marta Chronowska, Michael J. Stam, Derek N. Woolfson, Luigi F. Di Costanzo, Christopher W. Wood" ]
                 , row
-                    [ spacing 5 ]
+                    [ spacing 20 ]
                     [ paragraph
                         [ Font.alignLeft, Font.italic ]
                         [ text "Nature Biotechnology " ]
@@ -252,7 +253,7 @@ codeAvailabilityArea : Int -> Element msg
 codeAvailabilityArea columnWidth =
     column
         [ width <| px columnWidth
-        , spacing 10
+        , spacing 30
         ]
         [ paragraph
             Style.h2Font
@@ -317,7 +318,7 @@ uiArea : Int -> Element msg
 uiArea columnWidth =
     column
         [ width fill
-        , spacing 10
+        , spacing 30
         ]
         [ paragraph
             Style.h2Font
@@ -335,7 +336,7 @@ websiteStructureArea columnWidth =
         (Style.monospacedFont
             ++ [ Font.justify
                , width <| px columnWidth
-               , spacing 5
+               , spacing 20
                ]
         )
         [ paragraph
@@ -346,7 +347,7 @@ websiteStructureArea columnWidth =
             (Style.monospacedFont
                 ++ [ Font.justify
                    , width <| px columnWidth
-                   , spacing 5
+                   , spacing 20
                    ]
             )
             [ paragraph [ width fill ]
@@ -358,18 +359,37 @@ websiteStructureArea columnWidth =
                 [ paragraph [ width fill ] [ text <| "The " ]
                 , paragraph [ width fill, Font.bold ] [ text <| "Design Details page" ]
                 , paragraph [ width fill ]
-                    [ text <| " is self-explanatory. It provides information about a design, such as publication and basic experimental facts, interactive 3D structure, chain and sequence details, and a description, that is the abstract of the primary publication associated with this design. CATH labels are computed with "
-                    , newTabLink
-                        [ Font.color <| rgb255 104 176 171
-                        , Font.underline
-                        ]
-                        { url = "https://github.com/psipred/merizo_search?tab=readme-ov-file"
-                        , label = text <| "Merizo-search"
-                        }
-                    , paragraph [ width fill ] [ text <| " [1]. One element that might merit further elaborating on, " ]
-                    , paragraph [ width fill, Font.bold ] [ text <| "related proteins" ]
-                    , paragraph [ width fill ] [ text <| ", is described in detail below." ]
+                    [ text <| " is self-explanatory. It provides information about a design, such as publication, physicochemical properties, chain and sequence details, interactive 3D structure, and a description, that is the abstract of the primary publication associated with this design. " ]
+                , paragraph [ width fill, Font.bold ] [ text <| "CATH labels " ]
+                , paragraph [ width fill ] [ text <| "are computed with " ]
+                , newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
                     ]
+                    { url = "https://github.com/psipred/merizo_search?tab=readme-ov-file"
+                    , label = text <| "Merizo-search"
+                    }
+                , paragraph [ width fill ] [ text <| " [1]. " ]
+                , paragraph [ width fill, Font.bold ] [ text <| "Physicochemical properties " ]
+                , paragraph [ width fill ] [ text <| "are calculated with " ]
+                , newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url = "https://pragmaticproteindesign.bio.ed.ac.uk/de-stress"
+                    , label = text <| "DE-STRESS"
+                    }
+                , paragraph [ width fill ] [ text <| " [2] and the definitions of each property can be found in its " ]
+                , newTabLink
+                    [ Font.color <| rgb255 104 176 171
+                    , Font.underline
+                    ]
+                    { url = "https://pragmaticproteindesign.bio.ed.ac.uk/de-stress/glossary"
+                    , label = text <| "glossary"
+                    }
+                , paragraph [ width fill ] [ text <| ". One element that might merit further elaborating on, " ]
+                , paragraph [ width fill, Font.bold ] [ text <| "related proteins" ]
+                , paragraph [ width fill ] [ text <| ", is described in detail below." ]
                 ]
             ]
         ]
@@ -381,7 +401,7 @@ relatedProteinsArea columnWidth =
         (Style.monospacedFont
             ++ [ Font.justify
                , width <| px columnWidth
-               , spacing 5
+               , spacing 20
                ]
         )
         [ paragraph
@@ -397,7 +417,7 @@ relatedProteinsArea columnWidth =
                 { url = "https://github.com/soedinglab/mmseqs2"
                 , label = text <| "MMseqs2"
                 }
-            , text <| " [1] (for sequence) and "
+            , text <| " [3] (for sequence) and "
             , newTabLink
                 [ Font.color <| rgb255 104 176 171
                 , Font.underline
@@ -405,7 +425,7 @@ relatedProteinsArea columnWidth =
                 { url = "https://github.com/steineggerlab/foldseek"
                 , label = text <| "Foldseek"
                 }
-            , text <| " [2] (for structure) analysis as being similar to the currently viewed design. In the context of this analysis, "
+            , text <| " [4] (for structure) analysis as being similar to the currently viewed design. In the context of this analysis, "
             , paragraph [ Font.italic ] [ text <| " designs" ]
             , text <| " refers to other structures also found in The PDA, and"
             , paragraph [ Font.italic ] [ text <| " proteins" ]
@@ -429,7 +449,7 @@ filteringArea columnWidth =
         (Style.monospacedFont
             ++ [ Font.justify
                , width <| px columnWidth
-               , spacing 5
+               , spacing 20
                ]
         )
         [ paragraph
@@ -440,7 +460,7 @@ filteringArea columnWidth =
             (Style.monospacedFont
                 ++ [ Font.justify
                    , width <| px columnWidth
-                   , spacing 5
+                   , spacing 20
                    ]
             )
             [ paragraph [ width fill ]
@@ -475,7 +495,7 @@ dataCollectionArea : Int -> Element msg
 dataCollectionArea columnWidth =
     column
         [ width <| px columnWidth
-        , spacing 10
+        , spacing 30
         ]
         [ paragraph
             Style.h2Font
@@ -501,7 +521,7 @@ dataCollectionArea columnWidth =
                 , text <|
                     " list for transparency and discarded from The PDA dataset. Although the following is not exhaustive, example reasons for entries to be discarded are: "
                 , column
-                    [ width fill, spacing 5, paddingXY 30 10 ]
+                    [ width fill, spacing 20, paddingXY 30 10 ]
                     [ paragraph [ width fill ] [ text <| "* method of development - if protein was created without rational reasoning, such as by screening a large random library, it is discarded," ]
                     , paragraph [ width fill ] [ text <| "* length - very short peptides, such as less than 14 amino acids (threshold chosen based on MMseqs2 similarity screening limitations), tend to be discarded unless their method of development strongly suggests that they should be included," ]
                     , paragraph [ width fill ] [ text <| "* identity of synthetic construct - certain entities that are not de novo designed proteins tend to be labelled as synthetic constructs when deposited to the PDB database, such as the scFv16 antibody used to stabilise GPCR/G-protein complexes; as these are not the focus of their study as de novo designs, they are discarded." ]
@@ -515,7 +535,7 @@ dataProcessingArea : Int -> Element msg
 dataProcessingArea columnWidth =
     column
         [ width <| px columnWidth
-        , spacing 10
+        , spacing 30
         ]
         [ paragraph
             Style.h2Font
@@ -558,7 +578,7 @@ referencesArea : Int -> Element msg
 referencesArea columnWidth =
     column
         [ width <| px columnWidth
-        , spacing 10
+        , spacing 30
         ]
         [ paragraph
             Style.h2Font
@@ -591,6 +611,25 @@ referencesArea columnWidth =
                    ]
             )
             [ paragraph [ width fill ] [ text <| "[2]" ]
+            , paragraph [ Font.italic, width fill ] [ text <| " DE-STRESS: A user-friendly web application for the evaluation of protein designs, Protein Engineering, Design and Selection" ]
+            , paragraph [ width fill ] [ text <| ". Stam, M.J. and Wood, C.W., " ]
+            , paragraph [ width fill ] [ text <| "PEDS, 34, gzab029, 2021. (2021) " ]
+            , newTabLink
+                [ Font.color <| rgb255 104 176 171
+                , Font.underline
+                ]
+                { url = "https://doi.org/10.1038/s41587-023-01773-0"
+                , label = text "https://doi.org/10.1038/s41587-023-01773-0"
+                }
+            ]
+        , paragraph
+            (Style.monospacedFont
+                ++ [ Font.justify
+                   , Font.size 14
+                   , width (fill |> maximum columnWidth)
+                   ]
+            )
+            [ paragraph [ width fill ] [ text <| "[3]" ]
             , paragraph [ Font.italic, width fill ] [ text <| " MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets" ]
             , paragraph [ width fill ] [ text <| ". Steinegger, M., Söding, J." ]
             , paragraph [ width fill ] [ text <| ", Nat Biotechnol 35, 1026–1028 (2017) " ]
@@ -609,7 +648,7 @@ referencesArea columnWidth =
                    , width (fill |> maximum columnWidth)
                    ]
             )
-            [ paragraph [ width fill ] [ text <| "[3]" ]
+            [ paragraph [ width fill ] [ text <| "[4]" ]
             , paragraph [ Font.italic, width fill ] [ text <| " Fast and accurate protein structure search with Foldseek" ]
             , paragraph [ width fill ] [ text <| ". van Kempen, M., Kim, S.S., Tumescheit, C. et al." ]
             , paragraph [ width fill ] [ text <| ", Nat Biotechnol 42, 243–246 (2024) " ]
