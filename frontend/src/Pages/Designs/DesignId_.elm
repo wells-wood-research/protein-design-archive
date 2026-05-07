@@ -532,7 +532,11 @@ designDetailsBody shared model proteinDesign screenWidth screenHeight =
         )
         [ designDetailsBodyTop shared model proteinDesign layoutMode leftWidth rightWidth contentHeight
         , designDetailsBodySequence proteinDesign screenWidth
-        , designDetailsBodyComposition proteinDesign screenWidth
+        , if List.isEmpty proteinDesign.physicochem.aa_composition && List.isEmpty proteinDesign.physicochem.ss_composition then
+            el [] (text "")
+
+          else
+            designDetailsBodyComposition proteinDesign screenWidth
         , designDetailsBodyStructure proteinDesign screenWidth screenHeight
         , designDetailsBodyCuration proteinDesign screenWidth
         ]
@@ -1000,7 +1004,11 @@ designDetailsBodyComposition : ProteinDesign -> Int -> Element Msg
 designDetailsBodyComposition proteinDesign screenWidth =
     let
         isWide =
-            screenWidth > 860
+            if List.isEmpty proteinDesign.physicochem.aa_composition || List.isEmpty proteinDesign.physicochem.ss_composition then
+                False
+
+            else
+                screenWidth > 860
 
         tableWidth =
             if isWide then
