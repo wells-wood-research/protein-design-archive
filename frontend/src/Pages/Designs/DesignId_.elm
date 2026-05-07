@@ -1269,7 +1269,7 @@ renderSecondaryStructureHtml kvs barWidth isVertical =
                 "pi_helix" ->
                     ( "#b5e2fa", "π-helix" )
 
-                "turn" ->
+                "hbonded_turn" ->
                     ( "#9467bd", "turn" )
 
                 "bend" ->
