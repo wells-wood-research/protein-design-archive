@@ -2,6 +2,7 @@ module ProteinDesign exposing (..)
 
 import Csv.Encode as CsvEncode
 import Date exposing (Date, Unit(..))
+import Dict
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -15,6 +16,66 @@ import String exposing (fromFloat)
 import Style
 import Time exposing (Month(..))
 import Urls exposing (..)
+
+
+
+-- HELPERS --
+
+
+threeToOne : Dict.Dict String String
+threeToOne =
+    Dict.fromList
+        [ ( "ALA", "A" )
+        , ( "ARG", "R" )
+        , ( "ASN", "N" )
+        , ( "ASP", "D" )
+        , ( "CYS", "C" )
+        , ( "GLN", "Q" )
+        , ( "GLU", "E" )
+        , ( "GLY", "G" )
+        , ( "HIS", "H" )
+        , ( "ILE", "I" )
+        , ( "LEU", "L" )
+        , ( "LYS", "K" )
+        , ( "MET", "M" )
+        , ( "PHE", "F" )
+        , ( "PRO", "P" )
+        , ( "SER", "S" )
+        , ( "THR", "T" )
+        , ( "TRP", "W" )
+        , ( "TYR", "Y" )
+        , ( "VAL", "V" )
+        , ( "UNK", "X" )
+        ]
+
+
+maybeFloatToJson : Maybe Float -> JsonEncode.Value
+maybeFloatToJson mf =
+    case mf of
+        Nothing ->
+            JsonEncode.null
+
+        Just f ->
+            JsonEncode.float f
+
+
+listToObject : List ( String, Float ) -> JsonEncode.Value
+listToObject kvs =
+    JsonEncode.object (List.map (\( k, v ) -> ( k, JsonEncode.float v )) kvs)
+
+
+dictNullableToListDecoder : Decoder (List ( String, Float ))
+dictNullableToListDecoder =
+    Decode.dict (Decode.nullable Decode.float)
+        |> Decode.map
+            (Dict.toList
+                >> List.filterMap
+                    (\( k, mv ) -> Maybe.map (Tuple.pair k) mv)
+            )
+
+
+
+-- TYPE DEFINITIONS --
 
 
 type alias ProteinDesign =
@@ -51,6 +112,7 @@ type alias ProteinDesign =
     , cath_full : List Cath
     , cath_class : List Cath
     , cath_arch : List Cath
+    , physicochem : Physicochemical
     , review_comment : List String
     }
 
@@ -90,6 +152,7 @@ type alias ProteinDesignDownload =
     , exptl_method : List String
     , formula_weight : Float
     , synthesis_comment : String
+    , physicochem : Physicochemical
     , seq_thr_sim_designed : List Related
     , seq_thr_sim_natural : List Related
     , struct_thr_sim_designed : List Related
@@ -120,118 +183,6 @@ type alias CathClassGroup =
     , className : String
     , archs : List Cath
     }
-
-
-uniqueCathClasses : List ProteinDesignStub -> List Cath
-uniqueCathClasses designs =
-    designs
-        |> List.concatMap .cath_class
-        |> List.foldl
-            (\c acc ->
-                if List.any (\a -> a.code == c.code) acc then
-                    acc
-
-                else
-                    c :: acc
-            )
-            []
-        |> List.sortBy .code
-
-
-uniqueCathArchs : List ProteinDesignStub -> List Cath
-uniqueCathArchs designs =
-    designs
-        |> List.concatMap .cath_arch
-        |> List.foldl
-            (\arch acc ->
-                if List.any (\a -> a.code == arch.code) acc then
-                    acc
-
-                else
-                    arch :: acc
-            )
-            []
-        |> List.sortBy .code
-
-
-groupCathArchsByClass :
-    List Cath
-    -> List Cath
-    -> List CathClassGroup
-groupCathArchsByClass classes archs =
-    classes
-        |> List.map
-            (\cls ->
-                { classCode = cls.code
-                , className = cls.name
-                , archs =
-                    archs
-                        |> List.filter
-                            (\arch ->
-                                cathClassCode arch == cls.code
-                            )
-                }
-            )
-
-
-defaultRelated : Related
-defaultRelated =
-    { similarity = 0.0
-    , partner = ""
-    }
-
-
-defaultCath : Cath
-defaultCath =
-    { code = "0"
-    , name = "unknown"
-    }
-
-
-emptyArrayAsDefaultRelated : Decoder Related
-emptyArrayAsDefaultRelated =
-    Decode.oneOf
-        [ Decode.list Decode.value
-            |> Decode.andThen
-                (\val ->
-                    if List.isEmpty val then
-                        Decode.succeed defaultRelated
-
-                    else
-                        Decode.fail "Expected an empty array."
-                )
-        , Decode.null defaultRelated
-        ]
-
-
-emptyArrayAsDefaultCath : Decoder Cath
-emptyArrayAsDefaultCath =
-    Decode.oneOf
-        [ Decode.list Decode.value
-            |> Decode.andThen
-                (\val ->
-                    if List.isEmpty val then
-                        Decode.succeed defaultCath
-
-                    else
-                        Decode.fail "Expected an empty array."
-                )
-        , Decode.null defaultCath
-        ]
-
-
-relatedDetail : Related -> String -> Element msg
-relatedDetail related baseUrl =
-    row []
-        [ newTabLink
-            [ Font.color <| rgb255 104 176 171
-            , Font.underline
-            ]
-            { url = baseUrl ++ related.partner
-            , label = text <| related.partner
-            }
-        , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
-        ]
 
 
 type Classification
@@ -296,10 +247,220 @@ type alias Xtal =
     }
 
 
+type alias Solubility =
+    { total : Float
+    , avg : Float
+    , min : Float
+    , max : Float
+    }
+
+
+type alias Dssp =
+    { full_seq : String
+    , dssp_seq : String
+    }
+
+
+
+-- Physicochemical properties
+
+
+type alias Bude =
+    { budeff_total : Maybe Float
+    , budeff_steric : Maybe Float
+    , budeff_desolvation : Maybe Float
+    , budeff_charge : Maybe Float
+    }
+
+
+type alias Dfire2 =
+    { dfire2_total : Maybe Float
+    }
+
+
+type alias Evoef2 =
+    { evoef2_total : Maybe Float
+    , evoef2_ref_total : Maybe Float
+    , evoef2_intraR_total : Maybe Float
+    , evoef2_interS_total : Maybe Float
+    , evoef2_interD_total : Maybe Float
+    }
+
+
+type alias RosettaEnergy =
+    { rosetta_total : Maybe Float
+    , rosetta_vdw_atr : Maybe Float
+    , rosetta_vdw_rep : Maybe Float
+    , rosetta_vdw_intra_rep : Maybe Float
+    , rosetta_electrostatics : Maybe Float
+    , rosetta_solvation_isotropic : Maybe Float
+    , rosetta_solvation_anisotropic_polar_atoms : Maybe Float
+    , rosetta_solvation_isotropic_iR : Maybe Float
+    , rosetta_hbond_lr_bb : Maybe Float
+    , rosetta_hbond_sr_bb : Maybe Float
+    , rosetta_hbond_bb_sc : Maybe Float
+    , rosetta_hbond_sc : Maybe Float
+    , rosetta_disulfides : Maybe Float
+    , rosetta_backbone_torsion_preference : Maybe Float
+    , rosetta_aa_propensity : Maybe Float
+    , rosetta_dunbrack_rotamer : Maybe Float
+    , rosetta_omega : Maybe Float
+    , rosetta_pro_close : Maybe Float
+    , rosetta_yhh_planarity : Maybe Float
+    }
+
+
+type alias Energy =
+    { bude : Maybe Bude
+    , dfire2 : Maybe Dfire2
+    , evoef2 : Maybe Evoef2
+    , rosetta : Maybe RosettaEnergy
+    }
+
+
+type alias Physicochemical =
+    { num_residues : Maybe Float
+    , mass : Maybe Float
+    , charge : Maybe Float
+    , isoelectric_point : Maybe Float
+    , packing_density : Maybe Float
+    , hydrophobic_fitness : Maybe Float
+    , solubility : Maybe Solubility
+    , dssp : Maybe Dssp
+    , aa_composition : List ( String, Float )
+    , ss_composition : List ( String, Float )
+    , energy : Energy
+    }
+
+
 type alias DesignDetails msg =
     { header : String
     , property : Element msg
     }
+
+
+
+-- cath type --
+
+
+uniqueCathClasses : List ProteinDesignStub -> List Cath
+uniqueCathClasses designs =
+    designs
+        |> List.concatMap .cath_class
+        |> List.foldl
+            (\c acc ->
+                if List.any (\a -> a.code == c.code) acc then
+                    acc
+
+                else
+                    c :: acc
+            )
+            []
+        |> List.sortBy .code
+
+
+uniqueCathArchs : List ProteinDesignStub -> List Cath
+uniqueCathArchs designs =
+    designs
+        |> List.concatMap .cath_arch
+        |> List.foldl
+            (\arch acc ->
+                if List.any (\a -> a.code == arch.code) acc then
+                    acc
+
+                else
+                    arch :: acc
+            )
+            []
+        |> List.sortBy .code
+
+
+groupCathArchsByClass :
+    List Cath
+    -> List Cath
+    -> List CathClassGroup
+groupCathArchsByClass classes archs =
+    classes
+        |> List.map
+            (\cls ->
+                { classCode = cls.code
+                , className = cls.name
+                , archs =
+                    archs
+                        |> List.filter
+                            (\arch ->
+                                cathClassCode arch == cls.code
+                            )
+                }
+            )
+
+
+defaultCath : Cath
+defaultCath =
+    { code = "0"
+    , name = "unknown"
+    }
+
+
+emptyArrayAsDefaultCath : Decoder Cath
+emptyArrayAsDefaultCath =
+    Decode.oneOf
+        [ Decode.list Decode.value
+            |> Decode.andThen
+                (\val ->
+                    if List.isEmpty val then
+                        Decode.succeed defaultCath
+
+                    else
+                        Decode.fail "Expected an empty array."
+                )
+        , Decode.null defaultCath
+        ]
+
+
+
+-- related type --
+
+
+defaultRelated : Related
+defaultRelated =
+    { similarity = 0.0
+    , partner = ""
+    }
+
+
+emptyArrayAsDefaultRelated : Decoder Related
+emptyArrayAsDefaultRelated =
+    Decode.oneOf
+        [ Decode.list Decode.value
+            |> Decode.andThen
+                (\val ->
+                    if List.isEmpty val then
+                        Decode.succeed defaultRelated
+
+                    else
+                        Decode.fail "Expected an empty array."
+                )
+        , Decode.null defaultRelated
+        ]
+
+
+relatedDetail : Related -> String -> Element msg
+relatedDetail related baseUrl =
+    row []
+        [ newTabLink
+            [ Font.color <| rgb255 104 176 171
+            , Font.underline
+            ]
+            { url = baseUrl ++ related.partner
+            , label = text <| related.partner
+            }
+        , text <| "(" ++ (String.left 4 <| String.fromFloat related.similarity) ++ ")"
+        ]
+
+
+
+-- DONWLOAD AREA --
 
 
 type DownloadFileType
@@ -324,6 +485,7 @@ csvListFromProteinDesignDownload proteinDesign =
     , ( "classification", classificationToString proteinDesign.classification )
     , ( "chains", String.join "|" (List.map chainToString proteinDesign.chains) )
     , ( "formula_weight", fromFloat proteinDesign.formula_weight )
+    , ( "physicochemical_properties", JsonEncode.encode 0 (physicochemicalEncoder proteinDesign.physicochem) )
     , ( "symmetry", proteinDesign.symmetry )
     , ( "crystal_structure(a|b|c|alpha|beta|gamma)", xtalToString proteinDesign.crystal_structure )
     , ( "exptl_method", String.join "|" proteinDesign.exptl_method )
@@ -370,6 +532,7 @@ jsonValueFromProteinDesignDownload proteinDesign =
         , ( "release_date", JsonEncode.string <| Date.toIsoString proteinDesign.release_date )
         , ( "classification", JsonEncode.string <| classificationToString proteinDesign.classification )
         , ( "chains", JsonEncode.list chainEncoder proteinDesign.chains )
+        , ( "physicochemical_properties", physicochemicalEncoder proteinDesign.physicochem )
         , ( "formula_weight", JsonEncode.float proteinDesign.formula_weight )
         , ( "exptl_method", JsonEncode.string <| String.join "" proteinDesign.exptl_method )
         , ( "symmetry", JsonEncode.string proteinDesign.symmetry )
@@ -397,6 +560,10 @@ jsonValueFromProteinDesignDownload proteinDesign =
 jsonStringFromProteinDesignDownload : List ProteinDesignDownload -> String
 jsonStringFromProteinDesignDownload proteinDesigns =
     JsonEncode.encode 4 (jsonValueFromProteinDesignDownloadList proteinDesigns)
+
+
+
+-- DECODER AREA --
 
 
 rawDesignDecoder : Decoder ProteinDesign
@@ -435,6 +602,7 @@ rawDesignDecoder =
         |> required "cath_full" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
         |> required "cath_class" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
         |> required "cath_arch" (Decode.list (Decode.oneOf [ cathDecoder, emptyArrayAsDefaultCath ]))
+        |> required "physicochemical_properties" physicochemicalDecoder
         |> required "review_comment" (Decode.list Decode.string)
 
 
@@ -476,6 +644,7 @@ downloadDesignDecoder =
         |> required "exptl_method" (Decode.list Decode.string)
         |> required "formula_weight" Decode.float
         |> required "synthesis_comment" Decode.string
+        |> required "physicochemical_properties" physicochemicalDecoder
         |> required "seq_thr_sim_designed" (Decode.list relatedDecoder)
         |> required "seq_thr_sim_natural" (Decode.list relatedDecoder)
         |> required "struct_thr_sim_designed" (Decode.list relatedDecoder)
@@ -560,6 +729,150 @@ xtalDecoder =
         |> required "angle_g" Decode.string
 
 
+solubilityDecoder : Decoder Solubility
+solubilityDecoder =
+    Decode.succeed Solubility
+        |> required "total_value" Decode.float
+        |> required "avg_value" Decode.float
+        |> required "min_value" Decode.float
+        |> required "max_value" Decode.float
+
+
+dsspDecoder : Decoder Dssp
+dsspDecoder =
+    Decode.succeed Dssp
+        |> required "full_sequence" Decode.string
+        |> required "dssp_sequence" Decode.string
+
+
+aaCompositionDecoder : Decoder (List ( String, Float ))
+aaCompositionDecoder =
+    Decode.dict (Decode.nullable Decode.float)
+        |> Decode.map
+            (Dict.toList
+                >> List.filterMap
+                    (\( k, mv ) ->
+                        Maybe.map
+                            (\v ->
+                                let
+                                    -- strip prefix
+                                    suffix =
+                                        String.split "_" k
+                                            |> List.reverse
+                                            |> List.head
+                                            |> Maybe.withDefault k
+
+                                    code =
+                                        Dict.get (String.toUpper suffix) threeToOne
+                                            |> Maybe.withDefault (String.toUpper suffix)
+                                in
+                                ( code, v )
+                            )
+                            mv
+                    )
+            )
+
+
+ssCompositionDecoder : Decoder (List ( String, Float ))
+ssCompositionDecoder =
+    Decode.dict (Decode.nullable Decode.float)
+        |> Decode.map
+            (Dict.toList
+                >> List.filterMap
+                    (\( k, mv ) ->
+                        Maybe.map
+                            (\v ->
+                                ( if String.startsWith "ss_prop_" k then
+                                    String.dropLeft (String.length "ss_prop_") k
+
+                                  else
+                                    k
+                                , v
+                                )
+                            )
+                            mv
+                    )
+            )
+
+
+budeDecoder : Decoder Bude
+budeDecoder =
+    Decode.succeed Bude
+        |> optional "budeff_total" (Decode.maybe Decode.float) Nothing
+        |> optional "budeff_steric" (Decode.maybe Decode.float) Nothing
+        |> optional "budeff_desolvation" (Decode.maybe Decode.float) Nothing
+        |> optional "budeff_charge" (Decode.maybe Decode.float) Nothing
+
+
+dfire2Decoder : Decoder Dfire2
+dfire2Decoder =
+    Decode.succeed Dfire2
+        |> optional "dfire2_total" (Decode.maybe Decode.float) Nothing
+
+
+evoef2Decoder : Decoder Evoef2
+evoef2Decoder =
+    Decode.succeed Evoef2
+        |> optional "evoef2_total" (Decode.maybe Decode.float) Nothing
+        |> optional "evoef2_ref_total" (Decode.maybe Decode.float) Nothing
+        |> optional "evoef2_intraR_total" (Decode.maybe Decode.float) Nothing
+        |> optional "evoef2_interS_total" (Decode.maybe Decode.float) Nothing
+        |> optional "evoef2_interD_total" (Decode.maybe Decode.float) Nothing
+
+
+rosettaDecoder : Decoder RosettaEnergy
+rosettaDecoder =
+    Decode.succeed RosettaEnergy
+        |> optional "rosetta_total" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_vdw_atr" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_vdw_rep" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_vdw_intra_rep" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_electrostatics" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_solvation_isotropic" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_solvation_anisotropic_polar_atoms" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_solvation_isotropic_iR" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_hbond_lr_bb" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_hbond_sr_bb" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_hbond_bb_sc" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_hbond_sc" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_disulfides" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_backbone_torsion_preference" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_aa_propensity" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_dunbrack_rotamer" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_omega" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_pro_close" (Decode.maybe Decode.float) Nothing
+        |> optional "rosetta_yhh_planarity" (Decode.maybe Decode.float) Nothing
+
+
+energyDecoder : Decoder Energy
+energyDecoder =
+    Decode.succeed Energy
+        |> optional "budeff" (Decode.maybe budeDecoder) Nothing
+        |> optional "dfire2" (Decode.maybe dfire2Decoder) Nothing
+        |> optional "evoef2" (Decode.maybe evoef2Decoder) Nothing
+        |> optional "rosetta" (Decode.maybe rosettaDecoder) Nothing
+
+
+physicochemicalDecoder : Decoder Physicochemical
+physicochemicalDecoder =
+    Decode.succeed Physicochemical
+        |> optional "num_residues" (Decode.maybe Decode.float) Nothing
+        |> optional "mass" (Decode.maybe Decode.float) Nothing
+        |> optional "charge" (Decode.maybe Decode.float) Nothing
+        |> optional "isoelectric_point" (Decode.maybe Decode.float) Nothing
+        |> optional "packing_density" (Decode.maybe Decode.float) Nothing
+        |> optional "hydrophobic_fitness" (Decode.maybe Decode.float) Nothing
+        |> optional "solubility" (Decode.maybe solubilityDecoder) Nothing
+        |> optional "dssp" (Decode.maybe dsspDecoder) Nothing
+        |> optional "aa_composition" aaCompositionDecoder []
+        |> optional "ss_composition" ssCompositionDecoder []
+        |> optional "energy" energyDecoder { bude = Nothing, dfire2 = Nothing, evoef2 = Nothing, rosetta = Nothing }
+
+
+
+-- ENCODERS --
+
+
 chainEncoder : Chain -> JsonEncode.Value
 chainEncoder chain =
     JsonEncode.object
@@ -577,6 +890,24 @@ xtalEncoder xtal =
         , ( "angle_alpha", JsonEncode.string xtal.angle_a )
         , ( "angle_beta", JsonEncode.string xtal.angle_b )
         , ( "angle_gamma", JsonEncode.string xtal.angle_g )
+        ]
+
+
+solubilityEncoder : Solubility -> JsonEncode.Value
+solubilityEncoder sol =
+    JsonEncode.object
+        [ ( "aggrescan3d_total_value", JsonEncode.float sol.total )
+        , ( "aggrescan3d_avg_value", JsonEncode.float sol.avg )
+        , ( "aggrescan3d_min_value", JsonEncode.float sol.min )
+        , ( "aggrescan3d_max_value", JsonEncode.float sol.max )
+        ]
+
+
+dsspEncoder : Dssp -> JsonEncode.Value
+dsspEncoder dssp =
+    JsonEncode.object
+        [ ( "full_sequence", JsonEncode.string dssp.full_seq )
+        , ( "dssp_sequence", JsonEncode.string dssp.dssp_seq )
         ]
 
 
@@ -613,6 +944,104 @@ relatedEncoder related =
         [ ( "sim", JsonEncode.float related.similarity )
         , ( "partner", JsonEncode.string related.partner )
         ]
+
+
+budeEncoder : Bude -> JsonEncode.Value
+budeEncoder b =
+    JsonEncode.object
+        [ ( "budeff_total", maybeFloatToJson b.budeff_total )
+        , ( "budeff_steric", maybeFloatToJson b.budeff_steric )
+        , ( "budeff_desolvation", maybeFloatToJson b.budeff_desolvation )
+        , ( "budeff_charge", maybeFloatToJson b.budeff_charge )
+        ]
+
+
+dfire2Encoder : Dfire2 -> JsonEncode.Value
+dfire2Encoder d =
+    JsonEncode.object [ ( "dfire2_total", maybeFloatToJson d.dfire2_total ) ]
+
+
+evoef2Encoder : Evoef2 -> JsonEncode.Value
+evoef2Encoder e =
+    JsonEncode.object
+        [ ( "evoef2_total", maybeFloatToJson e.evoef2_total )
+        , ( "evoef2_ref_total", maybeFloatToJson e.evoef2_ref_total )
+        , ( "evoef2_intraR_total", maybeFloatToJson e.evoef2_intraR_total )
+        , ( "evoef2_interS_total", maybeFloatToJson e.evoef2_interS_total )
+        , ( "evoef2_interD_total", maybeFloatToJson e.evoef2_interD_total )
+        ]
+
+
+rosettaEncoder : RosettaEnergy -> JsonEncode.Value
+rosettaEncoder r =
+    JsonEncode.object
+        [ ( "rosetta_total", maybeFloatToJson r.rosetta_total )
+        , ( "rosetta_vdw_atr", maybeFloatToJson r.rosetta_vdw_atr )
+        , ( "rosetta_vdw_rep", maybeFloatToJson r.rosetta_vdw_rep )
+        , ( "rosetta_vdw_intra_rep", maybeFloatToJson r.rosetta_vdw_intra_rep )
+        , ( "rosetta_electrostatics", maybeFloatToJson r.rosetta_electrostatics )
+        , ( "rosetta_solvation_isotropic", maybeFloatToJson r.rosetta_solvation_isotropic )
+        , ( "rosetta_solvation_anisotropic_polar_atoms", maybeFloatToJson r.rosetta_solvation_anisotropic_polar_atoms )
+        , ( "rosetta_solvation_isotropic_iR", maybeFloatToJson r.rosetta_solvation_isotropic_iR )
+        , ( "rosetta_hbond_lr_bb", maybeFloatToJson r.rosetta_hbond_lr_bb )
+        , ( "rosetta_hbond_sr_bb", maybeFloatToJson r.rosetta_hbond_sr_bb )
+        , ( "rosetta_hbond_bb_sc", maybeFloatToJson r.rosetta_hbond_bb_sc )
+        , ( "rosetta_hbond_sc", maybeFloatToJson r.rosetta_hbond_sc )
+        , ( "rosetta_disulfides", maybeFloatToJson r.rosetta_disulfides )
+        , ( "rosetta_backbone_torsion_preference", maybeFloatToJson r.rosetta_backbone_torsion_preference )
+        , ( "rosetta_aa_propensity", maybeFloatToJson r.rosetta_aa_propensity )
+        , ( "rosetta_dunbrack_rotamer", maybeFloatToJson r.rosetta_dunbrack_rotamer )
+        , ( "rosetta_omega", maybeFloatToJson r.rosetta_omega )
+        , ( "rosetta_pro_close", maybeFloatToJson r.rosetta_pro_close )
+        , ( "rosetta_yhh_planarity", maybeFloatToJson r.rosetta_yhh_planarity )
+        ]
+
+
+energyEncoder : Energy -> JsonEncode.Value
+energyEncoder e =
+    JsonEncode.object
+        (List.filterMap identity
+            [ Maybe.map (\b -> ( "budeff", budeEncoder b )) e.bude
+            , Maybe.map (\d -> ( "dfire2", dfire2Encoder d )) e.dfire2
+            , Maybe.map (\ev -> ( "evoef2", evoef2Encoder ev )) e.evoef2
+            , Maybe.map (\r -> ( "rosetta", rosettaEncoder r )) e.rosetta
+            ]
+        )
+
+
+physicochemicalEncoder : Physicochemical -> JsonEncode.Value
+physicochemicalEncoder p =
+    JsonEncode.object
+        [ ( "num_residues", maybeFloatToJson p.num_residues )
+        , ( "mass", maybeFloatToJson p.mass )
+        , ( "charge", maybeFloatToJson p.charge )
+        , ( "isoelectric_point", maybeFloatToJson p.isoelectric_point )
+        , ( "packing_density", maybeFloatToJson p.packing_density )
+        , ( "hydrophobic_fitness", maybeFloatToJson p.hydrophobic_fitness )
+        , ( "solubility"
+          , case p.solubility of
+                Nothing ->
+                    JsonEncode.null
+
+                Just s ->
+                    solubilityEncoder s
+          )
+        , ( "dssp"
+          , case p.dssp of
+                Nothing ->
+                    JsonEncode.null
+
+                Just d ->
+                    dsspEncoder d
+          )
+        , ( "aa_composition", listToObject p.aa_composition )
+        , ( "ss_composition", listToObject p.ss_composition )
+        , ( "energy", energyEncoder p.energy )
+        ]
+
+
+
+-- TEXT PREOCESSING AREA --
 
 
 designSearchableText : ProteinDesign -> String
@@ -802,129 +1231,8 @@ classificationToString classification =
             "other"
 
 
-classificationToColour : Classification -> String
-classificationToColour classification =
-    case classification of
-        Minimal ->
-            "#ff0000"
 
-        Rational ->
-            "#ffff00"
-
-        Engineered ->
-            "#0000ff"
-
-        Computational ->
-            "#000000"
-
-        Phys ->
-            "#800080"
-
-        DeepLearning ->
-            "008000"
-
-        Consensus ->
-            "ff00ff"
-
-        Other ->
-            "#333333"
-
-
-stringToTag : String -> Tag
-stringToTag string =
-    case string of
-        "synthetic protein model" ->
-            Synthetic
-
-        "de novo protein" ->
-            DeNovo
-
-        "de novo protein design" ->
-            DeNovo
-
-        "novel sequence" ->
-            Novel
-
-        "designed peptide" ->
-            Designed
-
-        "protein binding" ->
-            ProteinBinding
-
-        "metal binding protein" ->
-            MetalBinding
-
-        "transcription" ->
-            Transcription
-
-        "growth response protein" ->
-            Growth
-
-        "structural protein" ->
-            Structural
-
-        "unknown function" ->
-            UnknownFunction
-
-        "alpha-helical bundle" ->
-            AlphaHelicalBundle
-
-        "beta beta alpha motif" ->
-            BetaBetaAlpha
-
-        "coiled coil" ->
-            CoiledCoil
-
-        _ ->
-            UnknownFunction
-
-
-tagsToString : List Tag -> String
-tagsToString tags =
-    String.join ", " <| List.map tagToString tags
-
-
-tagToString : Tag -> String
-tagToString tag =
-    case tag of
-        Synthetic ->
-            "synthetic"
-
-        DeNovo ->
-            "de novo"
-
-        Novel ->
-            "novel sequence"
-
-        Designed ->
-            "designed peptide"
-
-        ProteinBinding ->
-            "protein binding"
-
-        MetalBinding ->
-            "metal binding"
-
-        Transcription ->
-            "transcription"
-
-        Growth ->
-            "growth response"
-
-        Structural ->
-            "structural"
-
-        UnknownFunction ->
-            "unknown"
-
-        AlphaHelicalBundle ->
-            "alpha-helical bundle"
-
-        BetaBetaAlpha ->
-            "beta-beta-alpha motif"
-
-        CoiledCoil ->
-            "coiled-coil"
+-- DESIGN DETAILS AREA: STUBS FOR HOME PAGE, DETAILED TABLES FOR INDIVIDUAL PAGES --
 
 
 {-| A simple view that shows basic data about a design. Used for lists etc.
@@ -962,23 +1270,6 @@ designCard widthDesignCard design =
                     ]
                 ]
         }
-
-
-reviewCommentsArea : ProteinDesign -> Element msg
-reviewCommentsArea proteinDesign =
-    if proteinDesign.review_comment == [ "" ] then
-        text ""
-
-    else
-        column (Style.monospacedFont ++ [ paddingXY 10 0 ])
-            (List.map
-                (\comment ->
-                    wrappedRow
-                        [ Font.size 14, paddingXY 0 5 ]
-                        [ text <| comment ]
-                )
-                proteinDesign.review_comment
-            )
 
 
 designDetailsFromProteinDesign : ProteinDesign -> List (DesignDetails msg)
