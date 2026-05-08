@@ -20,6 +20,7 @@ import Element.Font as Font exposing (center)
 import Element.Input as Input
 import FeatherIcons
 import Get exposing (getScreenWidthFloat, getScreenWidthInt)
+import Html exposing (math)
 import Http
 import Json.Decode
 import Page exposing (Page)
@@ -37,6 +38,11 @@ import Time
 import Url exposing (..)
 import Urls
 import View exposing (View)
+
+
+plotHeight : Float
+plotHeight =
+    600.0
 
 
 page : Shared.Model -> Route () -> Page Model Msg
@@ -160,9 +166,6 @@ update shared msg model =
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
-
-                        plotHeight =
-                            getScreenWidthFloat model.mScreenHeightF
                     in
                     ( { model | designStubs = Success designs }
                     , Effect.batch
@@ -404,9 +407,6 @@ update shared msg model =
 
                         plotWidth =
                             getScreenWidthFloat model.mScreenWidthF
-
-                        plotHeight =
-                            getScreenWidthFloat model.mScreenHeightF
                     in
                     case model.renderPlotState of
                         AwaitingRender 0 ->
@@ -542,7 +542,7 @@ homeView shared model =
                         Element.px 390
             in
             column [ centerX ]
-                [ Plots.timelinePlotView model.mScreenWidthF
+                [ Plots.timelinePlotView (getScreenWidthFloat model.mScreenWidthF) plotHeight
                 , column
                     [ paddingXY 20 0, spacing 15, width (fill |> maximum screenWidth) ]
                     [ downloadArea model

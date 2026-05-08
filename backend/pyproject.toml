@@ -2,15 +2,12 @@
 name = "backend"
 version = "0.1.0"
 description = "Backend for Protein Design Archive"
+readme = "README.md"
+requires-python = ">=3.8"
 authors = [
     { name = "ChrisWellsWood", email = "cwwoodesq@gmail.com" },
     { name = "Marta Chronowska", email = "mchrnwsk@gmail.com" }
 ]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 dependencies = [
     "click==8.1.7",
     "Flask==3.0.3",
@@ -18,5 +15,6 @@ dependencies = [
     "pymongo==4.7.2",
 ]
 
-readme = "README.md"
-requires-python = ">= 3.8"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
