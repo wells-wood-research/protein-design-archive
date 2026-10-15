@@ -1,10 +1,17 @@
-version: '2'
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "3"
+
 services:
   pda-frontend:
     build:
       context: ./prot-des-timeline/frontend/
     depends_on:
       - pda-backend
+    restart: unless-stopped
+    logging: *default-logging
   pda-backend:
     build:
       context: ./prot-des-timeline/backend/
@@ -13,6 +20,9 @@ services:
       - GUNICORN_WORKERS=2
     depends_on:
       - pda-mongo
-    restart: always
+    restart: unless-stopped
+    logging: *default-logging
   pda-mongo:
     image: "mongo:7.0.9"
+    restart: unless-stopped
+    logging: *default-logging
