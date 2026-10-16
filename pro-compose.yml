@@ -17,7 +17,7 @@ services:
       context: ./prot-des-timeline/backend/
     environment:
       - MODULE_NAME=backend.app
-      - GUNICORN_WORKERS=2
+      - GUNICORN_WORKERS=4
     depends_on:
       - pda-mongo
     restart: unless-stopped
